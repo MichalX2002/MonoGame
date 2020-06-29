@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 
 namespace MonoGame.Framework.Vector
 {
@@ -17,14 +18,22 @@ namespace MonoGame.Framework.Vector
         /// Describes the components of this vector.
         /// Should be retrieved through <see cref="VectorTypeInfo"/>.
         /// </summary>
-        // TODO: replace with C#9 shape and a required static field
+        // TODO: replace with static field (C# 9 or 10 role/shape)
         VectorComponentInfo ComponentInfo { get; }
+
+        #region Scaled value-space
 
         /// <summary>
         /// Sets the vector from a scaled <see cref="Vector3"/>
         /// where the XYZ components correspond to RGB. 
         /// </summary>
-        void FromScaledVector3(Vector3 scaledVector);
+        void FromScaledVector(Vector3 scaledVector);
+
+        /// <summary>
+        /// Sets the vector from a scaled <see cref="Vector4"/>
+        /// where the XYZW components correspond to RGBA. 
+        /// </summary>
+        void FromScaledVector(Vector4 scaledVector);
 
         /// <summary>
         /// Gets the vector as a scaled <see cref="Vector3"/>
@@ -33,22 +42,26 @@ namespace MonoGame.Framework.Vector
         Vector3 ToScaledVector3();
 
         /// <summary>
-        /// Sets the vector from a scaled <see cref="Vector4"/>
-        /// where the XYZW components correspond to RGBA. 
-        /// </summary>
-        void FromScaledVector4(Vector4 scaledVector);
-
-        /// <summary>
         /// Gets the vector as a scaled <see cref="Vector4"/>
         /// where the XYZW components correspond to RGBA. 
         /// </summary>
         Vector4 ToScaledVector4();
 
+        #endregion
+
+        #region Custom value-space
+
         /// <summary>
         /// Sets the vector from a <see cref="Vector3"/> 
         /// where the XYZ components correspond to RGB. 
         /// </summary>
-        void FromVector3(Vector3 vector) => FromScaledVector3(vector);
+        void FromVector(Vector3 vector) => FromScaledVector(vector);
+
+        /// <summary>
+        /// Sets the vector from a <see cref="Vector4"/> 
+        /// where the XYZW components correspond to RGBA. 
+        /// </summary>
+        void FromVector(Vector4 vector) => FromScaledVector(vector);
 
         /// <summary>
         /// Gets the vector as a <see cref="Vector3"/>
@@ -57,16 +70,12 @@ namespace MonoGame.Framework.Vector
         Vector3 ToVector3() => ToScaledVector3();
 
         /// <summary>
-        /// Sets the vector from a <see cref="Vector4"/> 
-        /// where the XYZW components correspond to RGBA. 
-        /// </summary>
-        void FromVector4(Vector4 vector) => FromScaledVector4(vector);
-
-        /// <summary>
         /// Gets the vector as a <see cref="Vector4"/>
         /// where the XYZW components correspond to RGBA. 
         /// </summary>
         Vector4 ToVector4() => ToScaledVector4();
+
+        #endregion
     }
 
     public interface IVector<TSelf> : IVector, IEquatable<TSelf>

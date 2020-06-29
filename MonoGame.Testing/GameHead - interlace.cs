@@ -150,8 +150,8 @@ namespace MonoGame.Testing
                 var rect = new Rectangle(0, _lastRowFilled, image.Width, lastRow - _lastRowFilled);
                 if (rect.Height > 0)
                 {
-                    var span = ((Image<Color>)image).GetPixelByteSpan();
-                    tex.SetData(span.Slice(image.ByteStride * _lastRowFilled), rect);
+                    var rowSpan = image.GetPixelByteRowSpan(_lastRowFilled);
+                    tex.SetData(rowSpan, rect);
                 }
                 _lastRowFilled = lastRow;
             }

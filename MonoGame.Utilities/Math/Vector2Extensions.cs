@@ -26,6 +26,8 @@ namespace MonoGame.Framework
 
         public static void Round(ref this Vector2 vector)
         {
+            // TODO: optimize 
+
             vector.X = MathF.Round(vector.X);
             vector.Y = MathF.Round(vector.Y);
         }

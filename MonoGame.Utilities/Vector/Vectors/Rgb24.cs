@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vector
@@ -16,13 +17,13 @@ namespace MonoGame.Framework.Vector
     [StructLayout(LayoutKind.Sequential)]
     public struct Rgb24 : IPixel<Rgb24>
     {
-        public static Rgb24 Black => new Rgb24(0, 0, 0);
-        public static Rgb24 White => new Rgb24(255, 255, 255);
+        public static Rgb24 Black => new Rgb24(byte.MinValue, byte.MinValue, byte.MinValue);
+        public static Rgb24 White => new Rgb24(byte.MaxValue, byte.MaxValue, byte.MaxValue);
 
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Red),
-            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Green),
-            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Blue));
+            new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Blue));
 
         [CLSCompliant(false)]
         public byte R;
@@ -45,72 +46,74 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        public readonly Vector3 ToVector3()
-        {
-            return new Vector3(R, G, B) / byte.MaxValue;
-        }
-
         #region IPackedVector
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector3 scaledVector)
         {
-            scaledVector *= byte.MaxValue;
-            scaledVector += Vector4.Half;
-            scaledVector.Clamp(Vector4.Zero, Vector4.MaxValueByte);
-
+            scaledVector = RgbaVectorHelper.ToScaledUInt8(scaledVector);
             R = (byte)scaledVector.X;
             G = (byte)scaledVector.Y;
             B = (byte)scaledVector.Z;
         }
 
+        public readonly Vector3 ToScaledVector3()
+        {
+            return new Vector3(R, G, B) / byte.MaxValue;
+        }
+
+        public void FromScaledVector(Vector4 scaledVector)
+        {
+            FromScaledVector(scaledVector.ToScaledVector3());
+        }
+
         public readonly Vector4 ToScaledVector4()
         {
-            return new Vector4(ToVector3(), 1);
+            return new Vector4(ToScaledVector3(), 1);
         }
 
         #endregion
 
         #region IPixel
 
-        public void FromGray8(Gray8 source)
+        public void FromGray(Gray8 source)
         {
             R = G = B = source.L;
         }
 
-        public void FromGray16(Gray16 source)
+        public void FromGray(Gray16 source)
         {
-            R = G = B = PackedVectorHelper.DownScale16To8Bit(source.L);
+            R = G = B = ScalingHelper.ToUInt8(source.L);
         }
 
-        public void FromGrayAlpha16(GrayAlpha16 source)
+        public void FromGrayAlpha(GrayAlpha16 source)
         {
             R = G = B = source.L;
         }
 
-        public void FromRgb24(Rgb24 source)
+        public void FromRgb(Rgb24 source)
         {
             this = source;
         }
 
-        public void FromRgba32(Color source)
+        public void FromRgba(Color source)
         {
             R = source.R;
             G = source.G;
             B = source.B;
         }
 
-        public void FromRgb48(Rgb48 source)
+        public void FromRgb(Rgb48 source)
         {
-            R = PackedVectorHelper.DownScale16To8Bit(source.R);
-            G = PackedVectorHelper.DownScale16To8Bit(source.G);
-            B = PackedVectorHelper.DownScale16To8Bit(source.B);
+            R = ScalingHelper.ToUInt8(source.R);
+            G = ScalingHelper.ToUInt8(source.G);
+            B = ScalingHelper.ToUInt8(source.B);
         }
 
-        public void FromRgba64(Rgba64 source)
+        public void FromRgba(Rgba64 source)
         {
-            R = PackedVectorHelper.DownScale16To8Bit(source.R);
-            G = PackedVectorHelper.DownScale16To8Bit(source.G);
-            B = PackedVectorHelper.DownScale16To8Bit(source.B);
+            R = ScalingHelper.ToUInt8(source.R);
+            G = ScalingHelper.ToUInt8(source.G);
+            B = ScalingHelper.ToUInt8(source.B);
         }
 
         public readonly Color ToColor()
@@ -127,7 +130,7 @@ namespace MonoGame.Framework.Vector
             return this == other;
         }
 
-        public readonly override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is Rgb24 other && Equals(other);
         }
@@ -144,7 +147,7 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.

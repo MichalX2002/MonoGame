@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vector
@@ -17,6 +18,11 @@ namespace MonoGame.Framework.Vector
     [StructLayout(LayoutKind.Sequential)]
     public struct Rgba1010102 : IPackedPixel<Rgba1010102, uint>
     {
+        private const int MaxXYZ = 0x03FF;
+        private const int MaxW = 0x03;
+
+        private static Vector4 MaxValue => new Vector4(MaxXYZ, MaxXYZ, MaxXYZ, MaxW);
+
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Red, 10),
             new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Green, 10),
@@ -37,27 +43,26 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public uint PackedValue { get; set; }
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector4 scaledVector)
         {
-            scaledVector.Clamp(Vector4.Zero, Vector4.One);
-            scaledVector *= 1023f;
-            scaledVector.W *= 3f / 1023f;
-            scaledVector += Vector4.Half;
+            scaledVector *= MaxValue;
+            scaledVector += new Vector4(0.5f);
+            scaledVector.Clamp(Vector4.Zero, MaxValue);
 
             PackedValue = (uint)(
-                (((int)scaledVector.X & 0x03FF) << 0) |
-                (((int)scaledVector.Y & 0x03FF) << 10) |
-                (((int)scaledVector.Z & 0x03FF) << 20) |
-                (((int)scaledVector.W) & 0x03) << 30);
+                (((int)scaledVector.X & MaxXYZ) << 0) |
+                (((int)scaledVector.Y & MaxXYZ) << 10) |
+                (((int)scaledVector.Z & MaxXYZ) << 20) |
+                (((int)scaledVector.W) & MaxW) << 30);
         }
 
         public readonly Vector4 ToScaledVector4()
         {
             return new Vector4(
-                (PackedValue >> 0) & 0x03FF,
-                (PackedValue >> 10) & 0x03FF,
-                (PackedValue >> 20) & 0x03FF,
-                ((PackedValue >> 30) & 0x03) * 1023f / 3f) / 1023f;
+                (PackedValue >> 0) & MaxXYZ,
+                (PackedValue >> 10) & MaxXYZ,
+                (PackedValue >> 20) & MaxXYZ,
+                (PackedValue >> 30) & MaxW) / MaxValue;
         }
 
         #endregion
@@ -86,12 +91,12 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override readonly string ToString() => nameof(Rgba1010102) + $"({this.ToVector4()})";
+        public override readonly string ToString() => nameof(Rgba1010102) + $"({ToScaledVector4()})";
 
         /// <summary>
         /// Gets a hash code of the packed vector.

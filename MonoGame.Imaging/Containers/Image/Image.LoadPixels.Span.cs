@@ -46,7 +46,7 @@ namespace MonoGame.Imaging
                             var dstRow = (TPixelTo*)(dstPtr + (sourceRectangle.Y + y) * dstStride);
 
                             for (int x = 0; x < sourceRectangle.Width; x++)
-                                dstRow[x].FromRgba32(srcRow[x]);
+                                dstRow[x].FromRgba(srcRow[x]);
                         }
                     }
                     else
@@ -57,7 +57,7 @@ namespace MonoGame.Imaging
                             var dstRow = (TPixelTo*)(dstPtr + (sourceRectangle.Y + y) * dstStride);
 
                             for (int x = 0; x < sourceRectangle.Width; x++)
-                                dstRow[x].FromScaledVector4(srcRow[x].ToScaledVector4());
+                                dstRow[x].FromScaledVector(srcRow[x].ToScaledVector4());
                         }
                     }
                 }

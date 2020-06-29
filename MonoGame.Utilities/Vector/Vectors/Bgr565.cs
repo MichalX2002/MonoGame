@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vector
@@ -17,6 +18,11 @@ namespace MonoGame.Framework.Vector
     [StructLayout(LayoutKind.Sequential)]
     public struct Bgr565 : IPackedPixel<Bgr565, ushort>
     {
+        private const int MaxXZ = 0x1F;
+        private const int MaxY = 0x3F;
+
+        private static Vector3 MaxValue => new Vector3(MaxXZ, MaxY, MaxXZ);
+
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Blue, 5),
             new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Green, 6),
@@ -41,54 +47,93 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public ushort PackedValue { get; set; }
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector3 scaledVector)
         {
-            scaledVector *= 31;
-            scaledVector += Vector4.Half;
-            scaledVector.Clamp(Vector4.Zero, Vector4.One);
+            scaledVector *= MaxValue;
+            scaledVector += new Vector3(0.5f);
+            scaledVector.Clamp(Vector3.Zero, MaxValue);
 
             PackedValue = (ushort)(
-                (((int)scaledVector.X & 0x1F) << 11) |
-                (((int)(scaledVector.Y * 2.032258f) & 0x3F) << 5) |
-                ((int)scaledVector.Z & 0x1F));
+                (((int)scaledVector.X & MaxXZ) << 11) |
+                (((int)scaledVector.Y & MaxY) << 5) |
+                ((int)scaledVector.Z & MaxXZ));
+        }
+
+        public readonly Vector3 ToScaledVector3()
+        {
+            return new Vector3(
+                (PackedValue >> 11) & MaxXZ,
+                (PackedValue >> 5) & MaxY,
+                PackedValue & MaxXZ) / MaxValue;
+        }
+
+        public void FromScaledVector(Vector4 scaledVector)
+        {
+            FromScaledVector(scaledVector.ToVector3());
         }
 
         public readonly Vector4 ToScaledVector4()
         {
-            return new Vector4(
-                (PackedValue >> 11) & 0x1F,
-                ((PackedValue >> 5) & 0x3F) / 2.032258f,
-                PackedValue & 0x1F,
-                31f) / 31f;
+            return new Vector4(ToScaledVector3(), 1);
         }
+
+        #endregion
+
+        #region IPixel
+
+        #region From
+
+        public void FromAlpha(Alpha8 source)
+        {
+            PackedValue = ushort.MaxValue;
+        }
+
+        public void FromAlpha(Alpha16 source)
+        {
+            PackedValue = ushort.MaxValue;
+        }
+
+        public void FromAlpha(AlphaF source)
+        {
+            PackedValue = ushort.MaxValue;
+        }
+
+        #endregion
+
+        #region To
+
+        public readonly Alpha8 ToAlpha8()
+        {
+            return Alpha8.Opaque;
+        }
+
+        public readonly Alpha16 ToAlpha16()
+        {
+            return Alpha16.Opaque;
+        }
+
+        public readonly AlphaF ToAlphaF()
+        {
+            return AlphaF.Opaque;
+        }
+
+        #endregion
 
         #endregion
 
         #region Equals
 
-        public readonly bool Equals(Bgr565 other)
-        {
-            return this == other;
-        }
+        public readonly bool Equals(Bgr565 other) => this == other;
 
-        public override readonly bool Equals(object obj)
-        {
-            return obj is Bgr565 other && Equals(other);
-        }
+        public override readonly bool Equals(object obj) => obj is Bgr565 other && Equals(other);
 
-        public static bool operator ==(Bgr565 a, Bgr565 b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
+        public static bool operator ==(Bgr565 a, Bgr565 b) => a.PackedValue == b.PackedValue;
 
-        public static bool operator !=(Bgr565 a, Bgr565 b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
+        public static bool operator !=(Bgr565 a, Bgr565 b) => a.PackedValue != b.PackedValue;
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Gets a string representation of the packed vector.

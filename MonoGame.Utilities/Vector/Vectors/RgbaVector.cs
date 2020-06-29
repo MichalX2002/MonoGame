@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vector
 {
@@ -45,7 +46,17 @@ namespace MonoGame.Framework.Vector
 
         #region IPackedVector
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector3 scaledVector)
+        {
+            Base = scaledVector.ToVector4();
+        }
+
+        public readonly Vector3 ToScaledVector3()
+        {
+            return Base.ToVector3();
+        }
+
+        public void FromScaledVector(Vector4 scaledVector)
         {
             Base = scaledVector;
         }
@@ -81,7 +92,7 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.

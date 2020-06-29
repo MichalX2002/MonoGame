@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vector
@@ -37,14 +38,14 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        public readonly Vector3 ToVector3()
+        public readonly Vector3 ToScaledVector3()
         {
             return new Vector3(X, Y, Z);
         }
 
         #region IPackedVector
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector4 scaledVector)
         {
             var vector = scaledVector.ToVector3();
             vector *= 2;
@@ -57,13 +58,13 @@ namespace MonoGame.Framework.Vector
 
         public readonly Vector4 ToScaledVector4()
         {
-            var vector = ToVector3();
+            var vector = ToScaledVector3();
             vector += Vector3.One;
             vector /= 2f;
             return new Vector4(vector, 1);
         }
 
-        public void FromVector4(Vector4 vector)
+        public void FromVector(Vector4 vector)
         {
             X = new HalfSingle(vector.X);
             Y = new HalfSingle(vector.Y);
@@ -110,12 +111,12 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Returns a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override readonly string ToString() => nameof(HalfVector3) + $"({ToVector3()})";
+        public override readonly string ToString() => nameof(HalfVector3) + $"({ToScaledVector3()})";
 
         /// <summary>
         /// Gets the hash code for the current instance.

@@ -12,7 +12,7 @@ namespace MonoGame.Imaging
     /// </summary>
     public abstract partial class Image : IPixelMemory
     {
-        public event DatalessEvent<Image>? Disposing;
+        public event Event<Image>? Disposing;
 
         #region Properties
 

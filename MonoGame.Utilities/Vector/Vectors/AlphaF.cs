@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -17,6 +18,9 @@ namespace MonoGame.Framework.Vector
     [StructLayout(LayoutKind.Sequential)]
     public struct AlphaF : IPackedPixel<AlphaF, uint>
     {
+        public static AlphaF Transparent => default;
+        public static AlphaF Opaque => new AlphaF(1f);
+
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Float32, VectorComponentChannel.Alpha));
 
@@ -55,9 +59,19 @@ namespace MonoGame.Framework.Vector
             set => Unsafe.As<AlphaF, uint>(ref this) = value;
         }
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector3 scaledVector)
+        {
+            A = 1f;
+        }
+
+        public void FromScaledVector(Vector4 scaledVector)
         {
             A = scaledVector.W;
+        }
+
+        public readonly Vector3 ToScaledVector3()
+        {
+            return Vector3.One;
         }
 
         public readonly Vector4 ToScaledVector4()
@@ -67,76 +81,112 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        #region IPixel
+        #region IPixel.From
 
-        public void FromGray8(Gray8 source)
+        public void FromAlpha(Alpha8 source)
+        {
+            A = ScalingHelper.ToFloat32(source.A);
+        }
+
+        public void FromAlpha(Alpha16 source)
+        {
+            A = ScalingHelper.ToFloat32(source.A);
+        }
+
+        public void FromAlpha(AlphaF source)
+        {
+            this = source;
+        }
+
+        public void FromGray(Gray8 source)
         {
             A = 1f;
         }
 
-        public void FromGray16(Gray16 source)
+        public void FromGray(Gray16 source)
         {
             A = 1f;
         }
 
-        public void FromGrayAlpha16(GrayAlpha16 source)
+        public void FromGrayAlpha(GrayAlpha16 source)
         {
-            A = source.A / (float)byte.MaxValue;
+            A = ScalingHelper.ToFloat32(source.A);
         }
 
-        public void FromRgb24(Rgb24 source)
+        public void FromRgb(Rgb24 source)
         {
             A = 1f;
         }
 
-        public void FromRgba32(Color source)
+        public void FromRgba(Color source)
         {
-            A = source.A / (float)byte.MaxValue;
+            A = ScalingHelper.ToFloat32(source.A);
         }
 
-        public void FromRgb48(Rgb48 source)
+        public void FromRgb(Rgb48 source)
         {
             A = 1f;
         }
 
-        public void FromRgba64(Rgba64 source)
+        public void FromRgba(Rgba64 source)
         {
-            A = source.A / (float)ushort.MaxValue;
+            A = ScalingHelper.ToFloat32(source.A);
         }
 
-        public readonly Color ToColor()
+        #endregion
+
+        #region IPixel.To
+
+        public readonly Alpha8 ToAlpha8()
         {
-            byte a = MathHelper.Clamp((int)(A * 255), byte.MinValue, byte.MaxValue);
-            return new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue, a);
+            return ScalingHelper.ToUInt8(A);
+        }
+
+        public readonly Alpha16 ToAlpha16()
+        {
+            return ScalingHelper.ToUInt16(A);
+        }
+
+        public readonly AlphaF ToAlphaF()
+        {
+            return this;
+        }
+
+        public readonly Rgb24 ToRgb24()
+        {
+            return Rgb24.White;
+        }
+
+        public readonly Color ToRgba32()
+        {
+            return new Color(byte.MaxValue, ScalingHelper.ToUInt8(A));
+        }
+
+        public readonly Rgb48 ToRgb48()
+        {
+            return Rgb48.White;
+        }
+
+        public readonly Rgba64 ToRgba64()
+        {
+            return new Rgba64(ushort.MaxValue, ScalingHelper.ToUInt16(A));
         }
 
         #endregion
 
         #region Equals
 
-        public readonly bool Equals(AlphaF other)
-        {
-            return this == other;
-        }
+        public readonly bool Equals(AlphaF other) => this == other;
 
-        public override readonly bool Equals(object obj)
-        {
-            return obj is AlphaF other && Equals(other);
-        }
+        public override readonly bool Equals(object obj) => obj is AlphaF other && Equals(other);
 
-        public static bool operator ==(AlphaF a, AlphaF b)
-        {
-            return a.A == b.A;
-        }
+        public static bool operator ==(AlphaF a, AlphaF b) => a.A == b.A;
 
-        public static bool operator !=(AlphaF a, AlphaF b)
-        {
-            return a.A != b.A;
-        }
+        public static bool operator !=(AlphaF a, AlphaF b) => a.A != b.A;
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Gets a string representation of the packed vector.

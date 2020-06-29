@@ -107,20 +107,16 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public override int GetHashCode()
         {
-            unchecked
-            {
-                if (Count <= 0)
-                    return 0;
+            if (Count <= 0)
+                return 0;
 
-                int code = 7 + VertexDeclarations[0].GetHashCode();
-                code = code * 31 + InstanceFrequencies[0];
-                for (int i = 1; i < Count; i++)
-                {
-                    code = code * 31 + VertexDeclarations[i].GetHashCode();
-                    code = code * 31 + InstanceFrequencies[i];
-                }
-                return code;
+            var hash = new HashCode();
+            for (int i = 0; i < Count; i++)
+            {
+                hash.Add(VertexDeclarations[i]);
+                hash.Add(InstanceFrequencies[i]);
             }
+            return hash.ToHashCode();
         }
 
         /// <summary>

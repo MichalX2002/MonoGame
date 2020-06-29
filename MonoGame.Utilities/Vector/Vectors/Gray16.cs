@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vector
@@ -33,13 +34,13 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public ushort PackedValue { readonly get => L; set => L = value; }
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector4 scaledVector)
         {
             scaledVector *= ushort.MaxValue;
-            scaledVector += Vector4.Half;
-            scaledVector.Clamp(Vector4.Zero, Vector4.MaxValueUInt16);
+            scaledVector += new Vector4(0.5f);
+            scaledVector.Clamp(ushort.MinValue, ushort.MaxValue);
 
-            L = (ushort)(PackedVectorHelper.GetBT709Luminance(scaledVector.ToVector3()) + 0.5f);
+            L = (ushort)(LuminanceHelper.BT709.ToGrayF(scaledVector.ToVector3()) + 0.5f);
         }
 
         public readonly Vector4 ToScaledVector4()
@@ -52,72 +53,72 @@ namespace MonoGame.Framework.Vector
 
         #region IPixel
 
-        public void FromGray8(Gray8 source)
+        public void FromGray(Gray8 source)
         {
-            L = PackedVectorHelper.UpScale8To16Bit(source.L);
+            L = ScalingHelper.ToUInt16(source.L);
         }
 
-        public void FromGrayAlpha16(GrayAlpha16 source)
+        public void FromGrayAlpha(GrayAlpha16 source)
         {
-            L = PackedVectorHelper.UpScale8To16Bit(source.L);
+            L = ScalingHelper.ToUInt16(source.L);
         }
 
-        public void FromGray16(Gray16 source)
+        public void FromGray(Gray16 source)
         {
             L = source.L;
         }
 
-        public void FromRgb24(Rgb24 source)
+        public void FromRgb(Rgb24 source)
         {
-            L = PackedVectorHelper.UpScale8To16Bit(
-                PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
+            L = ScalingHelper.ToUInt16(
+                LuminanceHelper.BT709.ToGray8(source.R, source.G, source.B));
         }
 
-        public void FromRgba32(Color source)
+        public void FromRgba(Color source)
         {
-            L = PackedVectorHelper.UpScale8To16Bit(
-                PackedVectorHelper.Get8BitBT709Luminance(source.R, source.G, source.B));
+            L = ScalingHelper.ToUInt16(
+                LuminanceHelper.BT709.ToGray8(source.R, source.G, source.B));
         }
 
-        public void FromRgb48(Rgb48 source)
+        public void FromRgb(Rgb48 source)
         {
-            L = PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B);
+            L = LuminanceHelper.BT709.ToGray16(source.R, source.G, source.B);
         }
 
-        public void FromRgba64(Rgba64 source)
+        public void FromRgba(Rgba64 source)
         {
-            L = PackedVectorHelper.Get16BitBT709Luminance(source.R, source.G, source.B);
+            L = LuminanceHelper.BT709.ToGray16(source.R, source.G, source.B);
         }
 
         public readonly Color ToColor()
         {
-            return new Color(PackedVectorHelper.DownScale16To8Bit(L), byte.MaxValue);
+            return new Color(ScalingHelper.ToUInt8(L), byte.MaxValue);
         }
 
         #endregion
 
-        public void FromArgb32(Argb32 source)
+        public void FromArgb(Argb32 source)
         {
-            L = PackedVectorHelper.Get16BitBT709Luminance(
-                PackedVectorHelper.UpScale8To16Bit(source.R),
-                PackedVectorHelper.UpScale8To16Bit(source.G),
-                PackedVectorHelper.UpScale8To16Bit(source.B));
+            L = LuminanceHelper.BT709.ToGray16(
+                ScalingHelper.ToUInt16(source.R),
+                ScalingHelper.ToUInt16(source.G),
+                ScalingHelper.ToUInt16(source.B));
         }
 
-        public void FromBgr24(Bgr24 source)
+        public void FromBgr(Bgr24 source)
         {
-            L = PackedVectorHelper.Get16BitBT709Luminance(
-                PackedVectorHelper.UpScale8To16Bit(source.R),
-                PackedVectorHelper.UpScale8To16Bit(source.G),
-                PackedVectorHelper.UpScale8To16Bit(source.B));
+            L = LuminanceHelper.BT709.ToGray16(
+                ScalingHelper.ToUInt16(source.R),
+                ScalingHelper.ToUInt16(source.G),
+                ScalingHelper.ToUInt16(source.B));
         }
 
-        public void FromBgra32(Bgra32 source)
+        public void FromBgra(Bgra32 source)
         {
-            L = PackedVectorHelper.Get16BitBT709Luminance(
-                PackedVectorHelper.UpScale8To16Bit(source.R),
-                PackedVectorHelper.UpScale8To16Bit(source.G),
-                PackedVectorHelper.UpScale8To16Bit(source.B));
+            L = LuminanceHelper.BT709.ToGray16(
+                ScalingHelper.ToUInt16(source.R),
+                ScalingHelper.ToUInt16(source.G),
+                ScalingHelper.ToUInt16(source.B));
         }
 
         #region Equals
@@ -144,7 +145,7 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         public override readonly string ToString() => nameof(Gray16) + $"({L})";
 

@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vector
@@ -61,7 +62,7 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public ushort PackedValue { readonly get => X; set => X = value; }
 
-        public void FromScaledVector4(Vector4 vector)
+        public void FromScaledVector(Vector4 vector)
         {
             float scaled = vector.X;
             scaled *= 2;
@@ -75,7 +76,7 @@ namespace MonoGame.Framework.Vector
             return new Vector4(ToScaledSingle(), 0, 0, 1);
         }
 
-        public void FromVector4(Vector4 vector)
+        public void FromVector(Vector4 vector)
         {
             X = HalfTypeHelper.Pack(vector.X);
         }
@@ -125,7 +126,7 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Gets a string representation of the packed vector.

@@ -170,6 +170,9 @@ namespace MonoGame.Framework
         /// <returns>Containment between this <see cref="BoundingFrustum"/> and specified <see cref="BoundingFrustum"/>.</returns>
         public ContainmentType Contains(BoundingFrustum frustum)
         {
+            if (frustum == null)
+                throw new ArgumentNullException(nameof(frustum));
+
             if (this == frustum)                 // We check to see if the two frustums are equal
                 return ContainmentType.Contains; // If they are, there's no need to go any further.
 

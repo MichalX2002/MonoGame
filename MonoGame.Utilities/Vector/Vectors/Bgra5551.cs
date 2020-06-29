@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vector
@@ -17,6 +18,11 @@ namespace MonoGame.Framework.Vector
     [StructLayout(LayoutKind.Sequential)]
     public struct Bgra5551 : IPackedPixel<Bgra5551, ushort>
     {
+        private const int MaxXYZ = 0x1F;
+        private const int MaxW = 0x01;
+
+        private static Vector4 MaxValue => new Vector4(MaxXYZ, MaxXYZ, MaxXYZ, MaxW);
+
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Blue, 5),
             new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Green, 5),
@@ -41,26 +47,26 @@ namespace MonoGame.Framework.Vector
         [CLSCompliant(false)]
         public ushort PackedValue { get; set; }
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector4 scaledVector)
         {
-            scaledVector *= 31f;
-            scaledVector += Vector4.Half;
-            scaledVector.Clamp(Vector4.Zero, Vector4.One);
+            scaledVector *= MaxValue;
+            scaledVector += new Vector4(0.5f);
+            scaledVector.Clamp(Vector4.Zero, MaxValue);
 
             PackedValue = (ushort)(
-                (((int)scaledVector.X & 0x1F) << 10) |
-                (((int)scaledVector.Y & 0x1F) << 5) |
-                (((int)scaledVector.Z & 0x1F) << 0) |
-                (((int)(scaledVector.W / 31f) & 0x1) << 15));
+                (((int)scaledVector.X & MaxXYZ) << 10) |
+                (((int)scaledVector.Y & MaxXYZ) << 5) |
+                (((int)scaledVector.Z & MaxXYZ) << 0) |
+                (((int)scaledVector.W) & MaxW) << 15);
         }
 
         public readonly Vector4 ToScaledVector4()
         {
             return new Vector4(
-                (PackedValue >> 10) & 0x1F,
-                (PackedValue >> 5) & 0x1F,
-                (PackedValue >> 0) & 0x1F,
-                ((PackedValue >> 15) & 0x01) * 31f) / 31f;
+                (PackedValue >> 10) & MaxXYZ,
+                (PackedValue >> 5) & MaxXYZ,
+                (PackedValue >> 0) & MaxXYZ,
+                (PackedValue >> 15) & MaxW) / MaxValue;
         }
 
         #endregion
@@ -89,7 +95,7 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Gets a string representation of the packed vector.

@@ -38,8 +38,8 @@ namespace MonoGame.Framework.Graphics
             }
             else
             {
-                var byteSrc = System.Runtime.InteropServices.MemoryMarshal.AsBytes(src);
-                var byteDst = System.Runtime.InteropServices.MemoryMarshal.AsBytes(destination);
+                var byteSrc = MemoryMarshal.AsBytes(src);
+                var byteDst = MemoryMarshal.AsBytes(destination);
 
                 // interleaved copy from buffer to destination
                 for (int i = 0; i < destination.Length; i++)

@@ -2,7 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vector
@@ -16,8 +16,11 @@ namespace MonoGame.Framework.Vector
     [StructLayout(LayoutKind.Sequential)]
     public struct Alpha8 : IPackedPixel<Alpha8, byte>
     {
+        public static Alpha8 Transparent => default;
+        public static Alpha8 Opaque => new Alpha8(byte.MaxValue);
+
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Alpha));
+            new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Alpha));
 
         public byte A;
 
@@ -37,113 +40,143 @@ namespace MonoGame.Framework.Vector
         /// <param name="alpha">The W component.</param>
         public Alpha8(float alpha)
         {
-            A = Pack(alpha);
+            A = ScalingHelper.ToUInt8(alpha);
         }
 
         #endregion
-
-        /// <summary>
-        /// Gets the packed vector as a <see cref="float"/>.
-        /// </summary>
-        public readonly float ToAlpha()
-        {
-            return A / (float)byte.MaxValue;
-        }
-
-        private static byte Pack(float alpha)
-        {
-            alpha *= byte.MaxValue;
-            alpha += 0.5f;
-            alpha = MathHelper.Clamp(alpha, 0, 255);
-            
-            return (byte)alpha;
-        }
 
         #region IPackedVector
 
         public byte PackedValue { readonly get => A; set => A = value; }
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector3 scaledVector)
         {
-            A = Pack(scaledVector.W);
+            A = byte.MaxValue;
+        }
+
+        public void FromScaledVector(Vector4 scaledVector)
+        {
+            A = ScalingHelper.ToUInt8(scaledVector.W);
+        }
+
+        public readonly Vector3 ToScaledVector3()
+        {
+            return Vector3.One;
         }
 
         public readonly Vector4 ToScaledVector4()
         {
-            return new Vector4(1, 1, 1, ToAlpha());
+            return new Vector4(1, 1, 1, ToAlphaF());
         }
 
         #endregion
 
-        #region IPixel
+        #region IPixel.From
 
-        public void FromGray8(Gray8 source)
+        public void FromAlpha(Alpha8 source)
+        {
+            this = source;
+        }
+
+        public void FromAlpha(Alpha16 source)
+        {
+            A = ScalingHelper.ToUInt8(source.A);
+        }
+
+        public void FromAlpha(AlphaF source)
+        {
+            A = ScalingHelper.ToUInt8(source.A);
+        }
+
+        public void FromGray(Gray8 source)
         {
             A = byte.MaxValue;
         }
 
-        public void FromGray16(Gray16 source)
+        public void FromGray(Gray16 source)
         {
             A = byte.MaxValue;
         }
 
-        public void FromGrayAlpha16(GrayAlpha16 source)
+        public void FromGrayAlpha(GrayAlpha16 source)
         {
             A = source.A;
         }
 
-        public void FromRgb24(Rgb24 source)
+        public void FromRgb(Rgb24 source)
         {
             A = byte.MaxValue;
         }
 
-        public void FromRgba32(Color source)
+        public void FromRgb(Rgb48 source)
+        {
+            A = byte.MaxValue;
+        }
+
+        public void FromRgba(Color source)
         {
             A = source.A;
         }
 
-        public void FromRgb48(Rgb48 source)
+        public void FromRgba(Rgba64 source)
         {
-            A = byte.MaxValue;
+            A = ScalingHelper.ToUInt8(source.A);
         }
 
-        public void FromRgba64(Rgba64 source)
+        #endregion
+
+        #region IPixel.To
+
+        public readonly Alpha8 ToAlpha8()
         {
-            A = PackedVectorHelper.DownScale16To8Bit(source.A);
+            return this;
         }
 
-        public readonly Color ToColor()
+        public readonly Alpha16 ToAlpha16()
+        {
+            return ScalingHelper.ToUInt16(A);
+        }
+
+        public readonly AlphaF ToAlphaF()
+        {
+            return ScalingHelper.ToFloat32(A);
+        }
+
+        public readonly Rgb24 ToRgb24()
+        {
+            return Rgb24.White;
+        }
+
+        public readonly Rgb48 ToRgb48()
+        {
+            return Rgb48.White;
+        }
+
+        public readonly Color ToRgba32()
         {
             return new Color(byte.MaxValue, A);
+        }
+
+        public readonly Rgba64 ToRgba64()
+        {
+            return new Rgba64(ushort.MaxValue, ScalingHelper.ToUInt16(A));
         }
 
         #endregion
 
         #region Equals
 
-        public readonly bool Equals(Alpha8 other)
-        {
-            return this == other;
-        }
+        public readonly bool Equals(Alpha8 other) => this == other;
 
-        public override readonly bool Equals(object obj)
-        {
-            return obj is Alpha8 other && Equals(other);
-        }
+        public override readonly bool Equals(object obj) => obj is Alpha8 other && Equals(other);
 
-        public static bool operator ==(Alpha8 a, Alpha8 b)
-        {
-            return a.A == b.A;
-        }
+        public static bool operator ==(Alpha8 a, Alpha8 b) => a.PackedValue == b.PackedValue;
 
-        public static bool operator !=(Alpha8 a, Alpha8 b)
-        {
-            return a.A != b.A;
-        }
+        public static bool operator !=(Alpha8 a, Alpha8 b) => a.PackedValue != b.PackedValue;
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Gets a string representation of the packed vector.

@@ -12,7 +12,6 @@ using System.Text;
 using MonoGame.Framework.IO;
 using MonoGame.Framework.Memory;
 using MonoGame.OpenAL;
-using GenericVector = System.Numerics.Vector;
 
 namespace MonoGame.Framework.Audio
 {
@@ -316,44 +315,42 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Convert buffer containing IEEE 32-bit float data to a 16-bit signed PCM buffer.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static void ConvertSingleToInt16(ReadOnlySpan<float> src, Span<short> dst)
         {
             if (dst.Length < src.Length)
                 throw new ArgumentException("The destination span is too small.");
 
-            if (GenericVector.IsHardwareAccelerated)
+            // TODO: remove ANDROID conditional in NET5
+#if !ANDROID
+            if (System.Numerics.Vector.IsHardwareAccelerated)
             {
-                // TODO: also consider SSE for this, which may be a bit faster
-                // this is roughly 2x perf on AVX2
+                // TODO: consider using SSE or AVX2 directly, which may be a bit faster
+                
+                var vMax = new Vector<float>(short.MaxValue);
+                var vMin = new Vector<float>(short.MinValue);
+                var vHalf = new Vector<float>(0.5f);
 
-                var maxValueVec = new Vector<float>(short.MaxValue);
-                var minValueVec = new Vector<float>(short.MinValue);
-                var halfValueVec = new Vector<float>(0.5f);
-
-                while (src.Length >= Vector<float>.Count)
+                while (src.Length >= Vector<float>.Count * 2)
                 {
-#if ANDROID
-                    // HACK: TODO: FIXME: for netstandard2.1
-                    ref float srcRef = ref Unsafe.AsRef(src.GetPinnableReference());
-                    var mutableSrc = MemoryMarshal.CreateSpan(ref srcRef, src.Length);
-                    var srcVec = new Vector<float>(mutableSrc);
-#else
-                    var srcVec = new Vector<float>(src);
-#endif
-
-                    var resultVec = GenericVector.Multiply(srcVec, maxValueVec);
-                    resultVec = GenericVector.Max(resultVec, minValueVec);
-                    resultVec = GenericVector.Min(resultVec, maxValueVec);
-                    resultVec = GenericVector.Add(resultVec, halfValueVec);
-
-                    var resultInt32 = GenericVector.ConvertToInt32(resultVec);
-                    for (int j = 0; j < Vector<float>.Count; j++)
-                        dst[j] = (short)resultInt32[j];
-
+                    var vSrc1 = new Vector<float>(src);
                     src = src.Slice(Vector<float>.Count);
+                    var vResult1 = System.Numerics.Vector.Add(System.Numerics.Vector.Multiply(vSrc1, vMax), vHalf);
+                    vResult1 = System.Numerics.Vector.Max(vMin, System.Numerics.Vector.Min(vResult1, vMax));
+                    var vIntResult1 = System.Numerics.Vector.ConvertToInt32(vResult1);
+
+                    var vSrc2 = new Vector<float>(src);
+                    src = src.Slice(Vector<float>.Count);
+                    var vResult2 = System.Numerics.Vector.Add(System.Numerics.Vector.Multiply(vSrc2, vMax), vHalf);
+                    vResult2 = System.Numerics.Vector.Max(vMin, System.Numerics.Vector.Min(vResult2, vMax));
+                    var vIntResult2 = System.Numerics.Vector.ConvertToInt32(vResult2);
+
+                    var vResult = System.Numerics.Vector.Narrow(vIntResult1, vIntResult2);
+                    vResult.CopyTo(dst);
                     dst = dst.Slice(Vector<float>.Count);
                 }
             }
+#endif
 
             for (int i = 0; i < src.Length; i++)
             {
@@ -365,13 +362,6 @@ namespace MonoGame.Framework.Audio
                 else
                     dst[i] = (short)tmp;
             }
-        }
-
-        public static short[] ConvertSingleToInt16(ReadOnlySpan<float> source)
-        {
-            var outData = new short[source.Length];
-            ConvertSingleToInt16(source, outData);
-            return outData;
         }
 
         #region IMA4 decoding
@@ -557,10 +547,12 @@ namespace MonoGame.Framework.Audio
             230, 230, 230, 230, 307, 409, 512, 614,
             768, 614, 512, 409, 307, 230, 230, 230
         };
+
         private static int[] adaptationCoeff1 = new int[]
         {
             256, 512, 0, 192, 240, 460, 392
         };
+
         private static int[] adaptationCoeff2 = new int[]
         {
             0, -256, 0, 64, 0, -208, -232
@@ -578,7 +570,10 @@ namespace MonoGame.Framework.Audio
         private static int AdpcmMsExpandNibble(ref MsAdpcmState channel, int nibble)
         {
             int nibbleSign = nibble - (((nibble & 0x08) != 0) ? 0x10 : 0);
-            int predictor = ((channel.sample1 * channel.coeff1) + (channel.sample2 * channel.coeff2)) / 256 + (nibbleSign * channel.delta);
+            int predictor = 
+                ((channel.sample1 * channel.coeff1) +
+                (channel.sample2 * channel.coeff2)) / 256 + 
+                (nibbleSign * channel.delta);
 
             if (predictor < -32768)
                 predictor = -32768;

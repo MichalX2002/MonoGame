@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -66,11 +67,11 @@ namespace MonoGame.Framework.Vector
             return scaled;
         }
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector4 scaledVector)
         {
-            scaledVector.Clamp(Vector4.Zero, Vector4.One);
             scaledVector *= ushort.MaxValue;
             scaledVector -= Offset;
+            scaledVector.Clamp(short.MinValue, short.MaxValue);
 
             X = (short)scaledVector.X;
             Y = (short)scaledVector.Y;
@@ -88,11 +89,11 @@ namespace MonoGame.Framework.Vector
             return vector;
         }
 
-        public void FromVector4(Vector4 vector)
+        public void FromVector(Vector4 vector)
         {
-            vector.Clamp(Vector4.NegativeOne, Vector4.One);
             vector *= ushort.MaxValue / 2f;
-            vector -= Vector4.Half;
+            vector -= new Vector4(0.5f);
+            vector.Clamp(short.MinValue, short.MaxValue);
 
             X = (short)vector.X;
             Y = (short)vector.Y;
@@ -126,7 +127,7 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         public override readonly string ToString() => nameof(NormalizedShort4) + $"({X}, {Y}, {Z}, {W})";
 

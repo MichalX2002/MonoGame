@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -17,9 +18,7 @@ namespace MonoGame.Framework.Vector
     [StructLayout(LayoutKind.Sequential)]
     public struct Short4 : IPackedPixel<Short4, ulong>
     {
-        private static readonly Vector4 MinValue = new Vector4(short.MinValue);
-        private static readonly Vector4 MaxValue = new Vector4(short.MaxValue);
-        private static readonly Vector4 Offset = new Vector4(32768);
+        private static Vector4 Offset => new Vector4(32768);
 
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
@@ -44,7 +43,7 @@ namespace MonoGame.Framework.Vector
 
         public Short4(Vector4 vector) : this()
         {
-            FromVector4(vector);
+            FromVector(vector);
         }
 
         public Short4(float x, float y, float z, float w) : this(new Vector4(x, y, z, w))
@@ -62,12 +61,12 @@ namespace MonoGame.Framework.Vector
             set => Unsafe.As<Short4, ulong>(ref this) = value;
         }
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector4 scaledVector)
         {
             scaledVector *= ushort.MaxValue;
             scaledVector -= Offset;
 
-            FromVector4(scaledVector);
+            FromVector(scaledVector);
         }
 
         public readonly Vector4 ToScaledVector4()
@@ -79,9 +78,9 @@ namespace MonoGame.Framework.Vector
             return scaledVector;
         }
 
-        public void FromVector4(Vector4 vector)
+        public void FromVector(Vector4 vector)
         {
-            vector.Clamp(MinValue, MaxValue);
+            vector.Clamp(short.MinValue, short.MaxValue);
             vector.Round();
 
             X = (short)vector.X;
@@ -121,7 +120,7 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         public override readonly string ToString() => nameof(Short4) + $"({X}, {Y}, {Z}, {W})";
 

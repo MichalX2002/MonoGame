@@ -49,7 +49,7 @@ namespace MonoGame.Tools.Pipeline
                 if (string.IsNullOrEmpty(OriginalPath))
                     return "";
 
-                return System.IO.Path.GetFileNameWithoutExtension(OriginalPath);
+                return Path.GetFileNameWithoutExtension(OriginalPath);
             }
         }
 

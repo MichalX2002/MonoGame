@@ -520,7 +520,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 		public static byte[] Encode32HC(
 			byte[] input, int inputOffset, int inputLength)
 		{
-			if (inputLength == 0) return new byte[0];
+			if (inputLength == 0) return Array.Empty<byte>();
 			var outputLength = MaximumOutputLength(inputLength);
 			var result = new byte[outputLength];
 			var length = Encode32HC(input, inputOffset, inputLength, result, 0, outputLength);
@@ -585,7 +585,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 		public static byte[] Encode64HC(
 			byte[] input, int inputOffset, int inputLength)
 		{
-			if (inputLength == 0) return new byte[0];
+			if (inputLength == 0) return Array.Empty<byte>();
 			var outputLength = MaximumOutputLength(inputLength);
 			var result = new byte[outputLength];
 			var length = Encode64HC(input, inputOffset, inputLength, result, 0, outputLength);

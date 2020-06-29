@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -61,11 +62,11 @@ namespace MonoGame.Framework.Vector
             set => Unsafe.As<Rg32, uint>(ref this) = value;
         }
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector4 scaledVector)
         {
             var v = scaledVector.ToVector2() * ushort.MaxValue;
-            v += Vector2.Half;
-            v.Clamp(0, ushort.MaxValue);
+            v += new Vector2(0.5f);
+            v.Clamp(ushort.MinValue, ushort.MaxValue);
 
             R = (ushort)v.X;
             G = (ushort)v.Y;
@@ -80,40 +81,40 @@ namespace MonoGame.Framework.Vector
 
         #region IPixel
 
-        public void FromGray8(Gray8 source)
+        public void FromGray(Gray8 source)
         {
-            R = G = PackedVectorHelper.UpScale8To16Bit(source.L);
+            R = G = ScalingHelper.ToUInt16(source.L);
         }
 
-        public void FromGray16(Gray16 source)
-        {
-            R = G = source.L;
-        }
-
-        public void FromGrayAlpha16(GrayAlpha16 source)
+        public void FromGray(Gray16 source)
         {
             R = G = source.L;
         }
 
-        public void FromRgb24(Rgb24 source)
+        public void FromGrayAlpha(GrayAlpha16 source)
         {
-            R = PackedVectorHelper.UpScale8To16Bit(source.R);
-            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+            R = G = source.L;
         }
 
-        public void FromRgba32(Color source)
+        public void FromRgb(Rgb24 source)
         {
-            R = PackedVectorHelper.UpScale8To16Bit(source.R);
-            G = PackedVectorHelper.UpScale8To16Bit(source.G);
+            R = ScalingHelper.ToUInt16(source.R);
+            G = ScalingHelper.ToUInt16(source.G);
         }
 
-        public void FromRgb48(Rgb48 source)
+        public void FromRgba(Color source)
+        {
+            R = ScalingHelper.ToUInt16(source.R);
+            G = ScalingHelper.ToUInt16(source.G);
+        }
+
+        public void FromRgb(Rgb48 source)
         {
             R = source.R;
             G = source.G;
         }
 
-        public void FromRgba64(Rgba64 source)
+        public void FromRgba(Rgba64 source)
         {
             R = source.R;
             G = source.G;
@@ -122,8 +123,8 @@ namespace MonoGame.Framework.Vector
         public readonly Color ToColor()
         {
             return new Color(
-                PackedVectorHelper.DownScale16To8Bit(R),
-                PackedVectorHelper.DownScale16To8Bit(G),
+                ScalingHelper.ToUInt8(R),
+                ScalingHelper.ToUInt8(G),
                 (byte)0,
                 byte.MaxValue);
         }
@@ -154,7 +155,7 @@ namespace MonoGame.Framework.Vector
 
         #endregion
 
-        #region Object Overrides
+        #region Object overrides
 
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.

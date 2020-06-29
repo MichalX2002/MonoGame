@@ -16,7 +16,7 @@ namespace MonoGame.Tools.Pipeline
 
             public MoveAction(IProjectItem item, string newname)
             {
-                _con = PipelineController.Instance;
+                _con = Instance;
                 _oldname = Path.GetFileName(item.OriginalPath);
                 _newname = newname;
                 _item = item;
