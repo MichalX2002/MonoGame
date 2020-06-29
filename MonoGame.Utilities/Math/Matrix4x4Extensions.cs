@@ -11,8 +11,6 @@ namespace MonoGame.Framework
             MemoryMarshal.Cast<Matrix4x4, float>(UnsafeR.AsReadOnlySpan(value)).CopyTo(destination);
         }
 
-        #region Directions
-
         /// <summary>
         /// The backward vector formed from the third row M31, M32, M33 elements.
         /// </summary>
@@ -60,7 +58,5 @@ namespace MonoGame.Framework
         {
             return new Vector3(value.M21, value.M22, value.M23);
         }
-
-        #endregion
     }
 }

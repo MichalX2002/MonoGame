@@ -2,15 +2,15 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using MonoGame.Framework.Graphics;
-using MonoGame.Framework.Vectors;
 using System;
 using System.Runtime.InteropServices;
+using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Vectors;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     public class PixelBitmapContent<TPixel> : BitmapContent
-        where TPixel : unmanaged, IPixel
+        where TPixel : unmanaged, IPixel<TPixel>
     {
         private byte[] _pixelData;
         private SurfaceFormat _format;
@@ -127,9 +127,12 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         }
 
         protected override bool TryCopyFrom(
-            BitmapContent srcBmp, Rectangle srcRegion, Rectangle dstRegion)
+            BitmapContent srcBitmap, Rectangle srcRegion, Rectangle dstRegion)
         {
-            if (!srcBmp.TryGetFormat(out SurfaceFormat sourceFormat))
+            if (srcBitmap == null)
+                throw new ArgumentNullException(nameof(srcBitmap));
+
+            if (!srcBitmap.TryGetFormat(out SurfaceFormat sourceFormat))
                 return false;
 
             // A shortcut for copying the entire bitmap to another bitmap of the same type and format
@@ -137,12 +140,12 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 srcRegion == new Rectangle(0, 0, Width, Height) &&
                 srcRegion == dstRegion)
             {
-                SetPixelData(srcBmp.GetPixelData());
+                SetPixelData(srcBitmap.GetPixelData());
                 return true;
             }
 
             // If the source is RgbaVector and doesn't require resizing, just copy
-            if (srcBmp is PixelBitmapContent<RgbaVector> src &&
+            if (srcBitmap is PixelBitmapContent<RgbaVector> src &&
                 srcRegion.Width == dstRegion.Width &&
                 srcRegion.Height == dstRegion.Height)
             {
@@ -163,7 +166,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 
             try
             {
-                Copy(srcBmp, srcRegion, this, dstRegion);
+                Copy(srcBitmap, srcRegion, this, dstRegion);
                 return true;
             }
             catch (InvalidOperationException)
@@ -175,6 +178,9 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         protected override bool TryCopyTo(
             BitmapContent dstBitmap, Rectangle srcRegion, Rectangle dstRegion)
         {
+            if (dstBitmap == null)
+                throw new ArgumentNullException(nameof(dstBitmap));
+
             if (!dstBitmap.TryGetFormat(out SurfaceFormat destinationFormat))
                 return false;
 

@@ -5,8 +5,8 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.Vectors;
 using MonoGame.Imaging;
@@ -258,6 +258,9 @@ namespace MonoGame.Framework.Graphics
         public void SetData(
             Image image, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
         {
+            if (image == null)
+                throw new ArgumentNullException(nameof(image));
+
             var pixelType = image.PixelType;
 
             ValidateParams(
@@ -354,6 +357,9 @@ namespace MonoGame.Framework.Graphics
         public static Texture2D FromImage(
             Image image, GraphicsDevice graphicsDevice, bool mipmap, SurfaceFormat format)
         {
+            if (image == null)
+                throw new ArgumentNullException(nameof(image));
+
             ValidateFromImageParams(graphicsDevice, nameof(graphicsDevice), format, nameof(format));
 
             var texture = new Texture2D(graphicsDevice, image.Width, image.Height, mipmap, format);

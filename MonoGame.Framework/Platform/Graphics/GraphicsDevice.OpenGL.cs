@@ -5,9 +5,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Numerics;
+using System.Globalization;
 
 #if ANGLE
 using OpenTK.Graphics;
@@ -81,7 +81,7 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        internal void SetVertexAttributeArray(bool[] attrs)
+        internal static void SetVertexAttributeArray(bool[] attrs)
         {
             for (int i = 0; i < attrs.Length; i++)
             {
@@ -236,8 +236,8 @@ namespace MonoGame.Framework.Graphics
                     _glMinorVersion = 1;
                 }
 #else
-                _glMajorVersion = Convert.ToInt32(version.Substring(0, 1));
-                _glMinorVersion = Convert.ToInt32(version.Substring(2, 1));
+                _glMajorVersion = Convert.ToInt32(version.Substring(0, 1), CultureInfo.InvariantCulture);
+                _glMinorVersion = Convert.ToInt32(version.Substring(2, 1), CultureInfo.InvariantCulture);
 #endif
             }
             catch (FormatException)
@@ -761,7 +761,7 @@ namespace MonoGame.Framework.Graphics
                 PrimitiveType.LineStrip => GLPrimitiveType.LineStrip,
                 PrimitiveType.TriangleList => GLPrimitiveType.Triangles,
                 PrimitiveType.TriangleStrip => GLPrimitiveType.TriangleStrip,
-                _ => throw new ArgumentOutOfRangeException(),
+                _ => throw new ArgumentOutOfRangeException(nameof(primitiveType)),
             };
         }
 

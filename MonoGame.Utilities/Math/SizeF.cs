@@ -149,6 +149,7 @@ namespace MonoGame.Framework
         {
             return left - right;
         }
+
         #region Equals
 
         /// <summary>
@@ -168,8 +169,7 @@ namespace MonoGame.Framework
         /// </summary>
         public static bool operator ==(SizeF a, SizeF b)
         {
-            return a.Width == b.Width
-                && a.Height == b.Height;
+            return (a.Width, a.Height) == (b.Width, b.Height);
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace MonoGame.Framework
         /// </summary>
         public static bool operator !=(SizeF a, SizeF b)
         {
-            return !(a == b);
+            return (a.Width, a.Height) != (b.Width, b.Height);
         }
 
         #endregion
