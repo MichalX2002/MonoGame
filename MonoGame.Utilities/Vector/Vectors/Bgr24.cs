@@ -7,7 +7,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 
-namespace MonoGame.Framework.Vector
+namespace MonoGame.Framework.Vectors
 {
     /// <summary>
     /// Packed vector type containing three unsigned 8-bit XYZ components.

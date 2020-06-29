@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoGame.Framework.Vector
+namespace MonoGame.Framework.Vectors
 {
     /// <summary>
     /// Describes a single vector component.

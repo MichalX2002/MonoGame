@@ -1,5 +1,5 @@
 ﻿
-namespace MonoGame.Framework.Vector
+namespace MonoGame.Framework.Vectors
 {
     // http://msdn.microsoft.com/en-us/library/bb197661.aspx
     public interface IPackedVector<TSelf, TPacked> : IVector<TSelf>

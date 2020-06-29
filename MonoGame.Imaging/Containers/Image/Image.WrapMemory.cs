@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
-using MonoGame.Framework.Vector;
+using MonoGame.Framework.Vectors;
 
 namespace MonoGame.Imaging
 {

@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
-using MonoGame.Framework.Vector;
+using MonoGame.Framework.Vectors;
 using MonoGame.Imaging;
 
 namespace MonoGame.TestingC

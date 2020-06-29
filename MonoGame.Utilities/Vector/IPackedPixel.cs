@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoGame.Framework.Vector
+namespace MonoGame.Framework.Vectors
 {
     [CLSCompliant(false)]
     public interface IPackedPixel<TSelf, TPacked> : IPackedVector<TSelf, TPacked>, IPixel<TSelf>

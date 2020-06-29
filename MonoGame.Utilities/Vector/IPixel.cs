@@ -1,5 +1,5 @@
 
-namespace MonoGame.Framework.Vector
+namespace MonoGame.Framework.Vectors
 {
     /// <summary>
     /// The operations to be implemented by a pixel type.

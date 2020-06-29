@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
-using MonoGame.Framework.Vector;
+using MonoGame.Framework.Vectors;
 using MonoGame.Imaging.Codecs.Detection;
 using static StbSharp.ImageRead;
 

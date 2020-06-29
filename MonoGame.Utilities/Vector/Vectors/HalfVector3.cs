@@ -6,7 +6,7 @@ using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace MonoGame.Framework.Vector
+namespace MonoGame.Framework.Vectors
 {
     /// <summary>
     /// Packed vector type containing 16-bit floating-point XYZ components.

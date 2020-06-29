@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MonoGame.Framework.Vector
+namespace MonoGame.Framework.Vectors
 {
     /// <summary>
     /// Provides extension methods that expose the default implementation of

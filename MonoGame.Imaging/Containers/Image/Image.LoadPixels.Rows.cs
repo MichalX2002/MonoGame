@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
-using MonoGame.Framework.Vector;
+using MonoGame.Framework.Vectors;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging

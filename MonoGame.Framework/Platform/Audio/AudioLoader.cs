@@ -323,7 +323,7 @@ namespace MonoGame.Framework.Audio
 
             // TODO: remove ANDROID conditional in NET5
 #if !ANDROID
-            if (System.Numerics.Vector.IsHardwareAccelerated)
+            if (Vector.IsHardwareAccelerated)
             {
                 // TODO: consider using SSE or AVX2 directly, which may be a bit faster
                 
@@ -335,17 +335,17 @@ namespace MonoGame.Framework.Audio
                 {
                     var vSrc1 = new Vector<float>(src);
                     src = src.Slice(Vector<float>.Count);
-                    var vResult1 = System.Numerics.Vector.Add(System.Numerics.Vector.Multiply(vSrc1, vMax), vHalf);
-                    vResult1 = System.Numerics.Vector.Max(vMin, System.Numerics.Vector.Min(vResult1, vMax));
-                    var vIntResult1 = System.Numerics.Vector.ConvertToInt32(vResult1);
+                    var vResult1 = Vector.Add(Vector.Multiply(vSrc1, vMax), vHalf);
+                    vResult1 = Vector.Max(vMin, Vector.Min(vResult1, vMax));
+                    var vIntResult1 = Vector.ConvertToInt32(vResult1);
 
                     var vSrc2 = new Vector<float>(src);
                     src = src.Slice(Vector<float>.Count);
-                    var vResult2 = System.Numerics.Vector.Add(System.Numerics.Vector.Multiply(vSrc2, vMax), vHalf);
-                    vResult2 = System.Numerics.Vector.Max(vMin, System.Numerics.Vector.Min(vResult2, vMax));
-                    var vIntResult2 = System.Numerics.Vector.ConvertToInt32(vResult2);
+                    var vResult2 = Vector.Add(Vector.Multiply(vSrc2, vMax), vHalf);
+                    vResult2 = Vector.Max(vMin, Vector.Min(vResult2, vMax));
+                    var vIntResult2 = Vector.ConvertToInt32(vResult2);
 
-                    var vResult = System.Numerics.Vector.Narrow(vIntResult1, vIntResult2);
+                    var vResult = Vector.Narrow(vIntResult1, vIntResult2);
                     vResult.CopyTo(dst);
                     dst = dst.Slice(Vector<float>.Count);
                 }

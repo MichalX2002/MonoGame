@@ -1,6 +1,6 @@
 ﻿using System;
 using MonoGame.Framework.Memory;
-using MonoGame.Framework.Vector;
+using MonoGame.Framework.Vectors;
 
 namespace MonoGame.Imaging.Pixels
 {

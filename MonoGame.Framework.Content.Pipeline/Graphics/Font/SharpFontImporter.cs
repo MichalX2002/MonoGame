@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
-using MonoGame.Framework.Vector;
+using MonoGame.Framework.Vectors;
 using SharpFont;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics

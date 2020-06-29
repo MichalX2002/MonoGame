@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
-using MonoGame.Framework.Vector;
+using MonoGame.Framework.Vectors;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging

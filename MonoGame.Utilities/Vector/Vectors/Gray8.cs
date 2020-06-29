@@ -5,7 +5,7 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace MonoGame.Framework.Vector
+namespace MonoGame.Framework.Vectors
 {
     /// <summary>
     /// Packed vector type containing a 8-bit XYZ luminance.

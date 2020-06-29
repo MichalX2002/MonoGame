@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 
-namespace MonoGame.Framework.Vector
+namespace MonoGame.Framework.Vectors
 {
     // TODO: replace with C#9 shape and VectorComponentInfo as a required static field
     public class VectorTypeInfo : IEquatable<VectorTypeInfo>
