@@ -73,9 +73,9 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public static void Copy(BitmapContent sourceBitmap, BitmapContent destinationBitmap)
         {
             if (sourceBitmap == null)
-                throw new ArgumentNullException("sourceBitmap");
+                throw new ArgumentNullException(nameof(sourceBitmap));
             if (destinationBitmap == null)
-                throw new ArgumentNullException("destinationBitmap");
+                throw new ArgumentNullException(nameof(destinationBitmap));
 
             var sourceRegion = new Rectangle(0, 0, sourceBitmap.Width, sourceBitmap.Height);
             var destinationRegion = new Rectangle(0, 0, destinationBitmap.Width, destinationBitmap.Height);

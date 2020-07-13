@@ -1,32 +1,33 @@
 ﻿using System;
+using MonoGame.Imaging.Attributes.Format;
 
-namespace MonoGame.Imaging.Codecs
+namespace MonoGame.Imaging.Coders
 {
     /// <summary>
     /// Thrown when attempting to process multiple frames with an 
-    /// <see cref="IImageCodec"/> that is missing <see cref="IAnimatedFormatAttribute"/>.
+    /// <see cref="IImageCoder"/> that is missing <see cref="IAnimatedFormatAttribute"/>.
     /// </summary>
     public class AnimationNotImplementedException : ImagingException
     {
         /// <summary>
-        /// Gets the image codec that has not implemented animation.
+        /// Gets the image coder that has not implemented animation.
         /// </summary>
-        public IImageCodec Codec { get; }
+        public IImageCoder Coder { get; }
         
-        public AnimationNotImplementedException(IImageCodec codec) : base(codec.Format)
+        public AnimationNotImplementedException(IImageCoder coder) : base(coder?.Format)
         {
-            Codec = codec ?? throw new ArgumentNullException(nameof(codec));
+            Coder = coder ?? throw new ArgumentNullException(nameof(coder));
         }
 
-        public AnimationNotImplementedException(string message, IImageCodec codec) : base(message, codec.Format)
+        public AnimationNotImplementedException(string message, IImageCoder coder) : base(message, coder?.Format)
         {
-            Codec = codec ?? throw new ArgumentNullException(nameof(codec));
+            Coder = coder ?? throw new ArgumentNullException(nameof(coder));
         }
 
         public AnimationNotImplementedException(
-            string message, Exception inner, IImageCodec codec) : base(message, inner, codec.Format)
+            string message, Exception inner, IImageCoder coder) : base(message, inner, coder?.Format)
         {
-            Codec = codec ?? throw new ArgumentNullException(nameof(codec));
+            Coder = coder ?? throw new ArgumentNullException(nameof(coder));
         }
     }
 }

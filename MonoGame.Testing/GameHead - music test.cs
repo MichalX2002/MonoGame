@@ -4,7 +4,7 @@ using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 using MonoGame.Framework.Media;
 using MonoGame.Imaging;
-using MonoGame.Imaging.Codecs.Encoding;
+using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Processing;
 using NVorbis;

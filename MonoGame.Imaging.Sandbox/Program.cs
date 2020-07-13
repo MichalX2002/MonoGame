@@ -13,15 +13,15 @@ using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Pixels;
-using MonoGame.Imaging.Codecs.Decoding;
-using MonoGame.Imaging.Codecs.Encoding;
+using MonoGame.Imaging.Coders.Decoding;
+using MonoGame.Imaging.Coders.Encoding;
 using System.Numerics;
 using StbSharp;
 using MonoGame.Framework.Vectors;
 using System.Security.Cryptography;
 using System.Xml;
 using MonoGame.Imaging.Processing;
-using MonoGame.Imaging.Codecs.Formats;
+using MonoGame.Imaging.Coders.Formats;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -137,7 +137,7 @@ namespace MonoGame.Imaging.Tests
                                 img?.Dispose();
 
                                 ms.Position = 0;
-                                img = Image.Load(ms, VectorTypeInfo.Get<Color>());
+                                img = Image.Load(ms, VectorType.Get<Color>());
 
                                 byte[] hash = sha.ComputeHash(((Image<Color>)img).GetPixelByteSpan().ToArray());
                                 //Console.WriteLine("hash: " + BitConverter.ToString(hash));

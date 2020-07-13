@@ -9,8 +9,8 @@ namespace MonoGame.Imaging
         #region LoadPixelData(FromType, ToType, ReadOnlySpan<byte>)
 
         public static Image LoadPixelData(
-            VectorTypeInfo sourceType,
-            VectorTypeInfo destinationType,
+            VectorType sourceType,
+            VectorType destinationType,
             ReadOnlySpan<byte> pixelData,
             Rectangle sourceRectangle,
             int? byteStride = null)
@@ -30,8 +30,8 @@ namespace MonoGame.Imaging
         }
 
         public static Image LoadPixelData(
-            VectorTypeInfo sourceType,
-            VectorTypeInfo destinationType,
+            VectorType sourceType,
+            VectorType destinationType,
             ReadOnlySpan<byte> pixelData,
             Size size,
             int? byteStride = null)
@@ -45,7 +45,7 @@ namespace MonoGame.Imaging
         #region LoadPixelData(Type, ReadOnlySpan<byte>)
 
         public static Image LoadPixelData(
-            VectorTypeInfo pixelType,
+            VectorType pixelType,
             ReadOnlySpan<byte> pixelData,
             Rectangle sourceRectangle,
             int? byteStride = null)
@@ -54,7 +54,7 @@ namespace MonoGame.Imaging
         }
 
         public static Image LoadPixelData(
-            VectorTypeInfo pixelType, ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
+            VectorType pixelType, ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
         {
             return LoadPixelData(pixelType, pixelData, new Rectangle(size), byteStride);
         }
@@ -68,7 +68,7 @@ namespace MonoGame.Imaging
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel
         {
-            var fromType = VectorTypeInfo.Get<TPixelFrom>();
+            var fromType = VectorType.Get<TPixelFrom>();
             return LoadPixelData<TPixelTo>(fromType, pixelData, sourceRectangle, byteStride);
         }
 
@@ -85,19 +85,19 @@ namespace MonoGame.Imaging
         #region LoadPixelData<TTo>(FromType, ReadOnlySpan<byte>)
 
         public static Image<TPixelTo> LoadPixelData<TPixelTo>(
-            VectorTypeInfo sourceType,
+            VectorType sourceType,
             ReadOnlySpan<byte> pixelData,
             Rectangle sourceRectangle,
             int? byteStride = null)
             where TPixelTo : unmanaged, IPixel
         {
-            var toType = VectorTypeInfo.Get<TPixelTo>();
+            var toType = VectorType.Get<TPixelTo>();
             var image = LoadPixelData(sourceType, toType, pixelData, sourceRectangle, byteStride);
             return (Image<TPixelTo>)image;
         }
 
         public static Image<TPixelTo> LoadPixelData<TPixelTo>(
-            VectorTypeInfo sourceType, ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
+            VectorType sourceType, ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
             where TPixelTo : unmanaged, IPixel
         {
             return LoadPixelData<TPixelTo>(sourceType, pixelData, new Rectangle(size), byteStride);

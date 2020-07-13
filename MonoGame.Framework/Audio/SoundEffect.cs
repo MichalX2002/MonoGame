@@ -274,7 +274,7 @@ namespace MonoGame.Framework.Audio
         public static SoundEffect FromFile(string path)
         {
             if (path == null)
-                throw new ArgumentNullException("path");
+                throw new ArgumentNullException(nameof(path));
 
             using (var stream = File.OpenRead(path))
                 return FromStream(stream);
@@ -458,7 +458,7 @@ namespace MonoGame.Framework.Audio
             set
             {
                 if (value < 0f || value > 1f)
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 if (_masterVolume == value)
                     return;
@@ -506,8 +506,7 @@ namespace MonoGame.Framework.Audio
                 //   although the documentation does not say it throws an error we will anyway
                 //   just so it is like the DistanceScale
                 if (value < 0f)
-                    throw new ArgumentOutOfRangeException(
-                        value.ToString(), "value of DopplerScale");
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 _dopplerScale = value;
             }
@@ -525,7 +524,7 @@ namespace MonoGame.Framework.Audio
             set
             {
                 if (value <= 0f)
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 speedOfSound = value;
             }

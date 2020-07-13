@@ -1,9 +1,9 @@
 ﻿using System;
-using MonoGame.Imaging.Codecs.Decoding;
+using MonoGame.Imaging.Coders.Decoding;
 
 namespace MonoGame.Imaging.Config
 {
-    public class ImageFormatDetectorProvider : ImageCodecProvider<IImageFormatDetector>
+    public class ImageFormatDetectorProvider : ImageCoderProvider<IImageFormatDetector>
     {
         public int GetMaxHeaderSize()
         {

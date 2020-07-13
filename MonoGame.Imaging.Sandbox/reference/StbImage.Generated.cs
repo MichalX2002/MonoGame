@@ -255,7 +255,7 @@ namespace StbImageSharp
         {
             int row = 0;
             ulong bytes_per_row = (ulong)(w * bytes_per_pixel);
-            byte* temp = stackalloc byte[2048];
+            byte* tmp = stackalloc byte[4096];
             byte* bytes = (byte*)(image);
             for (row = (int)(0); (row) < (h / 2); row++)
             {
@@ -264,10 +264,10 @@ namespace StbImageSharp
                 ulong bytes_left = (ulong)(bytes_per_row);
                 while ((bytes_left) != 0)
                 {
-                    ulong bytes_copy = (ulong)(((bytes_left) < (2048)) ? bytes_left : 2048);
-                    CRuntime.memcpy(temp, row0, (ulong)(bytes_copy));
+                    ulong bytes_copy = (ulong)(((bytes_left) < (4096)) ? bytes_left : 4096);
+                    CRuntime.memcpy(tmp, row0, (ulong)(bytes_copy));
                     CRuntime.memcpy(row0, row1, (ulong)(bytes_copy));
-                    CRuntime.memcpy(row1, temp, (ulong)(bytes_copy));
+                    CRuntime.memcpy(row1, tmp, (ulong)(bytes_copy));
                     row0 += bytes_copy;
                     row1 += bytes_copy;
                     bytes_left -= (ulong)(bytes_copy);

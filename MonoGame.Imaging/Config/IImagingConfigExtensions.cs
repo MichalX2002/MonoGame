@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using MonoGame.Framework.IO;
-using MonoGame.Imaging.Codecs.Decoding;
-using MonoGame.Imaging.Codecs.Encoding;
+using MonoGame.Imaging.Coders.Decoding;
+using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Config;
 
 namespace MonoGame.Imaging
@@ -14,11 +15,11 @@ namespace MonoGame.Imaging
         public static bool TryGetEncoder(
             this IImagingConfig config, ImageFormat format, out IImageEncoder? encoder)
         {
-            var provider = config.GetModule<ImageCodecProvider<IImageEncoder>>();
+            var provider = config.GetModule<ImageCoderProvider<IImageEncoder>>();
             if (provider == null)
-                throw new ImagingException($"Missing {nameof(ImageCodecProvider<IImageEncoder>)}.");
+                throw new ImagingException($"Missing {nameof(ImageCoderProvider<IImageEncoder>)}.");
 
-            return provider.TryGetCodec(format, out encoder);
+            return provider.TryGetCoder(format, out encoder);
         }
 
         public static IImageEncoder GetEncoder(this IImagingConfig config, ImageFormat format)
@@ -35,11 +36,14 @@ namespace MonoGame.Imaging
         public static bool TryGetDecoder(
             this IImagingConfig config, ImageFormat format, out IImageDecoder? decoder)
         {
-            var provider = config.GetModule<ImageCodecProvider<IImageDecoder>>();
-            if (provider == null)
-                throw new ImagingException($"Missing {nameof(ImageCodecProvider<IImageDecoder>)}.");
+            if (config == null)
+                throw new ArgumentNullException(nameof(config));
 
-            return provider.TryGetCodec(format, out decoder);
+            var provider = config.GetModule<ImageCoderProvider<IImageDecoder>>();
+            if (provider == null)
+                throw new ImagingException($"Missing {nameof(ImageCoderProvider<IImageDecoder>)}.");
+
+            return provider.TryGetCoder(format, out decoder);
         }
 
         public static IImageDecoder GetDecoder(this IImagingConfig config, ImageFormat format)
@@ -56,11 +60,11 @@ namespace MonoGame.Imaging
         public static bool TryGetInfoDetector(
             this IImagingConfig config, ImageFormat format, out IImageInfoDetector? infoDetector)
         {
-            var provider = config.GetModule<ImageCodecProvider<IImageInfoDetector>>();
+            var provider = config.GetModule<ImageCoderProvider<IImageInfoDetector>>();
             if (provider == null)
-                throw new ImagingException($"Missing {nameof(ImageCodecProvider<IImageInfoDetector>)}.");
+                throw new ImagingException($"Missing {nameof(ImageCoderProvider<IImageInfoDetector>)}.");
 
-            return provider.TryGetCodec(format, out infoDetector);
+            return provider.TryGetCoder(format, out infoDetector);
         }
 
         public static IImageInfoDetector GetInfoDetector(this IImagingConfig config, ImageFormat format)
@@ -74,6 +78,9 @@ namespace MonoGame.Imaging
 
         public static int GetMaxHeaderSize(this IImagingConfig config)
         {
+            if (config == null)
+                throw new ArgumentNullException(nameof(config));
+
             var provider = config.GetModule<ImageFormatDetectorProvider>();
             if (provider == null)
                 throw new ImagingException($"Missing {nameof(ImageFormatDetectorProvider)}.");
@@ -83,6 +90,9 @@ namespace MonoGame.Imaging
 
         public static IEnumerable<IImageFormatDetector> GetFormatDetectors(this IImagingConfig config)
         {
+            if (config == null)
+                throw new ArgumentNullException(nameof(config));
+
             var provider = config.GetModule<ImageFormatDetectorProvider>();
             if (provider == null)
                 throw new ImagingException($"Missing {nameof(ImageFormatDetectorProvider)}.");

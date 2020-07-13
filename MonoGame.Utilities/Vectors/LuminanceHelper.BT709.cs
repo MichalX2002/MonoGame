@@ -77,6 +77,16 @@ namespace MonoGame.Framework.Vectors
             {
                 return ToGray16(rgb.R, rgb.G, rgb.B);
             }
+
+            /// <summary>
+            /// Converts RGB to luminance using the the BT.709 formula.
+            /// </summary>
+            [CLSCompliant(false)]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public static uint ToGray32(uint r, uint g, uint b)
+            {
+                return (uint)(ToGrayF(r, g, b) + 0.5f);
+            }
         }
     }
 }

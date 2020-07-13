@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using MonoGame.Framework.Collections;
 
 namespace MonoGame.Framework.IO
 {
@@ -10,7 +10,7 @@ namespace MonoGame.Framework.IO
     /// </summary>
     public class ConcatStream : Stream
     {
-        private Queue<Slice> _slices;
+        private Queue<Part> _parts;
         private long _position;
 
         #region Properties
@@ -27,7 +27,7 @@ namespace MonoGame.Framework.IO
             get
             {
                 long total = 0;
-                foreach (var slice in _slices)
+                foreach (var slice in _parts)
                 {
                     if (!slice.Stream.CanSeek)
                         return -1;
@@ -44,7 +44,7 @@ namespace MonoGame.Framework.IO
         {
             get
             {
-                foreach (var slice in _slices)
+                foreach (var slice in _parts)
                     if (slice.Stream.CanTimeout)
                         return true;
                 return false;
@@ -70,20 +70,18 @@ namespace MonoGame.Framework.IO
         /// </summary>
         public ConcatStream(Stream first, bool leaveFirstOpen, Stream second, bool leaveSecondOpen)
         {
-            if (first == null)
-                throw new ArgumentNullException(nameof(first));
-            if (second == null)
-                throw new ArgumentNullException(nameof(second));
+            var firstPart = new Part(first, leaveFirstOpen);
+            var secondPart = new Part(second, leaveSecondOpen);
 
-            _slices = new Queue<Slice>(2);
-            _slices.Enqueue(new Slice(first, leaveFirstOpen));
-            _slices.Enqueue(new Slice(second, leaveSecondOpen));
+            _parts = new Queue<Part>(2);
+            _parts.Enqueue(firstPart);
+            _parts.Enqueue(secondPart);
         }
 
         /// <summary>
         /// Constructs the <see cref="ConcatStream"/> with two streams, not leaving them open after disposal.
         /// </summary>
-        public ConcatStream(Stream first, Stream second) : this(first, true, second, true)
+        public ConcatStream(Stream first, Stream second) : this(first, false, second, false)
         {
         }
 
@@ -93,34 +91,35 @@ namespace MonoGame.Framework.IO
         /// </summary>
         public ConcatStream(IEnumerable<Stream> streams, bool leaveOpen)
         {
-            _slices = new Queue<Slice>(streams is ICollection coll ? coll.Count : 4);
+            if (streams == null)
+                throw new ArgumentNullException(nameof(streams));
+
+            _parts = new Queue<Part>(CollectionHelper.TryGetCount(streams) ?? 4);
+
             foreach (var stream in streams)
-                _slices.Enqueue(new Slice(stream, leaveOpen));
+                _parts.Enqueue(new Part(stream, leaveOpen));
         }
 
         /// <summary>
         /// Constructs the <see cref="ConcatStream"/> from an enumerable of streams.
         /// Use this to individually control which streams are left open after disposal.
         /// </summary>
-        public ConcatStream(IEnumerable<Slice> slices)
+        public ConcatStream(IEnumerable<Part> parts)
         {
-            _slices = new Queue<Slice>(slices);
+            _parts = new Queue<Part>(parts);
         }
 
         #endregion
 
-        public override int Read(byte[] buffer, int offset, int count)
+        public override int Read(Span<byte> buffer)
         {
             TryRead:
-            if (_slices.Count > 0)
+            if (_parts.Count > 0)
             {
-                if (offset + count > buffer.Length)
-                    count = buffer.Length - offset;
-
-                int read = _slices.Peek().Stream.Read(buffer, offset, count);
+                int read = _parts.Peek().Stream.Read(buffer);
                 if (read == 0)
                 {
-                    DisposeOneSlice();
+                    DequeueAndDisposePart();
                     goto TryRead;
                 }
                 else
@@ -132,16 +131,24 @@ namespace MonoGame.Framework.IO
             return 0;
         }
 
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            return Read(buffer.AsSpan(offset, count));
+        }
+
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
         public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
         public override void SetLength(long value) => throw new NotSupportedException();
+
         public override void Flush() => throw new NotSupportedException();
 
-        private void DisposeOneSlice()
+        private void DequeueAndDisposePart()
         {
-            var slice = _slices.Dequeue();
-            if (!slice.LeaveOpen)
-                slice.Stream.Dispose();
+            var part = _parts.Dequeue();
+            if (!part.LeaveOpen)
+                part.Stream.Dispose();
         }
 
         protected override void Dispose(bool disposing)
@@ -150,8 +157,8 @@ namespace MonoGame.Framework.IO
             {
                 if (disposing)
                 {
-                    while (_slices.Count > 0)
-                        DisposeOneSlice();
+                    while (_parts.Count > 0)
+                        DequeueAndDisposePart();
                 }
             }
             finally
@@ -163,14 +170,14 @@ namespace MonoGame.Framework.IO
         /// <summary>
         /// Represents a <see cref="System.IO.Stream"/> that is optionally disposed after use.
         /// </summary>
-        public readonly struct Slice
+        public readonly struct Part
         {
-            public readonly Stream Stream;
-            public readonly bool LeaveOpen;
+            public Stream Stream { get; }
+            public bool LeaveOpen { get; }
 
-            public Slice(Stream stream, bool leaveOpen)
+            public Part(Stream stream, bool leaveOpen)
             {
-                Stream = stream;
+                Stream = stream ?? throw new ArgumentNullException(nameof(stream));
                 LeaveOpen = leaveOpen;
             }
         }

@@ -8,6 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Numerics;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
@@ -15,7 +16,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
     /// Provides methods and properties for maintaining a vertex channel.
     /// This is a generic implementation of <see cref="VertexChannel"/> and, therefore, can handle strongly typed content data.
     /// </summary>
-    public sealed class VertexChannel<T> : VertexChannel, IList<T>, IReadOnlyList<T>, ICollection<T>, IEnumerable<T>, IEnumerable
+    public sealed class VertexChannel<T> : VertexChannel, IList<T>, IReadOnlyList<T>, ICollection<T>, IEnumerable<T>
     {
         private List<T> _items;
 
@@ -117,23 +118,24 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 throw new ArgumentNullException(nameof(data));
             if (!(data is IEnumerable<T>))
                 throw new ArgumentException("Value does not implement generic enumerable.", nameof(data));
+
             _items.InsertRange(index, (IEnumerable<T>)data);
         }
 
         /// <summary>
         /// Reads channel content and automatically converts it to the specified vector format.
         /// </summary>
-        /// <typeparam name="TargetType">Target vector format for the converted channel data.</typeparam>
+        /// <typeparam name="TTarget">Target vector format for the converted channel data.</typeparam>
         /// <returns>The converted channel data.</returns>
-        public override IEnumerable<TargetType> ReadConvertedContent<TargetType>()
+        public override IEnumerable<TTarget> ReadConvertedContent<TTarget>()
         {
-            if (typeof(TargetType).IsAssignableFrom(typeof(T)))
-                return _items.Cast<TargetType>();
+            if (typeof(TTarget).IsAssignableFrom(typeof(T)))
+                return _items.Cast<TTarget>();
 
-            return Convert<TargetType>(_items);
+            return Convert<TTarget>(_items);
         }
 
-        private static IEnumerable<TargetType> Convert<TargetType>(IEnumerable<T> items)
+        private static IEnumerable<TTarget> Convert<TTarget>(IEnumerable<T> items)
         {
             // The following formats are supported:
             // - Single
@@ -143,17 +145,17 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             // - Any implementation of IPackedVector Interface.
 
             var converter = TypeDescriptor.GetConverter(typeof(T));
-            if (!converter.CanConvertTo(typeof(TargetType)))
+            if (!converter.CanConvertTo(typeof(TTarget)))
             {
                 // If you got this exception, check out the static constructor above
                 // to make sure your type is registered.
                 throw new NotImplementedException(
                     string.Format("TypeConverter for {0} -> {1} is not implemented.",
-                    typeof(T).Name, typeof(TargetType).Name));
+                    typeof(T).Name, typeof(TTarget).Name));
             }
 
             foreach (var item in items)
-                yield return (TargetType)converter.ConvertTo(item, typeof(TargetType));
+                yield return (TTarget)converter.ConvertTo(item, typeof(TTarget));
         }
 
         /// <summary>

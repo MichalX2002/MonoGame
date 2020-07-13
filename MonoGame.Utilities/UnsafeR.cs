@@ -33,5 +33,19 @@ namespace MonoGame.Framework
         {
             return MemoryMarshal.CreateSpan(ref value, count);
         }
+
+        // TODO: use methods from NET5
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref T NullRef<T>()
+        {
+            return ref Unsafe.AsRef<T>(null);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe bool IsNullRef<T>(ref T source)
+        {
+            return Unsafe.AsPointer(ref source) == null;
+        }
     }
 }

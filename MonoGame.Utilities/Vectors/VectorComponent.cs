@@ -29,36 +29,38 @@ namespace MonoGame.Framework.Vectors
         /// <param name="channel">The channel type that the component represents.</param>
         /// <param name="bits">The size of the component in bits.</param>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="bits"/> is less or equal to zero.
+        /// <paramref name="bits"/> is less than or equal to zero or 
+        /// <paramref name="bits"/> is zero and <paramref name="type"/> is <see cref="VectorComponentType.BitField"/>.
         /// </exception>
-        public VectorComponent(VectorComponentType type, VectorComponentChannel channel, int bits = 0)
+        public VectorComponent(VectorComponentType type, VectorComponentChannel channel, int? bits = null)
         {
-            if (bits < 0)
-                throw new ArgumentOutOfRangeException(nameof(bits));
-
-            if (bits == 0 && type != VectorComponentType.Undefined)
+            if (bits.HasValue)
             {
-                if (type == VectorComponentType.BitField)
-                    throw new ArgumentException(
-                        $"The bit count may not be zero if the component type is of " +
-                        $"{VectorComponentType.BitField}.", nameof(bits));
+                if (bits.Value <= 0)
+                    throw new ArgumentOutOfRangeException(nameof(bits));
 
-                bits = type.SizeInBytes() * 8;
+                Bits = bits.Value;
+            }
+            else
+            {
+                if (type == VectorComponentType.BitField || 
+                    type == VectorComponentType.Undefined)
+                    throw new ArgumentException(
+                        "The bit size could not be inferred from the given component type.");
+
+                Bits = type.SizeInBytes() * 8;
             }
 
             Type = type;
             Channel = channel;
-            Bits = bits;
         }
 
         public bool Equals(VectorComponent other)
         {
-            return Type == other.Type
-                && Channel == other.Channel
-                && Bits == other.Bits;
+            return this == other;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is VectorComponent comp && Equals(comp);
         }
@@ -68,12 +70,19 @@ namespace MonoGame.Framework.Vectors
             return HashCode.Combine(Type, Channel, Bits);
         }
 
-        public static bool operator ==(VectorComponent a, VectorComponent b)
+        public override string ToString()
         {
-            return a.Equals(b);
+
         }
 
-        public static bool operator !=(VectorComponent a, VectorComponent b)
+        public static bool operator ==(in VectorComponent a, in VectorComponent b)
+        {
+            return a.Type == b.Type
+                && a.Channel == b.Channel
+                && a.Bits == b.Bits;
+        }
+
+        public static bool operator !=(in VectorComponent a, in VectorComponent b)
         {
             return !(a == b);
         }

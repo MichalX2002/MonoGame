@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.Vectors
 {
     /// <summary>
-    /// Packed vector type containing an 8-bit XYZ luminance an 8-bit W component.
+    /// Packed vector type containing an 8-bit XYZ luminance and 8-bit W component.
     /// <para>
     /// Ranges from [0, 0, 0, 0] to [1, 1, 1, 1] in vector form.
     /// </para>

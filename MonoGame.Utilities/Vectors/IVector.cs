@@ -16,7 +16,7 @@ namespace MonoGame.Framework.Vectors
     {
         /// <summary>
         /// Describes the components of this vector.
-        /// Should be retrieved through <see cref="VectorTypeInfo"/>.
+        /// Should be retrieved with <see cref="VectorType.Get(Type)"/>.
         /// </summary>
         // TODO: replace with static field (C# 9 or 10 role/shape)
         VectorComponentInfo ComponentInfo { get; }

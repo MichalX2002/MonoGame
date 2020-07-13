@@ -12,7 +12,7 @@ using MonoGame.Framework;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 using MonoGame.Imaging;
-using MonoGame.Imaging.Codecs.Decoding;
+using MonoGame.Imaging.Coders.Decoding;
 
 namespace MonoGame.Testing
 {

@@ -14,21 +14,25 @@ namespace MonoGame.Framework.Content
 {
     public sealed class ContentTypeReaderManager
     {
-        private static readonly object _syncRoot;
-        private static readonly Dictionary<Type, ContentTypeReader> _contentReadersCache;
-        private static readonly string _assemblyName;
+        private static object SyncRoot { get; } = new object();
+
+        private static Dictionary<Type, ContentTypeReader> ContentReaderCache { get; }
+            = new Dictionary<Type, ContentTypeReader>(255);
+
+        /// <summary>
+        /// Static map of type names to creation functions.
+        /// Required as iOS requires all types at compile time.
+        /// </summary>
+        private static Dictionary<string, Func<ContentTypeReader>> ReaderFactories { get; } =
+            new Dictionary<string, Func<ContentTypeReader>>();
 
         private Dictionary<Type, ContentTypeReader> _contentReaders;
 
-        static ContentTypeReaderManager()
-        {
-            _syncRoot = new object();
-            _contentReadersCache = new Dictionary<Type, ContentTypeReader>(255);
-            _assemblyName = typeof(ContentTypeReaderManager).Assembly.FullName;
-        }
-
         public ContentTypeReader GetTypeReader(Type targetType)
         {
+            if (targetType == null)
+                throw new ArgumentNullException(nameof(targetType));
+
             if (targetType.IsArray && targetType.GetArrayRank() > 1)
                 targetType = typeof(Array);
 
@@ -62,9 +66,13 @@ namespace MonoGame.Framework.Content
                 var hRayReader = new RayReader();
                 var hCharListReader = new ListReader<char>();
                 var hRuneListReader = new ListReader<Rune>();
-                var hRectangleListReader = new ListReader<Rectangle>();
+                var hNullableRectReader = new NullableReader<Rectangle>();
                 var hRectangleArrayReader = new ArrayReader<Rectangle>();
+                var hRectangleListReader = new ListReader<Rectangle>();
+                var hVector3ArrayReader = new ArrayReader<Vector3>();
                 var hVector3ListReader = new ListReader<Vector3>();
+                var hVector2ArrayReader = new ArrayReader<Vector2>();
+                var hVector2ListReader = new ListReader<Vector2>();
                 var hStringListReader = new ListReader<StringReader>();
                 var hIntListReader = new ListReader<int>();
                 var hSpriteFontReader = new SpriteFontReader();
@@ -85,11 +93,8 @@ namespace MonoGame.Framework.Content
                 var hAlphaTestEffectReader = new AlphaTestEffectReader();
                 var hEnumSpriteEffectsReader = new EnumReader<Graphics.SpriteFlip>();
                 var hArrayFloatReader = new ArrayReader<float>();
-                var hArrayVector2Reader = new ArrayReader<Vector2>();
-                var hListVector2Reader = new ListReader<Vector2>();
                 var hArrayMatrixReader = new ArrayReader<Matrix4x4>();
                 var hEnumBlendReader = new EnumReader<Graphics.Blend>();
-                var hNullableRectReader = new NullableReader<Rectangle>();
                 var hEffectMaterialReader = new EffectMaterialReader();
                 var hExternalReferenceReader = new ExternalReferenceReader();
                 var hSoundEffectReader = new SoundEffectReader();
@@ -115,19 +120,21 @@ namespace MonoGame.Framework.Content
             // Lock until we're done allocating and initializing any new
             // content type readers...  this ensures we can load content
             // from multiple threads and still cache the readers.
-            lock (_syncRoot)
+            lock (SyncRoot)
             {
-                // For each reader in the file, we read out the length of the string which contains the type of the reader,
-                // then we read out the string. Finally we instantiate an instance of that reader using reflection
+                // For each reader in the file, 
+                // we read out the length of the string which contains the type of the reader,
+                // then we read out the string. 
+                // Finally we instantiate an instance of that reader using reflection
                 for (var i = 0; i < numberOfReaders; i++)
                 {
                     // This string tells us what reader we need to decode the following data
                     // string readerTypeString = reader.ReadString();
                     string originalReaderTypeString = reader.ReadString();
 
-                    if (typeCreators.TryGetValue(originalReaderTypeString, out Func<ContentTypeReader> readerFunc))
+                    if (ReaderFactories.TryGetValue(originalReaderTypeString, out Func<ContentTypeReader> readerFactory))
                     {
-                        contentReaders[i] = readerFunc();
+                        contentReaders[i] = readerFactory.Invoke();
                         needsInitialize[i] = true;
                     }
                     else
@@ -136,46 +143,52 @@ namespace MonoGame.Framework.Content
 
                         // Need to resolve namespace differences
                         string readerTypeString = originalReaderTypeString;
-
                         readerTypeString = PrepareType(readerTypeString);
 
                         var l_readerType = Type.GetType(readerTypeString);
                         if (l_readerType != null)
                         {
-                            if (!_contentReadersCache.TryGetValue(l_readerType, out ContentTypeReader typeReader))
+                            if (!ContentReaderCache.TryGetValue(l_readerType, out ContentTypeReader typeReader))
                             {
                                 try
                                 {
-                                    typeReader = l_readerType.GetDefaultConstructor().Invoke(null) as ContentTypeReader;
+                                    typeReader = (ContentTypeReader)l_readerType.GetDefaultConstructor().Invoke(null);
                                 }
                                 catch (TargetInvocationException ex)
                                 {
                                     // If you are getting here, the Mono runtime is most likely not able to JIT the type.
-                                    // In particular, MonoTouch needs help instantiating types that are only defined in strings in Xnb files. 
+                                    // In particular, MonoTouch needs help instantiating types
+                                    // that are only defined in strings in XNB files. 
                                     throw new InvalidOperationException(
-                                        "Failed to get default constructor for ContentTypeReader. " +
-                                        "To work around, add a creation function to ContentTypeReaderManager.AddTypeCreator() " +
-                                        "with the following failed type string: " + originalReaderTypeString, ex);
+                                        $"Failed to get default constructor for {nameof(ContentTypeReader)}. " +
+                                        $"To work around, add a factory function " +
+                                        $"(with {nameof(ContentTypeReaderManager)}.{nameof(AddReaderFactory)}) " +
+                                        "with the following type string: " + originalReaderTypeString, ex);
                                 }
 
                                 needsInitialize[i] = true;
 
-                                _contentReadersCache.Add(l_readerType, typeReader);
+                                ContentReaderCache.Add(l_readerType, typeReader);
                             }
 
                             contentReaders[i] = typeReader;
                         }
                         else
+                        {
                             throw new ContentLoadException(
-                                    "Could not find ContentTypeReader Type. Please ensure the name of the Assembly " +
-                                    "that contains the Type matches the assembly in the full type name: " +
-                                    originalReaderTypeString + " (" + readerTypeString + ")");
+                                $"Could not find {nameof(ContentTypeReader)} Type. " +
+                                "Please ensure the name of the assembly " +
+                                "that contains the type matches the assembly in the full type name: " +
+                                originalReaderTypeString + " (" + readerTypeString + ")");
+                        }
                     }
 
                     var targetType = contentReaders[i].TargetType;
                     if (targetType != null)
+                    {
                         if (!_contentReaders.ContainsKey(targetType))
                             _contentReaders.Add(targetType, contentReaders[i]);
+                    }
 
                     // I think the next 4 bytes refer to the "Version" of the type reader,
                     // although it always seems to be zero
@@ -188,8 +201,7 @@ namespace MonoGame.Framework.Content
                     if (needsInitialize.Get(i))
                         contentReaders[i].Initialize(this);
                 }
-
-            } // lock (_locker)
+            }
 
             return contentReaders;
         }
@@ -201,53 +213,42 @@ namespace MonoGame.Framework.Content
         /// Supports multiple generic types 
         /// (e.g. <see cref="Dictionary{TKey, TValue}"/>) and nested generic types (e.g. List&lt;List&lt;int&gt;&gt;).
         /// </remarks> 
-        /// <param name="type">
-        /// A <see cref="string"/>
-        /// </param>
-        /// <returns>
-        /// A <see cref="string"/>
-        /// </returns>
+        /// <param name="type">The string contaning a full type description.</param>
+        /// <returns>A type description string without external identifiers.</returns>
         public static string PrepareType(string type)
         {
-            //Needed to support nested types
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+
+            // Needed to support nested types
             int count = type.Split(new[] { "[[" }, StringSplitOptions.None).Length - 1;
 
             string preparedType = type;
 
             for (int i = 0; i < count; i++)
-            {
                 preparedType = Regex.Replace(preparedType, @"\[(.+?), Version=.+?\]", "[$1]");
-            }
-
-            //Handle non generic types
-            if (preparedType.Contains("PublicKeyToken"))
+            
+            // Handle non generic types
+            if (preparedType.Contains("PublicKeyToken", StringComparison.OrdinalIgnoreCase))
                 preparedType = Regex.Replace(preparedType, @"(.+?), Version=.+?$", "$1");
-
-            // TODO: For WinRT this is most likely broken!
-            preparedType = preparedType.Replace(", MonoGame.Framework.Graphics", string.Format(", {0}", _assemblyName));
-            preparedType = preparedType.Replace(", MonoGame.Framework.Video", string.Format(", {0}", _assemblyName));
-            preparedType = preparedType.Replace(", MonoGame.Framework", string.Format(", {0}", _assemblyName));
 
             return preparedType;
         }
 
-        // Static map of type names to creation functions. Required as iOS requires all types at compile time
-        private static Dictionary<string, Func<ContentTypeReader>> typeCreators = new Dictionary<string, Func<ContentTypeReader>>();
-
         /// <summary>
-        /// Adds the type creator.
+        /// Adds a reader factory.
         /// </summary>
         /// <param name='typeString'>Type string.</param>
-        /// <param name='createFunction'>Create function.</param>
-        public static void AddTypeCreator(string typeString, Func<ContentTypeReader> createFunction)
+        /// <param name='factory'>Create function.</param>
+        public static void AddReaderFactory(string typeString, Func<ContentTypeReader> factory)
         {
-            if (!typeCreators.ContainsKey(typeString))
-                typeCreators.Add(typeString, createFunction);
+            if (!ReaderFactories.ContainsKey(typeString))
+                ReaderFactories.Add(typeString, factory);
         }
 
-        public static void ClearTypeCreators()
+        public static void ClearReaderFactories()
         {
-            typeCreators.Clear();
+            ReaderFactories.Clear();
         }
 
     }

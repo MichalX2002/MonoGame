@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Codecs\Encoding\StbImageEncoderBase.CustomDeflate.cs" />
+    <Compile Remove="Coders\Encoding\StbImageEncoderBase.CustomDeflate.cs" />
     <Compile Remove="ColorEncoding.cs" />
     <Compile Remove="Pixels\PixelRowProvider old.cs" />
     <Compile Remove="Utilities\BufferPixelProvider.Expressions.cs" />

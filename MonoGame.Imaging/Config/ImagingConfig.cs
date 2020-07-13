@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using MonoGame.Imaging.Codecs.Decoding;
-using MonoGame.Imaging.Codecs.Encoding;
-using MonoGame.Imaging.Codecs.Formats.Bmp;
-using MonoGame.Imaging.Codecs.Formats.Jpeg;
-using MonoGame.Imaging.Codecs.Formats.Png;
-using MonoGame.Imaging.Codecs.Formats.Tga;
+using MonoGame.Imaging.Coders.Decoding;
+using MonoGame.Imaging.Coders.Encoding;
+using MonoGame.Imaging.Coders.Formats.Bmp;
+using MonoGame.Imaging.Coders.Formats.Jpeg;
+using MonoGame.Imaging.Coders.Formats.Png;
+using MonoGame.Imaging.Coders.Formats.Tga;
 using MonoGame.Imaging.Config;
 
 namespace MonoGame.Imaging
@@ -24,12 +24,12 @@ namespace MonoGame.Imaging
         {
             _modules = new Dictionary<Type, object>();
 
-            var decoders = new ImageCodecProvider<IImageDecoder>();
+            var decoders = new ImageCoderProvider<IImageDecoder>();
             decoders.TryAdd(ImageFormat.Bmp, new BmpImageDecoder());
             decoders.TryAdd(ImageFormat.Png, new PngImageDecoder());
             decoders.TryAdd(ImageFormat.Jpeg, new JpegImageDecoder());
 
-            var encoders = new ImageCodecProvider<IImageEncoder>();
+            var encoders = new ImageCoderProvider<IImageEncoder>();
             encoders.TryAdd(ImageFormat.Bmp, new BmpImageEncoder());
             encoders.TryAdd(ImageFormat.Png, new PngImageEncoder());
             encoders.TryAdd(ImageFormat.Jpeg, new JpegImageEncoder());

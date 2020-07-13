@@ -36,7 +36,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets info about the pixel type of the image.
         /// </summary>
-        public VectorTypeInfo PixelType { get; }
+        public VectorType PixelType { get; }
 
         public abstract int ByteStride { get; }
 
@@ -52,7 +52,7 @@ namespace MonoGame.Imaging
             SetupReflection();
         }
 
-        protected Image(VectorTypeInfo pixelType, Size size)
+        protected Image(VectorType pixelType, Size size)
         {
             PixelType = pixelType ?? throw new ArgumentNullException(nameof(pixelType));
 
@@ -65,7 +65,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Creates an empty image with the given size and pixel type.
         /// </summary>
-        public static Image Create(VectorTypeInfo pixelType, Size size)
+        public static Image Create(VectorType pixelType, Size size)
         {
             var createDelegate = GetCreateDelegate(pixelType);
             return createDelegate.Invoke(size, zeroFill: true);
@@ -74,7 +74,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Creates an empty image with the given size and pixel type.
         /// </summary>
-        public static Image Create(VectorTypeInfo pixelType, int width, int height)
+        public static Image Create(VectorType pixelType, int width, int height)
         {
             return Create(pixelType, new Size(width, height));
         }
@@ -83,7 +83,7 @@ namespace MonoGame.Imaging
         /// Creates an image with the given size and pixel type
         /// without clearing the allocated memory.
         /// </summary>
-        public static Image CreateUninitialized(VectorTypeInfo pixelType, Size size)
+        public static Image CreateUninitialized(VectorType pixelType, Size size)
         {
             var createDelegate = GetCreateDelegate(pixelType);
             return createDelegate.Invoke(size, zeroFill: false);
@@ -93,7 +93,7 @@ namespace MonoGame.Imaging
         /// Creates an image with the given size and pixel type
         /// without clearing the allocated memory.
         /// </summary>
-        public static Image CreateUninitialized(VectorTypeInfo pixelType, int width, int height)
+        public static Image CreateUninitialized(VectorType pixelType, int width, int height)
         {
             return CreateUninitialized(pixelType, new Size(width, height));
         }

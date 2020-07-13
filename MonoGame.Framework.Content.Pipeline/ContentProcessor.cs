@@ -46,9 +46,9 @@ namespace MonoGame.Framework.Content.Pipeline
         object IContentProcessor.Process(object input, ContentProcessorContext context)
         {
             if (input == null)
-                throw new ArgumentNullException("input");
+                throw new ArgumentNullException(nameof(input));
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             if (!(input is TInput))
                 throw new InvalidOperationException("input is not of the expected type");
             return Process((TInput)input, context);

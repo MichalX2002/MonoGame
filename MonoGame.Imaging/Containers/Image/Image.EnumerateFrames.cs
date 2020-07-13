@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using MonoGame.Imaging.Codecs.Decoding;
+using MonoGame.Imaging.Coders.Decoding;
 
 namespace MonoGame.Imaging
 {

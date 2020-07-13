@@ -16,9 +16,9 @@ namespace MonoGame.Framework.Content.Pipeline
         public override NodeContent Import(string filename, ContentImporterContext context)
         {
             if (filename == null)
-                throw new ArgumentNullException("filename");
+                throw new ArgumentNullException(nameof(filename));
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
 
             var importer = new OpenAssetImporter("FbxImporter", true);
             return importer.Import(filename, context);

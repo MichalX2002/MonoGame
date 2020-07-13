@@ -70,6 +70,15 @@ namespace MonoGame.Framework.Vectors
             Components = (VectorComponent[])components.Clone();
         }
 
+        /// <summary>
+        /// Constructs the <see cref="VectorComponentInfo"/> with one component definition.
+        /// </summary>
+        /// <param name="component">The vector component.</param>
+        public VectorComponentInfo(VectorComponent component)
+        {
+            Components = new[] { component };
+        }
+
         public bool HasComponentType(VectorComponentChannel componentType)
         {
             foreach (var component in Components.Span)
@@ -80,28 +89,33 @@ namespace MonoGame.Framework.Vectors
 
         public bool Equals(VectorComponentInfo other)
         {
-            return Components.Span.SequenceEqual(other.Components.Span);
+            return this == other;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is VectorComponentInfo info && Equals(info);
         }
 
         public override int GetHashCode()
         {
-            HashCode code = default;
+            var code = new HashCode();
             foreach (var comp in Components.Span)
                 code.Add(comp);
             return code.ToHashCode();
         }
 
-        public static bool operator ==(VectorComponentInfo a, VectorComponentInfo b)
+        public override string ToString()
         {
-            return a.Equals(b);
+
         }
 
-        public static bool operator !=(VectorComponentInfo a, VectorComponentInfo b)
+        public static bool operator ==(in VectorComponentInfo a, in VectorComponentInfo b)
+        {
+            return a.Components.Span.SequenceEqual(b.Components.Span);
+        }
+
+        public static bool operator !=(in VectorComponentInfo a, in VectorComponentInfo b)
         {
             return !(a == b);
         }

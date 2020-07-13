@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace MonoGame.Framework.Vectors
@@ -26,7 +25,7 @@ namespace MonoGame.Framework.Vectors
                 VectorComponentType.Float32 => sizeof(float),
                 VectorComponentType.Float64 => sizeof(double),
 
-                _ => throw new InvalidOperationException(),
+                _ => throw new ArgumentOutOfRangeException(nameof(type)),
             };
         }
     }

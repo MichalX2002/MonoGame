@@ -1,26 +1,29 @@
-﻿using System;
+﻿// Copied from .NET Foundation (and Modified)
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MonoGame.Framework.Collections
 {
-    public partial class LongDictionary<TKey, TValue>
+    public partial class LongDictionary<TKey, TValue> where TKey : notnull
     {
         [DebuggerDisplay("Count = {Count}")]
-        public sealed class KeyCollection : IReadOnlyCollection<TKey>, IEnumerable<TKey>
+        public sealed class KeyCollection : ICollection<TKey>, ICollection, IReadOnlyCollection<TKey>
         {
             private readonly LongDictionary<TKey, TValue> _dictionary;
-
-            public bool IsReadOnly => true;
-            public int Count => _dictionary.Count;
 
             public KeyCollection(LongDictionary<TKey, TValue> dictionary)
             {
                 _dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
             }
 
-            public bool Contains(TKey item) => _dictionary.ContainsKey(item);
+            public Enumerator GetEnumerator()
+            {
+                return new Enumerator(_dictionary);
+            }
 
             public void CopyTo(TKey[] array, int index)
             {
@@ -31,76 +34,155 @@ namespace MonoGame.Framework.Collections
                     throw new ArgumentOutOfRangeException(nameof(index));
 
                 if (array.Length - index < _dictionary.Count)
-                    throw new ArgumentException(nameof(array), ArrayTooSmallException);
+                    throw CollectionExceptions.Argument_ArrayPlusOffTooSmall();
 
-                for (int i = 0; i < _dictionary.count; i++)
+                int count = _dictionary._count;
+                Entry[]? entries = _dictionary._entries;
+                for (int i = 0; i < count; i++)
                 {
-                    if (_dictionary.entries[i]._hashCode >= 0)
-                        array[index++] = _dictionary.entries[i]._key;
+                    if (entries![i].Next >= -1)
+                        array[index++] = entries[i].Key;
                 }
             }
 
-            public Enumerator GetEnumerator() => new Enumerator(_dictionary);
-            IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator() => GetEnumerator();
-            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+            public int Count => _dictionary.Count;
 
-            public struct Enumerator : IEnumerator<TKey>
+            bool ICollection<TKey>.IsReadOnly => true;
+
+            void ICollection<TKey>.Add(TKey item)
             {
-                private readonly LongDictionary<TKey, TValue> _dictionary;
-                private readonly int _version;
-                private int _index;
+                throw CollectionExceptions.NotSupported_KeyCollectionSet();
+            }
 
-                public TKey Current { get; private set; }
-                object IEnumerator.Current
+            void ICollection<TKey>.Clear()
+            {
+                throw CollectionExceptions.NotSupported_KeyCollectionSet();
+            }
+
+            bool ICollection<TKey>.Contains(TKey item)
+            {
+                return _dictionary.ContainsKey(item);
+            }
+
+            bool ICollection<TKey>.Remove(TKey item)
+            {
+                throw CollectionExceptions.NotSupported_KeyCollectionSet();
+            }
+
+            IEnumerator<TKey> IEnumerable<TKey>.GetEnumerator()
+            {
+                return new Enumerator(_dictionary);
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return new Enumerator(_dictionary);
+            }
+
+            void ICollection.CopyTo(Array array, int index)
+            {
+                if (array == null)
+                    throw new ArgumentNullException(nameof(array));
+
+                if (array.Rank != 1)
+                    throw CollectionExceptions.Argument_MultiDimArrayNotSupported(nameof(array));
+
+                if (array.GetLowerBound(0) != 0)
+                    throw CollectionExceptions.Argument_NonZeroLowerBound(nameof(array));
+
+                if ((uint)index > (uint)array.Length)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+
+                if (array.Length - index < _dictionary.Count)
+                    throw CollectionExceptions.Argument_ArrayPlusOffTooSmall();
+
+                if (array is TKey[] keys)
                 {
-                    get
+                    CopyTo(keys, index);
+                }
+                else
+                {
+                    if (!(array is object[] objects))
+                        throw CollectionExceptions.Argument_InvalidArrayType(nameof(array));
+
+                    int count = _dictionary._count;
+                    Entry[]? entries = _dictionary._entries;
+                    try
                     {
-                        if (_index == 0 || (_index == _dictionary.count + 1))
-                            throw new InvalidOperationException();
-                        return Current;
+                        for (int i = 0; i < count; i++)
+                        {
+                            if (entries![i].Next >= -1)
+                                objects[index++] = entries[i].Key;
+                        }
+                    }
+                    catch (ArrayTypeMismatchException)
+                    {
+                        throw CollectionExceptions.Argument_InvalidArrayType(nameof(array));
                     }
                 }
+            }
+
+            bool ICollection.IsSynchronized => false;
+
+            object ICollection.SyncRoot => ((ICollection)_dictionary).SyncRoot;
+
+            public struct Enumerator : IEnumerator<TKey>, IEnumerator
+            {
+                private readonly LongDictionary<TKey, TValue> _dictionary;
+                private int _index;
+                private readonly int _version;
+                [AllowNull, MaybeNull] private TKey _currentKey;
 
                 internal Enumerator(LongDictionary<TKey, TValue> dictionary)
                 {
                     _dictionary = dictionary;
-                    _version = dictionary.version;
+                    _version = dictionary._version;
                     _index = 0;
-                    Current = default;
+                    _currentKey = default;
                 }
+
+                public void Dispose() { }
 
                 public bool MoveNext()
                 {
-                    if (_version != _dictionary.version)
-                        throw new InvalidOperationException(VersionChangedException);
+                    if (_version != _dictionary._version)
+                        throw CollectionExceptions.InvalidOperation_EnumerationFailedVersion();
 
-                    while ((uint)_index < (uint)_dictionary.count)
+                    while ((uint)_index < (uint)_dictionary._count)
                     {
-                        if (_dictionary.entries[_index]._hashCode >= 0)
+                        ref Entry entry = ref _dictionary._entries![_index++];
+                        if (entry.Next >= -1)
                         {
-                            Current = _dictionary.entries[_index]._key;
-                            _index++;
+                            _currentKey = entry.Key;
                             return true;
                         }
-                        _index++;
                     }
 
-                    _index = _dictionary.count + 1;
-                    Current = default;
+                    _index = _dictionary._count + 1;
+                    _currentKey = default;
                     return false;
+                }
+
+                public TKey Current => _currentKey!;
+
+                object? IEnumerator.Current
+                {
+                    get
+                    {
+                        if (_index == 0 || (_index == _dictionary._count + 1))
+                            throw CollectionExceptions.InvalidOperation_EnumerationCantHappen();
+
+                        return _currentKey;
+                    }
                 }
 
                 void IEnumerator.Reset()
                 {
-                    if (_version != _dictionary.version)
-                        throw new InvalidOperationException(VersionChangedException);
+                    if (_version != _dictionary._version)
+                        throw CollectionExceptions.InvalidOperation_EnumerationFailedVersion();
 
                     _index = 0;
-                    Current = default;
-                }
-
-                public void Dispose()
-                {
+                    _currentKey = default;
                 }
             }
         }

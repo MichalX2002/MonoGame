@@ -25,7 +25,7 @@ namespace MonoGame.Framework
 
         private ContentManager _content;
 
-        private readonly object _locker = new object();
+        private object Locker { get; } = new object();
 
         internal GamePlatform Platform { get; }
 
@@ -146,7 +146,7 @@ namespace MonoGame.Framework
                         Platform.Dispose();
                     }
 
-                    ContentTypeReaderManager.ClearTypeCreators();
+                    ContentTypeReaderManager.ClearReaderFactories();
 
                     SoundEffect.PlatformShutdown();
                 }
@@ -293,7 +293,7 @@ namespace MonoGame.Framework
             ResetGameTimer();
             Time.ElapsedGameTime = TimeSpan.Zero;
             _accumulatedElapsedTicks = 0;
-            _previousTicks = 00;
+            _previousTicks = 0;
         }
 
         public void SuppressDraw()
@@ -412,7 +412,7 @@ namespace MonoGame.Framework
             {
                 // Sleep for as long as possible without overshooting the update time.
                 long sleepTicks = _targetElapsedTicks - _accumulatedElapsedTicks;
-                
+
                 // Check if the sleep time is more than 1 millisecond.
                 if (sleepTicks >= Stopwatch.Frequency / 1000)
                 {
@@ -423,8 +423,8 @@ namespace MonoGame.Framework
                         case PlatformInfo.OperatingSystem.Windows:
                             if (PlatformInfo.Platform == MonoGamePlatform.WindowsUniversal)
                             {
-                                lock (_locker)
-                                    Monitor.Wait(_locker, sleepTime);
+                                lock (Locker)
+                                    Monitor.Wait(Locker, sleepTime);
                             }
                             else
                             {

@@ -59,7 +59,7 @@ namespace MonoGame.Imaging.Pixels
             throw new NotImplementedException();
         }
 
-        public static VectorTypeInfo GetTypeByComp(int components, int depth)
+        public static VectorType GetTypeByComp(int components, int depth)
         {
             Exception GetDepthException() => new ArgumentOutOfRangeException(nameof(depth));
 
@@ -67,22 +67,22 @@ namespace MonoGame.Imaging.Pixels
             {
                 case 1:
                     if (depth == 8)
-                        return VectorTypeInfo.Get<Alpha8>();
+                        return VectorType.Get<Alpha8>();
                     throw GetDepthException();
 
                 case 2:
                     if (depth == 8)
-                        return VectorTypeInfo.Get<GrayAlpha16>();
+                        return VectorType.Get<GrayAlpha16>();
                     throw GetDepthException();
 
                 case 3:
                     if (depth == 8)
-                        return VectorTypeInfo.Get<Rgb24>();
+                        return VectorType.Get<Rgb24>();
                     throw GetDepthException();
 
                 case 4:
                     if (depth == 8)
-                        return VectorTypeInfo.Get<Color>();
+                        return VectorType.Get<Color>();
                     throw GetDepthException();
             }
             throw new ArgumentOutOfRangeException(nameof(components));

@@ -131,7 +131,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public VertexChannel<TargetType> ConvertChannelContent<TargetType>(int index)
         {
             if (index < 0 || index >= channels.Count)
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
 
             // Get the channel at that index
             var channel = this[index];
@@ -178,7 +178,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public VertexChannel<T> Get<T>(int index)
         {
             if (index < 0 || index >= channels.Count)
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             var channel = this[index];
             // Make sure the channel type is as expected
             if (channel.ElementType != typeof(T))
@@ -217,7 +217,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public int IndexOf(string name)
         {
             if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             return channels.FindIndex((v) => v.Name == name);
         }
 
@@ -229,7 +229,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public int IndexOf(VertexChannel item)
         {
             if (item == null)
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             return channels.IndexOf(item);
         }
 

@@ -5,18 +5,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace MonoGame.Framework.Graphics
 {
     public partial class SpriteFont : IEnumerable<KeyValuePair<Rune, int>>
     {
-        internal const string UnresolvableCharacters =
-            "Text contains characters that cannot be resolved by this font.";
-
-        internal const string UnresolvableCharacter =
-            "Character cannot be resolved by this font.";
-
         private Dictionary<Rune, int> _glyphIndexMap;
         private Glyph[] _glyphs;
         private Rune? _defaultCharacter;
@@ -28,14 +23,9 @@ namespace MonoGame.Framework.Graphics
         public Dictionary<Rune, int>.KeyCollection Characters => _glyphIndexMap.Keys;
 
         /// <summary>
-        /// Gets a collectioon of the glyph indicies in the font.
+        /// Gets a collection of the glyph indicies in the font.
         /// </summary>
         public Dictionary<Rune, int>.ValueCollection GlyphIndices => _glyphIndexMap.Values;
-
-        /// <summary>
-        /// Gets all the glyphs in the font.
-        /// </summary>
-        public ReadOnlySpan<Glyph> Glyphs => _glyphs.AsSpan();
 
         /// <summary>
         /// Gets the texture that the font draws from.
@@ -70,7 +60,7 @@ namespace MonoGame.Framework.Graphics
                 if (value.HasValue)
                 {
                     if (!TryGetGlyphIndex(value.Value, out _defaultGlyphIndex))
-                        throw new ArgumentException(UnresolvableCharacter);
+                        throw new ArgumentException("Character cannot be resolved by this font.");
                 }
                 else
                 {
@@ -113,6 +103,10 @@ namespace MonoGame.Framework.Graphics
             Rune? defaultCharacter)
         {
             // TODO: better argument validation
+            if (glyphBounds == null) throw new ArgumentNullException(nameof(glyphBounds));
+            if (cropping == null) throw new ArgumentNullException(nameof(cropping));
+            if (characters == null) throw new ArgumentNullException(nameof(characters));
+            if (kerning == null) throw new ArgumentNullException(nameof(kerning));
 
             Texture = texture ?? throw new ArgumentNullException(nameof(texture));
             LineSpacing = lineSpacing;
@@ -139,6 +133,11 @@ namespace MonoGame.Framework.Graphics
         public ReadOnlyMemory<Glyph> GetGlyphs()
         {
             return _glyphs.AsMemory();
+        }
+
+        public ReadOnlySpan<Glyph> GetGlyphSpan()
+        {
+            return _glyphs.AsSpan();
         }
 
         /// <summary>
@@ -210,7 +209,8 @@ namespace MonoGame.Framework.Graphics
                 return index;
 
             if (_defaultGlyphIndex == -1)
-                throw new KeyNotFoundException(UnresolvableCharacters);
+                throw new KeyNotFoundException(
+                    "Character cannot be resolved and no default glyph has been assigned to this font. Key: " + rune);
 
             return _defaultGlyphIndex;
         }

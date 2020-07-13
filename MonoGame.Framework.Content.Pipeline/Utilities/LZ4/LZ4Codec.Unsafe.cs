@@ -158,7 +158,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 		{
 			if (inputLength < 0) inputLength = input.Length - inputOffset;
 
-			if (input == null) throw new ArgumentNullException("input");
+			if (input == null) throw new ArgumentNullException(nameof(input));
 			if (inputOffset < 0 || inputOffset + inputLength > input.Length)
 				throw new ArgumentException("inputOffset and inputLength are invalid for given input");
 
@@ -251,7 +251,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 		{
 			if (inputLength < 0) inputLength = input.Length - inputOffset;
 
-			if (input == null) throw new ArgumentNullException("input");
+			if (input == null) throw new ArgumentNullException(nameof(input));
 			if (inputOffset < 0 || inputOffset + inputLength > input.Length)
 				throw new ArgumentException("inputOffset and inputLength are invalid for given input");
 
@@ -334,7 +334,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 		{
 			if (inputLength < 0) inputLength = input.Length - inputOffset;
 
-			if (input == null) throw new ArgumentNullException("input");
+			if (input == null) throw new ArgumentNullException(nameof(input));
 			if (inputOffset < 0 || inputOffset + inputLength > input.Length)
 				throw new ArgumentException("inputOffset and inputLength are invalid for given input");
 
@@ -427,7 +427,7 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities.LZ4
 		{
 			if (inputLength < 0) inputLength = input.Length - inputOffset;
 
-			if (input == null) throw new ArgumentNullException("input");
+			if (input == null) throw new ArgumentNullException(nameof(input));
 			if (inputOffset < 0 || inputOffset + inputLength > input.Length)
 				throw new ArgumentException("inputOffset and inputLength are invalid for given input");
 

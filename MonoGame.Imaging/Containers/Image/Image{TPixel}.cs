@@ -23,7 +23,7 @@ namespace MonoGame.Imaging
 
         #region Constructors
 
-        public Image(PixelBuffer buffer, Size size) : base(VectorTypeInfo.Get<TPixel>(), size)
+        public Image(PixelBuffer buffer, Size size) : base(VectorType.Get<TPixel>(), size)
         {
             if (buffer.IsEmpty)
                 throw new ArgumentEmptyException(nameof(buffer));
@@ -31,7 +31,7 @@ namespace MonoGame.Imaging
             _buffer = buffer;
         }
 
-        protected Image(Size size, bool zeroFill) : base(VectorTypeInfo.Get<TPixel>(), size)
+        protected Image(Size size, bool zeroFill) : base(VectorType.Get<TPixel>(), size)
         {
             var memory = new UnmanagedMemory<TPixel>(size.Width * size.Height, zeroFill);
             int byteStride = size.Width * PixelType.ElementSize;

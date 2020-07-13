@@ -99,26 +99,17 @@ namespace MonoGame.Framework.Vectors
 
         public void FromArgb(Argb32 source)
         {
-            L = LuminanceHelper.BT709.ToGray16(
-                ScalingHelper.ToUInt16(source.R),
-                ScalingHelper.ToUInt16(source.G),
-                ScalingHelper.ToUInt16(source.B));
+            L = ScalingHelper.ToUInt16(LuminanceHelper.BT709.ToGray8(source.R, source.G, source.B));
         }
 
         public void FromBgr(Bgr24 source)
         {
-            L = LuminanceHelper.BT709.ToGray16(
-                ScalingHelper.ToUInt16(source.R),
-                ScalingHelper.ToUInt16(source.G),
-                ScalingHelper.ToUInt16(source.B));
+            L = LuminanceHelper.BT709.ToGray8(source.R, source.G, source.B);
         }
 
         public void FromBgra(Bgra32 source)
         {
-            L = LuminanceHelper.BT709.ToGray16(
-                ScalingHelper.ToUInt16(source.R),
-                ScalingHelper.ToUInt16(source.G),
-                ScalingHelper.ToUInt16(source.B));
+            L = LuminanceHelper.BT709.ToGray8(source.R, source.G, source.B);
         }
 
         #region Equals
@@ -128,7 +119,7 @@ namespace MonoGame.Framework.Vectors
             return this == other;
         }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is Gray16 other && Equals(other);
         }

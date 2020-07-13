@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading;
 using MonoGame.Framework.Vectors;
-using MonoGame.Imaging.Codecs.Decoding;
+using MonoGame.Imaging.Coders.Decoding;
 
 namespace MonoGame.Imaging
 {
@@ -13,7 +13,7 @@ namespace MonoGame.Imaging
         public static Image? Load(
             IImagingConfig config,
             Stream stream,
-            VectorTypeInfo? preferredPixelType = null,
+            VectorType? preferredPixelType = null,
             DecoderOptions? decoderOptions = null,
             DecodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
@@ -35,7 +35,7 @@ namespace MonoGame.Imaging
 
         public static Image? Load(
             Stream stream,
-            VectorTypeInfo? preferredPixelType = null,
+            VectorType? preferredPixelType = null,
             DecoderOptions? decoderOptions = null,
             DecodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
@@ -57,7 +57,7 @@ namespace MonoGame.Imaging
             CancellationToken cancellationToken = default)
             where TPixel : unmanaged, IPixel
         {
-            var preferredType = VectorTypeInfo.Get<TPixel>();
+            var preferredType = VectorType.Get<TPixel>();
 
             var image = Load(
                 config, stream, preferredType, decoderOptions, onProgress, cancellationToken);

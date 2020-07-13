@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         protected internal override void Write(ContentWriter output, List<T> value)
         {
             if (value == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
 
             output.Write(value.Count);
             foreach (var element in value)

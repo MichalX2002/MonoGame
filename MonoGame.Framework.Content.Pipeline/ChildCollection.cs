@@ -27,7 +27,7 @@ namespace MonoGame.Framework.Content.Pipeline
         protected ChildCollection(TParent parent)
             : base()
         {
-            this.parent = parent ?? throw new ArgumentNullException("parent");
+            this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
         }
 
         /// <summary>

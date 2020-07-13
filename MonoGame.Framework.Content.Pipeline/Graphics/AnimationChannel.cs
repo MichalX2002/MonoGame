@@ -12,7 +12,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
     /// Provides methods and properties for maintaining an animation channel. 
     /// An animation channel is a collection of keyframes describing the movement of a single bone or rigid object.
     /// </summary>
-    public sealed class AnimationChannel : ICollection<AnimationKeyframe>, IEnumerable<AnimationKeyframe>, IEnumerable
+    public sealed class AnimationChannel : ICollection<AnimationKeyframe>, IEnumerable<AnimationKeyframe>
     {
         List<AnimationKeyframe> keyframes;
 

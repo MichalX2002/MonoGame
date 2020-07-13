@@ -59,7 +59,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public static string DecodeBaseName(string encodedName)
         {
             if (string.IsNullOrEmpty(encodedName))
-                throw new ArgumentNullException("encodedName");
+                throw new ArgumentNullException(nameof(encodedName));
             return encodedName.TrimEnd("0123456789".ToCharArray());
         }
 
@@ -71,7 +71,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public static int DecodeUsageIndex(string encodedName)
         {
             if (string.IsNullOrEmpty(encodedName))
-                throw new ArgumentNullException("encodedName");
+                throw new ArgumentNullException(nameof(encodedName));
             // Extract the base name
             string baseName = DecodeBaseName(encodedName);
             if (string.IsNullOrEmpty(baseName))
@@ -159,7 +159,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public static bool TryDecodeUsage(string encodedName, out VertexElementUsage usage)
         {
             if (string.IsNullOrEmpty(encodedName))
-                throw new ArgumentNullException("encodedName");
+                throw new ArgumentNullException(nameof(encodedName));
             // Extract the base name
             string baseName = DecodeBaseName(encodedName);
             if (string.IsNullOrEmpty(baseName))

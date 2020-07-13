@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.Vectors
 {
     /// <summary>
-    /// Packed vector type containing a 32-bit XYZ luminance.
+    /// Packed vector type containing a 32-bit floating-point XYZ luminance.
     /// <para>
     /// Ranges from [0, 0, 0, 1] to [1, 1, 1, 1] in vector form.
     /// </para>

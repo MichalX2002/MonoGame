@@ -36,7 +36,7 @@ namespace MonoGame.Framework.Content.Pipeline
         public ExternalReference(string filename)
         {
             if (string.IsNullOrEmpty(filename))
-                throw new ArgumentNullException("filename");
+                throw new ArgumentNullException(nameof(filename));
             Filename = filename;
         }
 
@@ -48,9 +48,9 @@ namespace MonoGame.Framework.Content.Pipeline
         public ExternalReference(string filename, ContentIdentity relativeToContent)
         {
             if (string.IsNullOrEmpty(filename))
-                throw new ArgumentNullException("filename");
+                throw new ArgumentNullException(nameof(filename));
             if (relativeToContent == null)
-                throw new ArgumentNullException("relativeToContent");
+                throw new ArgumentNullException(nameof(relativeToContent));
             if (string.IsNullOrEmpty(relativeToContent.SourceFilename))
                 throw new ArgumentNullException("relativeToContent.SourceFilename");
 

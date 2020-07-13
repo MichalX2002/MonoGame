@@ -21,17 +21,17 @@ namespace MonoGame.Imaging
         {
         }
         
-        public ImagingException(ImageFormat format)
+        public ImagingException(ImageFormat? format)
         {
             Format = format;
         }
 
-        public ImagingException(string message, ImageFormat format) : base(message)
+        public ImagingException(string message, ImageFormat? format) : base(message)
         {
             Format = format;
         }
 
-        public ImagingException(string message, Exception inner, ImageFormat format) : base(message, inner)
+        public ImagingException(string message, Exception inner, ImageFormat? format) : base(message, inner)
         {
             Format = format;
         }

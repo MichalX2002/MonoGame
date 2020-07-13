@@ -315,7 +315,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         {
             // We should always get a node to search!
             if (node == null)
-                throw new ArgumentNullException("node");
+                throw new ArgumentNullException(nameof(node));
 
             // Search up thru the hierarchy.
             for (; node != null; node = node.Parent)
@@ -359,7 +359,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public static IList<BoneContent> FlattenSkeleton(BoneContent skeleton)
         {
             if (skeleton == null)
-                throw new ArgumentNullException("skeleton");
+                throw new ArgumentNullException(nameof(skeleton));
 
             var results = new List<BoneContent>();
             var work = new Stack<NodeContent>(new[] { skeleton });
@@ -391,7 +391,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public static void MergeDuplicatePositions(MeshContent mesh, float tolerance)
         {
             if (mesh == null)
-                throw new ArgumentNullException("mesh");
+                throw new ArgumentNullException(nameof(mesh));
 
             // TODO Improve performance with spatial partitioning scheme
             var indexLists = new List<IndexUpdateList>();
@@ -426,7 +426,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public static void MergeDuplicateVertices(GeometryContent geometry)
         {
             if (geometry == null)
-                throw new ArgumentNullException("geometry");
+                throw new ArgumentNullException(nameof(geometry));
 
             var verts = geometry.Vertices;
             var hashMap = new Dictionary<int, List<VertexData>>();

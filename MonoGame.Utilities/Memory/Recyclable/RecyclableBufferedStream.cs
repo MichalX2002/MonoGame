@@ -4,19 +4,23 @@ using System.IO;
 namespace MonoGame.Framework.Memory
 {
     /// <summary>
-    /// Adds a buffering layer where the underlying buffer is a block with
-    /// fixed size from a <see cref="RecyclableMemoryManager"/>.
+    /// Adds a buffering layer where the underlying buffer is 
+    /// a fixed size block from a <see cref="RecyclableMemoryManager"/>.
     /// </summary>
     public sealed class RecyclableBufferedStream : Stream
     {
+        // TODO: IMPROVE (mostly with Span)
+
         #region Private Fields
 
         private RecyclableMemoryManager _manager;
         private Stream _stream;
         private bool _leaveOpen;
 
-        /// <summary>Shared buffer that's only allocated when needed.</summary>
-        private byte[] _buffer;
+        /// <summary>
+        /// Shared buffer that's only allocated when needed.
+        /// </summary>
+        private byte[]? _buffer;
 
         private int _readLength;
         private int _readPosition;
@@ -208,7 +212,8 @@ namespace MonoGame.Framework.Memory
 
         public override int Read(byte[] array, int offset, int count)
         {
-            if (array == null) throw new ArgumentNullException(nameof(array));
+            if (array == null)
+                throw new ArgumentNullException(nameof(array));
             ArgumentGuard.AssertAtLeastZero(offset, nameof(offset));
             ArgumentGuard.AssertAtLeastZero(count, nameof(count));
             AssertValidOffset(array.Length, offset, count);
@@ -420,11 +425,9 @@ namespace MonoGame.Framework.Memory
                 if (_buffer != null)
                     _manager?.ReturnBlock(_buffer);
                 _buffer = null;
-                _manager = null;
 
                 if (!_leaveOpen)
                     _stream?.Dispose();
-                _stream = null;
 
                 base.Dispose(disposing);
             }

@@ -57,7 +57,7 @@ namespace MonoGame.Framework.Memory
         /// </summary>
         /// <param name="tag">The tag associated with the event.</param>
         /// <param name="reason">Reason the buffer was discarded.</param>
-        public delegate void BufferDiscardedEventHandler(string tag, MemoryDiscardReason reason);
+        public delegate void BufferDiscardedEventHandler(string? tag, MemoryDiscardReason reason);
 
         /// <summary>
         /// Delegate for handling reports of stream size when streams are allocated
@@ -71,13 +71,13 @@ namespace MonoGame.Framework.Memory
         /// </summary>
         /// <param name="tag">The tag associated with the event.</param>
         /// <param name="callStack">The call stack of the allocation.</param>
-        public delegate void ImportantActionHandler(string tag, string callStack);
+        public delegate void ImportantActionHandler(string? tag, string? callStack);
 
         /// <summary>
         /// Delegate for handling actions that have an attached tag.
         /// </summary>
         /// <param name="tag">The tag associated with the event.</param>
-        public delegate void TaggedActionHandler(string tag);
+        public delegate void TaggedActionHandler(string? tag);
 
         /// <summary>
         /// Delegate for handling periodic reporting of memory use statistics.
@@ -97,22 +97,22 @@ namespace MonoGame.Framework.Memory
         public const bool DefaultUseExponentialBuffer = true;
 
         private static object DefaultInitMutex { get; } = new object();
-        private static RecyclableMemoryManager _defaultInstance;
+        private static RecyclableMemoryManager? _default;
 
         public static RecyclableMemoryManager Default
         {
             get
             {
-                if (_defaultInstance == null)
+                if (_default == null)
                 {
                     lock (DefaultInitMutex)
                     {
-                        if (_defaultInstance != null)
-                            return _defaultInstance;
-                        _defaultInstance = new RecyclableMemoryManager();
+                        if (_default != null)
+                            return _default;
+                        _default = new RecyclableMemoryManager();
                     }
                 }
-                return _defaultInstance;
+                return _default;
             }
         }
 
@@ -364,11 +364,11 @@ namespace MonoGame.Framework.Memory
 
             if (bufferMultiple <= 0)
                 throw new ArgumentOutOfRangeException(
-                    nameof(bufferMultiple), "Must be a positive number");
+                    nameof(bufferMultiple), bufferMultiple, "Must be a positive number");
 
             if (maximumBufferSize < blockSize)
                 throw new ArgumentOutOfRangeException(
-                    nameof(maximumBufferSize), "Must be at least blockSize.");
+                    nameof(maximumBufferSize), maximumBufferSize, "Must be at least blockSize.");
 
             BlockSize = blockSize;
             BufferMultiple = bufferMultiple;
@@ -405,7 +405,7 @@ namespace MonoGame.Framework.Memory
         /// <returns>A byte[] array</returns>
         public byte[] GetBlock()
         {
-            if (!_blockPool.TryPop(out byte[] block))
+            if (!_blockPool.TryPop(out var block))
             {
                 // We'll add this back to the pool when the stream is disposed
                 // (unless our free pool is too large)
@@ -413,8 +413,9 @@ namespace MonoGame.Framework.Memory
                 ReportBlockCreated();
             }
             else
+            {
                 Interlocked.Add(ref _blockPoolFreeSize, -BlockSize);
-
+            }
             Interlocked.Add(ref _blockPoolInUseSize, BlockSize);
             return block;
         }
@@ -426,12 +427,12 @@ namespace MonoGame.Framework.Memory
         /// <param name="minimumLength">The minimum length of the buffer</param>
         /// <param name="tag">The tag of the stream returning this buffer, for logging if necessary.</param>
         /// <returns>A buffer of at least the minimum size.</returns>
-        public RecyclableBuffer GetBuffer(long minimumLength, string tag)
+        public RecyclableBuffer GetBuffer(long minimumLength, string? tag = null)
         {
             int roundedLength = RoundToBufferSize(minimumLength);
             int poolIndex = GetPoolIndex(roundedLength);
 
-            byte[] buffer;
+            byte[]? buffer;
             if (poolIndex < _bufferPools.Length)
             {
                 if (!_bufferPools[poolIndex].TryPop(out buffer))
@@ -469,7 +470,7 @@ namespace MonoGame.Framework.Memory
         /// buffer.Length is not a multiple/exponential of <see cref="BufferMultiple"/> 
         /// (it did not originate from this pool).
         /// </exception>
-        public void ReturnBuffer(byte[] buffer, string tag = null)
+        public void ReturnBuffer(byte[] buffer, string? tag = null)
         {
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
@@ -511,7 +512,7 @@ namespace MonoGame.Framework.Memory
         /// <param name="tag">The tag of the object returning these blocks, for logging if necessary.</param>
         /// <exception cref="ArgumentNullException">blocks is null.</exception>
         /// <exception cref="ArgumentException">blocks contains buffers that are the wrong size (or null) for this memory manager.</exception>
-        public void ReturnBlocks(ICollection<byte[]> blocks, string tag)
+        public void ReturnBlocks(ICollection<byte[]> blocks, string? tag = null)
         {
             if (blocks == null)
                 throw new ArgumentNullException(nameof(blocks));
@@ -566,7 +567,7 @@ namespace MonoGame.Framework.Memory
         /// <param name="block">The block to return to the pool.</param>
         /// <exception cref="ArgumentNullException">block is null.</exception>
         /// <exception cref="ArgumentException">block is the wrong size for this memory manager.</exception>
-        public void ReturnBlock(byte[] block, string tag = null)
+        public void ReturnBlock(byte[] block, string? tag = null)
         {
             if (block == null)
                 throw new ArgumentNullException(nameof(block));
@@ -595,7 +596,7 @@ namespace MonoGame.Framework.Memory
         #region Helpers
 
         [DebuggerHidden]
-        private string GetCallStack()
+        private string? GetCallStack()
         {
             if (GenerateCallStacks)
                 return Environment.StackTrace;
@@ -648,15 +649,15 @@ namespace MonoGame.Framework.Memory
         internal void ReportStreamDisposed() => StreamDisposed?.Invoke();
         internal void ReportStreamFinalized() => StreamFinalized?.Invoke();
 
-        internal void ReportBlockDiscarded(string tag) => BlockDiscarded?.Invoke(tag);
+        internal void ReportBlockDiscarded(string? tag) => BlockDiscarded?.Invoke(tag);
 
         // also grab the stack, we want to know who requires such large buffers
-        internal void ReportBufferCreated(string tag) => BufferCreated?.Invoke(tag, GetCallStack());
-        internal void ReportStreamToArray(string tag) => StreamConvertedToArray?.Invoke(tag, GetCallStack());
+        internal void ReportBufferCreated(string? tag) => BufferCreated?.Invoke(tag, GetCallStack());
+        internal void ReportStreamToArray(string? tag) => StreamConvertedToArray?.Invoke(tag, GetCallStack());
 
         internal void ReportStreamLength(long bytes) => StreamLength?.Invoke(bytes);
 
-        internal void ReportBufferDiscarded(string tag, MemoryDiscardReason reason)
+        internal void ReportBufferDiscarded(string? tag, MemoryDiscardReason reason)
         {
             BufferDiscarded?.Invoke(tag, reason);
         }
@@ -700,7 +701,7 @@ namespace MonoGame.Framework.Memory
         /// </summary>
         /// <param name="tag">A tag which can be used to track the source of the stream.</param>
         /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream(string tag)
+        public RecyclableMemoryStream GetMemoryStream(string? tag)
         {
             return new RecyclableMemoryStream(this, tag);
         }
@@ -722,7 +723,7 @@ namespace MonoGame.Framework.Memory
         /// <param name="tag">A tag which can be used to track the source of the stream.</param>
         /// <param name="minimumSize">The minimum desired capacity for the stream.</param>
         /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream(string tag, long minimumSize)
+        public RecyclableMemoryStream GetMemoryStream(string? tag, long minimumSize)
         {
             return new RecyclableMemoryStream(this, tag, minimumSize);
         }
@@ -739,12 +740,12 @@ namespace MonoGame.Framework.Memory
         /// <param name="minimumSize">The minimum desired capacity for the stream.</param>
         /// <param name="asContiguousBuffer">Whether to attempt to use a single contiguous buffer.</param>
         /// <returns>A MemoryStream.</returns>
-        public RecyclableMemoryStream GetMemoryStream(string tag, long minimumSize, bool asContiguousBuffer)
+        public RecyclableMemoryStream GetMemoryStream(string? tag, long minimumSize, bool asContiguousBuffer)
         {
             if (!asContiguousBuffer || minimumSize <= BlockSize)
                 return GetMemoryStream(tag, minimumSize);
 
-            return new RecyclableMemoryStream(this, minimumSize, tag, GetBuffer(minimumSize, tag));
+            return new RecyclableMemoryStream(this, minimumSize, Guid.Empty, tag, GetBuffer(minimumSize, tag));
         }
 
         /// <summary>
@@ -754,9 +755,9 @@ namespace MonoGame.Framework.Memory
         /// <remarks>The new stream's position is set to the beginning of the stream when returned.</remarks>
         /// <param name="tag">A tag which can be used to track the source of the stream.</param>
         /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream(string tag, ReadOnlySpan<byte> data)
+        public RecyclableMemoryStream GetMemoryStream(ReadOnlySpan<byte> data, string? tag = null)
         {
-            RecyclableMemoryStream stream = null;
+            RecyclableMemoryStream? stream = null;
             try
             {
                 stream = new RecyclableMemoryStream(this, tag, data.Length);
@@ -779,10 +780,11 @@ namespace MonoGame.Framework.Memory
         /// <param name="buffer">The byte buffer to copy data from.</param>
         /// <param name="offset">The offset from the start of the buffer to copy from.</param>
         /// <param name="count">The number of bytes to copy from the buffer.</param>
+        /// <param name="tag">A tag which can be used to track the source of the stream.</param>
         /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream(string tag, byte[] buffer, int offset, int count)
+        public RecyclableMemoryStream GetMemoryStream(byte[] buffer, int offset, int count, string? tag = null)
         {
-            return GetMemoryStream(tag, buffer.AsSpan(offset, count));
+            return GetMemoryStream(buffer.AsSpan(offset, count), tag);
         }
 
         /// <summary>
@@ -790,12 +792,12 @@ namespace MonoGame.Framework.Memory
         /// tag and with contents copied from the provided <see cref="Stream"/>.
         /// </summary>
         /// <remarks>The new stream's position is set to the beginning of the stream when returned.</remarks>
-        /// <param name="tag">A tag which can be used to track the source of the stream.</param>
         /// <param name="stream">The stream to read the data from.</param>
+        /// <param name="tag">A tag which can be used to track the source of the stream.</param>
         /// <returns>The <see cref="RecyclableMemoryStream"/>.</returns>
-        public RecyclableMemoryStream GetMemoryStream(string tag, Stream stream)
+        public RecyclableMemoryStream GetMemoryStream(Stream stream, string? tag = null)
         {
-            RecyclableMemoryStream result = null;
+            RecyclableMemoryStream? result = null;
             try
             {
                 result = GetMemoryStream(tag);

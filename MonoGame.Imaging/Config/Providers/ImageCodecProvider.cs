@@ -2,34 +2,35 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using MonoGame.Imaging.Codecs;
+using System.Diagnostics.CodeAnalysis;
+using MonoGame.Imaging.Coders;
 
 namespace MonoGame.Imaging.Config
 {
-    public class ImageCodecProvider<TCodec> : IEnumerable<KeyValuePair<ImageFormat, TCodec>>
-        where TCodec : class, IImageCodec
+    public class ImageCoderProvider<TCoder> : IEnumerable<KeyValuePair<ImageFormat, TCoder>>
+        where TCoder : class, IImageCoder
     {
-        private ConcurrentDictionary<ImageFormat, TCodec> _codecs = new ConcurrentDictionary<ImageFormat, TCodec>();
+        private ConcurrentDictionary<ImageFormat, TCoder> _coders = new ConcurrentDictionary<ImageFormat, TCoder>();
 
-        public IEnumerable<ImageFormat> Keys => _codecs.Keys;
-        public IEnumerable<TCodec> Values => _codecs.Values;
+        public IEnumerable<ImageFormat> Keys => _coders.Keys;
+        public IEnumerable<TCoder> Values => _coders.Values;
 
-        public bool TryAdd(ImageFormat format, TCodec codec)
+        public bool TryAdd(ImageFormat format, TCoder coder)
         {
             if (format == null) throw new ArgumentNullException(nameof(format));
-            if (codec == null) throw new ArgumentNullException(nameof(codec));
+            if (coder == null) throw new ArgumentNullException(nameof(coder));
 
-            return _codecs.TryAdd(format, codec);
+            return _coders.TryAdd(format, coder);
         }
 
-        public bool TryGetCodec(ImageFormat format, out TCodec? codec)
+        public bool TryGetCoder(ImageFormat format, [MaybeNullWhen(false)] out TCoder? coder)
         {
-            return _codecs.TryGetValue(format, out codec);
+            return _coders.TryGetValue(format, out coder);
         }
 
-        public IEnumerator<KeyValuePair<ImageFormat, TCodec>> GetEnumerator()
+        public IEnumerator<KeyValuePair<ImageFormat, TCoder>> GetEnumerator()
         {
-            return _codecs.GetEnumerator();
+            return _coders.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -433,7 +433,7 @@ namespace MonoGame.TestingC
 
                     using (var fs = File.OpenRead(_directory + "/" + FileName))
                     {
-                        var pixelType = VectorTypeInfo.Get<Color>();
+                        var pixelType = VectorType.Get<Color>();
                         var image = Image.Load(fs, pixelType, DecoderOptions, null, cancellationToken);
                         PreviewImage = (Image<Color>)image;
                     }

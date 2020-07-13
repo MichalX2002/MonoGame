@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Imaging.Attributes.Format;
-using MonoGame.Imaging.Codecs;
+using MonoGame.Imaging.Coders;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging
@@ -67,12 +67,12 @@ namespace MonoGame.Imaging
                 throw new AnimationNotSupportedException(format);
         }
 
-        public static void AssertAnimationSupport(IImageCodec codec, ImagingConfig config)
+        public static void AssertAnimationSupport(IImageCoder coder, ImagingConfig config)
         {
-            AssertAnimationSupport(codec.Format, config);
+            AssertAnimationSupport(coder.Format, config);
 
-            if (!codec.HasAttribute<IAnimatedFormatAttribute>())
-                throw new AnimationNotImplementedException(codec);
+            if (!coder.HasAttribute<IAnimatedFormatAttribute>())
+                throw new AnimationNotImplementedException(coder);
         }
     }
 }

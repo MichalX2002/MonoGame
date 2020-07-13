@@ -213,7 +213,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public void RemoveAt(int index)
         {
             if (index < 0 || index >= VertexCount)
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
 
             PositionIndices.Items.RemoveAt(index);
 
@@ -229,9 +229,9 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public void RemoveRange(int index, int count)
         {
             if (index < 0 || index >= VertexCount)
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             if (count < 0 || (index+count) > VertexCount)
-                throw new ArgumentOutOfRangeException("count");
+                throw new ArgumentOutOfRangeException(nameof(count));
 
             PositionIndices.RemoveRange(index, count);
 

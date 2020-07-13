@@ -33,7 +33,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         protected internal override void Write(ContentWriter output, Array value)
         {
             if (value == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
 
             var rank = value.Rank;
 
@@ -68,7 +68,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             }
 
             if (index != 0)
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
         }
     }
 }

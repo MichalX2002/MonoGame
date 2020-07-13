@@ -91,7 +91,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                 // the type is WAV... else it is ok.
                 if ((audioFileType == AudioFileType.Wav || _fileType == AudioFileType.Wav) &&
                     audioFileType != _fileType)
-                    throw new ArgumentException("Incorrect file type!", "audioFileType");
+                    throw new ArgumentException("Incorrect file type!", nameof(audioFileType));
 
                 //// Only provide the data for WAV files.
                 //if (audioFileType == AudioFileType.Wav)

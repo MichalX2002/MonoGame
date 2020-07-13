@@ -8,27 +8,26 @@ namespace MonoGame.Framework.Collections
     [DebuggerDisplay("Count = {Count}")]
     public class ReadOnlySet<T> : IReadOnlySet<T>, ISet<T>
     {
-        private static ReadOnlySet<T> _empty;
+        private static ReadOnlySet<T>? _empty;
 
         public static ReadOnlySet<T> Empty
         {
             get
             {
                 if (_empty == null)
-                    // we don't care about threading as concurrency can only cause some extra allocs here
-                    _empty = new ReadOnlySet<T>(new HashSet<T>(0));
+                    // we don't care about threading; concurrency can only cause some extra allocs here
+                    _empty = new ReadOnlySet<T>(new HashSet<T>());
 
                 return _empty;
             }
         }
 
-        private readonly ISet<T> _set;
-        private readonly IReadOnlySet<T> _roSet;
-        private readonly IEqualityComparer<T> _comparer;
+        private readonly ISet<T>? _set;
+        private readonly IReadOnlySet<T>? _roSet;
 
         public bool IsReadOnly => true;
 
-        public int Count => _set != null ? _set.Count : _roSet.Count;
+        public int Count => _set != null ? _set.Count : _roSet!.Count;
 
         /// <summary>
         /// Constructs a <see cref="ReadOnlySet{T}"/> that uses an <see cref="ISet{T}"/> as it's backing store.
@@ -57,11 +56,9 @@ namespace MonoGame.Framework.Collections
         /// The comparer to use when comparing values in the set,
         /// or <see langword="null"/> to use <see cref="EqualityComparer{T}.Default"/>.
         /// </param>
-        public ReadOnlySet(IEnumerable<T> enumerable, IEqualityComparer<T> comparer)
+        public ReadOnlySet(IEnumerable<T> enumerable, IEqualityComparer<T>? comparer)
         {
-            _comparer = comparer ?? EqualityComparer<T>.Default;
-
-            _set = new HashSet<T>(enumerable, _comparer);
+            _set = new HashSet<T>(enumerable, comparer);
         }
 
         public ReadOnlySet(IEnumerable<T> enumerable) : this(enumerable, null)
@@ -70,52 +67,52 @@ namespace MonoGame.Framework.Collections
 
         public bool Contains(T item)
         {
-            return _set != null ? _set.Contains(item) : _roSet.Contains(item);
+            return _set != null ? _set.Contains(item) : _roSet!.Contains(item);
         }
 
         public bool IsProperSubsetOf(IEnumerable<T> other)
         {
-            return _set != null ? _set.IsProperSubsetOf(other) : _roSet.IsProperSubsetOf(other);
+            return _set != null ? _set.IsProperSubsetOf(other) : _roSet!.IsProperSubsetOf(other);
         }
 
         public bool IsProperSupersetOf(IEnumerable<T> other)
         {
-            return _set != null ? _set.IsProperSupersetOf(other) : _roSet.IsProperSupersetOf(other);
+            return _set != null ? _set.IsProperSupersetOf(other) : _roSet!.IsProperSupersetOf(other);
         }
 
         public bool IsSubsetOf(IEnumerable<T> other)
         {
-            return _set != null ? _set.IsSubsetOf(other) : _roSet.IsSubsetOf(other);
+            return _set != null ? _set.IsSubsetOf(other) : _roSet!.IsSubsetOf(other);
         }
 
         public bool IsSupersetOf(IEnumerable<T> other)
         {
-            return _set != null ? _set.IsSupersetOf(other) : _roSet.IsSupersetOf(other);
+            return _set != null ? _set.IsSupersetOf(other) : _roSet!.IsSupersetOf(other);
         }
 
         public bool Overlaps(IEnumerable<T> other)
         {
-            return _set != null ? _set.Overlaps(other) : _roSet.Overlaps(other);
+            return _set != null ? _set.Overlaps(other) : _roSet!.Overlaps(other);
         }
 
         public bool SetEquals(IEnumerable<T> other)
         {
-            return _set != null ? _set.SetEquals(other) : _roSet.SetEquals(other);
+            return _set != null ? _set.SetEquals(other) : _roSet!.SetEquals(other);
         }
 
         public Enumerator GetEnumerator()
         {
-            return _set != null ? new Enumerator(_set) : new Enumerator(_roSet);
+            return _set != null ? new Enumerator(_set) : new Enumerator(_roSet!);
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return _set != null ? _set.GetEnumerator() : _roSet.GetEnumerator();
+            return _set != null ? _set.GetEnumerator() : _roSet!.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _set != null ? _set.GetEnumerator() : _roSet.GetEnumerator();
+            return _set != null ? _set.GetEnumerator() : _roSet!.GetEnumerator();
         }
 
         #region ISet<T> (and ICollection<T>)
@@ -171,14 +168,14 @@ namespace MonoGame.Framework.Collections
         {
             private HashSet<T>.Enumerator _hashSetEnumerator;
             private IEnumerator<T> _genericEnumerator;
-            private IEnumerator _boxedCache;
+            private IEnumerator? _boxedCache;
 
             internal Enumerator(IEnumerable<T> enumerable)
             {
                 if (enumerable is HashSet<T> hashSet)
                 {
                     _hashSetEnumerator = hashSet.GetEnumerator();
-                    _genericEnumerator = null;
+                    _genericEnumerator = null!;
                 }
                 else
                 {
@@ -198,7 +195,7 @@ namespace MonoGame.Framework.Collections
                 }
             }
 
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
                 get
                 {

@@ -1,77 +1,65 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace MonoGame.Framework.Collections
 {
-    public partial class LongEqualityComparer<T>
+    public abstract partial class LongEqualityComparer<T> : EqualityComparer<T>, ILongEqualityComparer<T>
     {
-        public static ILongEqualityComparer<T> Default { get; } = CreateComparer();
+        public static new LongEqualityComparer<T> Default { get; } = 
+            (LongEqualityComparer<T>)CreateComparer();
 
-        private LongEqualityComparer()
+        public LongEqualityComparer()
         {
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Equals([AllowNull] T x, [AllowNull] T y) => EqualityComparer<T>.Default.Equals(x, y);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode([DisallowNull] T value) => EqualityComparer<T>.Default.GetHashCode(value);
+
+        public abstract long GetLongHashCode([DisallowNull] T value);
 
         private static ILongEqualityComparer<T> CreateComparer()
         {
-            Type type = typeof(T);
-            if (type == typeof(string))
+            if (typeof(T).GetGenericTypeDefinition() == typeof(Nullable<>))
             {
-                if (Environment.Is64BitProcess)
-                    return (ILongEqualityComparer<T>)new LongStringComparer64();
-                else
-                    return (ILongEqualityComparer<T>)new LongStringComparer32();
+                Type underlyingType = Nullable.GetUnderlyingType(typeof(T))!;
+                Type comparerType = typeof(LongNullableComparer<>).MakeGenericType(underlyingType);
+                return (LongEqualityComparer<T>)Activator.CreateInstance(comparerType)!;
             }
 
-            if (type == typeof(long))
+            if (typeof(T) == typeof(string))
+                // LongStringComparer is "randomized" by default
+                return (ILongEqualityComparer<T>)new LongStringComparer();
+
+            if (typeof(T) == typeof(long))
                 return (ILongEqualityComparer<T>)new LongInt64Comparer();
 
-            if (type == typeof(ulong))
+            if (typeof(T) == typeof(ulong))
                 return (ILongEqualityComparer<T>)new LongUInt64Comparer();
 
-            if (type == typeof(IntPtr))
+            if (typeof(T) == typeof(IntPtr))
                 return (ILongEqualityComparer<T>)new LongIntPtrComparer();
 
-            if (type == typeof(UIntPtr))
+            if (typeof(T) == typeof(UIntPtr))
                 return (ILongEqualityComparer<T>)new LongUIntPtrComparer();
 
-            if (type == typeof(double))
+            if (typeof(T) == typeof(double))
                 return (ILongEqualityComparer<T>)new LongDoubleComparer();
 
-            if (type == typeof(decimal))
+            if (typeof(T) == typeof(decimal))
                 return (ILongEqualityComparer<T>)new LongDecimalComparer();
 
-            if (typeof(ILongHashable).IsAssignableFrom(type))
+            if (typeof(ILongHashable).IsAssignableFrom(typeof(T)))
             {
-                // LongHashableComparer is a nested class and takes T,
-                // so we need to supply the generic type twice (for T and TLong)
-                Type comparerType = typeof(LongHashableComparer<>).MakeGenericType(type, type); 
-                return (ILongEqualityComparer<T>)Activator.CreateInstance(comparerType);
+                Type comparerType = typeof(LongHashableComparer<>).MakeGenericType(typeof(T));
+                return (LongEqualityComparer<T>)Activator.CreateInstance(comparerType)!;
             }
 
-            return new LongDefaultComparer();
-        }
-
-        private class LongHashableComparer<TLong> : ILongEqualityComparer<TLong>
-            where TLong : ILongHashable
-        {
-            private static readonly IEqualityComparer<TLong> _internalComparer = EqualityComparer<TLong>.Default;
-
-            public bool Equals(TLong x, TLong y) => _internalComparer.Equals(x, y);
-
-            public int GetHashCode(TLong value) => _internalComparer.GetHashCode(value);
-
-            public long GetLongHashCode(TLong value) => value.GetLongHashCode();
-        }
-
-        private class LongDefaultComparer : ILongEqualityComparer<T>
-        {
-            private static readonly IEqualityComparer<T> _internalComparer = EqualityComparer<T>.Default;
-
-            public bool Equals(T x, T y) => _internalComparer.Equals(x, y);
-
-            public int GetHashCode(T value) => _internalComparer.GetHashCode(value);
-
-            public long GetLongHashCode(T value) => _internalComparer.GetHashCode(value);
+            return new LongGenericComparer<T>();
         }
     }
 }

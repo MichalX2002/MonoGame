@@ -10,7 +10,7 @@ namespace MonoGame.Imaging
     public partial class Image
     {
         public static Image WrapMemory(
-            VectorTypeInfo pixelType, IMemory memory, Size size, bool leaveOpen = false, int? byteStride = null)
+            VectorType pixelType, IMemory memory, Size size, bool leaveOpen = false, int? byteStride = null)
         {
             var wrapDelegate = GetWrapMemoryDelegate(pixelType);
             return wrapDelegate.Invoke(memory, size, leaveOpen, byteStride);

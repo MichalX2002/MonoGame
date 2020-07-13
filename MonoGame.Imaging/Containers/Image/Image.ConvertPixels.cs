@@ -134,7 +134,7 @@ namespace MonoGame.Imaging
         }
 
         public static void ConvertPixelBytes(
-            VectorTypeInfo sourceType, VectorTypeInfo destinationType,
+            VectorType sourceType, VectorType destinationType,
             ReadOnlySpan<byte> source, Span<byte> destination)
         {
             var convertDelegate = GetConvertPixelsDelegate(sourceType, destinationType);

@@ -13,7 +13,7 @@ namespace MonoGame.Framework.Input.Touch
     /// </summary>
     public readonly struct TouchCollection : IReadOnlyList<TouchLocation>
     {
-        public static TouchCollection Empty { get; } = new TouchCollection();
+        public static TouchCollection Empty => default;
 
         private readonly TouchLocation[] _collection;
 

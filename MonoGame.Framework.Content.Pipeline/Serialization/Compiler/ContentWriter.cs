@@ -346,7 +346,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         public void WriteObject<T>(T value, ContentTypeWriter typeWriter)
         {
             if (typeWriter == null)
-                throw new ArgumentNullException("typeWriter");
+                throw new ArgumentNullException(nameof(typeWriter));
 
             if (typeWriter.TargetType.IsValueType)
                 typeWriter.Write(this, value);
@@ -379,9 +379,9 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         public void WriteRawObject<T>(T value, ContentTypeWriter typeWriter)
         {
             if (value == null)
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             if (typeWriter == null)
-                throw new ArgumentNullException("typeWriter");
+                throw new ArgumentNullException(nameof(typeWriter));
 
             typeWriter.Write(this, value);
         }

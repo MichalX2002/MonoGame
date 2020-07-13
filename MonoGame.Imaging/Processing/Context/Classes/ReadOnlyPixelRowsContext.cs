@@ -13,7 +13,7 @@ namespace MonoGame.Imaging.Processing
         public int Length => Pixels.Length;
         public int ElementSize => Pixels.ElementSize;
 
-        public VectorTypeInfo PixelType => Pixels.PixelType;
+        public VectorType PixelType => Pixels.PixelType;
         public Size Size => Pixels.Size;
 
         public ReadOnlyPixelRowsContext(IImagingConfig imagingConfig, IReadOnlyPixelRows pixels)

@@ -15,11 +15,10 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
     /// </summary>
     public abstract class VertexChannel : IList, ICollection, IEnumerable
     {
-
         /// <summary>
         /// Allows overriding classes to implement the list, and for properties/methods in this class to access it.
         /// </summary>
-        internal abstract IList Items  { get; }
+        internal abstract IList Items { get; }
 
         /// <summary>
         /// Gets the number of elements in the vertex channel

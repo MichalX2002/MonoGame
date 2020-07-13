@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -18,24 +17,24 @@ namespace MonoGame.Framework.Graphics
         private static Dictionary<SurfaceFormat, HashSet<VectorFormat>> VectorFormatsBySurface { get; } =
             new Dictionary<SurfaceFormat, HashSet<VectorFormat>>();
 
-        private static ConcurrentDictionary<SurfaceFormat, ReadOnlySet<VectorFormat>> VectorFormatsBySurfaceRO { get; } =
-            new ConcurrentDictionary<SurfaceFormat, ReadOnlySet<VectorFormat>>();
+        private static Dictionary<SurfaceFormat, ReadOnlySet<VectorFormat>> VectorFormatsBySurfaceRO { get; } =
+            new Dictionary<SurfaceFormat, ReadOnlySet<VectorFormat>>();
 
         private static Dictionary<Type, HashSet<VectorFormat>> VectorFormatsByType { get; } =
             new Dictionary<Type, HashSet<VectorFormat>>();
 
-        private static ConcurrentDictionary<Type, ReadOnlySet<VectorFormat>> VectorFormatsByTypeRO { get; } =
-            new ConcurrentDictionary<Type, ReadOnlySet<VectorFormat>>();
+        private static Dictionary<Type, ReadOnlySet<VectorFormat>> VectorFormatsByTypeRO { get; } =
+            new Dictionary<Type, ReadOnlySet<VectorFormat>>();
 
         private static void InitializeVectorFormats()
         {
             // TODO: implement SRgb
 
             AddVectorFormat(SurfaceFormat.Alpha8, typeof(Alpha8));
-            AddVectorFormat(SurfaceFormat.Single, typeof(Gray32));
+            AddVectorFormat(SurfaceFormat.Single, typeof(GrayF));
             AddVectorFormat(SurfaceFormat.Rgb24, typeof(Rgb24));
             //AddVectorFormat(SurfaceFormat.Rgba32SRgb, typeof(Rgba32SRgb));
-            AddVectorFormat(SurfaceFormat.Rgba32, typeof(Color), typeof(Byte4), typeof(NormalizedByte4));
+            AddVectorFormat(SurfaceFormat.Rgba32, typeof(Color), typeof(Byte4));
             AddVectorFormat(SurfaceFormat.Rg32, typeof(Rg32));
             AddVectorFormat(SurfaceFormat.Rgba64, typeof(Rgba64));
             AddVectorFormat(SurfaceFormat.Rgba1010102, typeof(Rgba1010102));
@@ -51,9 +50,9 @@ namespace MonoGame.Framework.Graphics
             AddVectorFormat(SurfaceFormat.HalfSingle, typeof(HalfSingle));
             AddVectorFormat(SurfaceFormat.HalfVector2, typeof(HalfVector2));
             AddVectorFormat(SurfaceFormat.HalfVector4, typeof(HalfVector4));
-            AddVectorFormat(SurfaceFormat.Vector2, typeof(Vector2));
-            AddVectorFormat(SurfaceFormat.Vector4, typeof(Vector4), typeof(RgbaVector));
-            AddVectorFormat(SurfaceFormat.HdrBlendable, typeof(RgbaVector), typeof(Vector4));
+            AddVectorFormat(SurfaceFormat.Vector2, typeof(RgVector));
+            AddVectorFormat(SurfaceFormat.Vector4, typeof(RgbaVector));
+            AddVectorFormat(SurfaceFormat.HdrBlendable, typeof(RgbaVector));
 
             AddVectorFormat(SurfaceFormat.NormalizedByte2, typeof(NormalizedByte2));
             AddVectorFormat(SurfaceFormat.NormalizedByte4, typeof(NormalizedByte4), typeof(Byte4), typeof(Color));
@@ -61,32 +60,26 @@ namespace MonoGame.Framework.Graphics
 
         private static void AddVectorFormat(SurfaceFormat surfaceFormat, params Type[] vectorTypes)
         {
-            var vectorInfos = vectorTypes.Select(x => VectorTypeInfo.Get(x));
+            var vectorInfos = vectorTypes.Select(x => VectorType.Get(x));
             var vectorFormat = new VectorFormat(surfaceFormat, vectorInfos);
 
-            lock (VectorFormatsBySurface)
+            if (!VectorFormatsBySurface.TryGetValue(surfaceFormat, out var bySurfaceSet))
             {
-                if (!VectorFormatsBySurface.TryGetValue(surfaceFormat, out var set))
-                {
-                    set = new HashSet<VectorFormat>();
-                    VectorFormatsBySurface.Add(surfaceFormat, set);
-                    VectorFormatsBySurfaceRO.TryAdd(surfaceFormat, set.AsReadOnly());
-                }
-                set.Add(vectorFormat);
+                bySurfaceSet = new HashSet<VectorFormat>();
+                VectorFormatsBySurface.TryAdd(surfaceFormat, bySurfaceSet);
+                VectorFormatsBySurfaceRO.TryAdd(surfaceFormat, bySurfaceSet.AsReadOnly());
             }
+            bySurfaceSet.Add(vectorFormat);
 
-            lock (VectorFormatsByType)
+            foreach (var vectorType in vectorTypes)
             {
-                foreach (var vectorType in vectorTypes)
+                if (!VectorFormatsByType.TryGetValue(vectorType, out var byTypeSet))
                 {
-                    if (!VectorFormatsByType.TryGetValue(vectorType, out var set))
-                    {
-                        set = new HashSet<VectorFormat>();
-                        VectorFormatsByType.Add(vectorType, set);
-                        VectorFormatsByTypeRO.TryAdd(vectorType, set.AsReadOnly());
-                    }
-                    set.Add(vectorFormat);
+                    byTypeSet = new HashSet<VectorFormat>();
+                    VectorFormatsByType.TryAdd(vectorType, byTypeSet);
+                    VectorFormatsByTypeRO.TryAdd(vectorType, byTypeSet.AsReadOnly());
                 }
+                byTypeSet.Add(vectorFormat);
             }
         }
 
@@ -135,10 +128,9 @@ namespace MonoGame.Framework.Graphics
             public SurfaceFormat SurfaceFormat { get; }
 
             /// <summary>
-            /// Gets structurally equal vector types that
-            /// represent this <see cref="VectorFormat"/>.
+            /// Gets structurally equal vector types that represent this <see cref="VectorFormat"/>.
             /// </summary>
-            public ReadOnlyMemory<VectorTypeInfo> VectorTypes { get; }
+            public ReadOnlyMemory<VectorType> VectorTypes { get; }
 
             public GetDataDelegate GetData { get; }
 
@@ -149,7 +141,7 @@ namespace MonoGame.Framework.Graphics
                     "GetData", methodParams.Select(x => x.ParameterType).ToArray());
             }
 
-            public VectorFormat(SurfaceFormat surfaceFormat, IEnumerable<VectorTypeInfo> vectorTypes)
+            public VectorFormat(SurfaceFormat surfaceFormat, IEnumerable<VectorType> vectorTypes)
             {
                 if (vectorTypes == null)
                     throw new ArgumentNullException(nameof(vectorTypes));

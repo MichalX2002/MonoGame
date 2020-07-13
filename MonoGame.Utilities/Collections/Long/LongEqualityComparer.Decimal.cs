@@ -1,15 +1,19 @@
-﻿
+﻿using System.Runtime.CompilerServices;
+
 namespace MonoGame.Framework.Collections
 {
     public partial class LongEqualityComparer<T>
     {
-        private class LongDecimalComparer : ILongEqualityComparer<decimal>
+        private class LongDecimalComparer : LongEqualityComparer<decimal>
         {
-            public bool Equals(decimal x, decimal y) => x == y;
-
-            public int GetHashCode(decimal obj) => obj.GetHashCode();
-
-            public long GetLongHashCode(decimal obj) => LongDoubleComparer.GetLongDoubleHashCode((double)obj);
+            [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+            public override long GetLongHashCode(decimal d)
+            {
+                ref long data = ref Unsafe.As<decimal, long>(ref d);
+                long h1 = data;
+                long h2 = Unsafe.Add(ref data, 1);
+                return LongHashCode.Combine(h1, h2);
+            }
         }
     }
 }

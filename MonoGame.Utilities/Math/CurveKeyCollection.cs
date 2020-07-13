@@ -72,7 +72,7 @@ namespace MonoGame.Framework
         /// </remarks>
         public void Add(CurveKey key)
         {
-            if (key == null)
+            if (key == null!)
                 throw new ArgumentNullException(nameof(key));
 
             if (_keys.Count == 0)
@@ -95,7 +95,7 @@ namespace MonoGame.Framework
 
         public void Insert(int index, CurveKey key)
         {
-            if (key == null)
+            if (key == null!)
                 throw new ArgumentNullException(nameof(key));
             
             if (_keys[index].Position == key.Position)

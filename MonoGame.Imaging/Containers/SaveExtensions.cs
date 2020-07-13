@@ -6,8 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Imaging.Attributes.Format;
-using MonoGame.Imaging.Codecs;
-using MonoGame.Imaging.Codecs.Encoding;
+using MonoGame.Imaging.Coders;
+using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging

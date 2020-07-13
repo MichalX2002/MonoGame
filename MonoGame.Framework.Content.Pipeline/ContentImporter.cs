@@ -39,9 +39,9 @@ namespace MonoGame.Framework.Content.Pipeline
         object IContentImporter.Import(string filename, ContentImporterContext context)
         {
             if (filename == null)
-                throw new ArgumentNullException("filename");
+                throw new ArgumentNullException(nameof(filename));
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
             return Import(filename, context);
         }
     }

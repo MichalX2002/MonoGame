@@ -24,9 +24,9 @@ namespace MonoGame.Framework.Content.Pipeline
         public override AudioContent Import(string filename, ContentImporterContext context)
         {
             if (string.IsNullOrEmpty(filename))
-                throw new ArgumentNullException("filename");
+                throw new ArgumentNullException(nameof(filename));
             if (context == null)
-                throw new ArgumentNullException("context");
+                throw new ArgumentNullException(nameof(context));
 
             if (!File.Exists(filename))
                 throw new FileNotFoundException(string.Format("Could not locate audio file {0}.", Path.GetFileName(filename)));

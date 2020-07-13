@@ -8,11 +8,14 @@ namespace MonoGame.Framework
     {
         public static ParameterInfo[] GetDelegateParameters(this Type delegateType)
         {
+            if (delegateType == null)
+                throw new ArgumentNullException(nameof(delegateType));
+
             if (!typeof(Delegate).IsAssignableFrom(delegateType))
                 throw new ArgumentException("The type is not a delegate.", nameof(delegateType));
 
             // Simple trick to get delegate arguments.
-            var invokeMethod = delegateType.GetMethod("Invoke");
+            var invokeMethod = delegateType.GetMethod("Invoke")!;
 
             var methodParams = invokeMethod.GetParameters();
             return methodParams;
@@ -20,6 +23,9 @@ namespace MonoGame.Framework
 
         public static ParameterInfo[] GetParameters(this Delegate @delegate)
         {
+            if (@delegate == null)
+                throw new ArgumentNullException(nameof(@delegate));
+
             var type = @delegate.GetType();
             return GetDelegateParameters(type);
         }
@@ -45,12 +51,18 @@ namespace MonoGame.Framework
         public static TDelegate CreateDelegate<TDelegate>(this MethodInfo method)
             where TDelegate : Delegate
         {
+            if (method == null)
+                throw new ArgumentNullException(nameof(method));
+
             return (TDelegate)method.CreateDelegate(typeof(TDelegate));
         }
 
         public static TDelegate CreateDelegate<TDelegate>(this MethodInfo method, object target)
             where TDelegate : Delegate
         {
+            if (method == null)
+                throw new ArgumentNullException(nameof(method));
+
             return (TDelegate)method.CreateDelegate(typeof(TDelegate), target);
         }
     }
