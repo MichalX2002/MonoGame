@@ -976,8 +976,9 @@ namespace MonoGame.Framework.Graphics
         }
 
         private void PlatformDrawInstancedPrimitives(
-            PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount,
-            int instanceCount, int baseInstance = 0)
+            PrimitiveType primitiveType, int baseVertex, 
+            int startIndex, int primitiveCount,
+            int baseInstance, int instanceCount)
         {
             AssertSupportsInstancing();
             ApplyState(true);

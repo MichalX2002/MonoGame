@@ -86,7 +86,8 @@ namespace MonoGame.Framework.Input
         /// <param name="leftDeadZoneMode">Enumerated value that specifies what dead zone type to use for the left stick.</param>
         /// <param name="rightDeadZoneMode">Enumerated value that specifies what dead zone type to use for the right stick.</param>
         /// <returns>The state of the controller.</returns>
-        public static GamePadState GetState(PlayerIndex playerIndex, GamePadDeadZone leftDeadZoneMode, GamePadDeadZone rightDeadZoneMode)
+        public static GamePadState GetState(
+            PlayerIndex playerIndex, GamePadDeadZone leftDeadZoneMode, GamePadDeadZone rightDeadZoneMode)
         {
             return GetState((int)playerIndex, leftDeadZoneMode, rightDeadZoneMode);
         }
@@ -99,7 +100,8 @@ namespace MonoGame.Framework.Input
         /// <param name="leftDeadZoneMode">Enumerated value that specifies what dead zone type to use for the left stick.</param>
         /// <param name="rightDeadZoneMode">Enumerated value that specifies what dead zone type to use for the right stick.</param>
         /// <returns>The state of the controller.</returns>
-        public static GamePadState GetState(int index, GamePadDeadZone leftDeadZoneMode, GamePadDeadZone rightDeadZoneMode)
+        public static GamePadState GetState(
+            int index, GamePadDeadZone leftDeadZoneMode, GamePadDeadZone rightDeadZoneMode)
         {
             if (index < 0 || index >= PlatformGetMaxNumberOfGamePads())
                 return default;
@@ -128,7 +130,8 @@ namespace MonoGame.Framework.Input
         /// <param name="leftTrigger">(Xbox One controller only) The speed of the left trigger motor, between 0.0 and 1.0. This motor is a high-frequency motor.</param>
         /// <param name="rightTrigger">(Xbox One controller only) The speed of the right trigger motor, between 0.0 and 1.0. This motor is a high-frequency motor.</param>
         /// <returns>Returns true if the vibration motors were set.</returns>
-        public static bool SetVibration(PlayerIndex playerIndex, float leftMotor, float rightMotor, float leftTrigger, float rightTrigger)
+        public static bool SetVibration(
+            PlayerIndex playerIndex, float leftMotor, float rightMotor, float leftTrigger, float rightTrigger)
         {
             return SetVibration((int)playerIndex, leftMotor, rightMotor, leftTrigger, rightTrigger);
         }
@@ -154,7 +157,8 @@ namespace MonoGame.Framework.Input
         /// <param name="leftTrigger">(Xbox One controller only) The speed of the left trigger motor, between 0.0 and 1.0. This motor is a high-frequency motor.</param>
         /// <param name="rightTrigger">(Xbox One controller only) The speed of the right trigger motor, between 0.0 and 1.0. This motor is a high-frequency motor.</param>
         /// <returns>Returns true if the vibration motors were set.</returns>
-        public static bool SetVibration(int index, float leftMotor, float rightMotor, float leftTrigger, float rightTrigger)
+        public static bool SetVibration(
+            int index, float leftMotor, float rightMotor, float leftTrigger, float rightTrigger)
         {
             if (index < 0 || index >= PlatformGetMaxNumberOfGamePads())
                 return false;
@@ -169,8 +173,6 @@ namespace MonoGame.Framework.Input
 
         /// <summary>
         /// The maximum number of game pads supported on this system. 
-        /// Attempting to access a gamepad index higher than this number will 
-        /// result in an <see cref="InvalidOperationException"/>.
         /// </summary>
         public static int MaximumGamePadCount => PlatformGetMaxNumberOfGamePads();
     }

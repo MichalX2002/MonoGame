@@ -16,7 +16,7 @@
     <Compile Include="Platform\Graphics\GraphicsDevice.OpenGL.FramebufferHelper.cs" />
     <Compile Include="Platform\Graphics\GraphicsDevice.OpenGL.cs" />
     <Compile Include="Platform\Graphics\IGraphicsContext.OpenGL.cs" />
-    <Compile Include="Platform\Graphics\IWindowInfo.OpenGL.cs" />
+    <Compile Include="Platform\Graphics\IWindowHandle.OpenGL.cs" />
     <Compile Include="Platform\Graphics\OcclusionQuery.OpenGL.cs" Condition="'$(MGOpenGL)' != 'GLES'"/>
     <Compile Include="Platform\Graphics\SamplerStateCollection.OpenGL.cs" />
     <Compile Include="Platform\Graphics\Shader\ConstantBuffer.OpenGL.cs" />

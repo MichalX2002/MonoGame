@@ -57,6 +57,7 @@ namespace MonoGame.Framework.Content
             'O', // XboxOne
             'S', // Nintendo Switch
             'G', // Google Stadia
+            'b', // WebAssembly and Bridge.NET
 
             // NOTE: There are additional idenfiers for consoles that 
             // are not defined in this repository.  Be sure to ask the

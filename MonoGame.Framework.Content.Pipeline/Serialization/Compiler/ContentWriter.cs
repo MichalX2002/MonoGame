@@ -59,6 +59,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             'O', // XboxOne
             'S', // Nintendo Switch
             'G', // Google Stadia
+            'b', // WebAssembly and Bridge.NET
         };
 
         /// <summary>
@@ -202,8 +203,13 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             Write('B');
             Write(targetPlatformIdentifiers[(int)TargetPlatform]);
             Write(XnbFormatVersion);
-            // We cannot use LZX compression, so we use the public domain LZ4 compression. Use one of the spare bits in the flags byte to specify LZ4.
-            byte flags = (byte)((TargetProfile == GraphicsProfile.HiDef ? HiDefContent : 0) | (compressContent ? ContentCompressedLz4 : 0));
+            
+            // We cannot use LZX compression, so we use the public domain LZ4 compression. 
+            // Use one of the spare bits in the flags byte to specify LZ4.
+            byte flags = 
+                (byte)((TargetProfile == GraphicsProfile.HiDef ? HiDefContent : 0) |
+                (compressContent ? ContentCompressedLz4 : 0));
+
             Write(flags);
         }
 
@@ -215,7 +221,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             for (int i = 0; i < sharedResources.Count; i++)
             {
                 var resource = sharedResources[i];
-                WriteObject(resource);
+                WriteObject<object>(resource);
             }
         }
 

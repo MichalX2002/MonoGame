@@ -128,7 +128,7 @@ namespace MonoGame.Framework
                 y: 0,
                 _width,
                 _height,
-                SDL.Window.State.Hidden);
+                SDL.Window.State.Hidden | SDL.Window.State.FullscreenDesktop);
         }
 
         private static unsafe IntPtr LoadBmp(Memory<byte> data)

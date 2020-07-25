@@ -12,17 +12,11 @@
   </PropertyGroup>
 
   <!--
-    Target flow diagram
-    * - only run if necessary
-
-                                      InstallMGCB*
-                                           ^
-                                           |
-         GetInstalledMGCB*     ->     UpdateMGCB*
-                                                        \
-                                                          -> RunContentBuilder -> IncludeContent
-                                                        /
-      CollectContentReferences -> PrepareContentBuilder
+    Target flow
+      1. CollectContentReferences
+      2. PrepareContentBuilder
+      3. RunContentBuilder
+      4. IncludeContent
   -->
 
   <!--
@@ -41,7 +35,6 @@
   </Target>
 
 
-  <!--
     Converts MonoGameContentReference items to ContentReference items, deriving the necessary metadata.
     Outputs:
       - ContentReference: references to .mgcb files that can be built with MGCB
@@ -53,7 +46,7 @@
       - Given the following file setup:
         - C:\Game\Game.Shared\Content.mgcb
         - C:\Game\Game.DesktopGL\Game.DesktopGL.csproj
-          - MonoGameContentReference: ..\Content\Content.mgcb
+          - MonoGameContentReference: ..\Game.Shared\Content.mgcb
       - Output:
         - ContentReference
           - FullDir: C:/Game/Game.Shared/
@@ -96,6 +89,10 @@
   </Target>
 
   <!--
+    =====================
+    PrepareContentBuilder
+    =====================
+
     Set and validate properties, and create folders for content output.
     Outputs:
       - PlatformResourcePrefix: the platform-specific prefix for included content paths
@@ -147,17 +144,21 @@
   </Target>
 
   <!--
+    =================
+    RunContentBuilder
+    =================
+
     Run MGCB to build content and include it as ExtraContent.
     Outputs:
       - ExtraContent: built content files
         - ContentDir: the relative path of the embedded folder to contain the content files
   -->
-  <Target Name="RunContentBuilder" DependsOnTargets="UpdateMGCB;PrepareContentBuilder">
+  <Target Name="RunContentBuilder" DependsOnTargets="PrepareContentBuilder">
 
     <!-- Execute MGCB from the project directory so we use the correct manifest. -->
     <Exec
       Condition="'%(ContentReference.FullPath)' != ''"
-      Command="$(MGCBCommand) $(MonoGameMGCBAdditionalArguments) /@:&quot;%(ContentReference.FullPath)&quot; /platform:$(MonoGamePlatform) /outputDir:&quot;%(ContentReference.ContentOutputDir)&quot; /intermediateDir:&quot;%(ContentReference.ContentIntermediateOutputDir)&quot; /workingDir:&quot;%(ContentReference.FullDir)&quot;"
+      Command="$(DotnetCommand) $(MGCBPath) $(MonoGameMGCBAdditionalArguments) /@:&quot;%(ContentReference.FullPath)&quot; /platform:$(MonoGamePlatform) /outputDir:&quot;%(ContentReference.ContentOutputDir)&quot; /intermediateDir:&quot;%(ContentReference.ContentIntermediateOutputDir)&quot; /workingDir:&quot;%(ContentReference.FullDir)&quot;"
       WorkingDirectory="$(MSBuildProjectDirectory)" />
 
     <ItemGroup>
@@ -172,6 +173,10 @@
   </Target>
 
   <!--
+    ==============
+    IncludeContent
+    ==============
+
     Include ExtraContent as platform-specific content in the project output.
     Outputs:
       - AndroidAsset: built content files if Android

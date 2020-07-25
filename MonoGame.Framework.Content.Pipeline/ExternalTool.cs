@@ -153,7 +153,7 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <param name="path">The full path to the executable.</param> 
         private static void EnsureExecutable(string path)
         {
-            if (path == "/bin/bash")
+            if (!path.StartsWith("/home") && !path.StartsWith("/Users"))
                 return;
 
             try

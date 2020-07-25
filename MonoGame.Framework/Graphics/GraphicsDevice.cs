@@ -827,6 +827,8 @@ namespace MonoGame.Framework.Graphics
 
         #region Drawing
 
+        #region DrawIndexedPrimitives
+
         /// <summary>
         /// Draw geometry by indexing into the vertex buffer.
         /// </summary>
@@ -857,6 +859,8 @@ namespace MonoGame.Framework.Graphics
                 _graphicsMetrics._primitiveCount += primitiveCount;
             }
         }
+
+        #endregion
 
         #region DrawUserPrimitives
 
@@ -910,6 +914,8 @@ namespace MonoGame.Framework.Graphics
 
         #endregion
 
+        #region DrawPrimitives
+
         /// <summary>
         /// Draw primitives of the specified type from the currently bound vertexbuffers without indexing.
         /// </summary>
@@ -937,74 +943,9 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        /// <summary>
-        /// Draw instanced geometry from the bound vertex buffers and index buffer.
-        /// </summary>
-        /// <param name="primitiveType">The type of primitives in the index buffer.</param>
-        /// <param name="baseVertex">Used to offset the vertex range indexed from the vertex buffer.</param>
-        /// <param name="startIndex">The index within the index buffer to start drawing from.</param>
-        /// <param name="primitiveCount">The number of primitives in a single instance.</param>
-        /// <param name="instanceCount">The number of instances to render.</param>
-        /// <remarks>Draw geometry with data from multiple bound vertex streams at different frequencies.</remarks>
-        public void DrawInstancedPrimitives(
-            PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount, int instanceCount)
-        {
-            if (_vertexShader == null)
-                throw new InvalidOperationException(
-                    "Vertex shader must be set before calling DrawInstancedPrimitives.");
-
-            if (_vertexBuffers.Count == 0)
-                throw new InvalidOperationException(
-                    "Vertex buffer must be set before calling DrawInstancedPrimitives.");
-
-            if (_indexBuffer == null)
-                throw new InvalidOperationException(
-                    "Index buffer must be set before calling DrawInstancedPrimitives.");
-
-            if (primitiveCount <= 0)
-                throw new ArgumentOutOfRangeException(nameof(primitiveCount));
-
-            PlatformDrawInstancedPrimitives(primitiveType, baseVertex, startIndex, primitiveCount, instanceCount);
-
-            unchecked
-            {
-                _graphicsMetrics._drawCount++;
-                _graphicsMetrics._primitiveCount += primitiveCount * instanceCount;
-            }
-        }
+        #endregion
 
         #region DrawUserIndexedPrimitives
-
-        /// <summary>
-        /// Draw primitives of the specified type by indexing into the given span of vertices with 
-        /// 16- or 32-bit indices.
-        /// </summary>
-        /// <typeparam name="TVertex">The type of the vertex data.</typeparam>
-        /// <typeparam name="TIndex">The type of the index data.</typeparam>
-        /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
-        /// <param name="vertexData">The span of vertices to draw.</param>
-        /// <param name="indexData">The span of indices for indexing the vertices.</param>
-        /// <param name="primitiveCount">The number of primitives to draw.</param>
-        /// <remarks>
-        /// The <see cref="VertexDeclaration"/> will be found by getting <see cref="IVertexType.VertexDeclaration"/>
-        /// from an instance of <typeparamref name="TVertex"/> and cached for subsequent calls.
-        /// </remarks>
-        /// <remarks>
-        /// All indices in the span are relative to the first vertex.
-        /// An index of zero in the index span points to the first vertex in the vertex span.
-        /// </remarks>
-        public void DrawUserIndexedPrimitives<TVertex, TIndex>(
-            PrimitiveType primitiveType,
-            ReadOnlySpan<TVertex> vertexData,
-            ReadOnlySpan<TIndex> indexData,
-            int primitiveCount)
-            where TVertex : unmanaged, IVertexType
-            where TIndex : unmanaged
-        {
-            var declaration = VertexDeclarationCache<TVertex>.VertexDeclaration;
-            DrawUserIndexedPrimitives(
-                primitiveType, vertexData, indexData, primitiveCount, declaration);
-        }
 
         /// <summary>
         /// Draw primitives of the specified type by indexing into the given span of vertices with 
@@ -1061,11 +1002,44 @@ namespace MonoGame.Framework.Graphics
             unchecked
             {
                 _graphicsMetrics._drawCount++;
-                _graphicsMetrics._primitiveCount += primitiveCount;
+                _graphicsMetrics._primitiveCount +=  primitiveCount;
             }
         }
 
+        /// <summary>
+        /// Draw primitives of the specified type by indexing into the given span of vertices with 
+        /// 16- or 32-bit indices.
+        /// </summary>
+        /// <typeparam name="TVertex">The type of the vertex data.</typeparam>
+        /// <typeparam name="TIndex">The type of the index data.</typeparam>
+        /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
+        /// <param name="vertexData">The span of vertices to draw.</param>
+        /// <param name="indexData">The span of indices for indexing the vertices.</param>
+        /// <param name="primitiveCount">The number of primitives to draw.</param>
+        /// <remarks>
+        /// The <see cref="VertexDeclaration"/> will be found by getting <see cref="IVertexType.VertexDeclaration"/>
+        /// from an instance of <typeparamref name="TVertex"/> and cached for subsequent calls.
+        /// </remarks>
+        /// <remarks>
+        /// All indices in the span are relative to the first vertex.
+        /// An index of zero in the index span points to the first vertex in the vertex span.
+        /// </remarks>
+        public void DrawUserIndexedPrimitives<TVertex, TIndex>(
+            PrimitiveType primitiveType,
+            ReadOnlySpan<TVertex> vertexData,
+            ReadOnlySpan<TIndex> indexData,
+            int primitiveCount)
+            where TVertex : unmanaged, IVertexType
+            where TIndex : unmanaged
+        {
+            var declaration = VertexDeclarationCache<TVertex>.VertexDeclaration;
+            DrawUserIndexedPrimitives(
+                primitiveType, vertexData, indexData, primitiveCount, declaration);
+        }
+
         #endregion
+
+        #region DrawInstancedPrimitives 
 
         /// <summary>
         /// Draw instanced geometry from the bound vertex buffers and index buffer.
@@ -1074,12 +1048,11 @@ namespace MonoGame.Framework.Graphics
         /// <param name="baseVertex">Used to offset the vertex range indexed from the vertex buffer.</param>
         /// <param name="startIndex">The index within the index buffer to start drawing from.</param>
         /// <param name="primitiveCount">The number of primitives in a single instance.</param>
-        /// <param name="instanceCount">The number of instances to render.</param>
         /// <param name="baseInstance">Used to offset the instance range indexed from the instance buffer.</param>
+        /// <param name="instanceCount">The number of instances to render.</param>
         /// <remarks>Draw geometry with data from multiple bound vertex streams at different frequencies.</remarks>
         public void DrawInstancedPrimitives(
-            PrimitiveType primitiveType, int baseVertex, int startIndex,
-            int primitiveCount, int instanceCount, int baseInstance)
+            PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount, int baseInstance, int instanceCount)
         {
             if (_vertexShader == null)
                 throw new InvalidOperationException("Vertex shader must be set before calling DrawInstancedPrimitives.");
@@ -1094,8 +1067,31 @@ namespace MonoGame.Framework.Graphics
                 throw new ArgumentOutOfRangeException(nameof(primitiveCount));
 
             PlatformDrawInstancedPrimitives(
-                primitiveType, baseVertex, startIndex, primitiveCount, instanceCount, baseInstance);
+                primitiveType, baseVertex, startIndex, primitiveCount, baseInstance, instanceCount);
+
+            unchecked
+            {
+                _graphicsMetrics._drawCount++;
+                _graphicsMetrics._primitiveCount += primitiveCount * instanceCount;
+            }
         }
+
+        /// <summary>
+        /// Draw instanced geometry from the bound vertex buffers and index buffer.
+        /// </summary>
+        /// <param name="primitiveType">The type of primitives in the index buffer.</param>
+        /// <param name="baseVertex">Used to offset the vertex range indexed from the vertex buffer.</param>
+        /// <param name="startIndex">The index within the index buffer to start drawing from.</param>
+        /// <param name="primitiveCount">The number of primitives in a single instance.</param>
+        /// <param name="instanceCount">The number of instances to render.</param>
+        /// <remarks>Draw geometry with data from multiple bound vertex streams at different frequencies.</remarks>
+        public void DrawInstancedPrimitives(
+            PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount, int instanceCount)
+        {
+            DrawInstancedPrimitives(primitiveType, baseVertex, startIndex, primitiveCount, 0, instanceCount);
+        }
+
+        #endregion
 
         #endregion
 

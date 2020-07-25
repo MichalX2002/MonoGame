@@ -105,6 +105,11 @@ namespace MonoGame.Framework.Content.Pipeline
         /// Google Stadia
         /// </summary>
         Stadia,
+
+        /// <summary>
+        /// WebAssembly and Bridge.NET
+        /// </summary>
+        Web
     }
 
 

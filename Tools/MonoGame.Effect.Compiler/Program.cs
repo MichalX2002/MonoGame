@@ -46,8 +46,10 @@ namespace MonoGame.Effect.Compiler
             ShaderResult shaderResult;
             try
             {
-                shaderResult = ShaderResult.FromFile(
-                    options.SourceFile, options, new ConsoleEffectCompilerOutput());
+                shaderResult = ShaderResult.FromFile(options.SourceFile, options, new ConsoleEffectCompilerOutput());
+
+                foreach (var dependency in shaderResult.Dependencies)
+                    Console.WriteLine("Dependency: " + dependency);
             }
             catch (Exception ex)
             {

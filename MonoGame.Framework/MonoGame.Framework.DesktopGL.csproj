@@ -36,7 +36,6 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Platform\Graphics\IWindowHandle.OpenGL.cs" />
     <Compile Include="Platform\Graphics\OpenGL\OpenGL.SDL.cs" />
     <Compile Include="Platform\Graphics\RenderTargetBindingArrayComparer.cs" />
     <Compile Include="Platform\Graphics\Shader\Shader.Structure.cs" />
@@ -161,7 +160,7 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
     <ProjectReference Include="..\ThirdParty\NVorbis\NVorbis\NVorbis.csproj" />
   </ItemGroup>
-  
+
   <Import Project="Platform\OpenGL.targets" />
   <Import Project="Platform\OpenAL.targets" />
 </Project>

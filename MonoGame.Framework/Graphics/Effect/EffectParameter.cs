@@ -196,12 +196,30 @@ namespace MonoGame.Framework.Graphics
 #endif
         }
 
-        /*
-        public int[] GetValueInt32Array ()
+        public int[] GetValueInt32Array()
         {
-            throw new NotImplementedException();
+            if (Elements != null && Elements.Count > 0)
+            {
+                var ret = new int[RowCount * ColumnCount * Elements.Count];
+                for (int i = 0; i < Elements.Count; i++)
+                {
+                    var elmArray = Elements[i].GetValueInt32Array();
+
+                    for (int j = 0; j < elmArray.Length; j++)
+                        ret[RowCount * ColumnCount * i + j] = elmArray[j];
+                }
+                return ret;
+            }
+
+            switch (ParameterClass)
+            {
+                case EffectParameterClass.Scalar:
+                    return new int[] { GetValueInt32() };
+
+                default:
+                    throw new NotImplementedException();
+            }
         }
-        */
 
         public Matrix4x4 GetValueMatrix()
         {
@@ -462,16 +480,17 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        /*
-        public void SetValue (int[] value)
+        public void SetValue(int[] value)
         {
-            throw new NotImplementedException();
+            for (var i = 0; i < value.Length; i++)
+                Elements[i].SetValue(value[i]);
+
+            StateKey = unchecked(NextStateKey++);
         }
-        */
 
         public void SetValue(in Matrix4x4 value)
         {
-            if (ParameterClass != EffectParameterClass.Matrix ||
+            if (ParameterClass != EffectParameterClass.Matrix || 
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 

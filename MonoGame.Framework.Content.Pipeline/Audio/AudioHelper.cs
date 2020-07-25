@@ -10,7 +10,10 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
     class AudioHelper
     {
         // This array must remain in sync with the ConversionFormat enum.
-        static string[] conversionFormatExtensions = new[] { "wav", "wav", "wma", "xma", "wav", "m4a", "ogg", "opus" };
+        static string[] conversionFormatExtensions = new[] 
+        {
+            "wav", "wav", "wma", "xma", "wav", "m4a", "ogg", "opus", "mp3" 
+        };
 
         /// <summary>
         /// Gets the file extension for an audio format.

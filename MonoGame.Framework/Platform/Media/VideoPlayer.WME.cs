@@ -79,8 +79,8 @@ namespace MonoGame.Framework.Media
                                         SurfaceFormat.Bgra32, 
                                         Texture2D.SurfaceType.RenderTarget);
 
-            var region = new SharpDX.Mathematics.Interop.RawRectangle(0, 0, _currentVideo.Width, _currentVideo.Height);
-            _mediaEngine.TransferVideoFrame(_lastFrame._texture, null, region, null);
+			var region = new SharpDX.Mathematics.Interop.RawRectangle(0, 0, _currentVideo.Width, _currentVideo.Height);
+            _mediaEngine.TransferVideoFrame(_lastFrame.GetTexture(), null, region, null);
 
             return _lastFrame;
         }

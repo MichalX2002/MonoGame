@@ -18,15 +18,16 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
 
         public override bool Supports(TargetPlatform platform)
         {
-            return platform == TargetPlatform.Android ||
-                   platform == TargetPlatform.DesktopGL ||
-                   platform == TargetPlatform.MacOSX ||
-                   platform == TargetPlatform.NativeClient ||
-                   platform == TargetPlatform.RaspberryPi ||
-                   platform == TargetPlatform.Windows ||
-                   platform == TargetPlatform.WindowsPhone8 ||
-                   platform == TargetPlatform.WindowsStoreApp ||
-                   platform == TargetPlatform.iOS;
+            return platform == TargetPlatform.Android
+                || platform == TargetPlatform.DesktopGL
+                || platform == TargetPlatform.MacOSX
+                || platform == TargetPlatform.NativeClient
+                || platform == TargetPlatform.RaspberryPi
+                || platform == TargetPlatform.Windows
+                || platform == TargetPlatform.WindowsPhone8
+                || platform == TargetPlatform.WindowsStoreApp
+                || platform == TargetPlatform.iOS
+                || platform == TargetPlatform.Web;
         }
 
         public override ConversionQuality ConvertAudio(
@@ -54,17 +55,18 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             return ConvertToFormat(content, targetFormat, quality, null, logger);
         }
 
-        private ConversionFormat PlatformToFormat(TargetPlatform platform)
+        private static ConversionFormat PlatformToFormat(TargetPlatform platform)
         {
             switch (platform)
             {
-                case TargetPlatform.WindowsPhone8:
-                case TargetPlatform.WindowsStoreApp:
-                    return ConversionFormat.WindowsMedia;
-
                 case TargetPlatform.Windows:
+                case TargetPlatform.WindowsStoreApp:
+                case TargetPlatform.WindowsPhone8:
                 case TargetPlatform.DesktopGL:
                     return ConversionFormat.Vorbis;
+
+                case TargetPlatform.Web:
+                    return ConversionFormat.Mp3;
 
                 default:
                     // Most platforms will use AAC ("mp4") by default
@@ -76,7 +78,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             TargetPlatform platform,
             ConversionQuality quality,
             AudioContent content,
-            string inputFile, 
+            string inputFile,
             out string outputFile,
             ContentBuildLogger logger = null)
         {
@@ -92,10 +94,10 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         }
 
         public static void ProbeFormat(
-            string sourceFile, 
+            string sourceFile,
             out AudioFileType audioFileType,
-            out AudioFormat audioFormat, 
-            out TimeSpan duration, 
+            out AudioFormat audioFormat,
+            out TimeSpan duration,
             out int loopStart,
             out int loopLength)
         {
@@ -150,7 +152,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                             break;
 
                         case "streams.stream.0.sample_fmt":
-                            sampleFormat = kv[1].Trim('"').ToLowerInvariant();
+                            sampleFormat = kv[1].Trim('"').ToUpperInvariant();
                             break;
 
                         case "streams.stream.0.bit_rate":
@@ -166,7 +168,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                             break;
 
                         case "format.format_name":
-                            formatName = kv[1].Trim('"').ToLowerInvariant();
+                            formatName = kv[1].Trim('"').ToUpperInvariant();
                             break;
 
                         case "streams.stream.0.codec_tag":
@@ -187,25 +189,25 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             {
                 switch (sampleFormat)
                 {
-                    case "u8":
-                    case "u8p":
+                    case "U8":
+                    case "U8P":
                         bitsPerSample = 8;
                         break;
 
-                    case "s16":
-                    case "s16p":
+                    case "S16":
+                    case "S16P":
                         bitsPerSample = 16;
                         break;
 
-                    case "s32":
-                    case "s32p":
-                    case "flt":
-                    case "fltp":
+                    case "S32":
+                    case "S32P":
+                    case "FLT":
+                    case "FLTP":
                         bitsPerSample = 32;
                         break;
 
-                    case "dbl":
-                    case "dblp":
+                    case "DBL":
+                    case "DBLP":
                         bitsPerSample = 64;
                         break;
                 }
@@ -213,32 +215,32 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
 
             // Figure out the file type.
             var durationMs = (int)Math.Floor(durationInSeconds * 1000.0);
-            if (formatName == "wav")
+            if (formatName == "WAV")
             {
                 audioFileType = AudioFileType.Wav;
             }
-            else if (formatName == "mp3")
+            else if (formatName == "MP3")
             {
                 audioFileType = AudioFileType.Mp3;
                 format = 1;
                 durationMs = (int)Math.Ceiling(durationInSeconds * 1000.0);
                 bitsPerSample = Math.Min(bitsPerSample, 16);
             }
-            else if (formatName == "wma" || formatName == "asf")
+            else if (formatName == "WMA" || formatName == "ASF")
             {
                 audioFileType = AudioFileType.Wma;
                 format = 1;
                 durationMs = (int)Math.Ceiling(durationInSeconds * 1000.0);
                 bitsPerSample = Math.Min(bitsPerSample, 16);
             }
-            else if (formatName == "ogg")
+            else if (formatName == "OGG")
             {
                 audioFileType = AudioFileType.Ogg;
                 format = 1;
                 durationMs = (int)Math.Ceiling(durationInSeconds * 1000.0);
                 bitsPerSample = Math.Min(bitsPerSample, 16);
             }
-            else if (formatName == "opus")
+            else if (formatName == "OPUS")
             {
                 audioFileType = AudioFileType.Opus;
                 format = 1;
@@ -309,9 +311,10 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                 while (true)
                 {
                     var chunkSignature = new string(reader.ReadChars(4));
-                    if (chunkSignature.ToLowerInvariant() == "data")
+                    if (chunkSignature.ToUpperInvariant() == "DATA")
                         break;
-                    if (chunkSignature.ToLowerInvariant() == "fmt ")
+
+                    if (chunkSignature.ToUpperInvariant() == "FMT ")
                     {
                         int fmtLength = reader.ReadInt32();
                         short formatTag = reader.ReadInt16();
@@ -429,6 +432,13 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                     case ConversionFormat.Vorbis:
                         ffmpegCodecName = "libvorbis";
                         ffmpegMuxerName = "ogg";
+                        //format = 0x0000; /* WAVE_FORMAT_UNKNOWN */
+                        break;
+
+                    case ConversionFormat.Mp3:
+                        // Vorbis
+                        ffmpegCodecName = "libmp3lame";
+                        ffmpegMuxerName = "mp3";
                         //format = 0x0000; /* WAVE_FORMAT_UNKNOWN */
                         break;
 

@@ -26,9 +26,9 @@ namespace MonoGame.Framework.Content
         private static Dictionary<string, Func<ContentTypeReader>> ReaderFactories { get; } =
             new Dictionary<string, Func<ContentTypeReader>>();
 
-        private Dictionary<Type, ContentTypeReader> _contentReaders;
+        private Dictionary<Type, ContentTypeReader>? _contentReaders;
 
-        public ContentTypeReader GetTypeReader(Type targetType)
+        public ContentTypeReader? GetTypeReader(Type targetType)
         {
             if (targetType == null)
                 throw new ArgumentNullException(nameof(targetType));
@@ -36,13 +36,13 @@ namespace MonoGame.Framework.Content
             if (targetType.IsArray && targetType.GetArrayRank() > 1)
                 targetType = typeof(Array);
 
-            if (_contentReaders.TryGetValue(targetType, out ContentTypeReader reader))
+            if (_contentReaders!.TryGetValue(targetType, out var reader))
                 return reader;
 
             return null;
         }
 
-        public ContentTypeReader GetTypeReader<T>()
+        public ContentTypeReader? GetTypeReader<T>()
         {
             return GetTypeReader(typeof(T));
         }
@@ -132,7 +132,7 @@ namespace MonoGame.Framework.Content
                     // string readerTypeString = reader.ReadString();
                     string originalReaderTypeString = reader.ReadString();
 
-                    if (ReaderFactories.TryGetValue(originalReaderTypeString, out Func<ContentTypeReader> readerFactory))
+                    if (ReaderFactories.TryGetValue(originalReaderTypeString, out var readerFactory))
                     {
                         contentReaders[i] = readerFactory.Invoke();
                         needsInitialize[i] = true;
@@ -148,7 +148,7 @@ namespace MonoGame.Framework.Content
                         var l_readerType = Type.GetType(readerTypeString);
                         if (l_readerType != null)
                         {
-                            if (!ContentReaderCache.TryGetValue(l_readerType, out ContentTypeReader typeReader))
+                            if (!ContentReaderCache.TryGetValue(l_readerType, out var typeReader))
                             {
                                 try
                                 {
@@ -221,16 +221,22 @@ namespace MonoGame.Framework.Content
                 throw new ArgumentNullException(nameof(type));
 
             // Needed to support nested types
-            int count = type.Split(new[] { "[[" }, StringSplitOptions.None).Length - 1;
+            int count = type.Split("[[", StringSplitOptions.None).Length - 1;
 
             string preparedType = type;
 
             for (int i = 0; i < count; i++)
-                preparedType = Regex.Replace(preparedType, @"\[(.+?), Version=.+?\]", "[$1]");
-            
+            {
+                preparedType = Regex.Replace(
+                    preparedType, @"\[(.+?), Version=.+?\]", "[$1]", RegexOptions.Compiled);
+            }
+
             // Handle non generic types
             if (preparedType.Contains("PublicKeyToken", StringComparison.OrdinalIgnoreCase))
-                preparedType = Regex.Replace(preparedType, @"(.+?), Version=.+?$", "$1");
+            {
+                preparedType = Regex.Replace(
+                    preparedType, @"(.+?), Version=.+?$", "$1", RegexOptions.Compiled);
+            }
 
             return preparedType;
         }

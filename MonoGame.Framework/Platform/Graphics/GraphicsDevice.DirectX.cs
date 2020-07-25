@@ -1400,14 +1400,14 @@ namespace MonoGame.Framework.Graphics
             PrimitiveType primitiveType, ReadOnlySpan<T> vertexData, VertexDeclaration vertexDeclaration) 
             where T : unmanaged
         {
-            SetUserVertexBuffer(vertexData, vertexDeclaration);
+            var startVertex = SetUserVertexBuffer(vertexData, vertexOffset, vertexCount, vertexDeclaration);
 
             lock (_d3dContext)
             {
                 ApplyState(true);
 
                 _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
-                _d3dContext.Draw(vertexData.Length, 0);
+                _d3dContext.Draw(vertexCount, startVertex);
             }
         }
 
@@ -1422,42 +1422,50 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        private unsafe void PlatformDrawUserIndexedPrimitives<TVertex, TIndex>(
-            PrimitiveType primitiveType, ReadOnlySpan<TVertex> vertexData,
-            IndexElementSize indexElementSize, ReadOnlySpan<TIndex> indexData, 
-            int primitiveCount, VertexDeclaration vertexDeclaration) 
-            where TVertex : unmanaged
-            where TIndex : unmanaged
+        private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
         {
-            int indexCount = GetElementCountForType(primitiveType, primitiveCount);
-            SetUserVertexBuffer(vertexData, vertexDeclaration);
-            SetUserIndexBuffer(indexData, indexElementSize);
+            var indexCount = GetElementCountArray(primitiveType, primitiveCount);
+            var startVertex = SetUserVertexBuffer(vertexData, vertexOffset, numVertices, vertexDeclaration);
+            var startIndex = SetUserIndexBuffer(indexData, indexOffset, indexCount);
 
             lock (_d3dContext)
             {
                 ApplyState(true);
 
                 _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
-                _d3dContext.DrawIndexed(indexCount, 0, 0);
+                _d3dContext.DrawIndexed(indexCount, startIndex, startVertex);
             }
         }
 
-        private void PlatformDrawInstancedPrimitives(
-            PrimitiveType primitiveType, int baseVertex, int startIndex,
-            int primitiveCount, int instanceCount, int baseInstance = 0)
+        private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, int[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
+        {
+            var indexCount = GetElementCountArray(primitiveType, primitiveCount);
+            var startVertex = SetUserVertexBuffer(vertexData, vertexOffset, numVertices, vertexDeclaration);
+            var startIndex = SetUserIndexBuffer(indexData, indexOffset, indexCount);
+
+            lock (_d3dContext)
+            {
+                ApplyState(true);
+
+                _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
+                _d3dContext.DrawIndexed(indexCount, startIndex, startVertex);
+            }
+        }
+
+        private void PlatformDrawInstancedPrimitives(PrimitiveType primitiveType, int baseVertex, int startIndex,
+            int primitiveCount, int baseInstance, int instanceCount)
         {
             lock (_d3dContext)
             {
                 ApplyState(true);
 
                 _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
-                int indexCount = GetElementCountForType(primitiveType, primitiveCount);
+                int indexCount = GetElementCountArray(primitiveType, primitiveCount);
                 _d3dContext.DrawIndexedInstanced(indexCount, instanceCount, startIndex, baseVertex, baseInstance);
             }
         }
 
-        private unsafe void PlatformGetBackBufferData<T>(Span<T> destination, Rectangle rect)
-            where T : unmanaged
+        private void PlatformGetBackBufferData<T>(Rectangle? rect, T[] data, int startIndex, int count) where T : struct
         {
             // TODO share code with Texture2D.GetData and do pooling for staging textures
             // first set up a staging texture

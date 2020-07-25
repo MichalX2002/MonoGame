@@ -48,5 +48,10 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         /// Opus Codec, totally open, royalty-free audio encoding
         /// </summary>
         Opus,
+
+        /// <summary>
+        /// mp3 audio format
+        /// </summary>
+        Mp3
     }
 }

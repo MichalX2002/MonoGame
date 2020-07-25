@@ -34,9 +34,6 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
     <Reference Include="CppNet">
       <HintPath>..\ThirdParty\Dependencies\CppNet\CppNet.dll</HintPath>
     </Reference>
-    <Reference Include="AssimpNet">
-      <HintPath>..\ThirdParty\Dependencies\assimp\AssimpNet.dll</HintPath>
-    </Reference>
     <Reference Include="Nvidia.TextureTools">
       <HintPath>..\ThirdParty\Dependencies\NVTT\Nvidia.TextureTools.dll</HintPath>
     </Reference>
@@ -64,20 +61,19 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Win32.Registry" Version="4.5.0" />
+    <PackageReference Include="AssimpNet" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(CopyContentFiles)' == 'True'">
     <Content Include="..\ThirdParty\Dependencies\SharpDX\net40\SharpDX.dll" PackagePath="lib\netstandard2.0" Visible="false" />
     <Content Include="..\ThirdParty\Dependencies\SharpDX\SharpDX.D3DCompiler.dll" PackagePath="lib\netstandard2.0" Visible="false" />
     <Content Include="..\ThirdParty\Dependencies\CppNet\CppNet.dll" PackagePath="lib\netstandard2.0" Visible="false" />
-    <Content Include="..\ThirdParty\Dependencies\assimp\AssimpNet.dll" PackagePath="lib\netstandard2.0" Visible="false" />
     <Content Include="..\ThirdParty\Dependencies\NVTT\Nvidia.TextureTools.dll" PackagePath="lib\netstandard2.0" Visible="false" />
     <Content Include="..\ThirdParty\Dependencies\SharpFont\x64\SharpFont.dll" PackagePath="lib\netstandard2.0" Visible="false" />
     <Content Include="..\ThirdParty\Dependencies\ATI.TextureConverter\ATI.TextureConverter.dll" PackagePath="lib\netstandard2.0" Visible="false" />
     <Content Include="..\ThirdParty\Dependencies\PVRTexLibNET\PVRTexLibNET.dll" PackagePath="lib\netstandard2.0" Visible="false" />
 
-    <Content Include="..\ThirdParty\Dependencies\assimp\libassimp.so" Visible="false">
-      <Link>Assimp64.so</Link>
-      <PackagePath>runtimes\linux-x64\native</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\ThirdParty\Dependencies\FreeImage.NET\Linux\x64\libfreeimage-3.17.0.so" Visible="false">
       <Link>libFreeImage.so</Link>
       <PackagePath>runtimes\linux-x64\native</PackagePath>
@@ -123,11 +119,6 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
 
-    <Content Include="..\ThirdParty\Dependencies\assimp\libassimp.dylib">
-      <Link>libassimp64.dylib</Link>
-      <PackagePath>runtimes\osx\native</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\ThirdParty\Dependencies\FreeImage.NET\MacOS\libfreeimage.dylib" Visible="false">
       <Link>libFreeImage.dylib</Link>
       <PackagePath>runtimes\osx\native</PackagePath>
@@ -173,10 +164,6 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
 
-    <Content Include="..\ThirdParty\Dependencies\assimp\Assimp64.dll" Visible="false">
-      <PackagePath>runtimes\win-x64\native</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="..\ThirdParty\Dependencies\ffmpeg\Windows\x64\ffmpeg.exe" Visible="false">
       <PackagePath>runtimes\win-x64\native</PackagePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -234,20 +221,18 @@ This package provides you with the content pipeline for Windows, Mac and Linux w
     </Compile>
   </ItemGroup>
 
-  <!-- Build and copy MGFXC, just don't reference it! -->
   <PropertyGroup>
     <!-- NuGet warns if we copy assemblies but don't reference them; we suppress those warnings. -->
     <NoWarn>NU5100</NoWarn>
   </PropertyGroup>
+  
   <ItemGroup>
-    <Content Include="..\Artifacts\MonoGame.Effect.Compiler\Release\*" Exclude="..\Artifacts\MonoGame.Effect.Compiler\Release\*.nupkg" Visible="false">
+    <Content Include="..\Artifacts\MonoGame.Effect.Compiler\$(Configuration)\*"
+             Exclude="..\Artifacts\MonoGame.Effect.Compiler\$(Configuration)\*.nupkg"
+             Visible="false">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <Target Name="BuildMGFXC" BeforeTargets="Restore">
-    <MSBuild Projects="..\Tools\MonoGame.Effect.Compiler\MonoGame.Effect.Compiler.csproj" Properties="Configuration=Release;UseAppHost=False" Targets="Restore" />
-    <MSBuild Projects="..\Tools\MonoGame.Effect.Compiler\MonoGame.Effect.Compiler.csproj" Properties="Configuration=Release;UseAppHost=False" Targets="Build" />
-  </Target>
   
   <Import Project="..\Stadia\MonoGame.Framework.Content.Pipeline.targets" Condition="exists('..\Stadia\MonoGame.Framework.Content.Pipeline.targets')" />
 
