@@ -22,7 +22,7 @@ namespace MonoGame.Framework.Collections
         }
 
         /// <summary>
-        /// Creates a <see cref="CachedReadOnlySet{T}"/> with a new empty list.
+        /// Creates a <see cref="CachedReadOnlySet{T}"/> with a new empty set.
         /// </summary>
         public static CachedReadOnlySet<T> Create()
         {

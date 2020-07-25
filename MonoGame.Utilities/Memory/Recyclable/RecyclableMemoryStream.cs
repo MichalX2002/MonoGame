@@ -564,7 +564,7 @@ namespace MonoGame.Framework.Memory
             if (_largeBuffer == null)
             {
                 var blockOffset = GetBlockOffset(_position);
-                while (source.Length > 0)
+                while (!source.IsEmpty)
                 {
                     byte[] currentBlock = _blocks[blockOffset.Block];
                     int remainingInBlock = _memoryManager.BlockSize - blockOffset.Offset;

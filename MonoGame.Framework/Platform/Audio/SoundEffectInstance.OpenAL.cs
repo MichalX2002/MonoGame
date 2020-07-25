@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using MonoGame.OpenAL;
 
 namespace MonoGame.Framework.Audio
@@ -13,14 +14,14 @@ namespace MonoGame.Framework.Audio
         private bool _looped = false;
         private float _alVolume = 1f;
 
-        internal ALController Controller { get; private set; }
-        internal uint? SourceId { get; set; }
-
         private float _reverb = 0f;
         private bool _needsFilterUpdate = false;
         private EfxFilterType _filterType;
         private float _filterQ; // unused?
         private float _frequency;
+
+        internal ALController Controller { get; private set; }
+        internal uint? SourceId { get; set; }
 
         /// <summary>
         /// Gets the OpenAL sound controller, constructs the sound buffer, 
@@ -43,7 +44,7 @@ namespace MonoGame.Framework.Audio
             Vector3 posOffset = emitter.Position - listener.Position;
 
             // set up orientation matrix
-            var orientation = Matrix.CreateWorld(Vector3.Zero, listener.Forward, listener.Up);
+            var orientation = Matrix4x4.CreateWorld(Vector3.Zero, listener.Forward, listener.Up);
 
             // set up our final position and velocity according to orientation of listener
             var finalPos = Vector3.Transform(new Vector3(x, y, z) + posOffset, orientation);
@@ -78,7 +79,7 @@ namespace MonoGame.Framework.Audio
             if (!SourceId.HasValue)
                 SourceId = Controller.ReserveSource();
 
-            AL.Source(SourceId.Value, ALSourcei.Buffer, _effect.SoundBuffer.BufferId);
+            AL.Source(SourceId.Value, ALSourcei.Buffer, _effect!.SoundBuffer.BufferId);
             ALHelper.CheckError("Failed to bind buffer to source.");
 
             // update the position, gain, looping, pitch, and distance model
@@ -243,7 +244,7 @@ namespace MonoGame.Framework.Audio
             if (_reverb <= 0f || SoundEffect.ReverbSlot == 0)
                 return;
             
-            Controller.Efx.BindSourceToAuxiliarySlot(SourceId.Value, (int)SoundEffect.ReverbSlot, 0, 0);
+            Controller.Efx.BindSourceToAuxiliarySlot(SourceId!.Value, (int)SoundEffect.ReverbSlot, 0, 0);
             ALHelper.CheckError("Failed to set reverb.");
         }
 
@@ -280,7 +281,7 @@ namespace MonoGame.Framework.Audio
                     break;
             }
 
-            AL.Source(SourceId.Value, ALSourcei.EfxDirectFilter, Controller.Filter);
+            AL.Source(SourceId!.Value, ALSourcei.EfxDirectFilter, Controller.Filter);
             ALHelper.CheckError("Failed to set DirectFilter.");
 
             _needsFilterUpdate = false;

@@ -138,14 +138,12 @@ namespace MonoGame.Framework.Graphics
             if (!vertexType.IsValueType)
                 throw new ArgumentException("Must be value type.", nameof(vertexType));
 
-            var type = Activator.CreateInstance(vertexType) as IVertexType;
-            var vertexDeclaration = type.VertexDeclaration;
-
-            if (type == null)
+            if (!(Activator.CreateInstance(vertexType) is IVertexType type))
                 throw new ArgumentException(
                     $"{nameof(vertexType)} does not implement {nameof(IVertexType)}.", nameof(vertexType));
 
-            if (vertexDeclaration == null)
+            var vertexDeclaration = type.VertexDeclaration;
+            if (vertexDeclaration is null)
                 throw new Exception(
                     $"{nameof(IVertexType)}.{nameof(IVertexType.VertexDeclaration)} may not be null.");
 
@@ -155,12 +153,12 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Determines whether the specified <see cref="VertexDeclaration"/> is equal to this instance.
         /// </summary>
-        public bool Equals(VertexDeclaration other) => other != null && _data.Equals(other._data);
+        public bool Equals(VertexDeclaration? other) => !(other is null) && _data.Equals(other._data);
 
         /// <summary>
         /// Determines whether the specified <see cref="object"/> is equal to this instance.
         /// </summary>
-        public override bool Equals(object obj) => Equals(obj as VertexDeclaration);
+        public override bool Equals(object? obj) => Equals(obj as VertexDeclaration);
 
         /// <summary>
         /// Returns a hash code for this instance.

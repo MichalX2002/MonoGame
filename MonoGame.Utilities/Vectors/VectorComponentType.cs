@@ -5,6 +5,9 @@ namespace MonoGame.Framework.Vectors
     {
         Undefined,
 
+        /// <summary>
+        /// Represents a bit field component that has a unique encoding.
+        /// </summary>
         BitField,
 
         Int8,

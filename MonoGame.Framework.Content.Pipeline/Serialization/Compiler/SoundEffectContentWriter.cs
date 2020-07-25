@@ -5,6 +5,7 @@
 using MonoGame.Framework.Content.Pipeline.Processors;
 using MonoGame.Framework.Memory;
 using System;
+using System.IO;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
@@ -27,20 +28,26 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 
             output.Write(value.dataLength);
 
-            byte[] buffer = RecyclableMemoryManager.Default.GetBlock();
             try
             {
+                Span<byte> buffer = stackalloc byte[4096];
                 int leftToRead = value.dataLength;
-                int read;
-                while (leftToRead > 0 && (read = value.data.Read(buffer, 0, Math.Min(leftToRead, buffer.Length))) > 0)
+                while (leftToRead > 0)
                 {
-                    output.Write(buffer, 0, read);
+                    int read = value.data.Read(buffer.Slice(0, Math.Min(buffer.Length, leftToRead)));
+                    if (read == 0)
+                        break;
+
+                    output.Write(buffer.Slice(0, read));
                     leftToRead -= read;
                 }
+
+                if (leftToRead > 0)
+                    throw new ArgumentException(
+                        "Failed to read the specified amount of data.", nameof(value));
             }
             finally
             {
-                RecyclableMemoryManager.Default.ReturnBlock(buffer, null);
                 value.data.Dispose();
             }
         }

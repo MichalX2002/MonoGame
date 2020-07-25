@@ -10,6 +10,8 @@ using Android.Views;
 
 namespace MonoGame.Framework
 {
+    // TODO: remove static game activity instance and make it more hierarchical
+
     [CLSCompliant(false)]
     public class AndroidGameActivity : Activity
     {
@@ -20,8 +22,8 @@ namespace MonoGame.Framework
         private ScreenReceiver screenReceiver;
         private OrientationListener _orientationListener;
 
-        public event DatalessEvent<AndroidGameActivity> Paused;
-        public event DatalessEvent<AndroidGameActivity> Resumed;
+        public event Event<AndroidGameActivity>? Paused;
+        public event Event<AndroidGameActivity>? Resumed;
 
         public bool AutoPauseAndResumeMediaPlayer = true;
         public bool RenderOnUIThread = true;

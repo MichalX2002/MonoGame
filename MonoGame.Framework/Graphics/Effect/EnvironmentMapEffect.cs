@@ -2,6 +2,7 @@
 // Copyright (C) Microsoft Corporation. All rights reserved.
 
 using System;
+using System.Numerics;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -31,22 +32,21 @@ namespace MonoGame.Framework.Graphics
         #region Fields
 
         bool oneLight;
-        bool fogEnabled;
         bool fresnelEnabled;
         bool specularEnabled;
 
-        Matrix world = Matrix.Identity;
-        Matrix view = Matrix.Identity;
-        Matrix projection = Matrix.Identity;
-
-        Matrix worldView;
+        Matrix4x4 world = Matrix4x4.Identity;
+        Matrix4x4 view = Matrix4x4.Identity;
+        Matrix4x4 projection = Matrix4x4.Identity;
+        Matrix4x4 worldView;
 
         Vector3 diffuseColor = Vector3.One;
         Vector3 emissiveColor = Vector3.Zero;
         Vector3 ambientLightColor = Vector3.Zero;
-
         float alpha = 1;
-        float fogStart = 0;
+
+        bool fogEnabled;
+        float fogStart;
         float fogEnd = 1;
 
         EffectDirtyFlags dirtyFlags = EffectDirtyFlags.All;
@@ -58,7 +58,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets or sets the world matrix.
         /// </summary>
-        public Matrix World
+        public Matrix4x4 World
         {
             get => world;
             set
@@ -72,7 +72,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets or sets the view matrix.
         /// </summary>
-        public Matrix View
+        public Matrix4x4 View
         {
             get => view;
             set
@@ -86,7 +86,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets or sets the projection matrix.
         /// </summary>
-        public Matrix Projection
+        public Matrix4x4 Projection
         {
             get => projection;
             set
@@ -325,11 +325,9 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-
         #endregion
 
         #region Methods
-
 
         /// <summary>
         /// Creates a new EnvironmentMapEffect with default parameter settings.
@@ -388,14 +386,14 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public void EnableDefaultLighting()
         {
-            AmbientLightColor = EffectHelpers.EnableDefaultLighting(DirectionalLight0, DirectionalLight1, DirectionalLight2);
+            AmbientLightColor = EffectHelpers.EnableDefaultLighting(
+                DirectionalLight0, DirectionalLight1, DirectionalLight2);
         }
-
 
         /// <summary>
         /// Looks up shortcut references to our effect parameters.
         /// </summary>
-        void CacheEffectParameters(EnvironmentMapEffect cloneSource)
+        void CacheEffectParameters(EnvironmentMapEffect? cloneSource)
         {
             textureParam = Parameters["Texture"];
             environmentMapParam = Parameters["EnvironmentMap"];
@@ -411,20 +409,23 @@ namespace MonoGame.Framework.Graphics
             worldInverseTransposeParam = Parameters["WorldInverseTranspose"];
             worldViewProjParam = Parameters["WorldViewProj"];
 
-            DirectionalLight0 = new DirectionalLight(Parameters["DirLight0Direction"],
-                                          Parameters["DirLight0DiffuseColor"],
-                                          null,
-                                          cloneSource?.DirectionalLight0);
+            DirectionalLight0 = new DirectionalLight(
+                Parameters["DirLight0Direction"],
+                Parameters["DirLight0DiffuseColor"],
+                null,
+                cloneSource?.DirectionalLight0);
 
-            DirectionalLight1 = new DirectionalLight(Parameters["DirLight1Direction"],
-                                          Parameters["DirLight1DiffuseColor"],
-                                          null,
-                                          cloneSource?.DirectionalLight1);
+            DirectionalLight1 = new DirectionalLight(
+                Parameters["DirLight1Direction"],
+                Parameters["DirLight1DiffuseColor"],
+                null,
+                cloneSource?.DirectionalLight1);
 
-            DirectionalLight2 = new DirectionalLight(Parameters["DirLight2Direction"],
-                                          Parameters["DirLight2DiffuseColor"],
-                                          null,
-                                          cloneSource?.DirectionalLight2);
+            DirectionalLight2 = new DirectionalLight(
+                Parameters["DirLight2Direction"],
+                Parameters["DirLight2DiffuseColor"],
+                null,
+                cloneSource?.DirectionalLight2);
         }
 
 

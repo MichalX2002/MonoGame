@@ -68,7 +68,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Get or set the depth stencil format for the back buffer.
         /// </summary>
-		public DepthFormat DepthStencilFormat { get; set; }
+        public DepthFormat DepthStencilFormat { get; set; }
 
         /// <summary>
         /// Get or set a value indicating if we are in full screen mode.
@@ -95,19 +95,15 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Get or set the display orientation.
         /// </summary>
-		public DisplayOrientation DisplayOrientation 
-		{ 
-			get; 
-			set; 
-		}
-		
+        public DisplayOrientation DisplayOrientation { get; set; }
+        
         /// <summary>
         /// Get or set the RenderTargetUsage for the back buffer.
         /// Determines if the back buffer is cleared when it is set as the
         /// render target by the <see cref="GraphicsDevice"/>.
         /// <see cref="GraphicsDevice"/> target.
         /// </summary>
-		public RenderTargetUsage RenderTargetUsage { get; set; }
+        public RenderTargetUsage RenderTargetUsage { get; set; }
 
         #endregion Properties
         
@@ -120,19 +116,19 @@ namespace MonoGame.Framework.Graphics
         {
             BackBufferFormat = SurfaceFormat.Rgba32;
 #if IOS
-			// Mainscreen.Bounds does not account for the device's orientation. it ALWAYS assumes portrait
-			var width = (int)(UIScreen.MainScreen.Bounds.Width * UIScreen.MainScreen.Scale);
-			var height = (int)(UIScreen.MainScreen.Bounds.Height * UIScreen.MainScreen.Scale);
-			
-			// Flip the dimensions if we need to.
-			if (TouchPanel.DisplayOrientation == DisplayOrientation.LandscapeLeft ||
-			    TouchPanel.DisplayOrientation == DisplayOrientation.LandscapeRight)
-			{
-				width = height;
-				height = (int)(UIScreen.MainScreen.Bounds.Width * UIScreen.MainScreen.Scale);
-			}
-			
-			backBufferWidth = width;
+            // Mainscreen.Bounds does not account for the device's orientation. it ALWAYS assumes portrait
+            var width = (int)(UIScreen.MainScreen.Bounds.Width * UIScreen.MainScreen.Scale);
+            var height = (int)(UIScreen.MainScreen.Bounds.Height * UIScreen.MainScreen.Scale);
+            
+            // Flip the dimensions if we need to.
+            if (TouchPanel.DisplayOrientation == DisplayOrientation.LandscapeLeft ||
+                TouchPanel.DisplayOrientation == DisplayOrientation.LandscapeRight)
+            {
+                width = height;
+                height = (int)(UIScreen.MainScreen.Bounds.Width * UIScreen.MainScreen.Scale);
+            }
+            
+            backBufferWidth = width;
             backBufferHeight = height;
 #else
             BackBufferWidth = GraphicsDeviceManager.DefaultBackBufferWidth;
@@ -140,9 +136,9 @@ namespace MonoGame.Framework.Graphics
 #endif
             DeviceWindowHandle = IntPtr.Zero;
 #if IOS && !TVOS
-			isFullScreen = UIApplication.SharedApplication.StatusBarHidden;
+            IsFullScreen = UIApplication.SharedApplication.StatusBarHidden;
 #else
-            // isFullScreen = false;
+            //IsFullScreen = false;
 #endif
             DepthStencilFormat = DepthFormat.None;
             MultiSampleCount = 0;
@@ -172,6 +168,5 @@ namespace MonoGame.Framework.Graphics
         }
 
         #endregion Methods
-
     }
 }

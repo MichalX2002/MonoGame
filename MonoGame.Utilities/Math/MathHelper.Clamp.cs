@@ -7,6 +7,8 @@ namespace MonoGame.Framework
 {
     public static partial class MathHelper
     {
+        // TODO: optimize with ARM/NEON instructions
+
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         private static float SseClamp(float value, float min, float max)
         {
@@ -88,27 +90,6 @@ namespace MonoGame.Framework
         /// <param name="min">The minimum value. If <c>value</c> is less than <c>min</c>, <c>min</c> will be returned.</param>
         /// <param name="max">The maximum value. If <c>value</c> is greater than <c>max</c>, <c>max</c> will be returned.</param>
         /// <returns>The clamped value.</returns>
-        public static int Clamp(int value, int min, int max)
-        {
-            if (Sse2.IsSupported)
-            {
-                return (int)Sse2Clamp(value, min, max);
-            }
-            else
-            {
-                value = (value > max) ? max : value;
-                value = (value < min) ? min : value;
-                return value;
-            }
-        }
-
-        /// <summary>
-        /// Restricts a value to be within a specified range.
-        /// </summary>
-        /// <param name="value">The value to clamp.</param>
-        /// <param name="min">The minimum value. If <c>value</c> is less than <c>min</c>, <c>min</c> will be returned.</param>
-        /// <param name="max">The maximum value. If <c>value</c> is greater than <c>max</c>, <c>max</c> will be returned.</param>
-        /// <returns>The clamped value.</returns>
         public static byte Clamp(int value, byte min, byte max)
         {
             if (Sse.IsSupported)
@@ -120,6 +101,48 @@ namespace MonoGame.Framework
                 value = (value > max) ? max : value;
                 value = (value < min) ? min : value;
                 return (byte)value;
+            }
+        }
+
+        /// <summary>
+        /// Restricts a value to be within a specified range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The minimum value. If <c>value</c> is less than <c>min</c>, <c>min</c> will be returned.</param>
+        /// <param name="max">The maximum value. If <c>value</c> is greater than <c>max</c>, <c>max</c> will be returned.</param>
+        /// <returns>The clamped value.</returns>
+        public static short Clamp(int value, short min, short max)
+        {
+            if (Sse.IsSupported)
+            {
+                return (short)SseClamp(value, min, max);
+            }
+            else
+            {
+                value = (value > max) ? max : value;
+                value = (value < min) ? min : value;
+                return (short)value;
+            }
+        }
+
+        /// <summary>
+        /// Restricts a value to be within a specified range.
+        /// </summary>
+        /// <param name="value">The value to clamp.</param>
+        /// <param name="min">The minimum value. If <c>value</c> is less than <c>min</c>, <c>min</c> will be returned.</param>
+        /// <param name="max">The maximum value. If <c>value</c> is greater than <c>max</c>, <c>max</c> will be returned.</param>
+        /// <returns>The clamped value.</returns>
+        public static int Clamp(int value, int min, int max)
+        {
+            if (Sse2.IsSupported)
+            {
+                return (int)Sse2Clamp(value, min, max);
+            }
+            else
+            {
+                value = (value > max) ? max : value;
+                value = (value < min) ? min : value;
+                return value;
             }
         }
 

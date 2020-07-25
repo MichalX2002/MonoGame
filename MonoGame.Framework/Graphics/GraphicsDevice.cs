@@ -4,6 +4,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -62,9 +64,9 @@ namespace MonoGame.Framework.Graphics
         /// performance warnings on Intel/Mesa.
         /// </summary>
 #if DEBUG
-        private static readonly Color DiscardColor = new Color(68, 34, 136, 255);
+        private static Color DiscardColor { get; } = new Color(68, 34, 136, 255);
 #else
-        private static readonly Color DiscardColor = new Color(0, 0, 0, 255);
+        private static Color DiscardColor { get; } = new Color(0, 0, 0, 255);
 #endif
 
         private Shader _vertexShader;
@@ -84,7 +86,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Resources may be added to and removed from the list from many threads.
         /// </summary>
-        private readonly object _resourcesLock = new object();
+        private object ResourcesLock { get; } = new object();
 
         /// <summary>
         /// Use <see cref="WeakReference"/> for the global resources list as we do not know when
@@ -127,22 +129,6 @@ namespace MonoGame.Framework.Graphics
 
         public PresentationParameters PresentationParameters { get; private set; }
         public GraphicsProfile GraphicsProfile { get; }
-
-        /// <summary>
-        /// Indicates whether DX9 style pixel addressing or standard pixel addressing is used.
-        /// When <see langword="true"/>, a half-pixel offset needs to be added to projection matrices.
-        /// Set to <see langword="false"/> by default.
-        /// <para>
-        /// See also <seealso cref="GraphicsDeviceManager.PreferHalfPixelOffset"/>.
-        /// </para>
-        /// </summary>
-        /// <remarks>
-        /// XNA uses DirectX9 for its graphics. DirectX9 interprets UV
-        /// coordinates differently from other graphics API's.
-        /// This is typically referred to as the half-pixel offset.
-        /// MonoGame replicates XNA behavior if this flag is set to <see langword="true"/>.
-        /// </remarks>
-        public bool UseHalfPixelOffset { get; }
 
         #endregion
 
@@ -362,13 +348,13 @@ namespace MonoGame.Framework.Graphics
         #region Events
 
         // TODO: Graphics Device events need implementing
-        public event Event<GraphicsDevice> Disposing;
-        public event Event<GraphicsDevice> DeviceLost;
-        public event Event<GraphicsDevice> DeviceReset;
-        public event Event<GraphicsDevice> DeviceResetting;
-        public event DataEvent<GraphicsDevice, object> ResourceCreated;
-        public event DataEvent<GraphicsDevice, ResourceDestroyedEventArgs> ResourceDestroyed;
-        internal event DataEvent<GraphicsDevice, PresentationParameters> PresentationChanged;
+        public event Event<GraphicsDevice>? Disposing;
+        public event Event<GraphicsDevice>? DeviceLost;
+        public event Event<GraphicsDevice>? DeviceReset;
+        public event Event<GraphicsDevice>? DeviceResetting;
+        public event DataEvent<GraphicsDevice, object>? ResourceCreated;
+        public event DataEvent<GraphicsDevice, ResourceDestroyedEventArgs>? ResourceDestroyed;
+        public event DataEvent<GraphicsDevice, PresentationParameters>? PresentationChanged;
 
         #endregion
 
@@ -409,49 +395,6 @@ namespace MonoGame.Framework.Graphics
                 throw new ArgumentNullException(nameof(presentationParameters));
 
             GraphicsProfile = graphicsProfile;
-            Setup();
-
-            Capabilities = new GraphicsCapabilities();
-            Capabilities.Initialize(this);
-
-            Initialize();
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GraphicsDevice" /> class.
-        /// </summary>
-        /// <param name="adapter">The graphics adapter.</param>
-        /// <param name="graphicsProfile">The graphics profile.</param>
-        /// <param name="useHalfPixelOffset">
-        /// Indicates if DX9 style pixel addressing or standard pixel addressing should be used.
-        /// </param>
-        /// <param name="presentationParameters">The presentation options.</param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="presentationParameters"/> is <see langword="null"/>.
-        /// </exception>
-        public GraphicsDevice(
-            GraphicsAdapter adapter,
-            GraphicsProfile graphicsProfile,
-            bool useHalfPixelOffset,
-            PresentationParameters presentationParameters)
-        {
-            Adapter = adapter ?? throw new ArgumentNullException(nameof(adapter));
-
-            if (!adapter.IsProfileSupported(graphicsProfile))
-                throw new NoSuitableGraphicsDeviceException(
-                    $"Adapter '{ adapter.Description}' does not support the {graphicsProfile} profile.");
-
-            PresentationParameters = presentationParameters ??
-                throw new ArgumentNullException(nameof(presentationParameters));
-
-#if DIRECTX
-            // TODO: we need to figure out how to inject the half pixel offset into DX shaders
-            useHalfPixelOffset = false;
-#endif
-
-            Adapter = adapter;
-            GraphicsProfile = graphicsProfile;
-            UseHalfPixelOffset = useHalfPixelOffset;
             Setup();
 
             Capabilities = new GraphicsCapabilities();
@@ -594,7 +537,7 @@ namespace MonoGame.Framework.Graphics
 
         internal void AddResourceReference(WeakReference resourceReference)
         {
-            lock (_resourcesLock)
+            lock (ResourcesLock)
             {
                 _resources.Add(resourceReference);
             }
@@ -602,7 +545,7 @@ namespace MonoGame.Framework.Graphics
 
         internal void RemoveResourceReference(WeakReference resourceReference)
         {
-            lock (_resourcesLock)
+            lock (ResourcesLock)
             {
                 _resources.Remove(resourceReference);
             }
@@ -647,6 +590,7 @@ namespace MonoGame.Framework.Graphics
         {
             PresentationParameters = presentationParameters ??
                 throw new ArgumentNullException(nameof(presentationParameters));
+
             Reset();
         }
 
@@ -658,7 +602,7 @@ namespace MonoGame.Framework.Graphics
         {
             DeviceResetting?.Invoke(this);
 
-            lock (_resourcesLock)
+            lock (ResourcesLock)
             {
                 foreach (var resource in _resources)
                 {
@@ -684,7 +628,7 @@ namespace MonoGame.Framework.Graphics
 
         #region RenderTargets
 
-        public void SetRenderTarget(RenderTarget2D renderTarget)
+        public void SetRenderTarget(RenderTarget2D? renderTarget)
         {
             if (renderTarget == null)
             {
@@ -697,7 +641,7 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        public void SetRenderTarget(RenderTargetCube renderTarget, CubeMapFace cubeMapFace)
+        public void SetRenderTarget(RenderTargetCube? renderTarget, CubeMapFace cubeMapFace)
         {
             if (renderTarget == null)
             {
@@ -751,7 +695,7 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        public void SetRenderTargets(params RenderTargetBinding[] renderTargets)
+        public void SetRenderTargets(params RenderTargetBinding[]? renderTargets)
         {
             SetRenderTargets(renderTargets.AsSpan());
         }
@@ -948,12 +892,12 @@ namespace MonoGame.Framework.Graphics
             if (vertexData.IsEmpty)
                 throw new ArgumentEmptyException(nameof(vertexData));
 
+            if (vertexDeclaration is null)
+                throw new ArgumentNullException(nameof(vertexDeclaration));
+
             int vertexCount = GetElementCountForType(primitiveType, vertexData.Length);
             if (vertexCount > vertexData.Length)
                 throw new ArgumentOutOfRangeException(nameof(vertexData));
-
-            if (vertexDeclaration == null)
-                throw new ArgumentNullException(nameof(vertexDeclaration));
 
             PlatformDrawUserPrimitives(primitiveType, vertexData, vertexDeclaration);
 
@@ -1077,7 +1021,7 @@ namespace MonoGame.Framework.Graphics
         /// All indices in the span are relative to the first vertex.
         /// An index of zero in the index span points to the first vertex in the vertex span.
         /// </remarks>
-        public unsafe void DrawUserIndexedPrimitives<TVertex, TIndex>(
+        public void DrawUserIndexedPrimitives<TVertex, TIndex>(
             PrimitiveType primitiveType,
             ReadOnlySpan<TVertex> vertexData,
             ReadOnlySpan<TIndex> indexData,
@@ -1086,23 +1030,23 @@ namespace MonoGame.Framework.Graphics
             where TVertex : unmanaged
             where TIndex : unmanaged
         {
-            if (vertexData.IsEmpty) 
+            if (vertexDeclaration is null)
+                throw new ArgumentNullException(nameof(vertexDeclaration));
+
+            if (vertexData.IsEmpty)
                 throw new ArgumentEmptyException(nameof(vertexData));
-            if (indexData.IsEmpty) 
+            if (indexData.IsEmpty)
                 throw new ArgumentEmptyException(nameof(indexData));
 
             if (primitiveCount <= 0 || GetElementCountForType(primitiveType, primitiveCount) > indexData.Length)
                 throw new ArgumentOutOfRangeException(nameof(primitiveCount));
 
-            if (vertexDeclaration == null)
-                throw new ArgumentNullException(nameof(vertexDeclaration));
-
-            if (vertexDeclaration.VertexStride < sizeof(TVertex))
+            if (vertexDeclaration.VertexStride < Unsafe.SizeOf<TIndex>())
                 throw new ArgumentOutOfRangeException(nameof(vertexDeclaration),
                     $"Vertex stride of {nameof(vertexDeclaration)} should be at least as big as the stride of the actual vertices.");
 
             IndexElementSize indexElementSize;
-            int indexSize = sizeof(TIndex);
+            int indexSize = Unsafe.SizeOf<TIndex>();
             if (indexSize == 2)
                 indexElementSize = IndexElementSize.Short;
             else if (indexSize == 4)
@@ -1182,8 +1126,8 @@ namespace MonoGame.Framework.Graphics
 
             int formatSize = PresentationParameters.BackBufferFormat.GetSize();
             if (sizeof(T) > formatSize || formatSize % sizeof(T) != 0)
-                throw new ArgumentException(
-                    $"{nameof(T)} is of an invalid size for the format of the backbuffer.", nameof(T));
+                throw new InvalidOperationException(
+                    $"{nameof(T)} is of an invalid size for the format of the backbuffer.");
 
             int spanBytes = destination.Length * sizeof(T);
             if (spanBytes > rect.Width * rect.Height * formatSize)
@@ -1269,12 +1213,12 @@ namespace MonoGame.Framework.Graphics
                 if (disposing)
                 {
                     // Dispose of remaining graphics resources before disposing of the graphics device
-                    lock (_resourcesLock)
+                    lock (ResourcesLock)
                     {
-                        // Save to array as resources remove themselves from the list upon disposal.
-                        foreach (var resource in _resources.ToArray())
+                        // Reverse loop as resources remove themselves from the list upon disposal.
+                        for (int i = _resources.Count; i-- > 0;)
                         {
-                            if (resource.Target is IDisposable target)
+                            if (_resources[i].Target is IDisposable target)
                                 target.Dispose();
                         }
                         _resources.Clear();
@@ -1282,21 +1226,15 @@ namespace MonoGame.Framework.Graphics
 
                     EffectCache.Clear();
 
-                    _blendState = null;
-                    _actualBlendState = null;
                     _blendStateAdditive.Dispose();
                     _blendStateAlphaBlend.Dispose();
                     _blendStateNonPremultiplied.Dispose();
                     _blendStateOpaque.Dispose();
 
-                    _depthStencilState = null;
-                    _actualDepthStencilState = null;
                     _depthStencilStateDefault.Dispose();
                     _depthStencilStateDepthRead.Dispose();
                     _depthStencilStateNone.Dispose();
 
-                    _rasterizerState = null;
-                    _actualRasterizerState = null;
                     _rasterizerStateCullClockwise.Dispose();
                     _rasterizerStateCullCounterClockwise.Dispose();
                     _rasterizerStateCullNone.Dispose();

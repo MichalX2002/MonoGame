@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace MonoGame.Framework.Vectors
 {
@@ -67,6 +68,10 @@ namespace MonoGame.Framework.Vectors
         {
             if (components == null) throw new ArgumentNullException(nameof(components));
             if (components.Length == 0) throw new ArgumentEmptyException(nameof(components));
+
+            foreach (var component in components)
+                AssertValidComponent(component);
+
             Components = (VectorComponent[])components.Clone();
         }
 
@@ -76,7 +81,15 @@ namespace MonoGame.Framework.Vectors
         /// <param name="component">The vector component.</param>
         public VectorComponentInfo(VectorComponent component)
         {
+            AssertValidComponent(component);
+
             Components = new[] { component };
+        }
+
+        private static void AssertValidComponent(VectorComponent component)
+        {
+            if (!component.IsValid)
+                throw new ArgumentException("The component is not valid.", nameof(component));
         }
 
         public bool HasComponentType(VectorComponentChannel componentType)
@@ -107,7 +120,29 @@ namespace MonoGame.Framework.Vectors
 
         public override string ToString()
         {
+            var components = Components.Span;
+            int bitDepth = 0;
 
+            var builder = new StringBuilder();
+            builder.Append('{');
+            for (int i = 0; i < components.Length; i++)
+            {
+                var component = components[i];
+                bitDepth += component.Bits;
+
+                builder.Append(component.Channel).Append(':');
+
+                if (component.Type == VectorComponentType.BitField)
+                    builder.Append(component.Bits).Append("bit");
+                else
+                    builder.Append(component.Type.ToShortString());
+
+                if (i < components.Length - 1)
+                    builder.Append(", ");
+            }
+            builder.Append('}');
+            builder.Append(bitDepth).Append("bit");
+            return builder.ToString();
         }
 
         public static bool operator ==(in VectorComponentInfo a, in VectorComponentInfo b)

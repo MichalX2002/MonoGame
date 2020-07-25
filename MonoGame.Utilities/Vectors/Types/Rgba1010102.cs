@@ -47,7 +47,7 @@ namespace MonoGame.Framework.Vectors
         {
             scaledVector *= MaxValue;
             scaledVector += new Vector4(0.5f);
-            scaledVector.Clamp(Vector4.Zero, MaxValue);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, MaxValue);
 
             PackedValue = (uint)(
                 (((int)scaledVector.X & MaxXYZ) << 0) |

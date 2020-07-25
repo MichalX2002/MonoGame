@@ -160,6 +160,14 @@ namespace MonoGame.Framework
             Height = size.Height;
         }
 
+        public RectangleF(Vector2 position, SizeF size)
+        {
+            X = position.X;
+            Y = position.Y;
+            Width = size.Width;
+            Height = size.Height;
+        }
+
         /// <summary>
         /// Computes the <see cref="RectangleF" /> from a minimum <see cref="PointF" /> and maximum
         /// <see cref="PointF" />.

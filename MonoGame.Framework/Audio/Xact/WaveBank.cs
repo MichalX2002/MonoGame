@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace MonoGame.Framework.Audio
@@ -13,7 +14,7 @@ namespace MonoGame.Framework.Audio
     public partial class WaveBank : IDisposable
     {
         private readonly SoundEffect[] _sounds;
-        private readonly StreamInfo[] _streams;
+        private readonly StreamInfo[]? _streams;
         private readonly string _bankName;
         private readonly string _waveBankFileName;
         private readonly bool _streaming;
@@ -61,6 +62,16 @@ namespace MonoGame.Framework.Audio
         //private const int Flag_SyncDisabled = 0x00040000; // Bank is disabled for audition sync
         //private const int Flag_SeekTables = 0x00080000; // Bank includes seek tables.
         //private const int Flag_Mask = 0x000F0000;
+
+        /// <summary>
+        /// This event is triggered when the WaveBank is being disposed.
+        /// </summary>
+        public event Event<WaveBank>? Disposing;
+
+        /// <summary>
+        /// Gets whether the <see cref="WaveBank"/> has been disposed.
+        /// </summary>
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// </summary>
@@ -147,11 +158,13 @@ namespace MonoGame.Framework.Audio
 
                 if ((wavebankheader.Version == 2) || (wavebankheader.Version == 3))
                 {
-                    wavebankdata.BankName = System.Text.Encoding.UTF8.GetString(reader.ReadBytes(16), 0, 16).Replace("\0", "");
+                    wavebankdata.BankName = System.Text.Encoding.UTF8.GetString(
+                        reader.ReadBytes(16), 0, 16).Replace("\0", "", StringComparison.InvariantCulture);
                 }
                 else
                 {
-                    wavebankdata.BankName = System.Text.Encoding.UTF8.GetString(reader.ReadBytes(64), 0, 64).Replace("\0", "");
+                    wavebankdata.BankName = System.Text.Encoding.UTF8.GetString(
+                        reader.ReadBytes(64), 0, 64).Replace("\0", "", StringComparison.InvariantCulture);
                 }
 
                 _bankName = wavebankdata.BankName;
@@ -364,10 +377,12 @@ namespace MonoGame.Framework.Audio
         {
         }
 
-        internal SoundEffectInstance GetSoundEffectInstance(int trackIndex, out bool streaming)
+        internal SoundEffectInstance? GetSoundEffectInstance(int trackIndex, out bool streaming)
         {
             if (_streaming)
             {
+                Debug.Assert(_streams != null);
+
                 streaming = true;
                 var stream = _streams[trackIndex];
                 return PlatformCreateStream(stream);
@@ -380,43 +395,35 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        /// <summary>
-        /// This event is triggered when the WaveBank is disposed.
-        /// </summary>
-        public event Event<WaveBank> Disposing;
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
+                if (disposing)
+                {
+                    Disposing?.Invoke(this);
 
-        /// <summary>
-        /// Is true if the WaveBank has been disposed.
-        /// </summary>
-        public bool IsDisposed { get; private set; }
+                    foreach (var s in _sounds)
+                        s.Dispose();
 
-        /// <summary>
-        /// Disposes the WaveBank.
-        /// </summary>
+                    IsPrepared = false;
+                    IsInUse = false;
+                }
+
+                IsDisposed = true;
+            }
+        }
+
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        private void Dispose(bool disposing)
-        {
-            if (IsDisposed)
-                return;
-
-            IsDisposed = true;
-
-            if (disposing)
-            {
-                foreach (var s in _sounds)
-                    s.Dispose();
-
-                IsPrepared = false;
-                IsInUse = false;
-                Disposing?.Invoke(this);
-            }
-        }
-
+        /// <summary>
+        /// Disposes this <see cref="WaveBank"/>.
+        /// </summary>
         ~WaveBank()
         {
             Dispose(false);

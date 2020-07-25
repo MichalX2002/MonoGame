@@ -9,7 +9,7 @@ namespace MonoGame.Framework.Graphics
 {
     public abstract partial class BufferBase : GraphicsResource
     {
-        internal GLHandle _handle;
+        internal GLHandle _glBuffer;
         internal BufferUsageHint _usageHint;
 
         private BufferTarget _target;
@@ -18,7 +18,7 @@ namespace MonoGame.Framework.Graphics
         /// <inheritdoc/>
         protected override void GraphicsDeviceResetting()
         {
-            _handle = default;
+            _glBuffer = default;
         }
 
         internal virtual void DiscardBuffer(BufferTarget target, SetDataOptions options, int byteSize)
@@ -43,20 +43,18 @@ namespace MonoGame.Framework.Graphics
 
         internal void GenerateIfRequired()
         {
-            if (!_handle.IsNull)
+            if (!_glBuffer.IsNull)
                 return;
 
-            GL.GenBuffers(1, out int buffer);
+            _glBuffer =  GL.GenBuffer();
             GL.CheckError();
 
-            GL.BindBuffer(_target, buffer);
+            GL.BindBuffer(_target, _glBuffer);
             GL.CheckError();
 
             int sizeInBytes = Capacity * _elementSize;
             GL.BufferData(_target, (IntPtr)sizeInBytes, IntPtr.Zero, _usageHint);
             GL.CheckError();
-
-            _handle = GLHandle.Buffer(buffer);
         }
 
         /// <summary>
@@ -66,7 +64,7 @@ namespace MonoGame.Framework.Graphics
         protected override void Dispose(bool disposing)
         {
             if (!IsDisposed)
-                GraphicsDevice.DisposeResource(_handle);
+                GraphicsDevice.DisposeResource(_glBuffer);
 
             base.Dispose(disposing);
         }

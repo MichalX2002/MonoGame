@@ -9,6 +9,7 @@ namespace MonoGame.Imaging.Processing
     {
         public IImagingConfig Config { get; }
         public IReadOnlyPixelRows Pixels { get; }
+        public bool IsDisposed { get; private set; }
 
         public int Length => Pixels.Length;
         public int ElementSize => Pixels.ElementSize;
@@ -27,8 +28,18 @@ namespace MonoGame.Imaging.Processing
             Pixels.GetPixelByteRow(x, y, destination);
         }
 
-        public virtual void Dispose()
+        protected virtual void Dispose(bool disposing)
         {
+            if (!IsDisposed)
+            {
+                IsDisposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

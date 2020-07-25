@@ -10,7 +10,9 @@ namespace MonoGame.Framework.Input
         private static TaskCompletionSource<string> tcs;
         private static AlertDialog alert;
 
-        private static Task<string> PlatformShow(string title, string description, string defaultText, bool usePasswordMode)
+        // TODO: more input types/modes
+        private static Task<string> PlatformShow(
+            string title, string description, string defaultText, bool usePasswordMode)
         {
             tcs = new TaskCompletionSource<string>();
             var activity = AndroidGameActivity.Instance;
@@ -28,7 +30,8 @@ namespace MonoGame.Framework.Input
                     input.SetSelection(defaultText.Length);
 
                 if (usePasswordMode)
-                    input.InputType = Android.Text.InputTypes.ClassText | Android.Text.InputTypes.TextVariationPassword;
+                    input.InputType = 
+                        Android.Text.InputTypes.ClassText | Android.Text.InputTypes.TextVariationPassword;
 
                 alert.SetView(input);
 

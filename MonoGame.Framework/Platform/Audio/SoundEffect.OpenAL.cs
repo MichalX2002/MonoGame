@@ -25,7 +25,7 @@ namespace MonoGame.Framework.Audio
         internal static uint ReverbSlot = 0;
         internal static uint ReverbEffect = 0;
 
-        internal ALBuffer SoundBuffer;
+        internal ALBuffer? SoundBuffer;
 
         #region Public Constructors
 
@@ -46,8 +46,8 @@ namespace MonoGame.Framework.Audio
             ReadOnlySpan<byte> data, int sampleBits, int sampleRate, AudioChannels channels,
             int loopStart, int loopLength)
         {
-            byte[] largeBuffer = null;
-            string bufferTag = null;
+            byte[]? largeBuffer = null;
+            string? bufferTag = null;
             try
             {
                 if (sampleBits == 24)
@@ -72,76 +72,74 @@ namespace MonoGame.Framework.Audio
         private void PlatformInitializeIeeeFloat(
             ReadOnlySpan<byte> data, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
         {
-            if (!ALController.Instance.SupportsFloat32)
+            if (ALController.Instance.SupportsFloat32)
+            {
+                var format = AudioLoader.GetSoundFormat(AudioLoader.FormatIeee, (int)channels, 32);
+                SoundBuffer = ALBufferPool.Rent();
+                SoundBuffer.BufferData(data, format, sampleRate);
+            }
+            else
             {
                 var floatData = MemoryMarshal.Cast<byte, float>(data);
                 int byteCount = floatData.Length * sizeof(short);
-                bool isRecyclable = byteCount <= RecyclableMemoryManager.Default.MaximumBufferSize;
 
-                byte[] largeBuffer = null;
                 string bufferTag = nameof(PlatformInitializeIeeeFloat);
-                try
+                using (var buffer = RecyclableMemoryManager.Default.GetBuffer(byteCount, bufferTag))
                 {
-                    largeBuffer = isRecyclable
-                        ? RecyclableMemoryManager.Default.GetBuffer(byteCount, bufferTag).Buffer
-                        : new byte[byteCount];
+                    var largeBuffer = buffer.Buffer;
 
                     // If 32-bit IEEE float is not supported, convert to 16-bit signed PCM
                     AudioLoader.ConvertSingleToInt16(floatData, MemoryMarshal.Cast<byte, short>(largeBuffer));
                     PlatformInitializePcm(largeBuffer, 16, sampleRate, channels, loopStart, loopLength);
-                    return;
-                }
-                finally
-                {
-                    if (isRecyclable)
-                        RecyclableMemoryManager.Default.ReturnBuffer(largeBuffer, bufferTag);
                 }
             }
-
-            var format = AudioLoader.GetSoundFormat(AudioLoader.FormatIeee, (int)channels, 32);
-            SoundBuffer = ALBufferPool.Rent();
-            SoundBuffer.BufferData(data, format, sampleRate);
         }
 
         private void PlatformInitializeAdpcm(
             ReadOnlySpan<byte> data, int sampleRate, AudioChannels channels, int blockAlignment,
             int loopStart, int loopLength)
         {
-            if (!ALController.Instance.SupportsAdpcm)
+            if (ALController.Instance.SupportsAdpcm)
+            {
+                var format = AudioLoader.GetSoundFormat(AudioLoader.FormatMsAdpcm, (int)channels, 0);
+                int sampleAlignment = AudioLoader.SampleAlignment(format, blockAlignment);
+
+                // Buffer length must be aligned with the block alignment
+                int alignedCount = data.Length - (data.Length % blockAlignment);
+                data = data.Slice(0, alignedCount);
+
+                SoundBuffer = ALBufferPool.Rent();
+                SoundBuffer.BufferData(data, format, sampleRate, sampleAlignment);
+            }
+            else
             {
                 // If MS-ADPCM is not supported, convert to 16-bit signed PCM
-                var pcmData = AudioLoader.ConvertMsAdpcmToPcm(data, (int)channels, blockAlignment);
+                var pcmData = MemoryMarshal.AsBytes(
+                    AudioLoader.ConvertMsAdpcmToPcm(data, (int)channels, blockAlignment).AsSpan());
+
                 PlatformInitializePcm(pcmData, 16, sampleRate, channels, loopStart, loopLength);
-                return;
             }
-
-            var format = AudioLoader.GetSoundFormat(AudioLoader.FormatMsAdpcm, (int)channels, 0);
-            int sampleAlignment = AudioLoader.SampleAlignment(format, blockAlignment);
-
-            // Buffer length must be aligned with the block alignment
-            int alignedCount = data.Length - (data.Length % blockAlignment);
-            data = data.Slice(0, alignedCount);
-
-            SoundBuffer = ALBufferPool.Rent();
-            SoundBuffer.BufferData(data, format, sampleRate, sampleAlignment);
         }
 
         private void PlatformInitializeIma4(
             ReadOnlySpan<byte> data, int sampleRate, AudioChannels channels, int blockAlignment,
             int loopStart, int loopLength)
         {
-            if (!ALController.Instance.SupportsIma4)
+            if (ALController.Instance.SupportsIma4)
             {
-                // If IMA/ADPCM is not supported, convert to 16-bit signed PCM
-                data = AudioLoader.ConvertIma4ToPcm(data, (int)channels, blockAlignment);
-                PlatformInitializePcm(data, 16, sampleRate, channels, loopStart, loopLength);
-                return;
+                var format = AudioLoader.GetSoundFormat(AudioLoader.FormatIma4, (int)channels, 0);
+                int sampleAlignment = AudioLoader.SampleAlignment(format, blockAlignment);
+                SoundBuffer = ALBufferPool.Rent();
+                SoundBuffer.BufferData(data, format, sampleRate, sampleAlignment);
             }
+            else
+            {
+                // If IMA4 is not supported, convert to 16-bit signed PCM
+                data = MemoryMarshal.AsBytes(
+                    AudioLoader.ConvertIma4ToPcm(data, (int)channels, blockAlignment).AsSpan());
 
-            var format = AudioLoader.GetSoundFormat(AudioLoader.FormatIma4, (int)channels, 0);
-            int sampleAlignment = AudioLoader.SampleAlignment(format, blockAlignment);
-            SoundBuffer = ALBufferPool.Rent();
-            SoundBuffer.BufferData(data, format, sampleRate, sampleAlignment);
+                PlatformInitializePcm(data, 16, sampleRate, channels, loopStart, loopLength);
+            }
         }
 
         private void PlatformInitializeFormat(
@@ -154,6 +152,7 @@ namespace MonoGame.Framework.Audio
             short bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(14));
 
             var format = AudioLoader.GetSoundFormat(wavFormat, channels, bitsPerSample);
+
             PlatformInitializeBuffer(
                 data, format, channels, sampleRate, blockAlignment, bitsPerSample, loopStart, loopLength);
         }
@@ -204,7 +203,8 @@ namespace MonoGame.Framework.Audio
 
             PlatformInitializeAdpcm(
                 data, sampleRate, (AudioChannels)channels, (blockAlignment + 16) * channels, loopStart, loopLength);
-            duration = TimeSpan.FromSeconds(SoundBuffer.Duration);
+
+            duration = TimeSpan.FromSeconds(SoundBuffer!.Duration);
         }
 
         #endregion
@@ -232,7 +232,7 @@ namespace MonoGame.Framework.Audio
             // map these from range 0-15 to 0-1
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbDiffusion, reverbSettings.EarlyDiffusion / 15f);
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbDiffusion, reverbSettings.LateDiffusion / 15f);
-            efx.Effect(ReverbEffect, EfxEffectf.EaxReverbGainLF, 
+            efx.Effect(ReverbEffect, EfxEffectf.EaxReverbGainLF,
                 Math.Min(XactHelpers.ParseVolumeFromDecibels(reverbSettings.LowEqGain - 8f), 1f));
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbLFReference, (reverbSettings.LowEqCutoff * 50f) + 50f);
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbGainHF,
@@ -240,7 +240,7 @@ namespace MonoGame.Framework.Audio
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbHFReference, (reverbSettings.HighEqCutoff * 500f) + 1000f);
 
             // According to Xamarin docs EaxReverbReflectionsGain Unit: Linear gain Range [0f .. 3.16f] Default: 0.05f
-            efx.Effect(ReverbEffect, EfxEffectf.EaxReverbReflectionsGain, 
+            efx.Effect(ReverbEffect, EfxEffectf.EaxReverbReflectionsGain,
                 Math.Min(XactHelpers.ParseVolumeFromDecibels(reverbSettings.ReflectionsGainDb), 3.16f));
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbGain,
                 Math.Min(XactHelpers.ParseVolumeFromDecibels(reverbSettings.ReverbGainDb), 1f));

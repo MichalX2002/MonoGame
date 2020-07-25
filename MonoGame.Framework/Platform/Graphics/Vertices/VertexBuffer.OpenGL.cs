@@ -20,7 +20,7 @@ namespace MonoGame.Framework.Graphics
             // http://www.khronos.org/registry/gles/extensions/OES/OES_mapbuffer.txt
             throw new NotSupportedException("Vertex buffers are write-only on OpenGL ES platforms");
 #else
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _handle);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _glBuffer);
             GL.CheckError();
 
             // Pointer to the start of data in the vertex buffer
@@ -61,7 +61,7 @@ namespace MonoGame.Framework.Graphics
         {
             GenerateIfRequired();
 
-            GL.BindBuffer(BufferTarget.ArrayBuffer, _handle);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, _glBuffer);
             GL.CheckError();
 
             DiscardBuffer(BufferTarget.ArrayBuffer, options, Capacity * VertexDeclaration.VertexStride);

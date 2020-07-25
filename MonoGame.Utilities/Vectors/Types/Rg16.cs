@@ -48,7 +48,7 @@ namespace MonoGame.Framework.Vectors
         /// <summary>
         /// Gets the packed vector in <see cref="Vector2"/> format.
         /// </summary>
-        public readonly Vector2 ToVector2()
+        public readonly Vector2 ToScaledVector2()
         {
             return new Vector2(R, G) / byte.MaxValue;
         }
@@ -62,25 +62,50 @@ namespace MonoGame.Framework.Vectors
             set => Unsafe.As<Rg16, ushort>(ref this) = value;
         }
 
-        public void FromScaledVector(Vector4 scaledVector)
+        public void FromScaledVector(Vector3 scaledVector)
         {
             var vector = scaledVector.ToVector2();
             vector *= byte.MaxValue;
             vector += new Vector2(0.5f);
-            vector.Clamp(byte.MinValue, byte.MaxValue);
+            vector = VectorHelper.ZeroMax(vector, byte.MaxValue);
 
             R = (byte)vector.X;
             G = (byte)vector.Y;
         }
 
+        public void FromScaledVector(Vector4 scaledVector)
+        {
+            FromScaledVector(scaledVector.ToVector3());
+        }
+
+        public readonly Vector3 ToScaledVector3()
+        {
+            return new Vector3(ToScaledVector2(), 0);
+        }
+
         public readonly Vector4 ToScaledVector4()
         {
-            return new Vector4(ToVector2(), 0, 1);
+            return new Vector4(ToScaledVector3(), 1);
         }
 
         #endregion
 
         #region IPixel
+
+        public void FromAlpha(Alpha8 source)
+        {
+            R = G = byte.MaxValue;
+        }
+
+        public void FromAlpha(Alpha16 source)
+        {
+            R = G = byte.MaxValue;
+        }
+
+        public void FromAlpha(AlphaF source)
+        {
+            R = G = byte.MaxValue;
+        }
 
         public void FromGray(Gray8 source)
         {
@@ -121,13 +146,24 @@ namespace MonoGame.Framework.Vectors
             G = ScalingHelper.ToUInt8(source.G);
         }
 
+        public readonly Alpha8 ToAlpha8()
+        {
+            return Alpha8.Opaque;
+        }
+
+        public readonly Alpha16 ToAlpha16()
+        {
+            return Alpha16.Opaque;
+        }
+        
+        public readonly AlphaF ToAlphaF()
+        {
+            return AlphaF.Opaque;
+        }
+
         public readonly Color ToColor()
         {
-            return new Color(
-                ScalingHelper.ToUInt8(R),
-                ScalingHelper.ToUInt8(G),
-                (byte)0,
-                byte.MaxValue);
+            return new Color(R, G, (byte)0, byte.MaxValue);
         }
 
         #endregion

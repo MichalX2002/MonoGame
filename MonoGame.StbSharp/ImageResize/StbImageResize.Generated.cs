@@ -715,7 +715,7 @@ namespace StbSharp
                     s.ring_buffer_num_entries;
             }
 
-            Span<float> ring_buffer = GetRingBufferEntry(s.ring_buffer, ring_buffer_index, s.ring_buffer_length);
+            Span<float> ring_buffer = GetRingBufferEntry(s.ring_buffer, ring_buffer_index, s.RingBufferLength);
             ring_buffer.Fill(0);
 
             return ring_buffer;
@@ -1159,7 +1159,7 @@ namespace StbSharp
             int ring_buffer_begin_index = (int)(s.ring_buffer_begin_index);
             int ring_buffer_first_scanline = (int)(s.ring_buffer_first_scanline);
             int ring_buffer_last_scanline = (int)(s.ring_buffer_last_scanline);
-            int ring_buffer_length = s.ring_buffer_length;
+            int ring_buffer_length = s.RingBufferLength;
             int output_row_start = (int)(n * s.output_stride_bytes);
 
             int coefficient_width = (int)(s.vertical_coefficient_width);
@@ -1307,7 +1307,7 @@ namespace StbSharp
                         (int)(s.ring_buffer_begin_index),
                         (int)(s.ring_buffer_first_scanline),
                         (int)(s.ring_buffer_num_entries),
-                         s.ring_buffer_length);
+                         s.RingBufferLength);
 
                     int coefficient_index = (int)(k - n0);
                     float coefficient = (float)(s.vertical_coefficients[coefficient_group + coefficient_index]);
@@ -1413,7 +1413,7 @@ namespace StbSharp
                 return;
 
             int decode = (int)((int)(s.datatype) * (MAX_COLORSPACES) + (int)(s.colorspace));
-            int ring_buffer_length = s.ring_buffer_length;
+            int ring_buffer_length = s.RingBufferLength;
 
             while ((first_necessary_scanline) > (s.ring_buffer_first_scanline))
             {

@@ -9,18 +9,17 @@ namespace MonoGame.Framework.Audio
 {
     internal static class SoundEffectInstancePool
     {
-        private static readonly object _syncRoot;
+        private static object SyncRoot { get; } = new object();
 
         private static readonly List<SoundEffectInstance> _playingInstances;
         private static readonly List<SoundEffectInstance> _pooledInstances;
 
         static SoundEffectInstancePool()
         {
-            _syncRoot = new object();
-
             // Reduce garbage generation by allocating enough capacity for
             // the maximum playing instances or at least some reasonable value.
             int maxInstances = Math.Min(SoundEffect.MAX_PLAYING_INSTANCES, 1024);
+
             _playingInstances = new List<SoundEffectInstance>(maxInstances);
             _pooledInstances = new List<SoundEffectInstance>(maxInstances);
         }
@@ -33,18 +32,18 @@ namespace MonoGame.Framework.Audio
         {
             get
             {
-                lock (_syncRoot)
+                lock (SyncRoot)
                     return _playingInstances.Count < SoundEffect.MAX_PLAYING_INSTANCES;
             }
         }
 
         /// <summary>
-        /// Add the specified instance to the pool if it is a pooled instance and removes it from the
-        /// list of playing instances.
+        /// Return the specified instance to the pool if it is a pooled instance and 
+        /// remove it from the list of playing instances.
         /// </summary>
         internal static void Return(SoundEffectInstance inst)
         {
-            lock (_syncRoot)
+            lock (SyncRoot)
             {
                 if (inst._isPooled)
                 {
@@ -59,9 +58,9 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Adds the <see cref="SoundEffectInstance"/> to the list of playing instances.
         /// </summary>
-        internal static void AddToPlaying(SoundEffectInstance inst)
+        internal static void Register(SoundEffectInstance inst)
         {
-            lock (_syncRoot)
+            lock (SyncRoot)
                 _playingInstances.Add(inst);
         }
 
@@ -71,16 +70,14 @@ namespace MonoGame.Framework.Audio
         /// </summary>
         internal static SoundEffectInstance GetInstance(bool forXAct)
         {
-            lock (_syncRoot)
+            lock (SyncRoot)
             {
-                SoundEffectInstance instance;
-
                 int count = _pooledInstances.Count;
                 if (count > 0)
                 {
                     // Grab the item at the end of the list so the remove doesn't copy all
                     // the list items down one slot.
-                    instance = _pooledInstances[count - 1];
+                    var instance = _pooledInstances[count - 1];
                     _pooledInstances.RemoveAt(count - 1);
 
                     // Reset used instance to the "default" state.
@@ -92,40 +89,37 @@ namespace MonoGame.Framework.Audio
                     instance.IsLooped = false;
                     instance.PlatformSetReverbMix(0);
                     instance.PlatformClearFilter();
+
+                    return instance;
                 }
                 else
                 {
-                    instance = new SoundEffectInstance
+                    return new SoundEffectInstance
                     {
                         _isPooled = true,
                         _isXAct = forXAct
                     };
                 }
-
-                return instance;
             }
         }
 
         /// <summary>
-        /// Iterates the list of playing instances, returning them to the pool if they
-        /// have stopped playing.
+        /// Updates playing instances, 
+        /// returning them to the pool if they have stopped playing.
         /// </summary>
         internal static void Update()
         {
-            lock (_syncRoot)
+            lock (SyncRoot)
             {
                 // Cleanup instances which have finished playing.                    
-                for (int i = 0; i < _playingInstances.Count; i++)
+                for (int i = _playingInstances.Count; i-- > 0;)
                 {
                     var instance = _playingInstances[i];
 
                     // Don't consume XACT instances... XACT will
                     // clear this flag when it is done with the wave.
                     if (instance._isXAct)
-                    {
-                        i++;
                         continue;
-                    }
 
                     if (instance.IsDisposed ||
                         instance.State == SoundState.Stopped ||
@@ -135,18 +129,34 @@ namespace MonoGame.Framework.Audio
                             instance.Stop(true);
 
                         Return(instance);
-                        continue;
                     }
-
-                    i++;
                 }
+            }
+        }
 
+        /// <summary>
+        /// Stop playing instances and return them to the pool if they are instances of the given SoundEffect.
+        /// </summary>
+        /// <param name="effect">The parent SoundEffect.</param>
+        internal static void StopPooledInstances(SoundEffect effect)
+        {
+            lock (SyncRoot)
+            {
+                for (int i = _playingInstances.Count; i-- > 0;)
+                {
+                    var instance = _playingInstances[i];
+                    if (instance._effect == effect)
+                    {
+                        instance.Stop(true); // stop immediatly
+                        Return(instance);
+                    }
+                }
             }
         }
 
         internal static void DisposeInstances()
         {
-            lock (_syncRoot)
+            lock (SyncRoot)
             {
                 foreach (var instance in _playingInstances)
                     instance.Dispose();
@@ -158,43 +168,12 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        /// <summary>
-        /// Iterates the list of playing instances, stop them and return them to the pool if they are instances of the given SoundEffect.
-        /// </summary>
-        /// <param name="effect">The SoundEffect</param>
-        internal static void StopPooledInstances(SoundEffect effect)
-        {
-            lock (_syncRoot)
-            {
-                for (int i = 0; i < _playingInstances.Count;)
-                {
-                    var instance = _playingInstances[i];
-                    if (instance._effect == effect)
-                    {
-                        instance.Stop(true); // stop immediatly
-                        Return(instance);
-                        continue;
-                    }
-                    i++;
-                }
-            }
-        }
-
         internal static void UpdateMasterVolume()
         {
-            lock (_syncRoot)
+            lock (SyncRoot)
             {
                 foreach (var instance in _playingInstances)
-                {
-                    // XAct sounds are not controlled by the SoundEffect
-                    // master volume, so we can skip them completely.
-                    if (instance._isXAct)
-                        continue;
-
-                    // Re-applying the volume to itself will update
-                    // the sound with the current master volume.
-                    instance.Volume = instance.Volume;
-                }
+                    instance.UpdateMasterVolume();
             }
 
         }

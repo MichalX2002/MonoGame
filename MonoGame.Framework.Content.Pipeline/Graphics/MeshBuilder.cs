@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
@@ -62,7 +63,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public void AddTriangleVertex(int indexIntoVertexCollection)
         {
             if (_finishedMesh)
-                throw new InvalidOperationException( "This MeshBuilder can no longer be used because FinishMesh has been called.");
+                throw new InvalidOperationException(
+                    "This MeshBuilder can no longer be used because FinishMesh has been called.");
 
             _finishedCreation = true;
 
@@ -93,7 +95,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 var channel = _currentGeometryContent.Vertices.Channels[i];
                 var data = _vertexChannelData[i];
                 if (data == null)
-                    throw new InvalidOperationException(string.Format("Missing vertex channel data for channel {0}", channel.Name));
+                    throw new InvalidOperationException($"Missing vertex channel data for channel {channel.Name}");
 
                 channel.Items.Add(data);
             }
@@ -104,9 +106,12 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public int CreateVertexChannel<T>(string usage)
         {
             if (_finishedMesh)
-                throw new InvalidOperationException("This MeshBuilder can no longer be used because FinishMesh has been called.");
+                throw new InvalidOperationException(
+                    "This MeshBuilder can no longer be used because FinishMesh has been called.");
+
             if (_finishedCreation)
-                throw new InvalidOperationException("Functions starting with 'Create' must be called before calling AddTriangleVertex");
+                throw new InvalidOperationException(
+                    "Functions starting with 'Create' must be called before calling AddTriangleVertex");
 
             var channel = new VertexChannel<T>(usage);
             _vertexChannels.Add(channel);
@@ -137,9 +142,12 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public int CreatePosition(Vector3 pos)
         {
             if (_finishedMesh)
-                throw new InvalidOperationException( "This MeshBuilder can no longer be used because FinishMesh has been called.");
+                throw new InvalidOperationException(
+                    "This MeshBuilder can no longer be used because FinishMesh has been called.");
+
             if (_finishedCreation)
-                throw new InvalidOperationException("Functions starting with 'Create' must be called before calling AddTriangleVertex");
+                throw new InvalidOperationException(
+                    "Functions starting with 'Create' must be called before calling AddTriangleVertex");
 
             _meshContent.Positions.Add(pos);
             return _meshContent.Positions.Count - 1;
@@ -210,13 +218,23 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Sets the specified vertex data with new data.
         /// </summary>
-        /// <param name="vertexDataIndex">Index of the vertex data channel being set. This should match the index returned by CreateVertexChannel.</param>
-        /// <param name="channelData">New data values for the vertex data. The data type being set must match the data type for the vertex channel specified by vertexDataIndex.</param>
+        /// <param name="vertexDataIndex">
+        /// Index of the vertex data channel being set. This should match the index returned by CreateVertexChannel.
+        /// </param>
+        /// <param name="channelData">
+        /// New data values for the vertex data. 
+        /// The data type being set must match the data type for the vertex channel specified by vertexDataIndex.
+        /// </param>
         public void SetVertexChannelData(int vertexDataIndex, object channelData)
         {
+            if (channelData == null)
+                throw new ArgumentNullException(nameof(channelData));
+
             if (_currentGeometryContent.Vertices.Channels[vertexDataIndex].ElementType != channelData.GetType())
-                throw new InvalidOperationException(string.Format("Channel {0} data has a different type from input. Expected: {1}. Actual: {2}",
-                    vertexDataIndex, _currentGeometryContent.Vertices.Channels[vertexDataIndex].ElementType, channelData.GetType()));
+                throw new InvalidOperationException(
+                    $"Channel {vertexDataIndex} data has a different type from input. " +
+                    $"Expected: {_currentGeometryContent.Vertices.Channels[vertexDataIndex].ElementType}. " +
+                    $"Actual: {channelData.GetType()}");
 
             _vertexChannelData[vertexDataIndex] = channelData;
         }

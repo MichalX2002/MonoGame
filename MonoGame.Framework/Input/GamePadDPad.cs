@@ -55,7 +55,7 @@ namespace MonoGame.Framework.Input
             _right = rightValue;
         }
 
-        internal GamePadDPad(Buttons[] buttons) : this()
+        public GamePadDPad(ReadOnlySpan<Buttons> buttons) : this()
         {
             foreach (var button in buttons)
                 ConvertButtonToDirection(button, ref _down, ref _left, ref _right, ref _up);

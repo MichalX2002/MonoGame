@@ -8,6 +8,7 @@ using System.ComponentModel;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Content.Pipeline.Graphics;
 using System.Text;
+using System.Numerics;
 
 namespace MonoGame.Framework.Content.Pipeline.Processors
 {
@@ -127,8 +128,13 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             foreach (var glyph in glyphs)
             {
                 output.CharacterMap.Add(glyph.Character);
-                output.Regions.Add(new Rectangle(glyph.Subrect.X, glyph.Subrect.Y, glyph.Subrect.Width, glyph.Subrect.Height));
-                output.Croppings.Add(new Rectangle((int)glyph.XOffset, (int)glyph.YOffset, glyph.Width, glyph.Height));
+
+                output.Regions.Add(
+                    new Rectangle(glyph.Subrect.X, glyph.Subrect.Y, glyph.Subrect.Width, glyph.Subrect.Height));
+
+                output.Croppings.Add(
+                    new Rectangle((int)glyph.XOffset, (int)glyph.YOffset, glyph.Width, glyph.Height));
+
                 var abc = glyph.CharacterWidths;
                 output.Kerning.Add(new Vector3(abc.A, abc.B, abc.C));
             }

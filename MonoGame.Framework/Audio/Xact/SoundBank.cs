@@ -231,7 +231,7 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        internal SoundEffectInstance GetSoundEffectInstance(
+        internal SoundEffectInstance? GetSoundEffectInstance(
             int waveBankIndex, int trackIndex, out bool streaming)
         {
             var waveBank = _waveBanks[waveBankIndex];

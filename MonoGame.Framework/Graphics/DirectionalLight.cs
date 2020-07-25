@@ -2,97 +2,94 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System.Numerics;
+
 namespace MonoGame.Framework.Graphics
 {
-	public sealed class DirectionalLight
-	{
-		internal EffectParameter diffuseColorParameter;
-		internal EffectParameter directionParameter;
-		internal EffectParameter specularColorParameter;
-		
-		Vector3 diffuseColor;
-		Vector3 direction;
-		Vector3 specularColor;
-		bool enabled;
-		
-		public DirectionalLight (EffectParameter directionParameter, EffectParameter diffuseColorParameter, EffectParameter specularColorParameter, DirectionalLight cloneSource)
-		{
-			this.diffuseColorParameter = diffuseColorParameter;
-			this.directionParameter = directionParameter;
-			this.specularColorParameter = specularColorParameter;
-			if (cloneSource != null) {
-				diffuseColor = cloneSource.diffuseColor;
-				direction = cloneSource.direction;
-				specularColor = cloneSource.specularColor;
-				enabled = cloneSource.enabled;
-			} else {
-				this.diffuseColorParameter = diffuseColorParameter;
-				this.directionParameter = directionParameter;
-				this.specularColorParameter = specularColorParameter;
-			}
-		}
-		
-		public Vector3 DiffuseColor
+    public sealed class DirectionalLight
+    {
+        internal EffectParameter? _diffuseColorParameter;
+        internal EffectParameter? _directionParameter;
+        internal EffectParameter? _specularColorParameter;
+
+        private Vector3 _diffuseColor;
+        private Vector3 _direction;
+        private Vector3 _specularColor;
+        private bool _enabled;
+
+        public DirectionalLight(
+            EffectParameter? directionParameter,
+            EffectParameter? diffuseColorParameter,
+            EffectParameter? specularColorParameter,
+            DirectionalLight? cloneSource)
         {
-            get => diffuseColor;
+            _diffuseColorParameter = diffuseColorParameter;
+            _directionParameter = directionParameter;
+            _specularColorParameter = specularColorParameter;
+
+            if (cloneSource != null)
+            {
+                _diffuseColor = cloneSource._diffuseColor;
+                _direction = cloneSource._direction;
+                _specularColor = cloneSource._specularColor;
+                _enabled = cloneSource._enabled;
+            }
+            else
+            {
+                _diffuseColorParameter = diffuseColorParameter;
+                _directionParameter = directionParameter;
+                _specularColorParameter = specularColorParameter;
+            }
+        }
+
+        public Vector3 DiffuseColor
+        {
+            get => _diffuseColor;
             set
             {
-                diffuseColor = value;
-                if (enabled && diffuseColorParameter != null)
-                    diffuseColorParameter.SetValue(diffuseColor);
+                _diffuseColor = value;
+                if (_enabled)
+                    _diffuseColorParameter?.SetValue(_diffuseColor);
             }
         }
 
         public Vector3 Direction
         {
-            get => direction;
+            get => _direction;
             set
             {
-                direction = value;
-                if (directionParameter != null)
-                    directionParameter.SetValue(direction);
+                _direction = value;
+                _directionParameter?.SetValue(_direction);
             }
         }
 
         public Vector3 SpecularColor
         {
-            get => specularColor;
+            get => _specularColor;
             set
             {
-                specularColor = value;
-                if (enabled && specularColorParameter != null)
-                    specularColorParameter.SetValue(specularColor);
+                _specularColor = value;
+                if (_enabled)
+                    _specularColorParameter?.SetValue(_specularColor);
             }
         }
         public bool Enabled
         {
-            get => enabled;
+            get => _enabled;
             set
             {
-                if (enabled != value)
+                if (_enabled != value)
                 {
-                    enabled = value;
-                    if (enabled)
+                    _enabled = value;
+                    if (_enabled)
                     {
-                        if (diffuseColorParameter != null)
-                        {
-                            diffuseColorParameter.SetValue(diffuseColor);
-                        }
-                        if (specularColorParameter != null)
-                        {
-                            specularColorParameter.SetValue(specularColor);
-                        }
+                        _diffuseColorParameter?.SetValue(_diffuseColor);
+                        _specularColorParameter?.SetValue(_specularColor);
                     }
                     else
                     {
-                        if (diffuseColorParameter != null)
-                        {
-                            diffuseColorParameter.SetValue(Vector3.Zero);
-                        }
-                        if (specularColorParameter != null)
-                        {
-                            specularColorParameter.SetValue(Vector3.Zero);
-                        }
+                        _diffuseColorParameter?.SetValue(Vector3.Zero);
+                        _specularColorParameter?.SetValue(Vector3.Zero);
                     }
                 }
 

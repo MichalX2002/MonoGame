@@ -8,12 +8,23 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class SamplerState : GraphicsResource
     {
-        public static SamplerState AnisotropicClamp { get; }
-        public static SamplerState AnisotropicWrap { get; }
-        public static SamplerState LinearClamp { get; }
-        public static SamplerState LinearWrap { get; }
-        public static SamplerState PointClamp { get; }
-        public static SamplerState PointWrap { get; }
+        public static SamplerState AnisotropicClamp { get; } =
+            new SamplerState("SamplerState.AnisotropicClamp", TextureFilter.Anisotropic, TextureAddressMode.Clamp);
+
+        public static SamplerState AnisotropicWrap { get; } =
+            new SamplerState("SamplerState.AnisotropicWrap", TextureFilter.Anisotropic, TextureAddressMode.Wrap);
+
+        public static SamplerState LinearClamp { get; } =
+            new SamplerState("SamplerState.LinearClamp", TextureFilter.Linear, TextureAddressMode.Clamp);
+
+        public static SamplerState LinearWrap { get; } =
+            new SamplerState("SamplerState.LinearWrap", TextureFilter.Linear, TextureAddressMode.Wrap);
+
+        public static SamplerState PointClamp { get; } =
+            new SamplerState("SamplerState.PointClamp", TextureFilter.Point, TextureAddressMode.Clamp);
+
+        public static SamplerState PointWrap { get; } =
+            new SamplerState("SamplerState.PointWrap", TextureFilter.Point, TextureAddressMode.Wrap);
 
         private readonly bool _defaultStateObject;
 
@@ -137,16 +148,6 @@ namespace MonoGame.Framework.Graphics
 
         #region Constructors
 
-        static SamplerState()
-        {
-            AnisotropicClamp = new SamplerState("SamplerState.AnisotropicClamp", TextureFilter.Anisotropic, TextureAddressMode.Clamp);
-            AnisotropicWrap = new SamplerState("SamplerState.AnisotropicWrap", TextureFilter.Anisotropic, TextureAddressMode.Wrap);
-            LinearClamp = new SamplerState("SamplerState.LinearClamp", TextureFilter.Linear, TextureAddressMode.Clamp);
-            LinearWrap = new SamplerState("SamplerState.LinearWrap", TextureFilter.Linear, TextureAddressMode.Wrap);
-            PointClamp = new SamplerState("SamplerState.PointClamp", TextureFilter.Point, TextureAddressMode.Clamp);
-            PointWrap = new SamplerState("SamplerState.PointWrap", TextureFilter.Point, TextureAddressMode.Wrap);
-        }
-
         public SamplerState()
         {
             Filter = TextureFilter.Linear;
@@ -186,7 +187,7 @@ namespace MonoGame.Framework.Graphics
             _filterMode = cloneSource._filterMode;
         }
 
-#endregion
+        #endregion
 
         internal void BindToGraphicsDevice(GraphicsDevice device)
         {

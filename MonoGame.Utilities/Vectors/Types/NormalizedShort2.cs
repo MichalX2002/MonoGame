@@ -74,7 +74,7 @@ namespace MonoGame.Framework.Vectors
         public void FromScaledVector(Vector4 scaledVector)
         {
             var raw = scaledVector.ToVector2();
-            raw.Clamp(Vector2.Zero, Vector2.One);
+            raw = VectorHelper.ZeroMax(raw, Vector2.One);
             raw *= ushort.MaxValue;
             raw -= Offset;
 
@@ -90,7 +90,7 @@ namespace MonoGame.Framework.Vectors
         public void FromVector(Vector4 vector)
         {
             var raw = vector.ToVector2();
-            raw.Clamp(-Vector2.One, Vector2.One);
+            raw = Vector2.Clamp(raw, -Vector2.One, Vector2.One);
             raw *= ushort.MaxValue / 2f;
             raw -= new Vector2(0.5f);
 
@@ -102,7 +102,7 @@ namespace MonoGame.Framework.Vectors
 
         #region Equals
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is NormalizedShort2 other && Equals(other);
         }

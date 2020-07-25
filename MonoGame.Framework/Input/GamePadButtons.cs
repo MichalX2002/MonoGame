@@ -16,64 +16,75 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Gets a value indicating whether the button A is pressed.
         /// </summary>
-        public ButtonState A => ((_buttons & Buttons.A) == Buttons.A) ? ButtonState.Pressed : ButtonState.Released;
+        public ButtonState A => 
+            ((_buttons & Buttons.A) == Buttons.A) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating whether the button B is pressed.
         /// </summary>
-        public ButtonState B => ((_buttons & Buttons.B) == Buttons.B) ? ButtonState.Pressed : ButtonState.Released;
+        public ButtonState B => 
+            ((_buttons & Buttons.B) == Buttons.B) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating whether the button Back is pressed.
         /// </summary>
-        public ButtonState Back => ((_buttons & Buttons.Back) == Buttons.Back) ? ButtonState.Pressed : ButtonState.Released;
+        public ButtonState Back => 
+            ((_buttons & Buttons.Back) == Buttons.Back) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating whether the button X is pressed.
         /// </summary>
-        public ButtonState X => ((_buttons & Buttons.X) == Buttons.X) ? ButtonState.Pressed : ButtonState.Released;
+        public ButtonState X => 
+            ((_buttons & Buttons.X) == Buttons.X) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating whether the button Y is pressed.
         /// </summary>
-        public ButtonState Y => ((_buttons & Buttons.Y) == Buttons.Y) ? ButtonState.Pressed : ButtonState.Released;
+        public ButtonState Y => 
+            ((_buttons & Buttons.Y) == Buttons.Y) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating whether the button Start is pressed.
         /// </summary>
-        public ButtonState Start => ((_buttons & Buttons.Start) == Buttons.Start) ? ButtonState.Pressed : ButtonState.Released;
+        public ButtonState Start => 
+            ((_buttons & Buttons.Start) == Buttons.Start) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating whether the left shoulder button is pressed.
         /// </summary>
-        public ButtonState LeftShoulder => ((_buttons & Buttons.LeftShoulder) == Buttons.LeftShoulder) ? ButtonState.Pressed : ButtonState.Released;
+        public ButtonState LeftShoulder => 
+            ((_buttons & Buttons.LeftShoulder) == Buttons.LeftShoulder) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating whether the left stick button is pressed.
         /// </summary>
-        public ButtonState LeftStick => ((_buttons & Buttons.LeftStick) == Buttons.LeftStick) ? ButtonState.Pressed : ButtonState.Released;
+        public ButtonState LeftStick => 
+            ((_buttons & Buttons.LeftStick) == Buttons.LeftStick) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating whether the right shoulder button is pressed.
         /// </summary>
-        public ButtonState RightShoulder => ((_buttons & Buttons.RightShoulder) == Buttons.RightShoulder) ? ButtonState.Pressed : ButtonState.Released;
+        public ButtonState RightShoulder => 
+            ((_buttons & Buttons.RightShoulder) == Buttons.RightShoulder) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating whether the right stick button is pressed.
         /// </summary>
-        public ButtonState RightStick => ((_buttons & Buttons.RightStick) == Buttons.RightStick) ? ButtonState.Pressed : ButtonState.Released;
+        public ButtonState RightStick => 
+            ((_buttons & Buttons.RightStick) == Buttons.RightStick) ? ButtonState.Pressed : ButtonState.Released;
 
         /// <summary>
         /// Gets a value indicating whether the guide button is pressed.
         /// </summary>
-        public ButtonState BigButton => ((_buttons & Buttons.BigButton) == Buttons.BigButton) ? ButtonState.Pressed : ButtonState.Released;
+        public ButtonState BigButton => 
+            ((_buttons & Buttons.BigButton) == Buttons.BigButton) ? ButtonState.Pressed : ButtonState.Released;
 
         public GamePadButtons(Buttons buttons)
         {
             _buttons = buttons;
         }
 
-        internal GamePadButtons(params Buttons[] buttons) : this()
+        internal GamePadButtons(ReadOnlySpan<Buttons> buttons) : this()
         {
             foreach (Buttons b in buttons)
                 _buttons |= b;

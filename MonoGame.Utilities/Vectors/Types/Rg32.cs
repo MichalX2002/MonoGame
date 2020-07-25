@@ -64,12 +64,13 @@ namespace MonoGame.Framework.Vectors
 
         public void FromScaledVector(Vector4 scaledVector)
         {
-            var v = scaledVector.ToVector2() * ushort.MaxValue;
-            v += new Vector2(0.5f);
-            v.Clamp(ushort.MinValue, ushort.MaxValue);
+            var vector = scaledVector.ToVector2();
+            vector *= ushort.MaxValue;
+            vector += new Vector2(0.5f);
+            vector = VectorHelper.ZeroMax(vector, ushort.MaxValue);
 
-            R = (ushort)v.X;
-            G = (ushort)v.Y;
+            R = (ushort)vector.X;
+            G = (ushort)vector.Y;
         }
 
         public readonly Vector4 ToScaledVector4()

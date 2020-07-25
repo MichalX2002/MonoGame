@@ -84,7 +84,7 @@ namespace MonoGame.Framework.Vectors
         {
             scaledVector *= byte.MaxValue;
             scaledVector -= Offset;
-            scaledVector.Clamp(sbyte.MinValue, sbyte.MaxValue);
+            scaledVector = VectorHelper.Clamp(scaledVector, sbyte.MinValue, sbyte.MaxValue);
 
             X = (sbyte)scaledVector.X;
             Y = (sbyte)scaledVector.Y;
@@ -106,7 +106,7 @@ namespace MonoGame.Framework.Vectors
         {
             vector *= byte.MaxValue / 2f;
             vector -= new Vector4(0.5f);
-            vector.Clamp(sbyte.MinValue, sbyte.MaxValue);
+            vector = VectorHelper.Clamp(vector, sbyte.MinValue, sbyte.MaxValue);
 
             X = (sbyte)vector.X;
             Y = (sbyte)vector.Y;

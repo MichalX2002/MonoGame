@@ -4,6 +4,7 @@
     <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <DefineConstants>OPENGL;OPENAL;XNADESIGNPROVIDED;LINUX;DESKTOPGL;SUPPORTS_EFX;NETSTANDARD;NVORBIS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
     <Description>MonoGame is an open source implementation of the Microsoft XNA 4.x Framework. The goal is to make it easy for XNA developers to create cross-platform games with extremely high code reuse.
 
 This package provides you with MonoGame Framework that uses OpenGL for rendering and works on Windows, Linux and MacOS.</Description>
@@ -12,11 +13,9 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Android\**" />
     <Compile Remove="bin\**" />
     <Compile Remove="obj\**" />
     <Compile Remove="Platform\**\*" />
-    <Compile Remove="Properties\**\*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,11 +36,14 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="Platform\Graphics\IWindowHandle.OpenGL.cs" />
     <Compile Include="Platform\Graphics\OpenGL\OpenGL.SDL.cs" />
     <Compile Include="Platform\Graphics\RenderTargetBindingArrayComparer.cs" />
     <Compile Include="Platform\Graphics\Shader\Shader.Structure.cs" />
     <Compile Include="Platform\Input\Joystick.Instance.SDL.cs" />
     <Compile Include="Platform\Input\TextInputEventArgs.cs" />
+    <Compile Include="Platform\Input\Touch\TouchPanelCapabilities.SDL.cs" />
+    <Compile Include="Platform\SDL\SDL.Touch.cs" />
     <Compile Include="Platform\SDL\SDL.Display.cs" />
     <Compile Include="Platform\SDL\SDL.Drop.cs" />
     <Compile Include="Platform\SDL\SDL.GameController.cs" />
@@ -67,7 +69,6 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
     <Compile Include="Platform\Input\Mouse.SDL.cs" />
     <Compile Include="Platform\Input\MouseCursor.SDL.cs" />
     <Compile Include="Platform\Graphics\GraphicsContext.SDL.cs" />
-    <Compile Include="Platform\Graphics\WindowInfo.SDL.cs" />
     <Compile Include="Platform\Graphics\GraphicsAdapter.Legacy.cs" />
     <Compile Include="Platform\GamePlatform.Desktop.cs" />
     <Compile Include="Platform\GraphicsDeviceManager.SDL.cs" />
@@ -144,11 +145,11 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0-beta2.final">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="3.0.0">
+    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="3.3.0-beta2.final">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

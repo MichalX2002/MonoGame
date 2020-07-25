@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System.Numerics;
 using MonoGame.Framework.Content.Pipeline.Graphics;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler

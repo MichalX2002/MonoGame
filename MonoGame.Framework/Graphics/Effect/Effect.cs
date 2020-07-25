@@ -17,7 +17,7 @@ namespace MonoGame.Framework.Graphics
             /// <summary>
             /// The MonoGame Effect file format header identifier ("MGFX"). 
             /// </summary>
-            public static readonly int MGFXSignature = 0x5846474D;
+            public static int MGFXSignature => 0x5846474D;
 
             /// <summary>
             /// The current MonoGame Effect file format versions used to detect old packaged content.
@@ -48,8 +48,11 @@ namespace MonoGame.Framework.Graphics
         {
         }
 
-        protected Effect(Effect cloneSource) : this(cloneSource.GraphicsDevice)
+        protected Effect(Effect cloneSource) : this(cloneSource?.GraphicsDevice!)
         {
+            if (cloneSource == null)
+                throw new ArgumentNullException(nameof(cloneSource));
+
             _isClone = true;
             Clone(cloneSource);
         }
@@ -81,7 +84,7 @@ namespace MonoGame.Framework.Graphics
             int headerSize = header.HeaderSize;
 
             // First look for it in the cache.
-            if (!graphicsDevice.EffectCache.TryGetValue(effectKey, out Effect cloneSource))
+            if (!graphicsDevice.EffectCache.TryGetValue(effectKey, out var cloneSource))
             {
                 // Create one.
                 fixed (byte* effectCodePtr = effectCode.Slice(headerSize))
@@ -103,7 +106,7 @@ namespace MonoGame.Framework.Graphics
             Clone(cloneSource);
         }
 
-        private MGFXHeader ReadHeader(ReadOnlySpan<byte> effectCode)
+        private static MGFXHeader ReadHeader(ReadOnlySpan<byte> effectCode)
         {
             int index = 0;
             MGFXHeader header;
@@ -204,7 +207,6 @@ namespace MonoGame.Framework.Graphics
                     {
                         foreach (var buffer in ConstantBuffers)
                             buffer.Dispose();
-                        ConstantBuffers = null;
                     }
                 }
             }
@@ -228,6 +230,7 @@ namespace MonoGame.Framework.Graphics
             // Read in all the constant buffers.
             var buffers = (int)reader.ReadByte();
             ConstantBuffers = new ConstantBuffer[buffers];
+
             for (var c = 0; c < buffers; c++)
             {
                 var name = reader.ReadString();
@@ -297,20 +300,20 @@ namespace MonoGame.Framework.Graphics
                 var annotations = ReadAnnotations(reader);
 
                 // Get the vertex shader.
-                Shader vertexShader = null;
+                Shader? vertexShader = null;
                 var shaderIndex = (int)reader.ReadByte();
                 if (shaderIndex != 255)
                     vertexShader = shaders[shaderIndex];
 
                 // Get the pixel shader.
-                Shader pixelShader = null;
+                Shader? pixelShader = null;
                 shaderIndex = reader.ReadByte();
                 if (shaderIndex != 255)
                     pixelShader = shaders[shaderIndex];
 
-                BlendState blend = null;
-                DepthStencilState depth = null;
-                RasterizerState raster = null;
+                BlendState? blend = null;
+                DepthStencilState? depth = null;
+                RasterizerState? raster = null;
                 if (reader.ReadBoolean())
                 {
                     blend = new BlendState
@@ -390,7 +393,7 @@ namespace MonoGame.Framework.Graphics
                 var elements = ReadParameters(reader);
                 var structMembers = ReadParameters(reader);
 
-                object data = null;
+                object? data = null;
                 if (elements.Count == 0 && structMembers.Count == 0)
                 {
                     switch (type)

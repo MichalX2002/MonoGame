@@ -5,16 +5,11 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using MonoGame.Framework.Collections;
 
 namespace MonoGame.Framework.Graphics
 {
     public abstract partial class Texture : GraphicsResource
     {
-        private static CachedReadOnlySet<Texture> _allTextures = CachedReadOnlySet<Texture>.Create();
-
-        public static ReadOnlySet<Texture> AllTextures => _allTextures.ReadOnly;
-
         private static int _lastSortingKey = 0;
 
         public SurfaceFormat Format { get; internal set; }
@@ -34,8 +29,6 @@ namespace MonoGame.Framework.Graphics
 
         public Texture(GraphicsDevice graphicsDevice) : base(graphicsDevice)
         {
-            lock (_allTextures.Source)
-                _allTextures.Source.Add(this);
         }
 
         internal static int CalculateMipLevels(int width, int height = 0, int depth = 0)
@@ -126,9 +119,6 @@ namespace MonoGame.Framework.Graphics
         protected override void Dispose(bool disposing)
         {
             PlatformDispose(disposing);
-
-            lock (_allTextures.Source)
-                _allTextures.Source.Remove(this);
 
             base.Dispose(disposing);
         }

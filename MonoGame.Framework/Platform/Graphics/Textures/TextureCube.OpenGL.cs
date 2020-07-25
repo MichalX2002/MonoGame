@@ -16,7 +16,7 @@ namespace MonoGame.Framework.Graphics
         {
             _glTarget = TextureTarget.TextureCubeMap;
 
-            GL.GenTextures(1, out _glTexture);
+            _glTexture = GL.GenTexture();
             GL.CheckError();
 
             GL.BindTexture(TextureTarget.TextureCubeMap, _glTexture);
@@ -39,12 +39,12 @@ namespace MonoGame.Framework.Graphics
                 TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
             GL.CheckError();
 
-            format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
+            format.GetGLFormat(GraphicsDevice, out _glInternalFormat, out _glFormat, out _glType);
 
             for (var i = 0; i < 6; i++)
             {
                 var target = GetGLCubeFace((CubeMapFace)i);
-                if (glFormat == GLPixelFormat.CompressedTextureFormats)
+                if (_glFormat == GLPixelFormat.CompressedTextureFormats)
                 {
                     var imageSize = 0;
                     switch (format)
@@ -83,12 +83,12 @@ namespace MonoGame.Framework.Graphics
                     }
 
                     GL.CompressedTexImage2D(
-                        target, 0, glInternalFormat, size, size, 0, imageSize, IntPtr.Zero);
+                        target, 0, _glInternalFormat, size, size, 0, imageSize, IntPtr.Zero);
                 }
                 else
                 {
                     GL.TexImage2D(
-                        target, 0, glInternalFormat, size, size, 0, glFormat, glType, IntPtr.Zero);
+                        target, 0, _glInternalFormat, size, size, 0, _glFormat, _glType, IntPtr.Zero);
                 }
                 GL.CheckError();
             }
@@ -121,7 +121,7 @@ namespace MonoGame.Framework.Graphics
             int pixelToT = Format.GetSize() / sizeof(T);
             var byteDst = MemoryMarshal.AsBytes(destination);
 
-            if (glFormat == GLPixelFormat.CompressedTextureFormats)
+            if (_glFormat == GLPixelFormat.CompressedTextureFormats)
             {
                 // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
                 var tFullWidth = Math.Max(Size >> level, 1) / 4 * pixelToT;
@@ -147,7 +147,7 @@ namespace MonoGame.Framework.Graphics
                 int tFullWidth = Math.Max(Size >> level, 1) * pixelToT;
                 int tmpSize = Math.Max(Size >> level, 1) * tFullWidth * sizeof(T);
                 IntPtr tmp = Marshal.AllocHGlobal(tmpSize);
-                GL.GetTexImage(target, level, glFormat, glType, tmp);
+                GL.GetTexImage(target, level, _glFormat, _glType, tmp);
                 GL.CheckError();
 
                 var tmpSpan = new Span<byte>((void*)tmp, tmpSize);
@@ -176,17 +176,17 @@ namespace MonoGame.Framework.Graphics
             var target = GetGLCubeFace(face);
             fixed (T* dataPtr = data)
             {
-                if (glFormat == GLPixelFormat.CompressedTextureFormats)
+                if (_glFormat == GLPixelFormat.CompressedTextureFormats)
                 {
                     GL.CompressedTexSubImage2D(
                         target, level, rect.X, rect.Y, rect.Width, rect.Height,
-                         glInternalFormat, data.Length * sizeof(T), (IntPtr)dataPtr);
+                         _glInternalFormat, data.Length * sizeof(T), (IntPtr)dataPtr);
                 }
                 else
                 {
                     GL.TexSubImage2D(
                         target, level, rect.X, rect.Y, rect.Width, rect.Height,
-                        glFormat, glType, (IntPtr)dataPtr);
+                        _glFormat, _glType, (IntPtr)dataPtr);
                 }
                 GL.CheckError();
             }

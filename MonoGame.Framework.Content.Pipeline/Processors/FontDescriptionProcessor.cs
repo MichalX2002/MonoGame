@@ -11,6 +11,7 @@ using Microsoft.Win32;
 using MonoGame.Framework.Content.Pipeline.Graphics;
 using MonoGame.Framework;
 using Glyph = MonoGame.Framework.Content.Pipeline.Graphics.Glyph;
+using System.Numerics;
 
 namespace MonoGame.Framework.Content.Pipeline.Processors
 {
@@ -103,10 +104,9 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                     new Rectangle(0, (int)(glyph.YOffset - yOffsetMin), (int)glyph.XAdvance, output.VerticalLineSpacing));
 
                 // Set the optional character kerning.
-                if (input.UseKerning)
-                    output.Kerning.Add(new Vector3(glyph.CharacterWidths.A, glyph.CharacterWidths.B, glyph.CharacterWidths.C));
-                else
-                    output.Kerning.Add(new Vector3(0, texRegion.Width, 0));
+                output.Kerning.Add(input.UseKerning
+                    ? new Vector3(glyph.CharacterWidths.A, glyph.CharacterWidths.B, glyph.CharacterWidths.C)
+                    : new Vector3(0, texRegion.Width, 0));
             }
 
             var facePixels = face.GetPixelSpan();
@@ -188,8 +188,10 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             return glyphs;
         }
 
-        private string FindFont(string name, string style)
+        private static string FindFont(string name, string style)
         {
+            // TODO: Add more platforms (MacOS?)
+
             if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
             {
                 var fontDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts");
@@ -204,7 +206,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
 
                             // The registry value might have trailing NUL characters
                             // See https://github.com/MonoGame/MonoGame/issues/4061
-                            var nulIndex = fontPath.IndexOf('\0');
+                            var nulIndex = fontPath.IndexOf('\0', StringComparison.Ordinal);
                             if (nulIndex != -1)
                                 fontPath = fontPath.Substring(0, nulIndex);
 
@@ -225,13 +227,13 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                     return string.Empty;
 
                 // check font family, fontconfig might return a fallback
-                if (split[1].Contains(","))
+                if (split[1].Contains(",", StringComparison.Ordinal))
                 {
                     // this file defines multiple family names
                     var families = split[1].Split(',');
                     foreach (var f in families)
                     {
-                        if (f.ToLowerInvariant() == name.ToLowerInvariant())
+                        if (f.ToUpperInvariant() == name.ToUpperInvariant())
                             return split[0];
                     }
                     // didn't find it
@@ -239,7 +241,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                 }
                 else
                 {
-                    if (split[1].ToLowerInvariant() != name.ToLowerInvariant())
+                    if (split[1].ToUpperInvariant() != name.ToUpperInvariant())
                         return string.Empty;
                 }
 

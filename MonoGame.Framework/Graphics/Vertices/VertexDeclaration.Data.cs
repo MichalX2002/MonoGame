@@ -35,31 +35,27 @@ namespace MonoGame.Framework.Graphics
 
                 _hashCode = hash.ToHashCode();
             }
-        }
 
+            public bool Equals(Data? other)
+            {
+                if (ReferenceEquals(this, other))
+                    return true;
 
-        public bool Equals(Data other)
-        {
-            if (ReferenceEquals(this, other))
-                return true;
+                return other != null
+                    && _hashCode == other._hashCode
+                    && VertexStride == other.VertexStride
+                    && Elements.Span.SequenceEqual(other.Elements.Span);
+            }
 
-            if (_hashCode != other._hashCode ||
-                VertexStride != other.VertexStride ||
-                Elements.Length != other.Elements.Length)
-                return false;
+            public override bool Equals(object? obj)
+            {
+                return obj is Data other && Equals(other);
+            }
 
-            return Elements.Span.SequenceEqual(other.Elements.Span);
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is Data other && Equals(other);
-        }
-
-        public override int GetHashCode()
-        {
-            return _hashCode;
+            public override int GetHashCode()
+            {
+                return _hashCode;
+            }
         }
     }
-}
 }

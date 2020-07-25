@@ -22,6 +22,8 @@ namespace MonoGame.Framework.Vectors
         /// </summary>
         public int Bits { get; }
 
+        public bool IsValid => Bits != 0;
+
         /// <summary>
         /// Constructs the <see cref="VectorComponent"/>.
         /// </summary>
@@ -72,7 +74,9 @@ namespace MonoGame.Framework.Vectors
 
         public override string ToString()
         {
-
+            return Type == VectorComponentType.BitField 
+                ? $"{Channel} {Type}[{Bits}]"
+                : $"{Channel} {Type}"; 
         }
 
         public static bool operator ==(in VectorComponent a, in VectorComponent b)

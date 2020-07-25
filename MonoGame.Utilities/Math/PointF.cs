@@ -104,10 +104,7 @@ namespace MonoGame.Framework
         /// <param name="a">The first vector to add.</param>
         /// <param name="b">The second vector to add.</param>
         /// <returns>The result of the vector addition.</returns>
-        public static PointF Add(PointF a, PointF b)
-        {
-            return Vector2.Add(a, b);
-        }
+        public static PointF Add(PointF a, PointF b) => a + b;
 
         /// <summary>
         /// Performs vector addition on <paramref name="a"/> and <paramref name="b"/>.
@@ -117,7 +114,7 @@ namespace MonoGame.Framework
         /// <returns>Sum of the vectors.</returns>
         public static PointF operator +(PointF a, PointF b)
         {
-            return (Vector2)a + (Vector2)b;
+            return (PointF)Vector2.Add(a, b);
         }
 
         #endregion
@@ -130,10 +127,7 @@ namespace MonoGame.Framework
         /// <param name="left">Left <see cref="PointF"/>.</param>
         /// <param name="right">Right <see cref="PointF"/>.</param>
         /// <returns>The result of the vector subtraction.</returns>
-        public static PointF Subtract(PointF left, PointF right)
-        {
-            return Vector2.Subtract(left, right);
-        }
+        public static PointF Subtract(PointF left, PointF right) => left - right;
 
         /// <summary>
         /// Subtracts left from right.
@@ -143,7 +137,29 @@ namespace MonoGame.Framework
         /// <returns>Result of the vector subtraction.</returns>
         public static PointF operator -(PointF left, PointF right)
         {
-            return (Vector2)left - (Vector2)right;
+            return (PointF)Vector2.Subtract(left, right);
+        }
+
+        #endregion
+
+        #region Multiply (operator *)
+
+        public static PointF Multiply(PointF a, float b) => a * b;
+
+        public static PointF operator *(PointF a, float b)
+        {
+            return (PointF)Vector2.Multiply(a, b);
+        }
+
+        #endregion
+
+        #region Divide (operator /)
+
+        public static PointF Divide(PointF left, float divisor) => left / divisor;
+
+        public static PointF operator /(PointF left, float divisor)
+        {
+            return (PointF)Vector2.Divide(left, divisor);
         }
 
         #endregion
@@ -156,7 +172,7 @@ namespace MonoGame.Framework
         /// <returns>The <see cref="PointF"/> with minimal values from the two points.</returns>
         public static PointF Min(PointF a, PointF b)
         {
-            return Vector2.Min(a, b);
+            return (PointF)Vector2.Min(a, b);
         }
 
         /// <summary>
@@ -167,7 +183,7 @@ namespace MonoGame.Framework
         /// <returns>The <see cref="PointF"/> with maximal values from the two points.</returns>
         public static PointF Max(PointF a, PointF b)
         {
-            return Vector2.Max(a, b);
+            return (PointF)Vector2.Max(a, b);
         }
 
         #region Equals
@@ -218,29 +234,27 @@ namespace MonoGame.Framework
 
         #endregion
 
-        public static implicit operator PointF(in Vector2 vector)
+        #region Explicit operators
+
+        public static explicit operator PointF(Vector2 vector)
         {
             return vector.ToPointF();
         }
 
-        public static implicit operator PointF(in SizeF vector)
-        {
-            return vector.ToPointF();
-        }
+        #endregion
 
-        public static implicit operator PointF(in Point point)
-        {
-            return point.ToPointF();
-        }
+        #region Implicit operators
 
-        public static implicit operator PointF(in Size vector)
-        {
-            return new PointF(vector.Width, vector.Height);
-        }
-
-        public static implicit operator Vector2(in PointF point)
+        public static implicit operator Vector2(PointF point)
         {
             return point.ToVector2();
         }
+
+        public static implicit operator PointF(SizeF size)
+        {
+            return size.ToPointF();
+        }
+
+        #endregion
     }
 }

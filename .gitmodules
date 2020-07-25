@@ -17,6 +17,7 @@
 [submodule "ThirdParty/StbSharp/ImageWrite"]
 	path = ThirdParty/StbSharp/ImageWrite
 	url = https://github.com/TechnologicalPizza/StbSharp.ImageWrite
+	
 [submodule "ThirdParty/SDL_GameControllerDB"]
 	path = ThirdParty/SDL_GameControllerDB
 	url = https://github.com/gabomdq/SDL_GameControllerDB/

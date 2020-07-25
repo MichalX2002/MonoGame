@@ -73,11 +73,13 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Adds a new vertex channel to the end of the collection.
         /// </summary>
-        /// <typeparam name="ElementType">Type of the channel.</typeparam>
+        /// <typeparam name="T">Type of the channel.</typeparam>
         /// <param name="name">Name of the new channel.</param>
-        /// <param name="channelData">Initial data for the new channel. If null, the channel is filled with the default value for that type.</param>
+        /// <param name="channelData">
+        /// Initial data for the new channel. If null, the channel is filled with the default value for that type.
+        /// </param>
         /// <returns>The newly added vertex channel.</returns>
-        public VertexChannel<ElementType> Add<ElementType>(string name, IEnumerable<ElementType> channelData)
+        public VertexChannel<T> Add<T>(string name, IEnumerable<T> channelData)
         {
             return Insert(channels.Count, name, channelData);
         }
@@ -87,7 +89,9 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// </summary>
         /// <param name="name">Name of the new channel.</param>
         /// <param name="elementType">Type of data to be contained in the new channel.</param>
-        /// <param name="channelData">Initial data for the new channel. If null, the channel is filled with the default value for that type.</param>
+        /// <param name="channelData">
+        /// Initial data for the new channel. If null, the channel is filled with the default value for that type.
+        /// </param>
         /// <returns>The newly added vertex channel.</returns>
         public VertexChannel Add(string name, Type elementType, IEnumerable channelData)
         {
@@ -125,10 +129,13 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Converts the channel, at the specified index, to another vector format.
         /// </summary>
-        /// <typeparam name="TargetType">Type of the target format. Can be one of the following: Single, Vector2, Vector3, Vector4, IPackedVector</typeparam>
+        /// <typeparam name="TTarget">
+        /// Type of the target format.
+        /// Can be one of the following: Single, Vector2, Vector3, Vector4, IPackedVector.
+        /// </typeparam>
         /// <param name="index">Index of the channel to be converted.</param>
         /// <returns>New channel in the specified format.</returns>
-        public VertexChannel<TargetType> ConvertChannelContent<TargetType>(int index)
+        public VertexChannel<TTarget> ConvertChannelContent<TTarget>(int index)
         {
             if (index < 0 || index >= channels.Count)
                 throw new ArgumentOutOfRangeException(nameof(index));
@@ -141,7 +148,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             try
             {
                 // Insert a new converted channel at the same index
-                var result = Insert(index, channel.Name, channel.ReadConvertedContent<TargetType>());
+                var result = Insert(index, channel.Name, channel.ReadConvertedContent<TTarget>());
 
                 // Return the new converted channel
                 return result;
@@ -158,15 +165,18 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Converts the channel, specified by name to another vector format.
         /// </summary>
-        /// <typeparam name="TargetType">Type of the target format. Can be one of the following: Single, Vector2, Vector3, Vector4, IPackedVector</typeparam>
+        /// <typeparam name="TTaret">
+        /// Type of the target format. 
+        /// Can be one of the following: Single, Vector2, Vector3, Vector4, IPackedVector
+        /// </typeparam>
         /// <param name="name">Name of the channel to be converted.</param>
         /// <returns>New channel in the specified format.</returns>
-        public VertexChannel<TargetType> ConvertChannelContent<TargetType>(string name)
+        public VertexChannel<TTaret> ConvertChannelContent<TTaret>(string name)
         {
             var index = IndexOf(name);
             if (index < 0)
                 throw new ArgumentOutOfRangeException(nameof(name));
-            return ConvertChannelContent<TargetType>(index);
+            return ConvertChannelContent<TTaret>(index);
         }
 
         /// <summary>

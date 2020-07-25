@@ -20,6 +20,8 @@ namespace MonoGame.Framework.Vectors
             new VectorComponent(VectorComponentType.Float16, VectorComponentChannel.Green),
             new VectorComponent(VectorComponentType.Float16, VectorComponentChannel.Blue));
 
+        public static HalfVector3 One => new HalfVector3(HalfSingle.One);
+
         public HalfSingle X;
         public HalfSingle Y;
         public HalfSingle Z;
@@ -36,45 +38,82 @@ namespace MonoGame.Framework.Vectors
             Z = z;
         }
 
-        #endregion
-
-        public readonly Vector3 ToScaledVector3()
+        /// <summary>
+        /// Constructs the packed vector with a raw value.
+        /// </summary>
+        public HalfVector3(HalfSingle value) : this(value, value, value)
         {
-            return new Vector3(X, Y, Z);
         }
+
+        #endregion
 
         #region IPackedVector
 
+        public void FromScaledVector(Vector3 scaledVector)
+        {
+            scaledVector *= 2;
+            scaledVector -= Vector3.One;
+
+            X = new HalfSingle(scaledVector.X);
+            Y = new HalfSingle(scaledVector.Y);
+            Z = new HalfSingle(scaledVector.Z);
+        }
+
         public void FromScaledVector(Vector4 scaledVector)
         {
-            var vector = scaledVector.ToVector3();
-            vector *= 2;
-            vector -= Vector3.One;
+            FromScaledVector(scaledVector.ToVector3());
+        }
 
-            X = new HalfSingle(vector.X);
-            Y = new HalfSingle(vector.Y);
-            Z = new HalfSingle(vector.Z);
+        public readonly Vector3 ToScaledVector3()
+        {
+            var vector = ToVector3();
+            vector += Vector3.One;
+            vector /= 2f;
+            return vector;
         }
 
         public readonly Vector4 ToScaledVector4()
         {
-            var vector = ToScaledVector3();
-            vector += Vector3.One;
-            vector /= 2f;
-            return new Vector4(vector, 1);
+            return new Vector4(ToScaledVector3(), 1);
         }
 
-        public void FromVector(Vector4 vector)
+        public void FromVector(Vector3 vector)
         {
             X = new HalfSingle(vector.X);
             Y = new HalfSingle(vector.Y);
             Z = new HalfSingle(vector.Z);
         }
 
+        public void FromVector(Vector4 vector)
+        {
+            FromVector(vector.ToVector3());
+        }
+
+        public readonly Vector3 ToVector3()
+        {
+            return new Vector3(X, Y, Z);
+        }
+
         public readonly Vector4 ToVector4()
         {
-            return new Vector4(X, Y, Z, 1);
+            return new Vector4(ToVector3(), 1);
         }
+
+        #endregion
+
+        #region IPixel
+
+        public void FromAlpha(Alpha8 source) => this = One;
+
+        public void FromAlpha(Alpha16 source) => this = One;
+
+        public void FromAlpha(AlphaF source) => this = One;
+
+        public Alpha8 ToAlpha8() => Alpha8.Opaque;
+
+        public Alpha16 ToAlpha16() => Alpha16.Opaque;
+
+        public AlphaF ToAlphaF() => AlphaF.Opaque;
 
         #endregion
 

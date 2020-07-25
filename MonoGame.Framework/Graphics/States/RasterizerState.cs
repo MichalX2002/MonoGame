@@ -8,9 +8,14 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class RasterizerState : GraphicsResource
     {
-        public static RasterizerState CullClockwise { get; }
-        public static RasterizerState CullCounterClockwise { get; }
-        public static RasterizerState CullNone { get; }
+        public static RasterizerState CullClockwise { get; } =
+             new RasterizerState("RasterizerState.CullClockwise", CullMode.CullClockwiseFace);
+
+        public static RasterizerState CullCounterClockwise { get; } = 
+            new RasterizerState("RasterizerState.CullCounterClockwise", CullMode.CullCounterClockwiseFace);
+
+        public static RasterizerState CullNone { get; } =
+            new RasterizerState("RasterizerState.CullNone", CullMode.None);
 
         private readonly bool _defaultStateObject;
 
@@ -97,13 +102,6 @@ namespace MonoGame.Framework.Graphics
         #endregion
 
         #region Constructors
-
-        static RasterizerState()
-        {
-            CullClockwise = new RasterizerState("RasterizerState.CullClockwise", CullMode.CullClockwiseFace);
-            CullCounterClockwise = new RasterizerState("RasterizerState.CullCounterClockwise", CullMode.CullCounterClockwiseFace);
-            CullNone = new RasterizerState("RasterizerState.CullNone", CullMode.None);
-        }
 
         public RasterizerState()
         {

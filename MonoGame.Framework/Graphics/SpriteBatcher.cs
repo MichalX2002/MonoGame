@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Graphics
@@ -121,7 +122,7 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="sortMode">The type of depth sorting desired for the rendering.</param>
         /// <param name="effect">The custom effect to apply to the drawn geometry</param>
-        public unsafe void DrawBatch(SpriteSortMode sortMode, Effect effect)
+        public unsafe void DrawBatch(SpriteSortMode sortMode, Effect? effect)
         {
             if (effect != null && effect.IsDisposed)
                 throw new ObjectDisposedException(nameof(effect));
@@ -155,7 +156,7 @@ namespace MonoGame.Framework.Graphics
                         itemsToProcess = MaxBatchSize;
 
                     int count = 0;
-                    Texture2D tex = null;
+                    Texture2D? tex = null;
 
                     // TODO: create a path with sort-by-texture that does less ref-equality checks
                     // (having such a path allows copying multiple items at once)
@@ -168,6 +169,8 @@ namespace MonoGame.Framework.Graphics
                         // if the texture changed, we need to flush and bind the new texture
                         if (!ReferenceEquals(item.Texture, tex))
                         {
+                            Debug.Assert(item.Texture != null);
+
                             FlushVertexArray(dstVertexSpan.Slice(0, count), indexSpan, effect, tex);
                             count = 0;
 
@@ -205,10 +208,12 @@ namespace MonoGame.Framework.Graphics
         /// <param name="texture">The texture to draw.</param>
         private void FlushVertexArray(
             ReadOnlySpan<VertexPositionColorTexture> vertices, ReadOnlySpan<ushort> indices,
-            Effect effect, Texture texture)
+            Effect? effect, Texture? texture)
         {
             if (vertices.IsEmpty)
                 return;
+
+            Debug.Assert(texture != null);
 
             const PrimitiveType primitiveType = PrimitiveType.TriangleList;
             int primitiveCount = vertices.Length / 2;

@@ -1,6 +1,8 @@
 // Microsoft XNA Community Game Platform
 // Copyright (C) Microsoft Corporation. All rights reserved.
 
+using System.Numerics;
+
 namespace MonoGame.Framework.Graphics
 {
     /// <summary>
@@ -21,27 +23,24 @@ namespace MonoGame.Framework.Graphics
 
         #region Fields
 
-        bool fogEnabled;
-        bool vertexColorEnabled;
+        Matrix4x4 _world = Matrix4x4.Identity;
+        Matrix4x4 _view = Matrix4x4.Identity;
+        Matrix4x4 _projection = Matrix4x4.Identity;
+        Matrix4x4 _worldView;
+        
+        bool _vertexColorEnabled;
+        Vector3 _diffuseColor = Vector3.One;
+        float _alpha = 1;
 
-        Matrix world = Matrix.Identity;
-        Matrix view = Matrix.Identity;
-        Matrix projection = Matrix.Identity;
+        CompareFunction _alphaFunction = CompareFunction.Greater;
+        int _referenceAlpha;
+        bool _isEqNe;
 
-        Matrix worldView;
+        bool _fogEnabled;
+        float _fogStart;
+        float _fogEnd = 1;
 
-        Vector3 diffuseColor = Vector3.One;
-
-        float alpha = 1;
-
-        float fogStart = 0;
-        float fogEnd = 1;
-
-        CompareFunction alphaFunction = CompareFunction.Greater;
-        int referenceAlpha;
-        bool isEqNe;
-
-        EffectDirtyFlags dirtyFlags = EffectDirtyFlags.All;
+        EffectDirtyFlags _dirtyFlags = EffectDirtyFlags.All;
 
         #endregion
 
@@ -51,13 +50,13 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets or sets the world matrix.
         /// </summary>
-        public Matrix World
+        public Matrix4x4 World
         {
-            get => world;
+            get => _world;
             set
             {
-                world = value;
-                dirtyFlags |= EffectDirtyFlags.WorldViewProj | EffectDirtyFlags.Fog;
+                _world = value;
+                _dirtyFlags |= EffectDirtyFlags.WorldViewProj | EffectDirtyFlags.Fog;
             }
         }
 
@@ -65,13 +64,13 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets or sets the view matrix.
         /// </summary>
-        public Matrix View
+        public Matrix4x4 View
         {
-            get => view;
+            get => _view;
             set
             {
-                view = value;
-                dirtyFlags |= EffectDirtyFlags.WorldViewProj | EffectDirtyFlags.Fog;
+                _view = value;
+                _dirtyFlags |= EffectDirtyFlags.WorldViewProj | EffectDirtyFlags.Fog;
             }
         }
 
@@ -79,13 +78,13 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets or sets the projection matrix.
         /// </summary>
-        public Matrix Projection
+        public Matrix4x4 Projection
         {
-            get => projection;
+            get => _projection;
             set
             {
-                projection = value;
-                dirtyFlags |= EffectDirtyFlags.WorldViewProj;
+                _projection = value;
+                _dirtyFlags |= EffectDirtyFlags.WorldViewProj;
             }
         }
 
@@ -95,11 +94,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public Vector3 DiffuseColor
         {
-            get => diffuseColor;
+            get => _diffuseColor;
             set
             {
-                diffuseColor = value;
-                dirtyFlags |= EffectDirtyFlags.MaterialColor;
+                _diffuseColor = value;
+                _dirtyFlags |= EffectDirtyFlags.MaterialColor;
             }
         }
 
@@ -109,11 +108,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public float Alpha
         {
-            get => alpha;
+            get => _alpha;
             set
             {
-                alpha = value;
-                dirtyFlags |= EffectDirtyFlags.MaterialColor;
+                _alpha = value;
+                _dirtyFlags |= EffectDirtyFlags.MaterialColor;
             }
         }
 
@@ -123,13 +122,13 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public bool FogEnabled
         {
-            get => fogEnabled;
+            get => _fogEnabled;
             set
             {
-                if (fogEnabled != value)
+                if (_fogEnabled != value)
                 {
-                    fogEnabled = value;
-                    dirtyFlags |= EffectDirtyFlags.ShaderIndex | EffectDirtyFlags.FogEnable;
+                    _fogEnabled = value;
+                    _dirtyFlags |= EffectDirtyFlags.ShaderIndex | EffectDirtyFlags.FogEnable;
                 }
             }
         }
@@ -140,11 +139,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public float FogStart
         {
-            get => fogStart;
+            get => _fogStart;
             set
             {
-                fogStart = value;
-                dirtyFlags |= EffectDirtyFlags.Fog;
+                _fogStart = value;
+                _dirtyFlags |= EffectDirtyFlags.Fog;
             }
         }
 
@@ -154,11 +153,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public float FogEnd
         {
-            get => fogEnd;
+            get => _fogEnd;
             set
             {
-                fogEnd = value;
-                dirtyFlags |= EffectDirtyFlags.Fog;
+                _fogEnd = value;
+                _dirtyFlags |= EffectDirtyFlags.Fog;
             }
         }
 
@@ -188,13 +187,13 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public bool VertexColorEnabled
         {
-            get => vertexColorEnabled;
+            get => _vertexColorEnabled;
             set
             {
-                if (vertexColorEnabled != value)
+                if (_vertexColorEnabled != value)
                 {
-                    vertexColorEnabled = value;
-                    dirtyFlags |= EffectDirtyFlags.ShaderIndex;
+                    _vertexColorEnabled = value;
+                    _dirtyFlags |= EffectDirtyFlags.ShaderIndex;
                 }
             }
         }
@@ -205,11 +204,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public CompareFunction AlphaFunction
         {
-            get => alphaFunction;
+            get => _alphaFunction;
             set
             {
-                alphaFunction = value;
-                dirtyFlags |= EffectDirtyFlags.AlphaTest;
+                _alphaFunction = value;
+                _dirtyFlags |= EffectDirtyFlags.AlphaTest;
             }
         }
 
@@ -219,11 +218,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public int ReferenceAlpha
         {
-            get => referenceAlpha;
+            get => _referenceAlpha;
             set
             {
-                referenceAlpha = value;
-                dirtyFlags |= EffectDirtyFlags.AlphaTest;
+                _referenceAlpha = value;
+                _dirtyFlags |= EffectDirtyFlags.AlphaTest;
             }
         }
 
@@ -249,22 +248,22 @@ namespace MonoGame.Framework.Graphics
         {
             CacheEffectParameters();
 
-            fogEnabled = cloneSource.fogEnabled;
-            vertexColorEnabled = cloneSource.vertexColorEnabled;
+            _fogEnabled = cloneSource._fogEnabled;
+            _vertexColorEnabled = cloneSource._vertexColorEnabled;
 
-            world = cloneSource.world;
-            view = cloneSource.view;
-            projection = cloneSource.projection;
+            _world = cloneSource._world;
+            _view = cloneSource._view;
+            _projection = cloneSource._projection;
 
-            diffuseColor = cloneSource.diffuseColor;
+            _diffuseColor = cloneSource._diffuseColor;
 
-            alpha = cloneSource.alpha;
+            _alpha = cloneSource._alpha;
 
-            fogStart = cloneSource.fogStart;
-            fogEnd = cloneSource.fogEnd;
+            _fogStart = cloneSource._fogStart;
+            _fogEnd = cloneSource._fogEnd;
 
-            alphaFunction = cloneSource.alphaFunction;
-            referenceAlpha = cloneSource.referenceAlpha;
+            _alphaFunction = cloneSource._alphaFunction;
+            _referenceAlpha = cloneSource._referenceAlpha;
 
         }
 
@@ -295,30 +294,30 @@ namespace MonoGame.Framework.Graphics
         protected internal override void OnApply()
         {
             // Recompute the world+view+projection matrix or fog vector?
-            dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
-                dirtyFlags, world, view, projection, worldView,
-                fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
+            _dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
+                _dirtyFlags, _world, _view, _projection, _worldView,
+                _fogEnabled, _fogStart, _fogEnd, worldViewProjParam, fogVectorParam);
 
             // Recompute the diffuse/alpha material color parameter?
-            if ((dirtyFlags & EffectDirtyFlags.MaterialColor) != 0)
+            if ((_dirtyFlags & EffectDirtyFlags.MaterialColor) != 0)
             {
-                diffuseColorParam.SetValue(new Vector4(diffuseColor * alpha, alpha));
-                dirtyFlags &= ~EffectDirtyFlags.MaterialColor;
+                diffuseColorParam.SetValue(new Vector4(_diffuseColor * _alpha, _alpha));
+                _dirtyFlags &= ~EffectDirtyFlags.MaterialColor;
             }
 
             // Recompute the alpha test settings?
-            if ((dirtyFlags & EffectDirtyFlags.AlphaTest) != 0)
+            if ((_dirtyFlags & EffectDirtyFlags.AlphaTest) != 0)
             {
                 var alphaTest = new Vector4();
                 bool eqNe = false;
 
                 // Convert reference alpha from 8-bit integer to 0-1 float format.
-                float reference = referenceAlpha / 255f;
+                float reference = _referenceAlpha / 255f;
 
                 // Comparison tolerance of half the 8-bit integer precision.
                 const float threshold = 0.5f / 255f;
 
-                switch (alphaFunction)
+                switch (_alphaFunction)
                 {
                     case CompareFunction.Less:
                         // Shader will evaluate: clip((a < x) ? z : w)
@@ -381,32 +380,32 @@ namespace MonoGame.Framework.Graphics
                 }
 
                 alphaTestParam.SetValue(alphaTest);
-                dirtyFlags &= ~EffectDirtyFlags.AlphaTest;
+                _dirtyFlags &= ~EffectDirtyFlags.AlphaTest;
 
                 // If we changed between less/greater vs. equal/notequal
                 // compare modes, we must also update the shader index.
-                if (isEqNe != eqNe)
+                if (_isEqNe != eqNe)
                 {
-                    isEqNe = eqNe;
-                    dirtyFlags |= EffectDirtyFlags.ShaderIndex;
+                    _isEqNe = eqNe;
+                    _dirtyFlags |= EffectDirtyFlags.ShaderIndex;
                 }
             }
 
             // Recompute the shader index?
-            if ((dirtyFlags & EffectDirtyFlags.ShaderIndex) != 0)
+            if ((_dirtyFlags & EffectDirtyFlags.ShaderIndex) != 0)
             {
                 int shaderIndex = 0;
 
-                if (!fogEnabled)
+                if (!_fogEnabled)
                     shaderIndex += 1;
 
-                if (vertexColorEnabled)
+                if (_vertexColorEnabled)
                     shaderIndex += 2;
 
-                if (isEqNe)
+                if (_isEqNe)
                     shaderIndex += 4;
 
-                dirtyFlags &= ~EffectDirtyFlags.ShaderIndex;
+                _dirtyFlags &= ~EffectDirtyFlags.ShaderIndex;
 
                 CurrentTechnique = Techniques[shaderIndex];
             }

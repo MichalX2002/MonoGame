@@ -73,6 +73,28 @@ namespace MonoGame.Framework.Vectors
             set => Unsafe.As<NormalizedByte2, ushort>(ref this) = value;
         }
 
+        public void FromScaledVector(Vector4 scaledVector)
+        {
+            var raw = scaledVector.ToVector2();
+            raw = Vector2.Clamp(raw, Vector2.Zero, Vector2.One);
+            raw *= byte.MaxValue;
+            raw -= Offset;
+
+            X = (sbyte)raw.X;
+            Y = (sbyte)raw.Y;
+        }
+
+        public void FromVector(Vector4 vector)
+        {
+            var raw = vector.ToVector2();
+            raw = Vector2.Clamp(raw, -Vector2.One, Vector2.One);
+            raw *= byte.MaxValue / 2f;
+            raw -= new Vector2(0.5f);
+
+            X = (sbyte)raw.X;
+            Y = (sbyte)raw.Y;
+        }
+
         public readonly Vector4 ToScaledVector4()
         {
             var scaled = new Vector2(X, Y);
@@ -82,38 +104,16 @@ namespace MonoGame.Framework.Vectors
             return new Vector4(scaled, 0, 1);
         }
 
-        public void FromScaledVector(Vector4 scaledVector)
-        {
-            var raw = scaledVector.ToVector2();
-            raw.Clamp(Vector2.Zero, Vector2.One);
-            raw *= byte.MaxValue;
-            raw -= Offset;
-
-            X = (sbyte)raw.X;
-            Y = (sbyte)raw.Y;
-        }
-
         public readonly Vector4 ToVector4()
         {
             return new Vector4(ToVector2(), 0, 1);
-        }
-
-        public void FromVector(Vector4 vector)
-        {
-            var raw = vector.ToVector2();
-            raw.Clamp(-Vector2.One, Vector2.One);
-            raw *= byte.MaxValue / 2f;
-            raw -= new Vector2(0.5f);
-            
-            X = (sbyte)raw.X;
-            Y = (sbyte)raw.Y;
         }
 
         #endregion
 
         #region Equals
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is NormalizedByte2 other && Equals(other);
         }

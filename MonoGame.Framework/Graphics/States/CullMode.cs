@@ -13,10 +13,12 @@ namespace MonoGame.Framework.Graphics
         /// Do not cull faces.
         /// </summary>
         None,
+
         /// <summary>
         /// Cull faces with clockwise order.
         /// </summary>
         CullClockwiseFace,
+
         /// <summary>
         /// Cull faces with counter clockwise order.
         /// </summary>

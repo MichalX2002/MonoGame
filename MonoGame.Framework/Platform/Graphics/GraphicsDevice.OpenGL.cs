@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Numerics;
 using System.Globalization;
+using System.Diagnostics;
 
 #if ANGLE
 using OpenTK.Graphics;
@@ -19,6 +20,12 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class GraphicsDevice
     {
+        private static List<IntPtr> ContextDisposeQueue { get; } = new List<IntPtr>();
+        private static object DisposeContextsLock { get; } = new object();
+
+        private static BufferBindingInfo[]? _bufferBindingInfos;
+        private static bool[]? _newEnabledVertexAttributes;
+
 #if DESKTOPGL || ANGLE
         internal IGraphicsContext Context { get; private set; }
 #endif
@@ -29,36 +36,30 @@ namespace MonoGame.Framework.Graphics
 
         private List<GLHandle> _disposeThisFrame = new List<GLHandle>();
         private List<GLHandle> _resourceFreeQueue = new List<GLHandle>();
-        private object _resourceFreeingLock = new object();
-
-        private static List<IntPtr> _disposeContexts = new List<IntPtr>();
-        private static object _disposeContextsLock = new object();
+        private object ResourceFreeingLock { get; } = new object();
 
         private ShaderProgramCache _programCache;
-        private ShaderProgram _shaderProgram = null;
+        private ShaderProgram? _shaderProgram;
 
-        private static BufferBindingInfo[] _bufferBindingInfos;
-        private static bool[] _newEnabledVertexAttributes;
-        internal static HashSet<int> _enabledVertexAttributes = new HashSet<int>();
+        internal static HashSet<int> EnabledVertexAttributes { get; } = new HashSet<int>();
         internal static bool _attribsDirty;
 
         internal FramebufferHelper _framebufferHelper;
 
-        internal int _glMajorVersion = 0;
-        internal int _glMinorVersion = 0;
-        internal int _glFramebuffer = 0;
+        internal int _glMajorVersion;
+        internal int _glMinorVersion;
+        internal int _glFramebuffer;
         internal int MaxVertexAttributes;
 
         // Keeps track of last applied state to avoid redundant OpenGL calls
-        internal bool _lastBlendEnable = false;
+        internal bool _lastBlendEnable;
         internal BlendState _lastBlendState = new BlendState();
         internal DepthStencilState _lastDepthStencilState = new DepthStencilState();
         internal RasterizerState _lastRasterizerState = new RasterizerState();
-
         private DepthStencilState _clearDepthStencilState = new DepthStencilState { StencilEnable = true };
         private Vector4 _lastClearColor = Vector4.Zero;
         private float _lastClearDepth = 1f;
-        private int _lastClearStencil = 0;
+        private int _lastClearStencil;
 
         /// <summary>
         /// Get a hashed value based on the currently bound shaders.
@@ -85,16 +86,16 @@ namespace MonoGame.Framework.Graphics
         {
             for (int i = 0; i < attrs.Length; i++)
             {
-                bool contains = _enabledVertexAttributes.Contains(i);
+                bool contains = EnabledVertexAttributes.Contains(i);
                 if (attrs[i] && !contains)
                 {
-                    _enabledVertexAttributes.Add(i);
+                    EnabledVertexAttributes.Add(i);
                     GL.EnableVertexAttribArray(i);
                     GL.CheckError();
                 }
                 else if (!attrs[i] && contains)
                 {
-                    _enabledVertexAttributes.Remove(i);
+                    EnabledVertexAttributes.Remove(i);
                     GL.DisableVertexAttribArray(i);
                     GL.CheckError();
                 }
@@ -103,6 +104,9 @@ namespace MonoGame.Framework.Graphics
 
         private void ApplyAttribs(Shader shader, int baseVertex)
         {
+            Debug.Assert(_bufferBindingInfos != null);
+            Debug.Assert(_newEnabledVertexAttributes != null);
+
             int programHash = ShaderProgramHash;
             bool bindingsChanged = false;
 
@@ -121,14 +125,14 @@ namespace MonoGame.Framework.Graphics
                     var info = _bufferBindingInfos[slot];
                     if (info.VertexOffset == offset &&
                         info.InstanceFrequency == vertexBufferBinding.InstanceFrequency &&
-                        info.Vbo == vertexBufferBinding.VertexBuffer._handle &&
+                        info.Vbo == vertexBufferBinding.VertexBuffer._glBuffer &&
                         ReferenceEquals(info.AttributeInfo, attrInfo))
                         continue;
                 }
 
                 bindingsChanged = true;
 
-                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferBinding.VertexBuffer._handle);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufferBinding.VertexBuffer._glBuffer);
                 GL.CheckError();
 
                 // If InstanceFrequency of the buffer is not zero
@@ -156,7 +160,7 @@ namespace MonoGame.Framework.Graphics
                 _bufferBindingInfos[slot].VertexOffset = offset;
                 _bufferBindingInfos[slot].AttributeInfo = attrInfo;
                 _bufferBindingInfos[slot].InstanceFrequency = vertexBufferBinding.InstanceFrequency;
-                _bufferBindingInfos[slot].Vbo = vertexBufferBinding.VertexBuffer._handle;
+                _bufferBindingInfos[slot].Vbo = vertexBufferBinding.VertexBuffer._glBuffer;
             }
 
             _attribsDirty = false;
@@ -180,15 +184,15 @@ namespace MonoGame.Framework.Graphics
             _programCache = new ShaderProgramCache(this);
 
 #if DESKTOPGL || ANGLE
-            var windowInfo = new WindowInfo(SDLGameWindow.Instance.Handle);
+            var window = SDLGameWindow.Instance;
 
             if (Context == null || Context.IsDisposed)
-                Context = GL.CreateContext(windowInfo);
+                Context = GL.CreateContext(window);
 
-            Context.MakeCurrent(windowInfo);
+            Context.MakeCurrent(window);
             Context.SwapInterval = PresentationParameters.PresentationInterval.GetSwapInterval();
 
-            Context.MakeCurrent(windowInfo);
+            Context.MakeCurrent(window);
 #endif
 
             GL.GetInteger(GetPName.MaxCombinedTextureImageUnits, out MaxTextureSlots);
@@ -220,7 +224,7 @@ namespace MonoGame.Framework.Graphics
 
             try
             {
-                string version = GL.GetString(StringName.Version);
+                string? version = GL.GetString(StringName.Version);
                 if (string.IsNullOrEmpty(version))
                     throw new NoSuitableGraphicsDeviceException("Unable to retrieve OpenGL version.");
 #if GLES
@@ -264,7 +268,7 @@ namespace MonoGame.Framework.Graphics
                 0, 0, PresentationParameters.BackBufferWidth, PresentationParameters.BackBufferHeight);
 
             // Ensure the vertex attributes are reset
-            _enabledVertexAttributes.Clear();
+            EnabledVertexAttributes.Clear();
 
             // Free all the cached shader programs. 
             _programCache.Clear();
@@ -373,20 +377,15 @@ namespace MonoGame.Framework.Graphics
 
 #if DESKTOPGL || ANGLE
             Context?.Dispose();
-            Context = null;
 #endif
 
             _lastBlendState?.Dispose();
-            _lastBlendState = null;
 
             _lastDepthStencilState?.Dispose();
-            _lastDepthStencilState = null;
 
             _lastRasterizerState?.Dispose();
-            _lastRasterizerState = null;
 
             _clearDepthStencilState?.Dispose();
-            _clearDepthStencilState = null;
         }
 
         internal void DisposeResource(GLHandle handle)
@@ -394,25 +393,25 @@ namespace MonoGame.Framework.Graphics
             if (IsDisposed || handle.IsNull)
                 return;
 
-            lock (_resourceFreeingLock)
+            lock (ResourceFreeingLock)
                 _resourceFreeQueue.Add(handle);
         }
 
 #if DESKTOPGL || ANGLE
         static internal void DisposeContext(IntPtr resource)
         {
-            lock (_disposeContextsLock)
-                _disposeContexts.Add(resource);
+            lock (DisposeContextsLock)
+                ContextDisposeQueue.Add(resource);
         }
 
         static internal void DisposeContexts()
         {
-            lock (_disposeContextsLock)
+            lock (DisposeContextsLock)
             {
-                int count = _disposeContexts.Count;
-                for (int i = 0; i < count; ++i)
-                    SDL.GL.DeleteContext(_disposeContexts[i]);
-                _disposeContexts.Clear();
+                int count = ContextDisposeQueue.Count;
+                for (int i = 0; i < count; i++)
+                    SDL.GL.DeleteContext(ContextDisposeQueue[i]);
+                ContextDisposeQueue.Clear();
             }
         }
 #endif
@@ -430,7 +429,7 @@ namespace MonoGame.Framework.Graphics
                 _disposeThisFrame[i].Free();
             _disposeThisFrame.Clear();
 
-            lock (_resourceFreeingLock)
+            lock (ResourceFreeingLock)
             {
                 // Swap lists so resources added during this draw will be released after the next draw
                 var tmp = _disposeThisFrame;
@@ -540,13 +539,13 @@ namespace MonoGame.Framework.Graphics
                             }
                             break;
 #else
-                    case DepthFormat.Depth24:
-                        depthInternalFormat = RenderbufferStorage.DepthComponent24;
-                        break;
+                        case DepthFormat.Depth24:
+                            depthInternalFormat = RenderbufferStorage.DepthComponent24;
+                            break;
 
-                    case DepthFormat.Depth24Stencil8:
-                        depthInternalFormat = RenderbufferStorage.Depth24Stencil8;
-                        break;
+                        case DepthFormat.Depth24Stencil8:
+                            depthInternalFormat = RenderbufferStorage.Depth24Stencil8;
+                            break;
 #endif
                     }
 
@@ -593,7 +592,7 @@ namespace MonoGame.Framework.Graphics
                 int depth = renderTarget.GLDepthBuffer;
                 int stencil = renderTarget.GLStencilBuffer;
                 bool colorIsRenderbuffer = color != renderTarget.GLTexture;
-                
+
                 if (colorIsRenderbuffer)
                     _framebufferHelper.DeleteRenderbuffer(color);
                 if (stencil != 0 && stencil != depth)
@@ -642,7 +641,7 @@ namespace MonoGame.Framework.Graphics
                 return;
 
             var renderTargetBinding = _currentRenderTargetBindings[0];
-            var renderTarget = renderTargetBinding.RenderTarget as IRenderTarget;
+            var renderTarget = (IRenderTarget)renderTargetBinding.RenderTarget;
             if (renderTarget.MultiSampleCount > 0 && _framebufferHelper.SupportsBlitFramebuffer)
             {
                 if (!_glResolveFramebuffers.TryGetValue(_currentRenderTargetBindings, out int glResolveFramebuffer))
@@ -651,7 +650,7 @@ namespace MonoGame.Framework.Graphics
                     _framebufferHelper.BindFramebuffer(glResolveFramebuffer);
                     for (var i = 0; i < RenderTargetCount; ++i)
                     {
-                        var rt = _currentRenderTargetBindings[i].RenderTarget as IRenderTarget;
+                        var rt = (IRenderTarget)_currentRenderTargetBindings[i].RenderTarget;
                         var texTarget = (int)rt.GetFramebufferTarget(renderTargetBinding);
                         _framebufferHelper.FramebufferTexture2D((int)(
                             FramebufferAttachment.ColorAttachment0 + i), texTarget, rt.GLTexture);
@@ -677,7 +676,7 @@ namespace MonoGame.Framework.Graphics
                 for (var i = 0; i < RenderTargetCount; ++i)
                 {
                     renderTargetBinding = _currentRenderTargetBindings[i];
-                    renderTarget = renderTargetBinding.RenderTarget as IRenderTarget;
+                    renderTarget = (IRenderTarget)renderTargetBinding.RenderTarget;
                     _framebufferHelper.BlitFramebuffer(i, renderTarget.Width, renderTarget.Height);
                 }
 
@@ -694,7 +693,7 @@ namespace MonoGame.Framework.Graphics
             for (var i = 0; i < RenderTargetCount; ++i)
             {
                 renderTargetBinding = _currentRenderTargetBindings[i];
-                renderTarget = renderTargetBinding.RenderTarget as IRenderTarget;
+                renderTarget = (IRenderTarget)renderTargetBinding.RenderTarget;
                 if (renderTarget.LevelCount > 1)
                 {
                     GL.BindTexture(renderTarget.GLTarget, renderTarget.GLTexture);
@@ -712,7 +711,7 @@ namespace MonoGame.Framework.Graphics
                 _framebufferHelper.BindFramebuffer(glFramebuffer);
 
                 var renderTargetBinding = _currentRenderTargetBindings[0];
-                var renderTarget = renderTargetBinding.RenderTarget as IRenderTarget;
+                var renderTarget = (IRenderTarget)renderTargetBinding.RenderTarget;
                 var depthBuffer = renderTarget.GLDepthBuffer;
                 _framebufferHelper.FramebufferRenderbuffer((int)FramebufferAttachment.DepthAttachment, depthBuffer, 0);
                 _framebufferHelper.FramebufferRenderbuffer((int)FramebufferAttachment.StencilAttachment, depthBuffer, 0);
@@ -720,7 +719,7 @@ namespace MonoGame.Framework.Graphics
                 for (int i = 0; i < RenderTargetCount; ++i)
                 {
                     renderTargetBinding = _currentRenderTargetBindings[i];
-                    renderTarget = renderTargetBinding.RenderTarget as IRenderTarget;
+                    renderTarget = (IRenderTarget)renderTargetBinding.RenderTarget;
                     var attachement = (int)(FramebufferAttachment.ColorAttachment0 + i);
                     if (renderTarget.GLColorBuffer != renderTarget.GLTexture)
                         _framebufferHelper.FramebufferRenderbuffer(attachement, renderTarget.GLColorBuffer, 0);
@@ -750,7 +749,7 @@ namespace MonoGame.Framework.Graphics
             // Textures will need to be rebound to render correctly in the new render target.
             Textures.MarkDirty();
 
-            return _currentRenderTargetBindings[0].RenderTarget as IRenderTarget;
+            return (IRenderTarget)_currentRenderTargetBindings[0].RenderTarget;
         }
 
         private static GLPrimitiveType PrimitiveTypeGL(PrimitiveType primitiveType)
@@ -783,60 +782,23 @@ namespace MonoGame.Framework.Graphics
                 _shaderProgram = shaderProgram;
             }
 
-            var posFixupLoc = shaderProgram.GetUniformLocation("posFixup");
-            if (posFixupLoc == -1)
+            var yFixupLoc = shaderProgram.GetUniformLocation("yFixup");
+            if (yFixupLoc == -1)
                 return;
 
             // Apply vertex shader fix:
-            // The following two lines are appended to the end of vertex shaders
+            // The following line is appended to the end of vertex shaders
             // to account for rendering differences between OpenGL and DirectX:
             //
             // gl_Position.y = gl_Position.y * posFixup.y;
-            // gl_Position.xy += posFixup.zw * gl_Position.ww;
             //
             // (the following paraphrased from wine, wined3d/state.c and wined3d/glsl_shader.c)
-            //
             // - We need to flip along the y-axis in case of offscreen rendering.
-            // - D3D coordinates refer to pixel centers while GL coordinates refer
-            //   to pixel corners.
-            // - D3D has a top-left filling convention. We need to maintain this
-            //   even after the y-flip mentioned above.
-            // In order to handle the last two points, we translate by
-            // (63.0 / 128.0) / VPw and (63.0 / 128.0) / VPh. This is equivalent to
-            // translating slightly less than half a pixel. We want the difference to
-            // be large enough that it doesn't get lost due to rounding inside the
-            // driver, but small enough to prevent it from interfering with any
-            // anti-aliasing.
-            //
-            // OpenGL coordinates specify the center of the pixel while d3d coords specify
-            // the corner. The offsets are stored in z and w in posFixup. posFixup.y contains
-            // 1.0 or -1.0 to turn the rendering upside down for offscreen rendering. PosFixup.x
-            // contains 1.0 to allow a mad.
 
-            Span<float> posFixup = stackalloc float[4];
-            posFixup[0] = 1f;
-            posFixup[1] = 1f;
+            //If we have a render target bound (rendering offscreen), flip vertically
+            float yFixup = IsRenderTargetBound ? -1 : 1;
 
-            if (UseHalfPixelOffset)
-            {
-                posFixup[2] = 63.0f / 64.0f / Viewport.Width;
-                posFixup[3] = -(63.0f / 64.0f) / Viewport.Height;
-            }
-            else
-            {
-                posFixup[2] = 0f;
-                posFixup[3] = 0f;
-            }
-
-            //If we have a render target bound (rendering offscreen)
-            if (IsRenderTargetBound)
-            {
-                //flip vertically
-                posFixup[1] *= -1f;
-                posFixup[3] *= -1f;
-            }
-
-            GL.Uniform4(posFixupLoc, 1, posFixup);
+            GL.Uniform1(yFixupLoc, yFixup);
             GL.CheckError();
         }
 
@@ -883,9 +845,11 @@ namespace MonoGame.Framework.Graphics
             if (!applyShaders)
                 return;
 
+            Debug.Assert(_shaderProgram != null);
+
             if (_indexBufferDirty && _indexBuffer != null)
             {
-                GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer._handle);
+                GL.BindBuffer(BufferTarget.ElementArrayBuffer, _indexBuffer._glBuffer);
                 GL.CheckError();
             }
             _indexBufferDirty = false;
@@ -1119,7 +1083,7 @@ namespace MonoGame.Framework.Graphics
         internal void OnPresentationChanged()
         {
 #if DESKTOPGL || ANGLE
-            Context.MakeCurrent(new WindowInfo(SDLGameWindow.Instance.Handle));
+            Context.MakeCurrent(SDLGameWindow.Instance);
             Context.SwapInterval = PresentationParameters.PresentationInterval.GetSwapInterval();
 #endif
 

@@ -5,7 +5,7 @@
 namespace MonoGame.Framework.Graphics
 {
     /// <summary>
-    /// Defines options for filling the primitive.
+    /// Defines options for filling primitives.
     /// </summary>
     public enum FillMode
     {
@@ -13,6 +13,7 @@ namespace MonoGame.Framework.Graphics
         /// Draw solid faces for each primitive.
         /// </summary>
         Solid,
+
         /// <summary>
         /// Draw lines for each primitive.
         /// </summary>

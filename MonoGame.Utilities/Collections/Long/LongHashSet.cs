@@ -759,7 +759,7 @@ namespace MonoGame.Framework.Collections
                 throw new ArgumentNullException(nameof(destination));
 
             Entry[]? entries = _entries;
-            for (int i = 0; i < _count && destination.Length > 0; i++)
+            for (int i = 0; i < _count && !destination.IsEmpty; i++)
             {
                 ref Entry entry = ref entries![i];
                 if (entry.Next >= -1)

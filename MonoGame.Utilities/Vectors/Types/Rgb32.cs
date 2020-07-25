@@ -51,13 +51,7 @@ namespace MonoGame.Framework.Vectors
 
         #endregion
 
-        public readonly Vector3 ToScaledVector3()
-        {
-            return new Vector3(R, G, B) / byte.MaxValue;
-        }
-
         #region IPackedVector
-
 
         public void FromScaledVector(Vector3 scaledVector)
         {

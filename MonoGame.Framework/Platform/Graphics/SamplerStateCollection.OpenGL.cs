@@ -29,7 +29,7 @@ namespace MonoGame.Framework.Graphics
                 var sampler = _actualSamplers[i];
                 var texture = device.Textures[i];
 
-                if (sampler != null && texture != null && sampler != texture.glLastSamplerState)
+                if (sampler != null && texture != null && sampler != texture._glLastSamplerState)
                 {
                     // TODO: Avoid doing this redundantly (see TextureCollection.SetTextures())
                     // However, I suspect that rendering from the same texture with different sampling modes
@@ -44,7 +44,7 @@ namespace MonoGame.Framework.Graphics
                     // GL.CheckError();
 
                     sampler.Activate(device, texture._glTarget, texture.LevelCount > 1);
-                    texture.glLastSamplerState = sampler;
+                    texture._glLastSamplerState = sampler;
                 }
             }
         }

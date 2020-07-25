@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Globalization;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -17,6 +18,9 @@ namespace MonoGame.Framework.Vectors
     {
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Float16, VectorComponentChannel.Red));
+
+        public static HalfSingle Zero => default;
+        public static HalfSingle One { get; } = new HalfSingle(1);
 
         [CLSCompliant(false)]
         public ushort X;
@@ -62,9 +66,23 @@ namespace MonoGame.Framework.Vectors
         [CLSCompliant(false)]
         public ushort PackedValue { readonly get => X; set => X = value; }
 
-        public void FromScaledVector(Vector4 vector)
+        public void FromScaledVector(Vector3 scaledVector)
         {
-            float scaled = vector.X;
+            float scaled = scaledVector.X;
+            scaled *= 2;
+            scaled -= 1;
+
+            PackedValue = HalfTypeHelper.Pack(scaled);
+        }
+
+        public Vector3 ToScaledVector3()
+        {
+            return new Vector3(ToScaledSingle(), 0, 0);
+        }
+
+        public void FromScaledVector(Vector4 scaledVector)
+        {
+            float scaled = scaledVector.X;
             scaled *= 2;
             scaled -= 1;
 
@@ -76,16 +94,6 @@ namespace MonoGame.Framework.Vectors
             return new Vector4(ToScaledSingle(), 0, 0, 1);
         }
 
-        public void FromVector(Vector4 vector)
-        {
-            X = HalfTypeHelper.Pack(vector.X);
-        }
-
-        public readonly Vector4 ToVector4()
-        {
-            return new Vector4(ToSingle(), 0, 0, 1);
-        }
-
         #endregion
 
         #region IPixel
@@ -93,6 +101,36 @@ namespace MonoGame.Framework.Vectors
         public readonly Color ToColor()
         {
             return new Color(ToScaledSingle(), 0, 0, 1);
+        }
+
+        public void FromAlpha(Alpha8 source)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void FromAlpha(Alpha16 source)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void FromAlpha(AlphaF source)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Alpha8 ToAlpha8()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Alpha16 ToAlpha16()
+        {
+            throw new NotImplementedException();
+        }
+
+        public AlphaF ToAlphaF()
+        {
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -109,7 +147,7 @@ namespace MonoGame.Framework.Vectors
             return this == other;
         }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is HalfSingle other && Equals(other);
         }
@@ -128,10 +166,12 @@ namespace MonoGame.Framework.Vectors
 
         #region Object overrides
 
+        public readonly string ToString(IFormatProvider? provider) => ToSingle().ToString(provider);
+
         /// <summary>
         /// Gets a string representation of the packed vector.
         /// </summary>
-        public override readonly string ToString() => ToSingle().ToString();
+        public override readonly string ToString() => ToString(CultureInfo.CurrentCulture);
 
         /// <summary>
         /// Gets a hash code of the packed vector.

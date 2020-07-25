@@ -10,7 +10,7 @@ namespace MonoGame.Framework.Audio
     class XactSound
     {
         private readonly bool _complexSound;
-        private readonly XactClip[] _soundClips;
+        private readonly XactClip[]? _soundClips;
         private readonly int _waveBankIndex;
         private readonly int _trackIndex;
         private readonly float _volume;
@@ -19,7 +19,7 @@ namespace MonoGame.Framework.Audio
         private readonly SoundBank _soundBank;
         private readonly bool _useReverb;
 
-        private SoundEffectInstance _wave;
+        private SoundEffectInstance? _wave;
         private bool _streaming;
 
         private float _cueVolume = 1;
@@ -55,9 +55,11 @@ namespace MonoGame.Framework.Audio
             soundReader.ReadByte(); //priority
             soundReader.ReadUInt16(); // filter stuff?
 
-            var numClips = 0;
+            int numClips = 0;
             if (_complexSound)
+            {
                 numClips = soundReader.ReadByte();
+            }
             else
             {
                 _trackIndex = soundReader.ReadUInt16();
@@ -65,7 +67,9 @@ namespace MonoGame.Framework.Audio
             }
 
             if (!hasRPCs)
+            {
                 RpcCurves = Array.Empty<int>();
+            }
             else
             {
                 var current = soundReader.BaseStream.Position;
@@ -84,7 +88,9 @@ namespace MonoGame.Framework.Audio
             }
 
             if (!hasDSPs)
+            {
                 _useReverb = false;
+            }
             else
             {
                 // The file format for this seems to follow the pattern for 
@@ -113,7 +119,7 @@ namespace MonoGame.Framework.Audio
 
             if (_complexSound)
             {
-                foreach (var sound in _soundClips)
+                foreach (var sound in _soundClips!)
                     sound.SetFade(fadeInTime, fadeOutTime);
             }
             else
@@ -145,7 +151,7 @@ namespace MonoGame.Framework.Audio
 
             if (_complexSound)
             {
-                foreach (XactClip clip in _soundClips)
+                foreach (XactClip clip in _soundClips!)
                 {
                     clip.UpdateState(finalVolume, finalPitch, finalMix, _cueFilterFrequency, _cueFilterQFactor);
                     clip.Play();
@@ -181,7 +187,7 @@ namespace MonoGame.Framework.Audio
         {
             if (_complexSound)
             {
-                foreach (var sound in _soundClips)
+                foreach (var sound in _soundClips!)
                     sound.Update(deltaTime);
             }
             else
@@ -202,7 +208,7 @@ namespace MonoGame.Framework.Audio
         {
             if (_complexSound)
             {
-                foreach (var clip in _soundClips)
+                foreach (var clip in _soundClips!)
                     clip.Stop();
             }
             else
@@ -223,7 +229,7 @@ namespace MonoGame.Framework.Audio
         {
             if (_complexSound)
             {
-                foreach (var sound in _soundClips)
+                foreach (var sound in _soundClips!)
                 {
                     if (sound.State == SoundState.Playing)
                         sound.Pause();
@@ -240,7 +246,7 @@ namespace MonoGame.Framework.Audio
         {
             if (_complexSound)
             {
-                foreach (var sound in _soundClips)
+                foreach (var sound in _soundClips!)
                 {
                     if (sound.State == SoundState.Paused)
                         sound.Resume();
@@ -260,7 +266,7 @@ namespace MonoGame.Framework.Audio
 
             if (_complexSound)
             {
-                foreach (var clip in _soundClips)
+                foreach (var clip in _soundClips!)
                     clip.SetVolumeScale(volume);
             }
             else
@@ -285,7 +291,7 @@ namespace MonoGame.Framework.Audio
 
             if (_complexSound)
             {
-                foreach (var clip in _soundClips)
+                foreach (var clip in _soundClips!)
                     clip.UpdateState(
                         finalVolume, finalPitch, _useReverb ? _cueReverbMix : 0f, _cueFilterFrequency, _cueFilterQFactor);
             }
@@ -301,7 +307,7 @@ namespace MonoGame.Framework.Audio
         {
             if (_complexSound)
             {
-                foreach (var clip in _soundClips)
+                foreach (var clip in _soundClips!)
                     clip.SetPan(pan);
             }
             else
@@ -317,7 +323,7 @@ namespace MonoGame.Framework.Audio
             {
                 if (_complexSound)
                 {
-                    foreach (var clip in _soundClips)
+                    foreach (var clip in _soundClips!)
                         if (clip.State == SoundState.Playing)
                             return true;
 
@@ -337,7 +343,7 @@ namespace MonoGame.Framework.Audio
                     bool notStopped = false;
 
                     // All clips must be stopped for the sound to be stopped.
-                    foreach (var clip in _soundClips)
+                    foreach (var clip in _soundClips!)
                     {
                         if (clip.State != SoundState.Stopped)
                             notStopped = true;
@@ -357,7 +363,7 @@ namespace MonoGame.Framework.Audio
             {
                 if (_complexSound)
                 {
-                    foreach (var clip in _soundClips)
+                    foreach (var clip in _soundClips!)
                         if (clip.State == SoundState.Paused)
                             return true;
 

@@ -70,44 +70,60 @@ namespace MonoGame.Framework
 
         #endregion
 
+        public static Point Add(Point a, Point b) => a + b;
+
+        public static Point Subtract(Point left, Point right) => left - right;
+
+        public static Point Multiply(Point a, int b) => a * b;
+
+        public static PointF Multiply(Point a, float b) => a * b;
+
+        public static Point Divide(Point left, int divisor) => left / divisor;
+
+        public static PointF Divide(Point left, float divisor) => left / divisor;
+
         #region Operators
 
         /// <summary>
         /// Adds two points.
         /// </summary>
-        /// <param name="value1">Source <see cref="Point"/> on the left of the add sign.</param>
-        /// <param name="value2">Source <see cref="Point"/> on the right of the add sign.</param>
+        /// <param name="a">Source <see cref="Point"/> on the left of the add sign.</param>
+        /// <param name="b">Source <see cref="Point"/> on the right of the add sign.</param>
         /// <returns>Sum of the points.</returns>
-        public static Point operator +(Point value1, Point value2) =>
-            new Point(value1.X + value2.X, value1.Y + value2.Y);
+        public static Point operator +(Point a, Point b)
+        {
+            return new Point(a.X + b.X, a.Y + b.Y);
+        }
 
         /// <summary>
         /// Subtracts a <see cref="Point"/> from a <see cref="Point"/>.
         /// </summary>
-        /// <param name="value1">Source <see cref="Point"/> on the left of the sub sign.</param>
-        /// <param name="value2">Source <see cref="Point"/> on the right of the sub sign.</param>
+        /// <param name="left">Source <see cref="Point"/> on the left of the sub sign.</param>
+        /// <param name="right">Source <see cref="Point"/> on the right of the sub sign.</param>
         /// <returns>Result of the subtraction.</returns>
-        public static Point operator -(Point value1, Point value2) =>
-            new Point(value1.X - value2.X, value1.Y - value2.Y);
-
-        /// <summary>
-        /// Multiplies the components of two points by each other.
-        /// </summary>
-        /// <param name="value1">Source <see cref="Point"/> on the left of the mul sign.</param>
-        /// <param name="value2">Source <see cref="Point"/> on the right of the mul sign.</param>
-        /// <returns>Result of the multiplication.</returns>
-        public static Point operator *(Point value1, Point value2) =>
-            new Point(value1.X * value2.X, value1.Y * value2.Y);
-
-        /// <summary>
-        /// Divides the components of a <see cref="Point"/> by the components of another <see cref="Point"/>.
-        /// </summary>
-        /// <param name="source">Source <see cref="Point"/> on the left of the div sign.</param>
-        /// <param name="divisor">Divisor <see cref="Point"/> on the right of the div sign.</param>
-        /// <returns>The result of dividing the points.</returns>
-        public static Point operator /(Point source, Point divisor)
+        public static Point operator -(Point left, Point right)
         {
-            return new Point(source.X / divisor.X, source.Y / divisor.Y);
+            return new Point(left.X - right.X, left.Y - right.Y);
+        }
+
+        public static Point operator *(Point a, int b)
+        {
+            return new Point(a.X * b, a.Y * b);
+        }
+
+        public static PointF operator *(Point a, float b)
+        {
+            return (PointF)a * b;
+        }
+
+        public static Point operator /(Point left, int divisor)
+        {
+            return new Point(left.X / divisor, left.Y / divisor);
+        }
+
+        public static PointF operator /(Point left, float divisor)
+        {
+            return (PointF)left / divisor;
         }
 
         #endregion
@@ -157,7 +173,7 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region Equals
+        #region Equals (operator ==, !=)
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="Point"/>.
@@ -209,20 +225,19 @@ namespace MonoGame.Framework
 
         #endregion
 
-
         #region Explicit operators
 
-        public static explicit operator Point(in Vector2 vector)
+        public static explicit operator Point(Vector2 vector)
         {
             return vector.ToPoint();
         }
 
-        public static explicit operator Point(in PointF point)
+        public static explicit operator Point(PointF point)
         {
             return point.ToPoint();
         }
 
-        public static explicit operator Point(in SizeF size)
+        public static explicit operator Point(SizeF size)
         {
             return size.ToPoint();
         }
@@ -231,29 +246,24 @@ namespace MonoGame.Framework
 
         #region Implicit Operators
 
-        public static implicit operator Vector2(in Point size)
+        public static implicit operator Vector2(Point point)
         {
-            return size.ToVector2();
+            return point.ToVector2();
         }
 
-        public static implicit operator Point(in Size point)
+        public static implicit operator PointF(Point point)
         {
-            return point.ToPoint();
+            return point.ToPointF();
         }
 
-        public static implicit operator PointF(in Point size)
+        public static implicit operator SizeF(Point point)
         {
-            return size.ToPointF();
+            return point.ToSizeF();
         }
 
-        public static implicit operator Size(in Point point)
+        public static implicit operator Point(Size size)
         {
-            return point.ToSize();
-        }
-
-        public static implicit operator SizeF(in Point size)
-        {
-            return size.ToSizeF();
+            return size.ToPoint();
         }
 
         #endregion

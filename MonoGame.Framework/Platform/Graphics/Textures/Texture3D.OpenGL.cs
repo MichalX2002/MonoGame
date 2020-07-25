@@ -2,7 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 using System;
-using System.Runtime.InteropServices;
 using MonoGame.OpenGL;
 
 namespace MonoGame.Framework.Graphics
@@ -20,15 +19,15 @@ namespace MonoGame.Framework.Graphics
             if (mipMap)
                 throw new NotImplementedException(nameof(Texture3D) + " does not yet support mipmaps.");
 
-            GL.GenTextures(1, out _glTexture);
+            _glTexture = GL.GenTexture();
             GL.CheckError();
 
             GL.BindTexture(_glTarget, _glTexture);
             GL.CheckError();
 
-            format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
+            format.GetGLFormat(GraphicsDevice, out _glInternalFormat, out _glFormat, out _glType);
 
-            GL.TexImage3D(_glTarget, 0, glInternalFormat, width, height, depth, 0, glFormat, glType, IntPtr.Zero);
+            GL.TexImage3D(_glTarget, 0, _glInternalFormat, width, height, depth, 0, _glFormat, _glType, IntPtr.Zero);
             GL.CheckError();
 #endif
         }
@@ -48,7 +47,7 @@ namespace MonoGame.Framework.Graphics
                 GL.BindTexture(_glTarget, _glTexture);
                 GL.CheckError();
 
-                GL.TexSubImage3D(_glTarget, level, left, top, front, width, height, depth, glFormat, glType, (IntPtr)ptr);
+                GL.TexSubImage3D(_glTarget, level, left, top, front, width, height, depth, _glFormat, _glType, (IntPtr)ptr);
                 GL.CheckError();
             }
 #endif

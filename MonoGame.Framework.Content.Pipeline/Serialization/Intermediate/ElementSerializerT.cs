@@ -15,7 +15,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             _elementCount = elementCount;
         }
 
-        protected void ThrowElementCountException()
+        protected static void ThrowElementCountException()
         {
             throw new InvalidContentException("Not have enough entries in space-separated list!");
         }

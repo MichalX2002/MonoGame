@@ -45,7 +45,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             // Transform all vectors too:
             // Normals are "tangent covectors", which need to be transformed using the
             // transpose of the inverse matrix!
-            if(!Matrix4x4.Invert(xform, out var ixform))
+            if (!Matrix4x4.Invert(xform, out var ixform))
                 throw new ArgumentException("Failed to invert matrix.", nameof(xform));
 
             var inverseTranspose = Matrix4x4.Transpose(ixform);
@@ -56,14 +56,14 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                     if (!(channel is VertexChannel<Vector3> vector3Channel))
                         continue;
 
-                    if (channel.Name.StartsWith("Normal") ||
-                        channel.Name.StartsWith("Binormal") ||
-                        channel.Name.StartsWith("Tangent"))
+                    if (channel.Name.StartsWith("Normal", StringComparison.Ordinal) ||
+                        channel.Name.StartsWith("Binormal", StringComparison.Ordinal) ||
+                        channel.Name.StartsWith("Tangent", StringComparison.Ordinal))
                     {
                         for (int i = 0; i < vector3Channel.Count; i++)
                         {
                             var normal = Vector3.TransformNormal(vector3Channel[i], inverseTranspose);
-                            normal.Normalize();
+                            normal = Vector3.Normalize(normal);
                             vector3Channel[i] = normal;
                         }
                     }

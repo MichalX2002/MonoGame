@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.Collections.Generic;
+using System.Numerics;
 using System.Xml;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
@@ -17,10 +18,11 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 
         protected internal override Quaternion Deserialize(string[] inputs, ref int index)
         {
-            return new Quaternion(  XmlConvert.ToSingle(inputs[index++]),
-                                    XmlConvert.ToSingle(inputs[index++]),
-                                    XmlConvert.ToSingle(inputs[index++]),
-                                    XmlConvert.ToSingle(inputs[index++]));
+            return new Quaternion(  
+                XmlConvert.ToSingle(inputs[index++]),
+                XmlConvert.ToSingle(inputs[index++]),
+                XmlConvert.ToSingle(inputs[index++]),
+                XmlConvert.ToSingle(inputs[index++]));
         }
 
         protected internal override void Serialize(Quaternion value, List<string> results)

@@ -33,8 +33,10 @@ namespace MonoGame.Imaging.Coders.Encoding
             ImageEncoderState encoderState,
             IReadOnlyPixelRows image)
         {
-            if (encoderState == null) throw new ArgumentNullException(nameof(encoderState));
-            if (image == null) throw new ArgumentNullException(nameof(image));
+            if (encoderState == null) 
+                throw new ArgumentNullException(nameof(encoderState));
+            if (image == null) 
+                throw new ArgumentNullException(nameof(image));
 
             var state = (StbImageEncoderState)encoderState;
             var pixelInfo = image.PixelType.ComponentInfo;

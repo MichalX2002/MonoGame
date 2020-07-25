@@ -2,6 +2,7 @@
 // Copyright (C) Microsoft Corporation. All rights reserved.
 
 using System;
+using System.Numerics;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -14,34 +15,34 @@ namespace MonoGame.Framework.Graphics
 
         #region Fields
 
-        private EffectParameter textureParam;
-        private EffectParameter diffuseColorParam;
-        private EffectParameter emissiveColorParam;
-        private EffectParameter specularColorParam;
-        private EffectParameter specularPowerParam;
-        private EffectParameter eyePositionParam;
-        private EffectParameter fogColorParam;
-        private EffectParameter fogVectorParam;
-        private EffectParameter worldParam;
-        private EffectParameter worldInverseTransposeParam;
-        private EffectParameter worldViewProjParam;
-        private EffectParameter bonesParam;
+        private EffectParameter _textureParam;
+        private EffectParameter _diffuseColorParam;
+        private EffectParameter _emissiveColorParam;
+        private EffectParameter _specularColorParam;
+        private EffectParameter _specularPowerParam;
+        private EffectParameter _eyePositionParam;
+        private EffectParameter _fogColorParam;
+        private EffectParameter _fogVectorParam;
+        private EffectParameter _worldParam;
+        private EffectParameter _worldInverseTransposeParam;
+        private EffectParameter _worldViewProjParam;
+        private EffectParameter _bonesParam;
 
-        private bool preferPerPixelLighting;
-        private bool oneLight;
-        private bool fogEnabled;
-        private Matrix world = Matrix.Identity;
-        private Matrix view = Matrix.Identity;
-        private Matrix projection = Matrix.Identity;
-        private Matrix worldView;
-        private Vector3 diffuseColor = Vector3.One;
-        private Vector3 emissiveColor = Vector3.Zero;
-        private Vector3 ambientLightColor = Vector3.Zero;
-        private float alpha = 1;
-        private float fogStart = 0;
-        private float fogEnd = 1;
-        private int weightsPerVertex = 4;
-        private EffectDirtyFlags dirtyFlags = EffectDirtyFlags.All;
+        private bool _preferPerPixelLighting;
+        private bool _oneLight;
+        private bool _fogEnabled;
+        private Matrix4x4 _world = Matrix4x4.Identity;
+        private Matrix4x4 _view = Matrix4x4.Identity;
+        private Matrix4x4 _projection = Matrix4x4.Identity;
+        private Matrix4x4 _worldView;
+        private Vector3 _diffuseColor = Vector3.One;
+        private Vector3 _emissiveColor = Vector3.Zero;
+        private Vector3 _ambientLightColor = Vector3.Zero;
+        private float _alpha = 1;
+        private float _fogStart;
+        private float _fogEnd = 1;
+        private int _weightsPerVertex = 4;
+        private EffectDirtyFlags _dirtyFlags = EffectDirtyFlags.All;
 
         #endregion
 
@@ -50,38 +51,38 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets or sets the world matrix.
         /// </summary>
-        public Matrix World
+        public Matrix4x4 World
         {
-            get => world;
+            get => _world;
             set
             {
-                world = value;
-                dirtyFlags |= EffectDirtyFlags.World | EffectDirtyFlags.WorldViewProj | EffectDirtyFlags.Fog;
+                _world = value;
+                _dirtyFlags |= EffectDirtyFlags.World | EffectDirtyFlags.WorldViewProj | EffectDirtyFlags.Fog;
             }
         }
 
         /// <summary>
         /// Gets or sets the view matrix.
         /// </summary>
-        public Matrix View
+        public Matrix4x4 View
         {
-            get => view;
+            get => _view;
             set
             {
-                view = value;
-                dirtyFlags |= EffectDirtyFlags.WorldViewProj | EffectDirtyFlags.EyePosition | EffectDirtyFlags.Fog;
+                _view = value;
+                _dirtyFlags |= EffectDirtyFlags.WorldViewProj | EffectDirtyFlags.EyePosition | EffectDirtyFlags.Fog;
             }
         }
         /// <summary>
         /// Gets or sets the projection matrix.
         /// </summary>
-        public Matrix Projection
+        public Matrix4x4 Projection
         {
-            get => projection;
+            get => _projection;
             set
             {
-                projection = value;
-                dirtyFlags |= EffectDirtyFlags.WorldViewProj;
+                _projection = value;
+                _dirtyFlags |= EffectDirtyFlags.WorldViewProj;
             }
         }
 
@@ -90,11 +91,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public Vector3 DiffuseColor
         {
-            get => diffuseColor;
+            get => _diffuseColor;
             set
             {
-                diffuseColor = value;
-                dirtyFlags |= EffectDirtyFlags.MaterialColor;
+                _diffuseColor = value;
+                _dirtyFlags |= EffectDirtyFlags.MaterialColor;
             }
         }
 
@@ -103,11 +104,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public Vector3 EmissiveColor
         {
-            get => emissiveColor;
+            get => _emissiveColor;
             set
             {
-                emissiveColor = value;
-                dirtyFlags |= EffectDirtyFlags.MaterialColor;
+                _emissiveColor = value;
+                _dirtyFlags |= EffectDirtyFlags.MaterialColor;
             }
         }
 
@@ -116,8 +117,8 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public Vector3 SpecularColor
         {
-            get => specularColorParam.GetValueVector3();
-            set => specularColorParam.SetValue(value);
+            get => _specularColorParam.GetValueVector3();
+            set => _specularColorParam.SetValue(value);
         }
 
         /// <summary>
@@ -125,8 +126,8 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public float SpecularPower
         {
-            get => specularPowerParam.GetValueSingle();
-            set => specularPowerParam.SetValue(value);
+            get => _specularPowerParam.GetValueSingle();
+            set => _specularPowerParam.SetValue(value);
         }
 
         /// <summary>
@@ -134,11 +135,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public float Alpha
         {
-            get => alpha;
+            get => _alpha;
             set
             {
-                alpha = value;
-                dirtyFlags |= EffectDirtyFlags.MaterialColor;
+                _alpha = value;
+                _dirtyFlags |= EffectDirtyFlags.MaterialColor;
             }
         }
 
@@ -147,13 +148,13 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public bool PreferPerPixelLighting
         {
-            get => preferPerPixelLighting;
+            get => _preferPerPixelLighting;
             set
             {
-                if (preferPerPixelLighting != value)
+                if (_preferPerPixelLighting != value)
                 {
-                    preferPerPixelLighting = value;
-                    dirtyFlags |= EffectDirtyFlags.ShaderIndex;
+                    _preferPerPixelLighting = value;
+                    _dirtyFlags |= EffectDirtyFlags.ShaderIndex;
                 }
             }
         }
@@ -163,11 +164,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public Vector3 AmbientLightColor
         {
-            get => ambientLightColor;
+            get => _ambientLightColor;
             set
             {
-                ambientLightColor = value;
-                dirtyFlags |= EffectDirtyFlags.MaterialColor;
+                _ambientLightColor = value;
+                _dirtyFlags |= EffectDirtyFlags.MaterialColor;
             }
         }
 
@@ -191,13 +192,13 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public bool FogEnabled
         {
-            get => fogEnabled;
+            get => _fogEnabled;
             set
             {
-                if (fogEnabled != value)
+                if (_fogEnabled != value)
                 {
-                    fogEnabled = value;
-                    dirtyFlags |= EffectDirtyFlags.ShaderIndex | EffectDirtyFlags.FogEnable;
+                    _fogEnabled = value;
+                    _dirtyFlags |= EffectDirtyFlags.ShaderIndex | EffectDirtyFlags.FogEnable;
                 }
             }
         }
@@ -207,11 +208,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public float FogStart
         {
-            get => fogStart;
+            get => _fogStart;
             set
             {
-                fogStart = value;
-                dirtyFlags |= EffectDirtyFlags.Fog;
+                _fogStart = value;
+                _dirtyFlags |= EffectDirtyFlags.Fog;
             }
         }
 
@@ -220,11 +221,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public float FogEnd
         {
-            get => fogEnd;
+            get => _fogEnd;
             set
             {
-                fogEnd = value;
-                dirtyFlags |= EffectDirtyFlags.Fog;
+                _fogEnd = value;
+                _dirtyFlags |= EffectDirtyFlags.Fog;
             }
         }
 
@@ -233,8 +234,8 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public Vector3 FogColor
         {
-            get => fogColorParam.GetValueVector3();
-            set => fogColorParam.SetValue(value);
+            get => _fogColorParam.GetValueVector3();
+            set => _fogColorParam.SetValue(value);
         }
 
         /// <summary>
@@ -242,8 +243,8 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public Texture2D Texture
         {
-            get => textureParam.GetValueTexture2D();
-            set => textureParam.SetValue(value);
+            get => _textureParam.GetValueTexture2D();
+            set => _textureParam.SetValue(value);
         }
 
         /// <summary>
@@ -251,7 +252,7 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public int WeightsPerVertex
         {
-            get => weightsPerVertex;
+            get => _weightsPerVertex;
             set
             {
                 if ((value != 1) &&
@@ -259,15 +260,15 @@ namespace MonoGame.Framework.Graphics
                     (value != 4))
                     throw new ArgumentOutOfRangeException(nameof(value));
 
-                weightsPerVertex = value;
-                dirtyFlags |= EffectDirtyFlags.ShaderIndex;
+                _weightsPerVertex = value;
+                _dirtyFlags |= EffectDirtyFlags.ShaderIndex;
             }
         }
 
         /// <summary>
         /// Sets an array of skinning bone transform matrices.
         /// </summary>
-        public void SetBoneTransforms(Matrix[] boneTransforms)
+        public void SetBoneTransforms(Matrix4x4[] boneTransforms)
         {
             if ((boneTransforms == null) || (boneTransforms.Length == 0))
                 throw new ArgumentNullException(nameof(boneTransforms));
@@ -275,18 +276,18 @@ namespace MonoGame.Framework.Graphics
             if (boneTransforms.Length > MaxBones)
                 throw new ArgumentException();
 
-            bonesParam.SetValue(boneTransforms);
+            _bonesParam.SetValue(boneTransforms);
         }
 
         /// <summary>
         /// Gets a copy of the current skinning bone transform matrices.
         /// </summary>
-        public Matrix[] GetBoneTransforms(int count)
+        public Matrix4x4[] GetBoneTransforms(int count)
         {
             if (count <= 0 || count > MaxBones)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
-            Matrix[] bones = bonesParam.GetValueMatrixArray(count);
+            Matrix4x4[] bones = _bonesParam.GetValueMatrixArray(count);
 
             // Convert matrices from 43 to 44 format.
             for (int i = 0; i < bones.Length; i++)
@@ -330,11 +331,11 @@ namespace MonoGame.Framework.Graphics
             SpecularColor = Vector3.One;
             SpecularPower = 16;
 
-            Matrix[] identityBones = new Matrix[MaxBones];
+            var identityBones = new Matrix4x4[MaxBones];
 
             for (int i = 0; i < MaxBones; i++)
             {
-                identityBones[i] = Matrix.Identity;
+                identityBones[i] = Matrix4x4.Identity;
             }
 
             SetBoneTransforms(identityBones);
@@ -348,23 +349,23 @@ namespace MonoGame.Framework.Graphics
         {
             CacheEffectParameters(cloneSource);
 
-            preferPerPixelLighting = cloneSource.preferPerPixelLighting;
-            fogEnabled = cloneSource.fogEnabled;
+            _preferPerPixelLighting = cloneSource._preferPerPixelLighting;
+            _fogEnabled = cloneSource._fogEnabled;
 
-            world = cloneSource.world;
-            view = cloneSource.view;
-            projection = cloneSource.projection;
+            _world = cloneSource._world;
+            _view = cloneSource._view;
+            _projection = cloneSource._projection;
 
-            diffuseColor = cloneSource.diffuseColor;
-            emissiveColor = cloneSource.emissiveColor;
-            ambientLightColor = cloneSource.ambientLightColor;
+            _diffuseColor = cloneSource._diffuseColor;
+            _emissiveColor = cloneSource._emissiveColor;
+            _ambientLightColor = cloneSource._ambientLightColor;
 
-            alpha = cloneSource.alpha;
+            _alpha = cloneSource._alpha;
 
-            fogStart = cloneSource.fogStart;
-            fogEnd = cloneSource.fogEnd;
+            _fogStart = cloneSource._fogStart;
+            _fogEnd = cloneSource._fogEnd;
 
-            weightsPerVertex = cloneSource.weightsPerVertex;
+            _weightsPerVertex = cloneSource._weightsPerVertex;
         }
 
         /// <summary>
@@ -389,18 +390,18 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         private void CacheEffectParameters(SkinnedEffect cloneSource)
         {
-            textureParam = Parameters["Texture"];
-            diffuseColorParam = Parameters["DiffuseColor"];
-            emissiveColorParam = Parameters["EmissiveColor"];
-            specularColorParam = Parameters["SpecularColor"];
-            specularPowerParam = Parameters["SpecularPower"];
-            eyePositionParam = Parameters["EyePosition"];
-            fogColorParam = Parameters["FogColor"];
-            fogVectorParam = Parameters["FogVector"];
-            worldParam = Parameters["World"];
-            worldInverseTransposeParam = Parameters["WorldInverseTranspose"];
-            worldViewProjParam = Parameters["WorldViewProj"];
-            bonesParam = Parameters["Bones"];
+            _textureParam = Parameters["Texture"];
+            _diffuseColorParam = Parameters["DiffuseColor"];
+            _emissiveColorParam = Parameters["EmissiveColor"];
+            _specularColorParam = Parameters["SpecularColor"];
+            _specularPowerParam = Parameters["SpecularPower"];
+            _eyePositionParam = Parameters["EyePosition"];
+            _fogColorParam = Parameters["FogColor"];
+            _fogVectorParam = Parameters["FogVector"];
+            _worldParam = Parameters["World"];
+            _worldInverseTransposeParam = Parameters["WorldInverseTranspose"];
+            _worldViewProjParam = Parameters["WorldViewProj"];
+            _bonesParam = Parameters["Bones"];
 
             DirectionalLight0 = new DirectionalLight(
                 Parameters["DirLight0Direction"],
@@ -428,53 +429,53 @@ namespace MonoGame.Framework.Graphics
         protected internal override void OnApply()
         {
             // Recompute the world+view+projection matrix or fog vector?
-            dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
-                dirtyFlags, world, view, projection, worldView,
-                fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
+            _dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
+                _dirtyFlags, _world, _view, _projection, _worldView,
+                _fogEnabled, _fogStart, _fogEnd, _worldViewProjParam, _fogVectorParam);
 
             // Recompute the world inverse transpose and eye position?
-            dirtyFlags = EffectHelpers.SetLightingMatrices(
-                dirtyFlags, world, view, 
-                worldParam, worldInverseTransposeParam, eyePositionParam);
+            _dirtyFlags = EffectHelpers.SetLightingMatrices(
+                _dirtyFlags, _world, _view, 
+                _worldParam, _worldInverseTransposeParam, _eyePositionParam);
 
             // Recompute the diffuse/emissive/alpha material color parameters?
-            if ((dirtyFlags & EffectDirtyFlags.MaterialColor) != 0)
+            if ((_dirtyFlags & EffectDirtyFlags.MaterialColor) != 0)
             {
                 EffectHelpers.SetMaterialColor(
-                    true, alpha, diffuseColor, emissiveColor, ambientLightColor, 
-                    diffuseColorParam, emissiveColorParam);
+                    true, _alpha, _diffuseColor, _emissiveColor, _ambientLightColor, 
+                    _diffuseColorParam, _emissiveColorParam);
 
-                dirtyFlags &= ~EffectDirtyFlags.MaterialColor;
+                _dirtyFlags &= ~EffectDirtyFlags.MaterialColor;
             }
 
             // Check if we can use the only-bother-with-the-first-light shader optimization.
             bool newOneLight = !DirectionalLight1.Enabled && !DirectionalLight2.Enabled;
 
-            if (oneLight != newOneLight)
+            if (_oneLight != newOneLight)
             {
-                oneLight = newOneLight;
-                dirtyFlags |= EffectDirtyFlags.ShaderIndex;
+                _oneLight = newOneLight;
+                _dirtyFlags |= EffectDirtyFlags.ShaderIndex;
             }
 
             // Recompute the shader index?
-            if ((dirtyFlags & EffectDirtyFlags.ShaderIndex) != 0)
+            if ((_dirtyFlags & EffectDirtyFlags.ShaderIndex) != 0)
             {
                 int shaderIndex = 0;
 
-                if (!fogEnabled)
+                if (!_fogEnabled)
                     shaderIndex += 1;
 
-                if (weightsPerVertex == 2)
+                if (_weightsPerVertex == 2)
                     shaderIndex += 2;
-                else if (weightsPerVertex == 4)
+                else if (_weightsPerVertex == 4)
                     shaderIndex += 4;
 
-                if (preferPerPixelLighting)
+                if (_preferPerPixelLighting)
                     shaderIndex += 12;
-                else if (oneLight)
+                else if (_oneLight)
                     shaderIndex += 6;
 
-                dirtyFlags &= ~EffectDirtyFlags.ShaderIndex;
+                _dirtyFlags &= ~EffectDirtyFlags.ShaderIndex;
 
                 CurrentTechnique = Techniques[shaderIndex];
             }

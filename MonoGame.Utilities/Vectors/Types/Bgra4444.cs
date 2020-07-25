@@ -66,7 +66,7 @@ namespace MonoGame.Framework.Vectors
         {
             scaledVector *= MaxValue;
             scaledVector += new Vector3(0.5f);
-            scaledVector.Clamp(0, MaxValue);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, MaxValue);
 
             PackedValue = (ushort)(
                 (MaxXYZW << 12) |
@@ -79,7 +79,7 @@ namespace MonoGame.Framework.Vectors
         {
             scaledVector *= MaxValue;
             scaledVector += new Vector4(0.5f);
-            scaledVector.Clamp(0, MaxValue);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, MaxValue);
 
             PackedValue = (ushort)(
                 (((int)scaledVector.W) << 12) |
@@ -148,17 +148,17 @@ namespace MonoGame.Framework.Vectors
 
         public readonly Alpha8 ToAlpha8()
         {
-            return ScalingHelper.ToUInt8From4(PackedValue >> 12);
+            return ScalingHelper.ToUInt8From4((byte)(PackedValue >> 12));
         }
 
         public readonly Alpha16 ToAlpha16()
         {
-            return ScalingHelper.ToUInt16From4(PackedValue >> 12);
+            return ScalingHelper.ToUInt16From4((byte)(PackedValue >> 12));
         }
 
         public readonly AlphaF ToAlphaF()
         {
-            return ScalingHelper.ToFloat32FromUInt4(PackedValue >> 12);
+            return ScalingHelper.ToFloat32FromUInt4((byte)(PackedValue >> 12));
         }
 
         #endregion

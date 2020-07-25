@@ -647,7 +647,7 @@ namespace MonoGame.Framework
                 Update(gameTime);
 
                 //The TouchPanel needs to know the time for when touches arrive
-                TouchPanelState.CurrentTimestamp = gameTime.TotalGameTime;
+                TouchPanel.CurrentTimestamp = gameTime.TotalGameTime;
             }
         }
 

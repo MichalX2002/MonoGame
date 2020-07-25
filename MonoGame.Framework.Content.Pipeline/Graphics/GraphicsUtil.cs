@@ -7,6 +7,7 @@ using MonoGame.Framework.Graphics;
 using MonoGame.Imaging;
 using MonoGame.Imaging.Processing;
 using MonoGame.Framework.Vectors;
+using System.Numerics;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
@@ -131,7 +132,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             {
                 context.Logger.LogWarning(
                     null, content.Identity,
-                    "PVR compression requires width and height to be powers of two and equal. Falling back to 16-bit color.");
+                    "PVR compression requires width and height to " +
+                    "be powers of two and equal. Falling back to 16-bit color.");
 
                 CompressColor16Bit(content);
             }
@@ -145,7 +147,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             {
                 if (!IsPowerOfTwo(face.Width) || !IsPowerOfTwo(face.Height))
                     throw new PipelineException(
-                        "DXT compression requires width and height must be powers of two in Reach graphics profile.");
+                        "DXT compression requires width and height must " +
+                        "be powers of two in Reach graphics profile.");
             }
 
             // Test the alpha channel to figure out if we have alpha.
@@ -214,7 +217,11 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 // Since we already enforce POT for PVR and DXT in Reach, we will also enforce POT for ETC1
                 if (!IsPowerOfTwo(face.Width) || !IsPowerOfTwo(face.Height))
                 {
-                    context.Logger.LogWarning(null, content.Identity, "ETC1 compression requires width and height to be powers of two due to hardware restrictions on some devices. Falling back to BGR565.");
+                    context.Logger.LogWarning(
+                        null, content.Identity, 
+                        "ETC1 compression requires width and height to be powers of two due to " +
+                        "hardware restrictions on some devices. Falling back to BGR565.");
+
                     content.ConvertBitmapType(typeof(PixelBitmapContent<Bgr565>));
                 }
                 else
@@ -376,24 +383,25 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         static void CompressFontDXT3Block(Span<Vector4> colors, byte[] buffer, int offset)
         {
             // Get the alpha into a 0-15 range
-            int a0 = (int)(colors[0].W * 15.0);
-            int a1 = (int)(colors[1].W * 15.0);
-            int a2 = (int)(colors[2].W * 15.0);
-            int a3 = (int)(colors[3].W * 15.0);
-            int a4 = (int)(colors[4].W * 15.0);
-            int a5 = (int)(colors[5].W * 15.0);
-            int a6 = (int)(colors[6].W * 15.0);
-            int a7 = (int)(colors[7].W * 15.0);
-            int a8 = (int)(colors[8].W * 15.0);
-            int a9 = (int)(colors[9].W * 15.0);
-            int a10 = (int)(colors[10].W * 15.0);
-            int a11 = (int)(colors[11].W * 15.0);
-            int a12 = (int)(colors[12].W * 15.0);
-            int a13 = (int)(colors[13].W * 15.0);
-            int a14 = (int)(colors[14].W * 15.0);
             int a15 = (int)(colors[15].W * 15.0);
+            int a14 = (int)(colors[14].W * 15.0);
+            int a13 = (int)(colors[13].W * 15.0);
+            int a12 = (int)(colors[12].W * 15.0);
+            int a11 = (int)(colors[11].W * 15.0);
+            int a10 = (int)(colors[10].W * 15.0);
+            int a9 = (int)(colors[9].W * 15.0);
+            int a8 = (int)(colors[8].W * 15.0);
+            int a7 = (int)(colors[7].W * 15.0);
+            int a6 = (int)(colors[6].W * 15.0);
+            int a5 = (int)(colors[5].W * 15.0);
+            int a4 = (int)(colors[4].W * 15.0);
+            int a3 = (int)(colors[3].W * 15.0);
+            int a2 = (int)(colors[2].W * 15.0);
+            int a1 = (int)(colors[1].W * 15.0);
+            int a0 = (int)(colors[0].W * 15.0);
 
-            // Duplicate the top two bits into the bottom two bits so we get one of four values: b0000, b0101, b1010, b1111
+            // Duplicate the top two bits into the bottom two bits so 
+            // we get one of four values: b0000, b0101, b1010, b1111
             a0 = (a0 & 0xC) | (a0 >> 2);
             a1 = (a1 & 0xC) | (a1 >> 2);
             a2 = (a2 & 0xC) | (a2 >> 2);
@@ -411,43 +419,45 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             a14 = (a14 & 0xC) | (a14 >> 2);
             a15 = (a15 & 0xC) | (a15 >> 2);
 
-            // 4-bit alpha
-            buffer[offset + 0] = (byte)((a1 << 4) | a0);
-            buffer[offset + 1] = (byte)((a3 << 4) | a2);
-            buffer[offset + 2] = (byte)((a5 << 4) | a4);
-            buffer[offset + 3] = (byte)((a7 << 4) | a6);
-            buffer[offset + 4] = (byte)((a9 << 4) | a8);
-            buffer[offset + 5] = (byte)((a11 << 4) | a10);
-            buffer[offset + 6] = (byte)((a13 << 4) | a12);
-            buffer[offset + 7] = (byte)((a15 << 4) | a14);
-
-            // color0 (transparent)
-            buffer[offset + 8] = 0;
-            buffer[offset + 9] = 0;
 
             // color1 (white)
-            buffer[offset + 10] = 255;
             buffer[offset + 11] = 255;
+            buffer[offset + 10] = 255;
+
+            // color0 (transparent)
+            buffer[offset + 9] = 0;
+            buffer[offset + 8] = 0;
+
+            // 4-bit alpha
+            buffer[offset + 7] = (byte)((a15 << 4) | a14);
+            buffer[offset + 6] = (byte)((a13 << 4) | a12);
+            buffer[offset + 5] = (byte)((a11 << 4) | a10);
+            buffer[offset + 4] = (byte)((a9 << 4) | a8);
+            buffer[offset + 3] = (byte)((a7 << 4) | a6);
+            buffer[offset + 2] = (byte)((a5 << 4) | a4);
+            buffer[offset + 1] = (byte)((a3 << 4) | a2);
+            buffer[offset + 0] = (byte)((a1 << 4) | a0);
 
             // Get the red (to be used for green and blue channels as well) into a 0-15 range
-            a0 = (int)(colors[0].X * 15.0);
-            a1 = (int)(colors[1].X * 15.0);
-            a2 = (int)(colors[2].X * 15.0);
-            a3 = (int)(colors[3].X * 15.0);
-            a4 = (int)(colors[4].X * 15.0);
-            a5 = (int)(colors[5].X * 15.0);
-            a6 = (int)(colors[6].X * 15.0);
-            a7 = (int)(colors[7].X * 15.0);
-            a8 = (int)(colors[8].X * 15.0);
-            a9 = (int)(colors[9].X * 15.0);
-            a10 = (int)(colors[10].X * 15.0);
-            a11 = (int)(colors[11].X * 15.0);
-            a12 = (int)(colors[12].X * 15.0);
-            a13 = (int)(colors[13].X * 15.0);
-            a14 = (int)(colors[14].X * 15.0);
             a15 = (int)(colors[15].X * 15.0);
+            a14 = (int)(colors[14].X * 15.0);
+            a13 = (int)(colors[13].X * 15.0);
+            a12 = (int)(colors[12].X * 15.0);
+            a11 = (int)(colors[11].X * 15.0);
+            a10 = (int)(colors[10].X * 15.0);
+            a9 = (int)(colors[9].X * 15.0);
+            a8 = (int)(colors[8].X * 15.0);
+            a7 = (int)(colors[7].X * 15.0);
+            a6 = (int)(colors[6].X * 15.0);
+            a5 = (int)(colors[5].X * 15.0);
+            a4 = (int)(colors[4].X * 15.0);
+            a3 = (int)(colors[3].X * 15.0);
+            a2 = (int)(colors[2].X * 15.0);
+            a1 = (int)(colors[1].X * 15.0);
+            a0 = (int)(colors[0].X * 15.0);
 
-            // Duplicate the top two bits into the bottom two bits so we get one of four values: b0000, b0101, b1010, b1111
+            // Duplicate the top two bits into the bottom two bits so 
+            // we get one of four values: b0000, b0101, b1010, b1111
             a0 = (a0 & 0xC) | (a0 >> 2);
             a1 = (a1 & 0xC) | (a1 >> 2);
             a2 = (a2 & 0xC) | (a2 >> 2);
@@ -465,11 +475,35 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             a14 = (a14 & 0xC) | (a14 >> 2);
             a15 = (a15 & 0xC) | (a15 >> 2);
 
-            // Color indices (00 = color0, 01 = color1, 10 = 2/3 * color0 + 1/3 * color1, 11 = 1/3 * color0 + 2/3 * color1)
-            buffer[offset + 12] = (byte)((_dxt3Map[a3 >> 2] << 6) | (_dxt3Map[a2 >> 2] << 4) | (_dxt3Map[a1 >> 2] << 2) | _dxt3Map[a0 >> 2]);
-            buffer[offset + 13] = (byte)((_dxt3Map[a7 >> 2] << 6) | (_dxt3Map[a6 >> 2] << 4) | (_dxt3Map[a5 >> 2] << 2) | _dxt3Map[a4 >> 2]);
-            buffer[offset + 14] = (byte)((_dxt3Map[a11 >> 2] << 6) | (_dxt3Map[a10 >> 2] << 4) | (_dxt3Map[a9 >> 2] << 2) | _dxt3Map[a8 >> 2]);
-            buffer[offset + 15] = (byte)((_dxt3Map[a15 >> 2] << 6) | (_dxt3Map[a14 >> 2] << 4) | (_dxt3Map[a13 >> 2] << 2) | _dxt3Map[a12 >> 2]);
+            // Color indices (
+            //  00 = color0, 
+            //  01 = color1, 
+            //  10 = 2/3 * color0 + 1/3 * color1, 
+            //  11 = 1/3 * color0 + 2/3 * color1)
+
+            buffer[offset + 15] = (byte)(
+                (_dxt3Map[a15 >> 2] << 6) | 
+                (_dxt3Map[a14 >> 2] << 4) | 
+                (_dxt3Map[a13 >> 2] << 2) | 
+                _dxt3Map[a12 >> 2]);
+
+            buffer[offset + 14] = (byte)(
+                (_dxt3Map[a11 >> 2] << 6) |
+                (_dxt3Map[a10 >> 2] << 4) | 
+                (_dxt3Map[a9 >> 2] << 2) | 
+                _dxt3Map[a8 >> 2]);
+
+            buffer[offset + 13] = (byte)(
+                (_dxt3Map[a7 >> 2] << 6) | 
+                (_dxt3Map[a6 >> 2] << 4) |
+                (_dxt3Map[a5 >> 2] << 2) |
+                _dxt3Map[a4 >> 2]);
+
+            buffer[offset + 12] = (byte)(
+                (_dxt3Map[a3 >> 2] << 6) |
+                (_dxt3Map[a2 >> 2] << 4) |
+                (_dxt3Map[a1 >> 2] << 2) | 
+                _dxt3Map[a0 >> 2]);
         }
     }
 }

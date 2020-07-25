@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.Serialization;
-using System.Security.Authentication.ExtendedProtection;
 
 namespace MonoGame.Framework
 {
@@ -98,21 +97,6 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Calculates the <see cref="Size" /> representing the vector addition of two <see cref="Size" /> structures as if
-        /// they were <see cref="Vector2" /> structures.
-        /// </summary>
-        /// <param name="a">The first size.</param>
-        /// <param name="b">The second size.</param>
-        /// <returns>
-        /// The <see cref="Size" /> representing the vector addition of two <see cref="Size" /> structures as if they
-        /// were <see cref="Vector2" /> structures.
-        /// </returns>
-        public static Size operator +(Size a, Size b)
-        {
-            return new Size(a.Width + b.Width, a.Height + b.Height);
-        }
-
-        /// <summary>
         /// Calculates the <see cref="Size" /> representing the vector addition of two <see cref="Size" /> structures.
         /// </summary>
         /// <param name="a">The first size.</param>
@@ -120,10 +104,7 @@ namespace MonoGame.Framework
         /// <returns>
         /// The <see cref="Size" /> representing the vector addition of two <see cref="Size" /> structures.
         /// </returns>
-        public static Size Add(Size a, Size b)
-        {
-            return a + b;
-        }
+        public static Size Add(Size a, Size b) => a + b;
 
         /// <summary>
         /// Calculates the <see cref="Size" /> representing the vector subtraction of two <see cref="Size" /> structures.
@@ -133,35 +114,64 @@ namespace MonoGame.Framework
         /// <returns>
         /// The <see cref="Size" /> representing the vector subtraction of two <see cref="Size" /> structures.
         /// </returns>
+        public static Size Subtract(Size left, Size right) => left - right;
+
+        public static Size Multiply(Size a, int b) => a * b;
+
+        public static SizeF Multiply(Size a, float b) => a * b;
+
+        public static Size Divide(Size left, int divisor) => left / divisor;
+
+        public static SizeF Divide(Size left, float disivor) => left / disivor;
+
+        #region Operators
+
+        /// <summary>
+        /// Calculates the <see cref="Size" /> representing the vector addition of two <see cref="Size" /> structures as if
+        /// they were <see cref="Vector2" /> structures.
+        /// </summary>
+        /// <param name="a">The first size.</param>
+        /// <param name="b">The second size.</param>
+        /// <returns>The <see cref="Size" /> representing the vector addition.</returns>
+        public static Size operator +(Size a, Size b)
+        {
+            return new Size(a.Width + b.Width, a.Height + b.Height);
+        }
+
+        /// <summary>
+        /// Calculates the <see cref="Size" /> representing the vector subtraction.
+        /// </summary>
+        /// <param name="left">The first size.</param>
+        /// <param name="right">The second size.</param>
+        /// <returns>The <see cref="Size" /> representing the vector subtraction.</returns>
         public static Size operator -(Size left, Size right)
         {
             return new Size(left.Width - right.Width, left.Height - right.Height);
         }
 
-        public static Size operator /(Size size, int value)
+        public static Size operator *(Size a, int b)
         {
-            return new Size(size.Width / value, size.Height / value);
+            return new Size(a.Width * b, a.Height * b);
         }
 
-        public static Size operator *(Size size, int value)
+        public static SizeF operator *(Size a, float b)
         {
-            return new Size(size.Width * value, size.Height * value);
+            return (SizeF)a * b;
         }
 
-        /// <summary>
-        /// Calculates the <see cref="Size" /> representing the vector subtraction of two <see cref="Size" /> structures.
-        /// </summary>
-        /// <param name="left">The first size.</param>
-        /// <param name="right">The second size.</param>
-        /// <returns>
-        /// The <see cref="Size" /> representing the vector subtraction of two <see cref="Size" /> structures.
-        /// </returns>
-        public static Size Subtract(Size left, Size right)
+        public static Size operator /(Size left, int divisor)
         {
-            return Subtract(left, right);
+            return new Size(left.Width / divisor, left.Height / divisor);
         }
 
-        #region Equals
+        public static SizeF operator /(Size left, float divisor)
+        {
+            return (SizeF)left / divisor;
+        }
+
+        #endregion
+
+        #region Equals (operator ==, !=)
 
         /// <summary>
         /// Indicates whether this <see cref="Size" /> is equal to another <see cref="Size" />.
@@ -180,7 +190,7 @@ namespace MonoGame.Framework
         /// </summary>
         public static bool operator ==(Size a, Size b)
         {
-            return (a.Width == b.Width) 
+            return (a.Width == b.Width)
                 && (a.Height == b.Height);
         }
 
@@ -212,17 +222,17 @@ namespace MonoGame.Framework
 
         #region Explicit operators
 
-        public static explicit operator Size(in Vector2 vector)
+        public static explicit operator Size(Vector2 vector)
         {
             return vector.ToSize();
         }
 
-        public static explicit operator Size(in PointF point)
+        public static explicit operator Size(PointF point)
         {
             return point.ToSize();
         }
 
-        public static explicit operator Size(in SizeF size)
+        public static explicit operator Size(SizeF size)
         {
             return size.ToSize();
         }
@@ -231,27 +241,17 @@ namespace MonoGame.Framework
 
         #region Implicit Operators
 
-        public static implicit operator Vector2(in Size size)
+        public static implicit operator Vector2(Size size)
         {
             return size.ToVector2();
         }
 
-        public static implicit operator Point(in Size size)
-        {
-            return size.ToPoint();
-        }
-
-        public static implicit operator PointF(in Size size)
+        public static implicit operator PointF(Size size)
         {
             return size.ToPointF();
         }
 
-        public static implicit operator Size(in Point point)
-        {
-            return point.ToSize();
-        }
-
-        public static implicit operator SizeF(in Size size)
+        public static implicit operator SizeF(Size size)
         {
             return size.ToSizeF();
         }

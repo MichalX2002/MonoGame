@@ -8,10 +8,17 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class BlendState : GraphicsResource
     {
-        public static BlendState Additive { get; }
-        public static BlendState AlphaBlend { get; }
-        public static BlendState NonPremultiplied { get; }
-        public static BlendState Opaque { get; }
+        public static BlendState Additive { get; } =
+            new BlendState("BlendState.Additive", Blend.SourceAlpha, Blend.One);
+
+        public static BlendState AlphaBlend { get; } =
+            new BlendState("BlendState.AlphaBlend", Blend.One, Blend.InverseSourceAlpha);
+
+        public static BlendState NonPremultiplied { get; } =
+            new BlendState("BlendState.NonPremultiplied", Blend.SourceAlpha, Blend.InverseSourceAlpha);
+
+        public static BlendState Opaque { get; } =
+            new BlendState("BlendState.Opaque", Blend.One, Blend.Zero);
 
         private readonly TargetBlendState[] _targetBlendState;
         private readonly bool _defaultStateObject;
@@ -20,23 +27,20 @@ namespace MonoGame.Framework.Graphics
         private int _multiSampleMask;
         private bool _independentBlendEnable;
 
-        #region Constructors
+        /// <summary>
+        /// Returns the target specific blend state.
+        /// </summary>
+        /// <param name="index">The 0 to 3 target blend state index.</param>
+        /// <returns>A target blend state.</returns>
+        public TargetBlendState this[int index] => _targetBlendState[index];
 
-        static BlendState()
-        {
-            Additive = new BlendState("BlendState.Additive", Blend.SourceAlpha, Blend.One);
-            AlphaBlend = new BlendState("BlendState.AlphaBlend", Blend.One, Blend.InverseSourceAlpha);
-            NonPremultiplied = new BlendState("BlendState.NonPremultiplied", Blend.SourceAlpha, Blend.InverseSourceAlpha);
-            Opaque = new BlendState("BlendState.Opaque", Blend.One, Blend.Zero);
-        }
+        #region Constructors
 
         public BlendState()
         {
             _targetBlendState = new TargetBlendState[4];
-            _targetBlendState[0] = new TargetBlendState(this);
-            _targetBlendState[1] = new TargetBlendState(this);
-            _targetBlendState[2] = new TargetBlendState(this);
-            _targetBlendState[3] = new TargetBlendState(this);
+            for (int i = 0; i < _targetBlendState.Length; i++)
+                _targetBlendState[i] = new TargetBlendState(this);
 
             _blendFactor = Color.White;
             _multiSampleMask = int.MaxValue;
@@ -58,11 +62,9 @@ namespace MonoGame.Framework.Graphics
         {
             Name = cloneSource.Name;
 
-            _targetBlendState = new TargetBlendState[4];
-            _targetBlendState[0] = cloneSource[0].Clone(this);
-            _targetBlendState[1] = cloneSource[1].Clone(this);
-            _targetBlendState[2] = cloneSource[2].Clone(this);
-            _targetBlendState[3] = cloneSource[3].Clone(this);
+            _targetBlendState = new TargetBlendState[cloneSource._targetBlendState.Length];
+            for (int i = 0; i < _targetBlendState.Length; i++)
+                _targetBlendState[i] = cloneSource[i].Clone(this);
 
             _blendFactor = cloneSource._blendFactor;
             _multiSampleMask = cloneSource._multiSampleMask;
@@ -94,13 +96,6 @@ namespace MonoGame.Framework.Graphics
                 throw new InvalidOperationException(
                     "You cannot modify the blend state after it has been bound to the graphics device!");
         }
-
-        /// <summary>
-        /// Returns the target specific blend state.
-        /// </summary>
-        /// <param name="index">The 0 to 3 target blend state index.</param>
-        /// <returns>A target blend state.</returns>
-        public TargetBlendState this[int index] => _targetBlendState[index];
 
         #region Properties
 
@@ -244,7 +239,7 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-#endregion
+        #endregion
 
         internal BlendState Clone()
         {
@@ -257,9 +252,6 @@ namespace MonoGame.Framework.Graphics
         {
             if (!IsDisposed)
             {
-                for (int i = 0; i < _targetBlendState.Length; ++i)
-                    _targetBlendState[i] = null;
-
                 PlatformDispose();
             }
             base.Dispose(disposing);

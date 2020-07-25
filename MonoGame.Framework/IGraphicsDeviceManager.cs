@@ -10,16 +10,16 @@ namespace MonoGame.Framework
     public interface IGraphicsDeviceManager
     {
         /// <summary>
-        /// Called at the start of rendering a frame.
-        /// </summary>
-        /// <returns>Returns true if the frame should be rendered.</returns>
-        bool BeginDraw();
-
-        /// <summary>
         /// Called to create the graphics device.
         /// </summary>
         /// <remarks>Does nothing if the graphics device is already created.</remarks>
         void CreateDevice();
+
+        /// <summary>
+        /// Called at the start of rendering a frame.
+        /// </summary>
+        /// <returns>Returns true if the frame should be rendered.</returns>
+        bool BeginDraw();
 
         /// <summary>
         /// Called after rendering to present the frame to the screen.

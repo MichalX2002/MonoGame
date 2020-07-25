@@ -44,6 +44,9 @@ namespace MonoGame.Imaging
         public static void AssertRectangleInSource(
             IPixelSource source, Rectangle rectangle, string rectParamName)
         {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
             // Rectangle.Contains would suffice, but exception details would suffer
             AssertNonEmptyRectangle(rectangle, rectParamName);
 
@@ -69,6 +72,9 @@ namespace MonoGame.Imaging
 
         public static void AssertAnimationSupport(IImageCoder coder, ImagingConfig config)
         {
+            if (coder == null)
+                throw new ArgumentNullException(nameof(coder));
+
             AssertAnimationSupport(coder.Format, config);
 
             if (!coder.HasAttribute<IAnimatedFormatAttribute>())

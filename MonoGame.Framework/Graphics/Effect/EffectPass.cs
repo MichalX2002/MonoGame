@@ -6,20 +6,25 @@ namespace MonoGame.Framework.Graphics
     {
         private readonly Effect _effect;
 
-		private readonly Shader _pixelShader;
-        private readonly Shader _vertexShader;
+        private readonly Shader? _pixelShader;
+        private readonly Shader? _vertexShader;
 
-        private readonly BlendState _blendState;
-        private readonly DepthStencilState _depthStencilState;
-        private readonly RasterizerState _rasterizerState;
+        private readonly BlendState? _blendState;
+        private readonly DepthStencilState? _depthStencilState;
+        private readonly RasterizerState? _rasterizerState;
 
-		public string Name { get; private set; }
+        public string Name { get; private set; }
 
         public EffectAnnotationCollection Annotations { get; private set; }
 
         internal EffectPass(
-            Effect effect, string name, Shader vertexShader, Shader pixelShader, 
-            BlendState blendState, DepthStencilState depthStencilState, RasterizerState rasterizerState,
+            Effect effect,
+            string name,
+            Shader? vertexShader, 
+            Shader? pixelShader, 
+            BlendState? blendState, 
+            DepthStencilState? depthStencilState, 
+            RasterizerState? rasterizerState,
             EffectAnnotationCollection annotations)
         {
             Debug.Assert(effect != null, "Got a null effect!");
@@ -73,7 +78,7 @@ namespace MonoGame.Framework.Graphics
             {
                 device.VertexShader = _vertexShader;
 
-				// Update the texture parameters.
+                // Update the texture parameters.
                 SetShaderSamplers(_vertexShader, device.VertexTextures, device.VertexSamplerStates);
 
                 // Update the constant buffers.
@@ -115,8 +120,8 @@ namespace MonoGame.Framework.Graphics
             foreach (var sampler in shader.Samplers)
             {
                 var param = _effect.Parameters[sampler.Parameter];
-                var texture = param.Data as Texture;
 
+                var texture = param.Data as Texture;
                 textures[sampler.TextureSlot] = texture;
 
                 // If there is a sampler state set it.

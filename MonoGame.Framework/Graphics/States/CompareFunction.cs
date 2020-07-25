@@ -13,30 +13,37 @@ namespace MonoGame.Framework.Graphics
         /// Always passes the test.
         /// </summary>
         Always,
+
         /// <summary>
         /// Never passes the test.
         /// </summary>
         Never,
+
         /// <summary>
         /// Passes the test when the new pixel value is less than current pixel value.
         /// </summary>
         Less,
+
         /// <summary>
         /// Passes the test when the new pixel value is less than or equal to current pixel value.
         /// </summary>
         LessEqual,
+
         /// <summary>
         /// Passes the test when the new pixel value is equal to current pixel value.
         /// </summary>
         Equal,
+
         /// <summary>
         /// Passes the test when the new pixel value is greater than or equal to current pixel value.
         /// </summary>
         GreaterEqual,
+
         /// <summary>
         /// Passes the test when the new pixel value is greater than current pixel value.
         /// </summary>
         Greater,
+
         /// <summary>
         /// Passes the test when the new pixel value does not equal to current pixel value.
         /// </summary>

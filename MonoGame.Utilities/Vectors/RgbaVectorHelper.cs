@@ -16,7 +16,7 @@ namespace MonoGame.Framework.Vectors
         {
             scaledVector *= byte.MaxValue;
             scaledVector += new Vector3(0.5f);
-            scaledVector.Clamp(0, byte.MaxValue);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, byte.MaxValue);
 
             return scaledVector;
         }
@@ -26,7 +26,7 @@ namespace MonoGame.Framework.Vectors
         {
             scaledVector *= byte.MaxValue;
             scaledVector += new Vector4(0.5f);
-            scaledVector.Clamp(0, byte.MaxValue);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, byte.MaxValue);
 
             return scaledVector;
         }

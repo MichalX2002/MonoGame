@@ -2,6 +2,8 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System.Numerics;
+
 namespace MonoGame.Framework.Content.Pipeline.Graphics
 {
     /// <summary>
@@ -15,7 +17,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Gets the value of the local Transform property, multiplied by the AbsoluteTransform of the parent.
         /// </summary>
-        public Matrix AbsoluteTransform
+        public Matrix4x4 AbsoluteTransform
         {
             get
             {
@@ -44,7 +46,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// Gets the transform matrix of the scene.
         /// The transform matrix defines a local coordinate system for the content in addition to any children of this object.
         /// </summary>
-        public Matrix Transform { get; set; }
+        public Matrix4x4 Transform { get; set; } = Matrix4x4.Identity;
 
         /// <summary>
         /// Creates an instance of NodeContent.
@@ -53,7 +55,6 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         {
             Children = new NodeContentCollection(this);
             animations = new AnimationContentDictionary();
-            Transform = Matrix.Identity;
         }
     }
 }

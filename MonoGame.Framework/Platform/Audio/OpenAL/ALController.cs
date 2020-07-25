@@ -98,6 +98,7 @@ namespace MonoGame.Framework.Audio
             AL.GenSources(_allSources);
             ALHelper.CheckError("Failed to generate sources.");
 
+            // TODO: allow more effects
             if (Efx.IsAvailable)
                 Filter = Efx.GenFilter();
 

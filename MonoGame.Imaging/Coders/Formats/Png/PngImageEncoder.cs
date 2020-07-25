@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO.Compression;
-using System.Threading.Tasks;
 using MonoGame.Imaging.Attributes.Coder;
 using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Pixels;
@@ -34,9 +33,14 @@ namespace MonoGame.Imaging.Coders.Formats
                 IReadOnlyPixelRows image,
                 ImageWrite.WriteState writeState)
             {
-                var options = encoderState.GetCoderOptions<PngEncoderOptions>();
+                if (encoderState == null) throw new ArgumentNullException(nameof(encoderState));
+                if (image == null) throw new ArgumentNullException(nameof(image));
+                if (writeState == null) throw new ArgumentNullException(nameof(writeState));
+
+                var options = encoderState.GetCoderOptionsOrDefault<PngEncoderOptions>();
                 
-                ImageWrite.Png.Write(writeState, options.CompressionLevel);
+                // TODO: add forcedFilter option
+                ImageWrite.Png.Write(writeState, options.CompressionLevel, null);
             }
         }
     }

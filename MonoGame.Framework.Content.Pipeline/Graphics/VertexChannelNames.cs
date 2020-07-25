@@ -17,16 +17,17 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// A lookup for the TryDecodeUsage method.
         /// </summary>
-        static Dictionary<string, VertexElementUsage> usages;
+        static Dictionary<string, VertexElementUsage> _usages;
 
         static VertexChannelNames()
         {
             // Populate the lookup for TryDecodeUsage
-            usages = new Dictionary<string, VertexElementUsage>();
             string[] names = Enum.GetNames(typeof(VertexElementUsage));
-            Array values = Enum.GetValues(typeof(VertexElementUsage));
-            for (int i = 0; i < names.Length; ++i)
-                usages.Add(names[i], (VertexElementUsage)values.GetValue(i));
+            var values = (VertexElementUsage[])Enum.GetValues(typeof(VertexElementUsage));
+
+            _usages = new Dictionary<string, VertexElementUsage>(names.Length);
+            for (int i = 0; i < names.Length; i++)
+                _usages.Add(names[i], values[i]);
         }
 
         /// <summary>
@@ -56,11 +57,12 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// </summary>
         /// <param name="encodedName">Encoded string to be decoded.</param>
         /// <returns>Extracted base name.</returns>
-        public static string DecodeBaseName(string encodedName)
+        public static ReadOnlySpan<char> DecodeBaseName(ReadOnlySpan<char> encodedName)
         {
-            if (string.IsNullOrEmpty(encodedName))
-                throw new ArgumentNullException(nameof(encodedName));
-            return encodedName.TrimEnd("0123456789".ToCharArray());
+            if (encodedName.IsEmpty)
+                throw new ArgumentEmptyException(nameof(encodedName));
+
+            return encodedName.TrimEnd(trimChars: "0123456789");
         }
 
         /// <summary>
@@ -68,19 +70,24 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// </summary>
         /// <param name="encodedName">Encoded name to be decoded.</param>
         /// <returns>Resulting channel usage index.</returns>
-        public static int DecodeUsageIndex(string encodedName)
+        public static int DecodeUsageIndex(ReadOnlySpan<char> encodedName)
         {
-            if (string.IsNullOrEmpty(encodedName))
-                throw new ArgumentNullException(nameof(encodedName));
+            if (encodedName.IsEmpty)
+                throw new ArgumentEmptyException(nameof(encodedName));
+
             // Extract the base name
-            string baseName = DecodeBaseName(encodedName);
-            if (string.IsNullOrEmpty(baseName))
-                throw new InvalidOperationException("encodedName");
+            ReadOnlySpan<char> baseName = DecodeBaseName(encodedName);
+            if (baseName.IsEmpty)
+                throw new ArgumentException("Empty base name.", nameof(encodedName));
 
             // Subtract the base name from the string and convert the remainder to an integer.
             // TryParse solves the problem when name is just 'BlendIndicies' for example, in 
             // which case we default to index 0, assuming only 1 index.
-            int.TryParse(encodedName.Substring(baseName.Length), NumberStyles.Integer, CultureInfo.InvariantCulture, out int index);
+            int.TryParse(
+                encodedName.Slice(baseName.Length),
+                NumberStyles.Integer,
+                CultureInfo.InvariantCulture,
+                out int index);
 
             return index;
         }
@@ -160,16 +167,19 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         {
             if (string.IsNullOrEmpty(encodedName))
                 throw new ArgumentNullException(nameof(encodedName));
+
             // Extract the base name
-            string baseName = DecodeBaseName(encodedName);
-            if (string.IsNullOrEmpty(baseName))
-                throw new InvalidOperationException("encodedName");
-            return usages.TryGetValue(baseName, out usage);
+            var baseName = DecodeBaseName(encodedName);
+            if (baseName.IsEmpty)
+                throw new ArgumentException("Empty base name.", nameof(encodedName));
+
+            return _usages.TryGetValue(baseName.ToString(), out usage);
         }
 
         /// <summary>
         /// Gets the name of the primary animation weights channel.
-        /// This will typically contain data on the bone weights for a vertex channel. For more information, see BoneWeightCollection.
+        /// This will typically contain data on the bone weights for a vertex channel. 
+        /// For more information, see BoneWeightCollection.
         /// </summary>
         /// <returns>Name of the primary animation weights channel.</returns>
         public static string Weights()
@@ -179,7 +189,8 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
 
         /// <summary>
         /// Gets the name of an animation weights channel at the specified index.
-        /// This will typically contain data on the bone weights for a vertex channel. For more information, see BoneWeightCollection.
+        /// This will typically contain data on the bone weights for a vertex channel.
+        /// For more information, see BoneWeightCollection.
         /// </summary>
         /// <param name="usageIndex">Index of the animation weight channel to be retrieved.</param>
         /// <returns>Name of the retrieved animation weights channel.</returns>

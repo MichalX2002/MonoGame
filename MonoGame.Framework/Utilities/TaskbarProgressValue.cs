@@ -36,8 +36,31 @@ namespace MonoGame.Framework.Utilities
         /// </summary>
         public bool Equals(TaskbarProgressValue other)
         {
-            return Completed == other.Completed 
-                && Total == other.Total;
+            return this == other;
+        }
+
+        /// <summary>
+        /// Determines whether the specified value is equal to the current value.
+        /// </summary>
+        public override bool Equals(object? obj)
+        {
+            return obj is TaskbarProgressValue other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Completed, Total);
+        }
+
+        public static bool operator ==(TaskbarProgressValue a, TaskbarProgressValue b)
+        {
+            return a.Completed == b.Completed
+                && a.Total == b.Total;
+        }
+
+        public static bool operator !=(TaskbarProgressValue a, TaskbarProgressValue b)
+        {
+            return !(a == b);
         }
     }
 }

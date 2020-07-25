@@ -12,6 +12,8 @@ namespace MonoGame.Imaging.Coders
         public bool LeaveOpen { get; }
         public CancellationToken CancellationToken { get; }
 
+        public bool IsDisposed { get; private set; }
+
         /// <summary>
         /// Gets the zero-based index of the most recently processed image.
         /// </summary>
@@ -31,24 +33,36 @@ namespace MonoGame.Imaging.Coders
             Stream = stream ?? throw new ArgumentNullException(nameof(config));
             LeaveOpen = leaveOpen;
             CancellationToken = cancellationToken;
-
-            CoderOptions = Coder.DefaultOptions;
         }
 
-        public TOptions GetCoderOptions<TOptions>()
+        public TOptions GetCoderOptionsOrDefault<TOptions>()
             where TOptions : CoderOptions
         {
             if (CoderOptions != null)
+            {
                 if (Coder.DefaultOptions.IsAssignableFrom(CoderOptions))
                     return (TOptions)CoderOptions;
-
+            }
             return (TOptions)Coder.DefaultOptions;
+        }
+
+        protected void AssertNotDisposed()
+        {
+            if (IsDisposed)
+                throw new ObjectDisposedException(GetType().Name);
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!LeaveOpen)
-                Stream.Dispose();
+            if (!IsDisposed)
+            {
+                if (disposing)
+                {
+                    if (!LeaveOpen)
+                        Stream.Dispose();
+                }
+                IsDisposed = true;
+            }
         }
 
         public void Dispose()

@@ -16,14 +16,8 @@ namespace MonoGame.Framework.Collections
                 count = roGColl.Count;
             else if (enumerable is ICollection<T> gColl)
                 count = gColl.Count;
-            else if (enumerable is IReadOnlyList<T> roGList)
-                count = roGList.Count;
-            else if (enumerable is ICollection<T> gList)
-                count = gList.Count;
             else if (enumerable is ICollection coll)
                 count = coll.Count;
-            else if (enumerable is IList list)
-                count = list.Count;
             else
                 return null;
 

@@ -44,6 +44,11 @@ namespace MonoGame.Framework.Vectors
             B = b;
         }
 
+        [CLSCompliant(false)]
+        public Rgb48(ushort value) : this(value, value, value)
+        {
+        }
+
         #endregion
 
         #region IPackedVector
@@ -52,7 +57,7 @@ namespace MonoGame.Framework.Vectors
         {
             scaledVector *= ushort.MaxValue;
             scaledVector += new Vector3(0.5f);
-            scaledVector.Clamp(ushort.MinValue, ushort.MaxValue);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, ushort.MaxValue);
 
             R = (ushort)scaledVector.X;
             G = (ushort)scaledVector.Y;

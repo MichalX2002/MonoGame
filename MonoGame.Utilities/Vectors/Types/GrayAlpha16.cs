@@ -43,7 +43,7 @@ namespace MonoGame.Framework.Vectors
         {
             scaledVector *= byte.MaxValue;
             scaledVector += new Vector4(0.5f);
-            scaledVector.Clamp(byte.MinValue, byte.MaxValue);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, byte.MaxValue);
 
             L = (byte)(LuminanceHelper.BT709.ToGrayF(scaledVector.ToVector3()) + 0.5f);
             A = (byte)scaledVector.W;
@@ -102,7 +102,7 @@ namespace MonoGame.Framework.Vectors
             A = byte.MaxValue;
         }
 
-        public readonly Color ToColor()
+        public readonly Color ToRgba32()
         {
             return new Color(L, A);
         }

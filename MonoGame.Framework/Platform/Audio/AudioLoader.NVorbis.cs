@@ -13,9 +13,7 @@ namespace MonoGame.Framework.Audio
             Stream stream, out ALFormat format, out int frequency, out int channels,
             out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount)
         {
-            byte[] pcmBufferBlock = null;
-            byte[] floatBufferBlock = null;
-            RecyclableBuffer result = null;
+            RecyclableBuffer? result = null;
             var reader = new VorbisReader(stream, leaveOpen: false);
             try
             {
@@ -30,7 +28,11 @@ namespace MonoGame.Framework.Audio
                 else
                     throw new NotSupportedException("Only mono and stereo is supported.");
 
-                sampleCount = (int)reader.TotalSamples;
+                var readerTotalSamples = reader.TotalSamples;
+                if (readerTotalSamples == null)
+                    throw new IOException("Unknown sample count.");
+
+                sampleCount = (int)readerTotalSamples;
                 frequency = reader.SampleRate;
                 blockAlignment = 0;
                 samplesPerBlock = 0;
@@ -41,39 +43,46 @@ namespace MonoGame.Framework.Audio
                     throw new InvalidDataException("Size of decoded audio data exceeds " + int.MaxValue + " bytes.");
 
                 result = RecyclableMemoryManager.Default.GetBuffer((int)outputBytes, "Vorbis audio data");
-                pcmBufferBlock = RecyclableMemoryManager.Default.GetBlock();
-                floatBufferBlock = RecyclableMemoryManager.Default.GetBlock();
-
-                // First cast then use AsBytes to prevent misalignment
-                Span<float> sampleBuffer = MemoryMarshal.Cast<byte, float>(floatBufferBlock);
-                Span<byte> sampleBufferBytes = MemoryMarshal.AsBytes(sampleBuffer);
-                Span<short> pcmBuffer = MemoryMarshal.Cast<byte, short>(pcmBufferBlock);
-                Span<byte> pcmBufferBytes = MemoryMarshal.AsBytes(pcmBuffer);
 
                 var resultSpan = result.AsSpan();
-                int totalSamples = 0;
+                int totalSamplesRead = 0;
                 int samplesRead;
-                while ((samplesRead = reader.ReadSamples(sampleBuffer)) > 0)
+
+                // Both paths allocate around 4096 stack bytes for buffers.
+                if (useFloat)
                 {
-                    Span<byte> bytes;
-                    if (useFloat)
+                    Span<float> sampleBuffer = stackalloc float[1024];
+                    Span<byte> sampleBufferBytes = MemoryMarshal.AsBytes(sampleBuffer);
+
+                    // we can copy directly to output
+                    while ((samplesRead = reader.ReadSamples(sampleBuffer)) > 0)
                     {
-                        // we can copy directly to output
-                        bytes = sampleBufferBytes.Slice(0, samplesRead * sizeof(float));
+                        Span<byte> bytes = sampleBufferBytes.Slice(0, samplesRead * sizeof(float));
+                        bytes.CopyTo(resultSpan);
+                        resultSpan = resultSpan.Slice(bytes.Length);
+                        totalSamplesRead += samplesRead;
                     }
-                    else
+                }
+                else
+                {
+                    // The buffer lengths are multiples of 16 to allow for better vectorization.
+                    Span<float> sampleBuffer = stackalloc float[672];
+                    Span<short> pcmBuffer = stackalloc short[672];
+                    Span<byte> sampleBufferBytes = MemoryMarshal.AsBytes(sampleBuffer);
+                    Span<byte> pcmBufferBytes = MemoryMarshal.AsBytes(pcmBuffer);
+
+                    // we need to convert float to short
+                    while ((samplesRead = reader.ReadSamples(sampleBuffer)) > 0)
                     {
-                        // we need to convert float to short
                         var src = sampleBuffer.Slice(0, samplesRead);
                         var dst = pcmBuffer.Slice(0, samplesRead);
                         ConvertSingleToInt16(src, dst);
 
-                        bytes = pcmBufferBytes.Slice(0, samplesRead * sizeof(short));
+                        Span<byte> bytes = pcmBufferBytes.Slice(0, samplesRead * sizeof(short));
+                        bytes.CopyTo(resultSpan);
+                        resultSpan = resultSpan.Slice(bytes.Length);
+                        totalSamplesRead += samplesRead;
                     }
-
-                    bytes.CopyTo(resultSpan);
-                    resultSpan = resultSpan.Slice(bytes.Length);
-                    totalSamples += samplesRead;
                 }
 
                 if (!resultSpan.IsEmpty)
@@ -89,10 +98,6 @@ namespace MonoGame.Framework.Audio
             }
             finally
             {
-                if (pcmBufferBlock != null)
-                    RecyclableMemoryManager.Default.ReturnBlock(pcmBufferBlock);
-                if (floatBufferBlock != null)
-                    RecyclableMemoryManager.Default.ReturnBlock(floatBufferBlock);
                 reader?.Dispose();
             }
         }

@@ -28,5 +28,29 @@ namespace MonoGame.Framework.Vectors
                 _ => throw new ArgumentOutOfRangeException(nameof(type)),
             };
         }
+
+        public static string ToShortString(this VectorComponentType type)
+        {
+            return type switch
+            {
+                VectorComponentType.Int8 => "i8",
+                VectorComponentType.UInt8 => "u8",
+
+                VectorComponentType.Int16 => "i16",
+                VectorComponentType.UInt16 => "u16",
+
+                VectorComponentType.Int32 => "i32",
+                VectorComponentType.UInt32 => "u32",
+
+                VectorComponentType.Int64 => "i64",
+                VectorComponentType.UInt64 => "u64",
+
+                VectorComponentType.Float16 => "f16",
+                VectorComponentType.Float32 => "f32",
+                VectorComponentType.Float64 => "f64",
+
+                _ => throw new ArgumentOutOfRangeException(nameof(type)),
+            };
+        }
     }
 }

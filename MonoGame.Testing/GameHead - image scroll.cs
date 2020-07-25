@@ -7,8 +7,10 @@ using System.IO;
 using System.IO.Enumeration;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Numerics;
 using System.Runtime;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -236,7 +238,7 @@ namespace MonoGame.TestingC
         const int uploadsPerFrame = 10;
 
         static float renderscale = 0.5f;
-        static Matrix transformation => Matrix.CreateScale(renderscale);
+        static Matrix4x4 transformation => Matrix4x4.CreateScale(renderscale);
 
         private void ClearFrames()
         {
@@ -299,15 +301,30 @@ namespace MonoGame.TestingC
                 if (frame.IsPreviewRequested && frame.PreviewTexture == null)
                 {
                     frame.AnimationTime += delta;
-                    float x = frame.AnimationTime * 2.5f;
-                    float alpha = x - 0.25f;
+                    float animX = frame.AnimationTime * 2.5f;
+                    float alpha = animX - 0.25f;
                     if (alpha > 0.05f)
                     {
                         var boundsRect = frame.BoundsRect;
                         var center = boundsRect.Position + boundsRect.Size / 2;
 
-                        float radius1 = MathF.Sin(x) * 10 + 15;
-                        float radius2 = MathF.Cos(x + MathF.PI / 2) * 10 + 15;
+                        _ = new Size() / 2;
+                        _ = new Size() / 2f;
+                        _ = new Size() * 2;
+                        _ = new Size() * 2f;
+
+                        _ = new SizeF() + new Size();
+                        _ = new SizeF() + new Point();
+                        _ = new SizeF() + new Vector2();
+                        _ = new SizeF() / 2f;
+                        _ = new SizeF() * 2f;
+
+                        _ = new PointF() + new Size();
+                        _ = new PointF() + new Point();
+                        _ = new PointF() + new Vector2();
+
+                        float radius1 = MathF.Sin(animX) * 10 + 15;
+                        float radius2 = MathF.Cos(animX + MathF.PI / 2) * 10 + 15;
 
                         var color = new Color(Color.White, alpha);
                         spriteBatch.DrawCircle(center, radius1, 40, color, 2);

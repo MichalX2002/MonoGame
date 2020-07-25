@@ -6,10 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
+using System.Numerics;
 
 namespace MonoGame.Framework.Input
 {
+    using SDLController = SDL.GameController;
+
     public static partial class GamePad
     {
         private class GamePadInfo
@@ -57,16 +59,16 @@ namespace MonoGame.Framework.Input
             {
                 using (var reader = new StreamReader(stream))
                 {
-                    string line;
+                    string? line;
                     while ((line = reader.ReadLine()) != null)
                     {
                         if (string.IsNullOrWhiteSpace(line))
                             continue;
 
-                        if (line.StartsWith("#"))
+                        if (line.StartsWith("#", StringComparison.Ordinal))
                             continue;
 
-                        switch (SDL.GameController.AddMapping(line))
+                        switch (SDLController.AddMapping(line))
                         {
                             case -1:
                                 Debug.WriteLine(SDL.GetError());
@@ -83,8 +85,8 @@ namespace MonoGame.Framework.Input
 
         internal static void AddDevice(int deviceId)
         {
-            IntPtr device = SDL.GameController.Open(deviceId);
-            IntPtr hapticDevice = SDL.Haptic.OpenFromJoystick(SDL.GameController.GetJoystick(device));
+            IntPtr device = SDLController.Open(deviceId);
+            IntPtr hapticDevice = SDL.Haptic.OpenFromJoystick(SDLController.GetJoystick(device));
             int hapticType = 0;
 
             var id = 0;
@@ -124,7 +126,7 @@ namespace MonoGame.Framework.Input
         {
             foreach (KeyValuePair<int, GamePadInfo> entry in GamePads)
             {
-                if (SDL.Joystick.InstanceID(SDL.GameController.GetJoystick(entry.Value.Device)) == instanceId)
+                if (SDL.Joystick.InstanceID(SDLController.GetJoystick(entry.Value.Device)) == instanceId)
                 {
                     GamePads.Remove(entry.Key);
                     DisposeDevice(entry.Value);
@@ -140,7 +142,7 @@ namespace MonoGame.Framework.Input
             _translationTable.Clear();
             foreach (var pair in GamePads)
             {
-                IntPtr joystick = SDL.GameController.GetJoystick(pair.Value.Device);
+                IntPtr joystick = SDLController.GetJoystick(pair.Value.Device);
                 _translationTable[SDL.Joystick.InstanceID(joystick)] = pair.Key;
             }
         }
@@ -149,7 +151,7 @@ namespace MonoGame.Framework.Input
         {
             if (_translationTable.TryGetValue(instanceid, out int index))
             {
-                if (GamePads.TryGetValue(index, out GamePadInfo info))
+                if (GamePads.TryGetValue(index, out var info))
                     info.PacketNumber = (int)(packetNumber < int.MaxValue
                         ? packetNumber
                         : packetNumber - int.MaxValue);
@@ -160,7 +162,7 @@ namespace MonoGame.Framework.Input
         {
             if (info.HapticType > 0)
                 SDL.Haptic.Close(info.HapticDevice);
-            SDL.GameController.Close(info.Device);
+            SDLController.Close(info.Device);
         }
 
         internal static void CloseDevices()
@@ -181,7 +183,7 @@ namespace MonoGame.Framework.Input
             if (!GamePads.TryGetValue(index, out var gamepad))
                 return default;
 
-            var mapping = SDL.GameController.GetMapping(gamepad.Device).Split(',');
+            var mapping = SDLController.GetMapping(gamepad.Device).Split(',');
             var set = new HashSet<string>();
             foreach (var map in mapping)
             {
@@ -193,8 +195,8 @@ namespace MonoGame.Framework.Input
             bool hasVibrationMotor = GamePads[index].HapticType != 0;
             return new GamePadCapabilities(
                 isConnected: true,
-                displayName: SDL.GameController.GetName(gamepad.Device),
-                identifier: SDL.Joystick.GetGUID(SDL.GameController.GetJoystick(gamepad.Device)).ToString(),
+                displayName: SDLController.GetName(gamepad.Device),
+                identifier: SDL.Joystick.GetGUID(SDLController.GetJoystick(gamepad.Device)).ToString(),
 
                 hasBackButton: set.Contains("back"),
                 hasBigButton: set.Contains("guide"),
@@ -248,38 +250,38 @@ namespace MonoGame.Framework.Input
             // Y gamepad axis is inverted between SDL and XNA
             var thumbSticks = new GamePadThumbSticks(
                 new Vector2(
-                    GetFromSDLAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.LeftX)),
-                    GetFromSDLAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.LeftY)) * -1f),
+                    GetFromSDLAxis(SDLController.GetAxis(device, SDLController.Axis.LeftX)),
+                    GetFromSDLAxis(SDLController.GetAxis(device, SDLController.Axis.LeftY)) * -1f),
                 new Vector2(
-                    GetFromSDLAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.RightX)),
-                    GetFromSDLAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.RightY)) * -1f),
+                    GetFromSDLAxis(SDLController.GetAxis(device, SDLController.Axis.RightX)),
+                    GetFromSDLAxis(SDLController.GetAxis(device, SDLController.Axis.RightY)) * -1f),
                 leftDeadZoneMode,
                 rightDeadZoneMode);
 
             var triggers = new GamePadTriggers(
-                GetFromSDLAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.TriggerLeft)),
-                GetFromSDLAxis(SDL.GameController.GetAxis(device, SDL.GameController.Axis.TriggerRight)));
+                GetFromSDLAxis(SDLController.GetAxis(device, SDLController.Axis.TriggerLeft)),
+                GetFromSDLAxis(SDLController.GetAxis(device, SDLController.Axis.TriggerRight)));
 
             var buttons = new GamePadButtons(
-                ((SDL.GameController.GetButton(device, SDL.GameController.Button.A) == 1) ? Buttons.A : 0) |
-                ((SDL.GameController.GetButton(device, SDL.GameController.Button.B) == 1) ? Buttons.B : 0) |
-                ((SDL.GameController.GetButton(device, SDL.GameController.Button.Back) == 1) ? Buttons.Back : 0) |
-                ((SDL.GameController.GetButton(device, SDL.GameController.Button.Guide) == 1) ? Buttons.BigButton : 0) |
-                ((SDL.GameController.GetButton(device, SDL.GameController.Button.LeftShoulder) == 1) ? Buttons.LeftShoulder : 0) |
-                ((SDL.GameController.GetButton(device, SDL.GameController.Button.RightShoulder) == 1) ? Buttons.RightShoulder : 0) |
-                ((SDL.GameController.GetButton(device, SDL.GameController.Button.LeftStick) == 1) ? Buttons.LeftStick : 0) |
-                ((SDL.GameController.GetButton(device, SDL.GameController.Button.RightStick) == 1) ? Buttons.RightStick : 0) |
-                ((SDL.GameController.GetButton(device, SDL.GameController.Button.Start) == 1) ? Buttons.Start : 0) |
-                ((SDL.GameController.GetButton(device, SDL.GameController.Button.X) == 1) ? Buttons.X : 0) |
-                ((SDL.GameController.GetButton(device, SDL.GameController.Button.Y) == 1) ? Buttons.Y : 0) |
+                ((SDLController.GetButton(device, SDLController.Button.A) == 1) ? Buttons.A : 0) |
+                ((SDLController.GetButton(device, SDLController.Button.B) == 1) ? Buttons.B : 0) |
+                ((SDLController.GetButton(device, SDLController.Button.Back) == 1) ? Buttons.Back : 0) |
+                ((SDLController.GetButton(device, SDLController.Button.Guide) == 1) ? Buttons.BigButton : 0) |
+                ((SDLController.GetButton(device, SDLController.Button.LeftShoulder) == 1) ? Buttons.LeftShoulder : 0) |
+                ((SDLController.GetButton(device, SDLController.Button.RightShoulder) == 1) ? Buttons.RightShoulder : 0) |
+                ((SDLController.GetButton(device, SDLController.Button.LeftStick) == 1) ? Buttons.LeftStick : 0) |
+                ((SDLController.GetButton(device, SDLController.Button.RightStick) == 1) ? Buttons.RightStick : 0) |
+                ((SDLController.GetButton(device, SDLController.Button.Start) == 1) ? Buttons.Start : 0) |
+                ((SDLController.GetButton(device, SDLController.Button.X) == 1) ? Buttons.X : 0) |
+                ((SDLController.GetButton(device, SDLController.Button.Y) == 1) ? Buttons.Y : 0) |
                 ((triggers.Left > 0f) ? Buttons.LeftTrigger : 0) |
                 ((triggers.Right > 0f) ? Buttons.RightTrigger : 0));
 
             var dPad = new GamePadDPad(
-                (SDL.GameController.GetButton(device, SDL.GameController.Button.DpadUp) == 1) ? ButtonState.Pressed : ButtonState.Released,
-                (SDL.GameController.GetButton(device, SDL.GameController.Button.DpadDown) == 1) ? ButtonState.Pressed : ButtonState.Released,
-                (SDL.GameController.GetButton(device, SDL.GameController.Button.DpadLeft) == 1) ? ButtonState.Pressed : ButtonState.Released,
-                (SDL.GameController.GetButton(device, SDL.GameController.Button.DpadRight) == 1) ? ButtonState.Pressed : ButtonState.Released);
+                (SDLController.GetButton(device, SDLController.Button.DpadUp) == 1) ? ButtonState.Pressed : ButtonState.Released,
+                (SDLController.GetButton(device, SDLController.Button.DpadDown) == 1) ? ButtonState.Pressed : ButtonState.Released,
+                (SDLController.GetButton(device, SDLController.Button.DpadLeft) == 1) ? ButtonState.Pressed : ButtonState.Released,
+                (SDLController.GetButton(device, SDLController.Button.DpadRight) == 1) ? ButtonState.Pressed : ButtonState.Released);
 
             return new GamePadState(
                 isConnected: true, thumbSticks, triggers, buttons, dPad, gamepad.PacketNumber);

@@ -47,8 +47,8 @@ namespace MonoGame.Framework.Vectors
         {
             scaledVector *= ushort.MaxValue;
             scaledVector += new Vector4(0.5f);
-            scaledVector.Clamp(byte.MinValue,byte.MaxValue);
-
+            scaledVector = VectorHelper.ZeroMax(scaledVector, byte.MaxValue);
+            
             L = (ushort)(LuminanceHelper.BT709.ToGrayF(scaledVector.ToVector3()) + 0.5f);
             A = (ushort)scaledVector.W;
         }

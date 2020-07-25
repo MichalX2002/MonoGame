@@ -24,7 +24,7 @@ namespace MonoGame.Framework.Graphics
             EffectAnnotationCollection annotations,
             EffectParameterCollection elements,
             EffectParameterCollection structMembers,
-            object data)
+            object? data)
         {
             ParameterClass = @class;
             ParameterType = type;
@@ -78,12 +78,11 @@ namespace MonoGame.Framework.Graphics
         public EffectParameterCollection StructureMembers { get; private set; }
         public EffectAnnotationCollection Annotations { get; private set; }
 
-
         // TODO: Using object adds alot of boxing/unboxing overhead
         // and garbage generation.  We should consider a templated
         // type implementation to fix this!
 
-        internal object Data { get; private set; }
+        internal object? Data { get; private set; }
 
         /// <summary>
         /// The current state key which is used to detect

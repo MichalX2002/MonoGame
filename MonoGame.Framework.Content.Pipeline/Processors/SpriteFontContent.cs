@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace MonoGame.Framework.Content.Pipeline.Graphics
@@ -10,7 +11,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
     public class SpriteFontContent
     {
         public string FontName = string.Empty;
-        private FontDescriptionStyle Style = FontDescriptionStyle.Regular;
+        public FontDescriptionStyle Style = FontDescriptionStyle.Regular;
         public float FontSize;
         public Texture2DContent Texture = new Texture2DContent();
         public List<Rectangle> Regions = new List<Rectangle>();
@@ -21,7 +22,9 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         public List<Vector3> Kerning = new List<Vector3>();
         public Rune? DefaultCharacter;
 
-        public SpriteFontContent() { }
+        public SpriteFontContent() 
+        {
+        }
 
         public SpriteFontContent(FontDescription desc)
         {

@@ -24,7 +24,7 @@ namespace MonoGame.Framework.Graphics
         public SpriteEffect(GraphicsDevice device)
             : base(device, EffectResource.SpriteEffect.ByteCode)
         {
-            CacheEffectParameters();
+            _matrixParam = Parameters["MatrixTransform"];
         }
 
         /// <summary>
@@ -40,9 +40,8 @@ namespace MonoGame.Framework.Graphics
         protected SpriteEffect(SpriteEffect cloneSource)
             : base(cloneSource)
         {
-            CacheEffectParameters();
+            _matrixParam = Parameters["MatrixTransform"];
         }
-
 
         /// <summary>
         /// Creates a clone of the current SpriteEffect instance.
@@ -50,15 +49,6 @@ namespace MonoGame.Framework.Graphics
         public override Effect Clone()
         {
             return new SpriteEffect(this);
-        }
-
-
-        /// <summary>
-        /// Looks up shortcut references to our effect parameters.
-        /// </summary>
-        void CacheEffectParameters()
-        {
-            _matrixParam = Parameters["MatrixTransform"];
         }
 
         /// <summary>
@@ -75,12 +65,6 @@ namespace MonoGame.Framework.Graphics
                 // --> We get the correct matrix with near plane 0 and far plane -1.
                 _projection = Matrix4x4.CreateOrthographicOffCenter(
                     0, vp.Width, vp.Height, 0, 0, -1);
-
-                if (GraphicsDevice.UseHalfPixelOffset)
-                {
-                    _projection.M41 += -0.5f * _projection.M11;
-                    _projection.M42 += -0.5f * _projection.M22;
-                }
 
                 _lastViewport = vp;
             }

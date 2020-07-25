@@ -8,9 +8,14 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class DepthStencilState : GraphicsResource
     {
-        public static DepthStencilState Default { get; }
-        public static DepthStencilState DepthRead { get; }
-        public static DepthStencilState None { get; }
+        public static DepthStencilState Default { get; } =
+            new DepthStencilState("DepthStencilState.Default", true, true);
+
+        public static DepthStencilState DepthRead { get; } =
+            new DepthStencilState("DepthStencilState.DepthRead", true, false);
+
+        public static DepthStencilState None { get; } =
+            new DepthStencilState("DepthStencilState.None", false, false);
 
         private readonly bool _defaultStateObject;
 
@@ -196,13 +201,6 @@ namespace MonoGame.Framework.Graphics
         #endregion
 
         #region Constructors
-
-        static DepthStencilState()
-        {
-            Default = new DepthStencilState("DepthStencilState.Default", true, true);
-            DepthRead = new DepthStencilState("DepthStencilState.DepthRead", true, false);
-            None = new DepthStencilState("DepthStencilState.None", false, false);
-        }
 
         public DepthStencilState()
         {

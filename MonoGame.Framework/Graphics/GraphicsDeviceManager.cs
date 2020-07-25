@@ -11,7 +11,7 @@ namespace MonoGame.Framework
     /// <summary>
     /// Used to initialize and control the presentation of the graphics device.
     /// </summary>
-    public partial class GraphicsDeviceManager : IGraphicsDeviceService, IDisposable, IGraphicsDeviceManager
+    public partial class GraphicsDeviceManager : IGraphicsDeviceService, IGraphicsDeviceManager, IDisposable
     {
         private readonly Game _game;
         private bool _initialized = false;
@@ -26,7 +26,6 @@ namespace MonoGame.Framework
         private bool _drawBegun;
         private bool _disposed;
         private bool _hardwareModeSwitch = true;
-        private bool _preferHalfPixelOffset = false;
         private bool _wantFullScreen;
         private GraphicsProfile _graphicsProfile;
         // dirty flag for ApplyChanges
@@ -60,7 +59,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the the graphics device for this manager.
         /// </summary>
-        public GraphicsDevice GraphicsDevice { get; private set; }
+        public GraphicsDevice? GraphicsDevice { get; private set; }
 
         /// <summary>
         /// Gets or sets whether to switch into fullscreen mode.
@@ -95,34 +94,6 @@ namespace MonoGame.Framework
             {
                 _shouldApplyChanges = true;
                 _hardwareModeSwitch = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets whether DX9 style pixel addressing or current standard pixel addressing should be used.
-        /// <para>
-        /// Set to <see langword="true"/> for XNA compatibility. 
-        /// It is recommended to leave this flag set to <see langword="false"/> 
-        /// for projects that are not ported from XNA. 
-        /// This flag is set to <see langword="false"/> by default.
-        /// </para>
-        /// </summary>
-        /// <remarks>
-        /// XNA uses DirectX9 for its graphics. DirectX9 interprets UV
-        /// coordinates differently from other graphics API's. 
-        /// This is typically referred to as the half-pixel offset. 
-        /// MonoGame replicates XNA behavior if this flag is set to <see langword="true"/>.
-        /// This value is passed to <see cref="GraphicsDevice.UseHalfPixelOffset"/>.
-        /// </remarks>
-        public bool PreferHalfPixelOffset
-        {
-            get => _preferHalfPixelOffset;
-            set
-            {
-                if (GraphicsDevice != null)
-                    throw new InvalidOperationException(
-                        "Setting PreferHalfPixelOffset is not allowed after the creation of GraphicsDevice.");
-                _preferHalfPixelOffset = value;
             }
         }
 
@@ -296,19 +267,11 @@ namespace MonoGame.Framework
                 throw new ArgumentException(
                     "A graphics device manager is already registered. " +
                     "The graphics device manager cannot be changed once it is set.");
-            
+
             _game.GraphicsDeviceManager = this;
 
             _game.Services.AddService<IGraphicsDeviceManager>(this);
             _game.Services.AddService<IGraphicsDeviceService>(this);
-        }
-
-        /// <summary>
-        /// Finalizes the <see cref="GraphicsDeviceManager"/> and disposes it.
-        /// </summary>
-        ~GraphicsDeviceManager()
-        {
-            Dispose(false);
         }
 
         private void CreateDevice()
@@ -340,11 +303,11 @@ namespace MonoGame.Framework
                 return;
 
             GraphicsDevice = new GraphicsDevice(
-                gdi.Adapter, gdi.GraphicsProfile, PreferHalfPixelOffset, gdi.PresentationParameters);
+                gdi.Adapter, gdi.GraphicsProfile, gdi.PresentationParameters);
             _shouldApplyChanges = false;
 
             // hook up reset events
-            GraphicsDevice.DeviceReset     += (sender) => OnDeviceReset();
+            GraphicsDevice.DeviceReset += (sender) => OnDeviceReset();
             GraphicsDevice.DeviceResetting += (sender) => OnDeviceResetting();
 
             // update the touchpanel display size when the graphicsdevice is reset
@@ -379,12 +342,12 @@ namespace MonoGame.Framework
 
         #region IGraphicsDeviceService
 
-        public event Event<IGraphicsDeviceService> DeviceCreated;
-        public event Event<IGraphicsDeviceService> DeviceDisposing;
-        public event Event<IGraphicsDeviceService> DeviceReset;
-        public event Event<IGraphicsDeviceService> DeviceResetting;
-        public event DataEvent<IGraphicsDeviceService, GraphicsDeviceInformation> PreparingDeviceSettings;
-        public event Event<IGraphicsDeviceService> Disposed;
+        public event Event<IGraphicsDeviceService>? DeviceCreated;
+        public event Event<IGraphicsDeviceService>? DeviceDisposing;
+        public event Event<IGraphicsDeviceService>? DeviceReset;
+        public event Event<IGraphicsDeviceService>? DeviceResetting;
+        public event Event<IGraphicsDeviceService>? Disposed;
+        public event DataEvent<IGraphicsDeviceService, GraphicsDeviceInformation>? PreparingDeviceSettings;
 
         internal void OnDeviceDisposing() => DeviceDisposing?.Invoke(this);
 
@@ -423,33 +386,6 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region IDisposable
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    if (GraphicsDevice != null)
-                    {
-                        GraphicsDevice.Dispose();
-                        GraphicsDevice = null;
-                    }
-                }
-                _disposed = true;
-                Disposed?.Invoke(this);
-            }
-        }
-
-        #endregion
-
         partial void PlatformApplyChanges();
 
         partial void PlatformPreparePresentationParameters(PresentationParameters presentationParameters);
@@ -464,7 +400,7 @@ namespace MonoGame.Framework
             presentationParameters.HardwareModeSwitch = _hardwareModeSwitch;
             presentationParameters.PresentationInterval = _presentInterval;
             presentationParameters.DisplayOrientation = _game.Window.CurrentOrientation;
-            presentationParameters.DeviceWindowHandle = _game.Window.Handle;
+            presentationParameters.DeviceWindowHandle = _game.Window.WindowHandle;
 
             if (_preferMultiSampling)
             {
@@ -501,6 +437,9 @@ namespace MonoGame.Framework
             if (GraphicsDevice == null)
                 CreateDevice();
 
+            if (GraphicsDevice == null)
+                throw new Exception("Missing graphics device.");
+
             if (!_shouldApplyChanges)
                 return;
 
@@ -528,9 +467,12 @@ namespace MonoGame.Framework
 
         private void DisposeGraphicsDevice()
         {
-            GraphicsDevice.Dispose();
-            DeviceDisposing?.Invoke(this);
-            GraphicsDevice = null;
+            if (GraphicsDevice != null)
+            {
+                DeviceDisposing?.Invoke(this);
+                GraphicsDevice.Dispose();
+                GraphicsDevice = null;
+            }
         }
 
         partial void PlatformInitialize(PresentationParameters presentationParameters);
@@ -550,9 +492,12 @@ namespace MonoGame.Framework
 
         private void UpdateTouchPanel(GraphicsDevice sender)
         {
-            TouchPanel.DisplayWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;
-            TouchPanel.DisplayHeight = GraphicsDevice.PresentationParameters.BackBufferHeight;
-            TouchPanel.DisplayOrientation = GraphicsDevice.PresentationParameters.DisplayOrientation;
+            if (sender == null)
+                throw new ArgumentNullException(nameof(sender));
+
+            _game.Window.TouchPanel.DisplayWidth = sender.PresentationParameters.BackBufferWidth;
+            _game.Window.TouchPanel.DisplayHeight = sender.PresentationParameters.BackBufferHeight;
+            _game.Window.TouchPanel.DisplayOrientation = sender.PresentationParameters.DisplayOrientation;
         }
 
         /// <summary>
@@ -570,6 +515,38 @@ namespace MonoGame.Framework
         private void OnPresentationChanged(object sender, PresentationParameters presentationParams)
         {
             _game.Platform.OnPresentationChanged(presentationParams);
+        }
+
+        #region IDisposable
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    GraphicsDevice?.Dispose();
+                    GraphicsDevice = null;
+                }
+                _disposed = true;
+                Disposed?.Invoke(this);
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Finalizes the <see cref="GraphicsDeviceManager"/> and disposes it.
+        /// </summary>
+        ~GraphicsDeviceManager()
+        {
+            Dispose(false);
         }
     }
 }

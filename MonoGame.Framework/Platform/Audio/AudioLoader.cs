@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using MonoGame.Framework.IO;
 using MonoGame.Framework.Memory;
@@ -23,7 +22,7 @@ namespace MonoGame.Framework.Audio
         internal const int FormatIma4 = 17;
 
         [DebuggerHidden]
-        private static Exception GetChannelCountNotSupportedException()
+        private static Exception GetChannelCountNotSupported()
         {
             return new NotSupportedException("The specified channel count is not supported.");
         }
@@ -37,7 +36,7 @@ namespace MonoGame.Framework.Audio
                 {
                     1 => bits == 8 ? ALFormat.Mono8 : ALFormat.Mono16,
                     2 => bits == 8 ? ALFormat.Stereo8 : ALFormat.Stereo16,
-                    _ => throw GetChannelCountNotSupportedException(),
+                    _ => throw GetChannelCountNotSupported(),
                 },
 
                 // Microsoft ADPCM
@@ -45,7 +44,7 @@ namespace MonoGame.Framework.Audio
                 {
                     1 => ALFormat.MonoMSAdpcm,
                     2 => ALFormat.StereoMSAdpcm,
-                    _ => throw GetChannelCountNotSupportedException(),
+                    _ => throw GetChannelCountNotSupported(),
                 },
 
                 // IEEE Float
@@ -53,7 +52,7 @@ namespace MonoGame.Framework.Audio
                 {
                     1 => ALFormat.MonoFloat32,
                     2 => ALFormat.StereoFloat32,
-                    _ => throw GetChannelCountNotSupportedException(),
+                    _ => throw GetChannelCountNotSupported(),
                 },
 
                 // IMA4 ADPCM
@@ -61,10 +60,11 @@ namespace MonoGame.Framework.Audio
                 {
                     1 => ALFormat.MonoIma4,
                     2 => ALFormat.StereoIma4,
-                    _ => throw GetChannelCountNotSupportedException(),
+                    _ => throw GetChannelCountNotSupported(),
                 },
 
-                _ => throw new NotSupportedException("The specified sound format (" + format.ToString() + ") is not supported."),
+                _ => throw new NotSupportedException(
+                    "The specified sound format (" + format + ") is not supported."),
             };
         }
 
@@ -107,14 +107,16 @@ namespace MonoGame.Framework.Audio
                 signature = new string(reader.ReadChars(4));
 
             if (stream.CanSeek)
+            {
                 stream.Seek(0, SeekOrigin.Begin);
+            }
             else
             {
                 byte[] sigBytes = Encoding.UTF8.GetBytes(signature);
                 stream = new PrefixedStream(sigBytes, stream, leaveOpen: false);
             }
 
-            using (var buffered = RecyclableMemoryManager.Default.GetBufferedStream(stream, false))
+            using (var buffered = RecyclableMemoryManager.Default.GetBufferedStream(stream, leaveOpen: false))
             {
                 switch (signature)
                 {
@@ -142,16 +144,16 @@ namespace MonoGame.Framework.Audio
         {
             using (var reader = new BinaryReader(stream))
             {
-                string signature = new string(reader.ReadChars(4));
+                var signature = new string(reader.ReadChars(4));
                 if (signature != "RIFF")
-                    throw new ArgumentException("Specified stream is not a wave file.");
+                    throw new ArgumentException("Specified stream is not a RIFF file.");
                 reader.ReadInt32(); // riff_chunk_size
 
-                string wformat = new string(reader.ReadChars(4));
+                var wformat = new string(reader.ReadChars(4));
                 if (wformat != "WAVE")
-                    throw new ArgumentException("Specified stream is not a wave file.");
+                    throw new ArgumentException("Specified stream is not a WAVE file.");
 
-                RecyclableBuffer audioData = null;
+                RecyclableBuffer? audioData = null;
                 int audioFormat = 0;
                 channels = 0;
                 bitsPerSample = 0;
@@ -172,12 +174,12 @@ namespace MonoGame.Framework.Audio
                         {
                             case "fmt ":
                             {
-                                audioFormat = reader.ReadInt16(); // 2
-                                channels = reader.ReadInt16(); // 4
-                                frequency = reader.ReadInt32();  // 8
-                                int byteRate = reader.ReadInt32();    // 12
-                                blockAlignment = reader.ReadInt16();  // 14
-                                bitsPerSample = reader.ReadInt16(); // 16
+                                audioFormat = reader.ReadInt16();    // 2
+                                channels = reader.ReadInt16();       // 4
+                                frequency = reader.ReadInt32();      // 8
+                                int byteRate = reader.ReadInt32();   // 12
+                                blockAlignment = reader.ReadInt16(); // 14
+                                bitsPerSample = reader.ReadInt16();  // 16
 
                                 // Read extra data if present
                                 if (chunkSize > 16)
@@ -194,7 +196,7 @@ namespace MonoGame.Framework.Audio
                                             reader.BaseStream.Seek(extraDataSize, SeekOrigin.Current);
                                         else
                                         {
-                                            for (int i = 0; i < extraDataSize; ++i)
+                                            for (int i = 0; i < extraDataSize; i++)
                                                 reader.ReadByte();
                                         }
                                     }
@@ -215,7 +217,7 @@ namespace MonoGame.Framework.Audio
                                         reader.BaseStream.Seek(chunkSize, SeekOrigin.Current);
                                     else
                                     {
-                                        for (int i = 0; i < chunkSize; ++i)
+                                        for (int i = 0; i < chunkSize; i++)
                                             reader.ReadByte();
                                     }
                                 }
@@ -232,7 +234,7 @@ namespace MonoGame.Framework.Audio
                                     reader.BaseStream.Seek(chunkSize, SeekOrigin.Current);
                                 else
                                 {
-                                    for (int i = 0; i < chunkSize; ++i)
+                                    for (int i = 0; i < chunkSize; i++)
                                         reader.ReadByte();
                                 }
                                 break;
@@ -270,7 +272,7 @@ namespace MonoGame.Framework.Audio
                 }
                 catch
                 {
-                    audioData.Dispose();
+                    audioData?.Dispose();
                     throw;
                 }
             }
@@ -280,7 +282,7 @@ namespace MonoGame.Framework.Audio
         /// Convert buffer containing 24-bit signed PCM wav data to a 16-bit signed PCM buffer
         /// </summary>
         internal static unsafe byte[] Convert24To16(
-            ReadOnlySpan<byte> data, out string bufferTag, out int size)
+            ReadOnlySpan<byte> data, out string? bufferTag, out int size)
         {
             if (data.Length % 3 != 0)
                 throw new ArgumentException("Invalid 24-bit PCM data received");
@@ -300,8 +302,10 @@ namespace MonoGame.Framework.Audio
             {
                 int srcIndex = 0;
                 int dstIndex = 0;
-                for (int i = 0; i < sampleCount; ++i)
+                for (int i = 0; i < sampleCount; i++)
                 {
+                    // TODO: SIMD shuffle?
+
                     // Drop the least significant byte from the 24-bit sample to get the 16-bit sample
                     dst[dstIndex] = src[srcIndex + 1];
                     dst[dstIndex + 1] = src[srcIndex + 2];
@@ -326,7 +330,7 @@ namespace MonoGame.Framework.Audio
             if (Vector.IsHardwareAccelerated)
             {
                 // TODO: consider using SSE or AVX2 directly, which may be a bit faster
-                
+
                 var vMax = new Vector<float>(short.MaxValue);
                 var vMin = new Vector<float>(short.MinValue);
                 var vHalf = new Vector<float>(0.5f);
@@ -364,10 +368,11 @@ namespace MonoGame.Framework.Audio
             }
         }
 
+        // TODO: validate IMA4
         #region IMA4 decoding
 
         // Step table
-        private static int[] stepTable = new int[]
+        private static int[] StepTable { get; } = new int[]
         {
             7, 8, 9, 10, 11, 12, 13, 14,
             16, 17, 19, 21, 23, 25, 28, 31,
@@ -383,8 +388,8 @@ namespace MonoGame.Framework.Audio
             32767
         };
 
-        // Step index tables
-        private static int[] indexTable = new int[]
+        // Does not allocate by returning reference to assembly.
+        private static ReadOnlySpan<sbyte> IndexTable => new sbyte[]
         {
             // ADPCM data size is 4
             -1, -1, -1, -1, 2, 4, 6, 8,
@@ -393,45 +398,36 @@ namespace MonoGame.Framework.Audio
 
         private struct ImaState
         {
-            public int predictor;
-            public int stepIndex;
+            public int Predictor;
+            public int StepIndex;
         }
 
-        private static int AdpcmImaWavExpandNibble(ref ImaState channel, int nibble)
+        private static short AdpcmImaWavExpandNibble(ref ImaState channel, int nibble)
         {
-            int diff = stepTable[channel.stepIndex] >> 3;
+            int diff = StepTable[channel.StepIndex] >> 3;
             if ((nibble & 0x04) != 0)
-                diff += stepTable[channel.stepIndex];
+                diff += StepTable[channel.StepIndex];
             if ((nibble & 0x02) != 0)
-                diff += stepTable[channel.stepIndex] >> 1;
+                diff += StepTable[channel.StepIndex] >> 1;
             if ((nibble & 0x01) != 0)
-                diff += stepTable[channel.stepIndex] >> 2;
+                diff += StepTable[channel.StepIndex] >> 2;
+
             if ((nibble & 0x08) != 0)
-                channel.predictor -= diff;
+                channel.Predictor -= diff;
             else
-                channel.predictor += diff;
+                channel.Predictor += diff;
 
-            if (channel.predictor < -32768)
-                channel.predictor = -32768;
-            else if (channel.predictor > 32767)
-                channel.predictor = 32767;
+            channel.StepIndex = MathHelper.Clamp(channel.StepIndex + IndexTable[nibble], 0, 88);
 
-            channel.stepIndex += indexTable[nibble];
-
-            if (channel.stepIndex < 0)
-                channel.stepIndex = 0;
-            else if (channel.stepIndex > 88)
-                channel.stepIndex = 88;
-
-            return channel.predictor;
+            return MathHelper.Clamp(channel.Predictor, short.MinValue, short.MaxValue);
         }
 
-        // Convert buffer containing IMA/ADPCM wav data to a 16-bit signed PCM buffer
-        internal static byte[] ConvertIma4ToPcm<T>(ReadOnlySpan<T> span, int channels, int blockAlignment)
-            where T : unmanaged
+        /// <summary>
+        /// Convert buffer containing IMA/ADPCM data to a 16-bit signed PCM buffer.
+        /// </summary>
+        internal static short[] ConvertIma4ToPcm(ReadOnlySpan<byte> source, int channels, int blockAlignment)
         {
-            ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(span);
-            int count = byteSpan.Length;
+            int count = source.Length;
 
             var channel0 = new ImaState();
             var channel1 = new ImaState();
@@ -441,8 +437,8 @@ namespace MonoGame.Framework.Audio
             if (count % blockAlignment > 0)
                 sampleCountLastBlock = ((count % blockAlignment / channels) - 4) / 4 * 8 + 1;
             int sampleCount = (count / blockAlignment * sampleCountFullBlock) + sampleCountLastBlock;
-            var samples = new byte[sampleCount * sizeof(short) * channels];
-            int sampleOffset = 0;
+            var samples = new short[sampleCount * channels];
+            var sampleDst = samples.AsSpan();
 
             int offset = 0;
             while (count > 0)
@@ -452,85 +448,74 @@ namespace MonoGame.Framework.Audio
                     blockSize = count;
                 count -= blockAlignment;
 
-                channel0.predictor = byteSpan[offset++];
-                channel0.predictor |= byteSpan[offset++] << 8;
-                if ((channel0.predictor & 0x8000) != 0)
-                    channel0.predictor -= 0x10000;
-                channel0.stepIndex = byteSpan[offset++];
-                if (channel0.stepIndex > 88)
-                    channel0.stepIndex = 88;
+                channel0.Predictor = source[offset++];
+                channel0.Predictor |= source[offset++] << 8;
+                if ((channel0.Predictor & 0x8000) != 0)
+                    channel0.Predictor -= 0x10000;
+                channel0.StepIndex = source[offset++];
+                if (channel0.StepIndex > 88)
+                    channel0.StepIndex = 88;
                 offset++;
-                int index = sampleOffset * 2;
-                samples[index] = (byte)channel0.predictor;
-                samples[index + 1] = (byte)(channel0.predictor >> 8);
-                ++sampleOffset;
+
+                sampleDst[0] = (short)channel0.Predictor;
+                sampleDst = sampleDst.Slice(1);
 
                 if (channels == 2)
                 {
-                    channel1.predictor = byteSpan[offset++];
-                    channel1.predictor |= byteSpan[offset++] << 8;
-                    if ((channel1.predictor & 0x8000) != 0)
-                        channel1.predictor -= 0x10000;
-                    channel1.stepIndex = byteSpan[offset++];
-                    if (channel1.stepIndex > 88)
-                        channel1.stepIndex = 88;
+                    channel1.Predictor = source[offset++];
+                    channel1.Predictor |= source[offset++] << 8;
+                    if ((channel1.Predictor & 0x8000) != 0)
+                        channel1.Predictor -= 0x10000;
+                    channel1.StepIndex = source[offset++];
+                    if (channel1.StepIndex > 88)
+                        channel1.StepIndex = 88;
                     offset++;
-                    index = sampleOffset * 2;
-                    samples[index] = (byte)channel1.predictor;
-                    samples[index + 1] = (byte)(channel1.predictor >> 8);
-                    ++sampleOffset;
-                }
 
-                if (channels == 2)
-                {
+                    sampleDst[0] = (short)channel1.Predictor;
+                    sampleDst = sampleDst.Slice(1);
+
                     for (int nibbles = 2 * (blockSize - 8); nibbles > 0; nibbles -= 16)
                     {
                         for (int i = 0; i < 4; i++)
                         {
-                            index = (sampleOffset + i * 4) * 2;
-                            int sample = AdpcmImaWavExpandNibble(ref channel0, byteSpan[offset + i] & 0x0f);
-                            samples[index] = (byte)sample;
-                            samples[index + 1] = (byte)(sample >> 8);
+                            byte nibble = source[offset + i];
+                            short sample1 = AdpcmImaWavExpandNibble(ref channel0, nibble & 0x0f);
+                            short sample2 = AdpcmImaWavExpandNibble(ref channel0, nibble >> 4);
 
-                            index = (sampleOffset + i * 4 + 2) * 2;
-                            sample = AdpcmImaWavExpandNibble(ref channel0, byteSpan[offset + i] >> 4);
-                            samples[index] = (byte)sample;
-                            samples[index + 1] = (byte)(sample >> 8);
+                            int index = i * 4;
+                            sampleDst[index + 2] = sample2;
+                            sampleDst[index + 0] = sample1;
                         }
                         offset += 4;
 
                         for (int i = 0; i < 4; i++)
                         {
-                            index = (sampleOffset + i * 4 + 1) * 2;
-                            int sample = AdpcmImaWavExpandNibble(ref channel1, byteSpan[offset + i] & 0x0f);
-                            samples[index] = (byte)sample;
-                            samples[index + 1] = (byte)(sample >> 8);
+                            byte nibble = source[offset + i];
+                            short sample1 = AdpcmImaWavExpandNibble(ref channel1, nibble & 0x0f);
+                            short sample2 = AdpcmImaWavExpandNibble(ref channel1, nibble >> 4);
 
-                            index = (sampleOffset + i * 4 + 3) * 2;
-                            sample = AdpcmImaWavExpandNibble(ref channel1, byteSpan[offset + i] >> 4);
-                            samples[index] = (byte)sample;
-                            samples[index + 1] = (byte)(sample >> 8);
+                            int index = i * 4 + 1;
+                            sampleDst[index + 2] = sample2;
+                            sampleDst[index + 0] = sample1;
                         }
                         offset += 4;
-                        sampleOffset += 16;
+
+                        sampleDst = sampleDst.Slice(16);
                     }
                 }
                 else
                 {
                     for (int nibbles = 2 * (blockSize - 4); nibbles > 0; nibbles -= 2)
                     {
-                        index = sampleOffset * 2;
-                        int b = byteSpan[offset];
-                        int sample = AdpcmImaWavExpandNibble(ref channel0, b & 0x0f);
-                        samples[index] = (byte)sample;
-                        samples[index + 1] = (byte)(sample >> 8);
-                        index += 2;
-                        sample = AdpcmImaWavExpandNibble(ref channel0, b >> 4);
-                        samples[index] = (byte)sample;
-                        samples[index + 1] = (byte)(sample >> 8);
+                        byte nibble = source[offset];
+                        short sample1 = AdpcmImaWavExpandNibble(ref channel0, nibble & 0x0f);
+                        short sample2 = AdpcmImaWavExpandNibble(ref channel0, nibble >> 4);
 
-                        sampleOffset += 2;
-                        ++offset;
+                        sampleDst[1] = sample2;
+                        sampleDst[0] = sample1;
+                        sampleDst = sampleDst.Slice(2);
+
+                        offset++;
                     }
                 }
             }
@@ -540,62 +525,58 @@ namespace MonoGame.Framework.Audio
 
         #endregion
 
+        // TODO: validate MS-ADPCM
         #region MS-ADPCM decoding
 
-        private static int[] adaptationTable = new int[]
+        private static int[] AdaptationTable { get; } = new int[]
         {
             230, 230, 230, 230, 307, 409, 512, 614,
             768, 614, 512, 409, 307, 230, 230, 230
         };
 
-        private static int[] adaptationCoeff1 = new int[]
+        private static int[] AdaptationCoeff1 { get; } = new int[]
         {
             256, 512, 0, 192, 240, 460, 392
         };
 
-        private static int[] adaptationCoeff2 = new int[]
+        private static int[] AdaptationCoeff2 { get; } = new int[]
         {
             0, -256, 0, 64, 0, -208, -232
         };
 
         private struct MsAdpcmState
         {
-            public int delta;
-            public int sample1;
-            public int sample2;
-            public int coeff1;
-            public int coeff2;
+            public int Delta;
+            public int Sample1;
+            public int Sample2;
+            public int Coeff1;
+            public int Coeff2;
         }
 
-        private static int AdpcmMsExpandNibble(ref MsAdpcmState channel, int nibble)
+        private static short AdpcmMsExpandNibble(ref MsAdpcmState channel, int nibble)
         {
             int nibbleSign = nibble - (((nibble & 0x08) != 0) ? 0x10 : 0);
-            int predictor = 
-                ((channel.sample1 * channel.coeff1) +
-                (channel.sample2 * channel.coeff2)) / 256 + 
-                (nibbleSign * channel.delta);
+            int predictor =
+                ((channel.Sample1 * channel.Coeff1) +
+                (channel.Sample2 * channel.Coeff2)) / 256 +
+                (nibbleSign * channel.Delta);
 
-            if (predictor < -32768)
-                predictor = -32768;
-            else if (predictor > 32767)
-                predictor = 32767;
+            channel.Sample2 = channel.Sample1;
+            channel.Sample1 = predictor;
 
-            channel.sample2 = channel.sample1;
-            channel.sample1 = predictor;
+            channel.Delta = AdaptationTable[nibble] * channel.Delta / 256;
+            if (channel.Delta < 16)
+                channel.Delta = 16;
 
-            channel.delta = adaptationTable[nibble] * channel.delta / 256;
-            if (channel.delta < 16)
-                channel.delta = 16;
-
-            return predictor;
+            return MathHelper.Clamp(predictor, short.MinValue, short.MaxValue);
         }
 
-        // Convert buffer containing MS-ADPCM wav data to a 16-bit signed PCM buffer
-        internal static byte[] ConvertMsAdpcmToPcm<T>(ReadOnlySpan<T> span, int channels, int blockAlignment)
-            where T : unmanaged
+        /// <summary>
+        /// Convert buffer containing MS-ADPCM data to a 16-bit signed PCM buffer.
+        /// </summary>
+        internal static short[] ConvertMsAdpcmToPcm(ReadOnlySpan<byte> source, int channels, int blockAlignment)
         {
-            ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(span);
-            int count = byteSpan.Length;
+            int count = source.Length;
             bool stereo = channels == 2;
 
             var channel0 = new MsAdpcmState();
@@ -607,8 +588,8 @@ namespace MonoGame.Framework.Audio
             if (count % blockAlignment > 0)
                 sampleCountLastBlock = ((count % blockAlignment / channels) - 7) * 2 + 2;
             int sampleCount = (count / blockAlignment * sampleCountFullBlock) + sampleCountLastBlock;
-            var samples = new byte[sampleCount * sizeof(short) * channels];
-            int sampleOffset = 0;
+            var samples = new short[sampleCount * channels];
+            var sampleDst = samples.AsSpan();
 
             int offset = 0;
             while (count > 0)
@@ -623,120 +604,108 @@ namespace MonoGame.Framework.Audio
                     break;
 
                 int offsetStart = offset;
-                blockPredictor = byteSpan[offset];
+                blockPredictor = source[offset];
                 ++offset;
                 if (blockPredictor > 6)
                     blockPredictor = 6;
-                channel0.coeff1 = adaptationCoeff1[blockPredictor];
-                channel0.coeff2 = adaptationCoeff2[blockPredictor];
+                channel0.Coeff1 = AdaptationCoeff1[blockPredictor];
+                channel0.Coeff2 = AdaptationCoeff2[blockPredictor];
                 if (stereo)
                 {
-                    blockPredictor = byteSpan[offset];
+                    blockPredictor = source[offset];
                     ++offset;
                     if (blockPredictor > 6)
                         blockPredictor = 6;
-                    channel1.coeff1 = adaptationCoeff1[blockPredictor];
-                    channel1.coeff2 = adaptationCoeff2[blockPredictor];
+                    channel1.Coeff1 = AdaptationCoeff1[blockPredictor];
+                    channel1.Coeff2 = AdaptationCoeff2[blockPredictor];
                 }
 
-                channel0.delta = byteSpan[offset];
-                channel0.delta |= byteSpan[offset + 1] << 8;
-                if ((channel0.delta & 0x8000) != 0)
-                    channel0.delta -= 0x10000;
+                channel0.Delta = source[offset];
+                channel0.Delta |= source[offset + 1] << 8;
+                if ((channel0.Delta & 0x8000) != 0)
+                    channel0.Delta -= 0x10000;
                 offset += 2;
                 if (stereo)
                 {
-                    channel1.delta = byteSpan[offset];
-                    channel1.delta |= byteSpan[offset + 1] << 8;
-                    if ((channel1.delta & 0x8000) != 0)
-                        channel1.delta -= 0x10000;
+                    channel1.Delta = source[offset];
+                    channel1.Delta |= source[offset + 1] << 8;
+                    if ((channel1.Delta & 0x8000) != 0)
+                        channel1.Delta -= 0x10000;
                     offset += 2;
                 }
 
-                channel0.sample1 = byteSpan[offset];
-                channel0.sample1 |= byteSpan[offset + 1] << 8;
-                if ((channel0.sample1 & 0x8000) != 0)
-                    channel0.sample1 -= 0x10000;
+                channel0.Sample1 = source[offset];
+                channel0.Sample1 |= source[offset + 1] << 8;
+                if ((channel0.Sample1 & 0x8000) != 0)
+                    channel0.Sample1 -= 0x10000;
                 offset += 2;
                 if (stereo)
                 {
-                    channel1.sample1 = byteSpan[offset];
-                    channel1.sample1 |= byteSpan[offset + 1] << 8;
-                    if ((channel1.sample1 & 0x8000) != 0)
-                        channel1.sample1 -= 0x10000;
+                    channel1.Sample1 = source[offset];
+                    channel1.Sample1 |= source[offset + 1] << 8;
+                    if ((channel1.Sample1 & 0x8000) != 0)
+                        channel1.Sample1 -= 0x10000;
                     offset += 2;
                 }
 
-                channel0.sample2 = byteSpan[offset];
-                channel0.sample2 |= byteSpan[offset + 1] << 8;
-                if ((channel0.sample2 & 0x8000) != 0)
-                    channel0.sample2 -= 0x10000;
+                channel0.Sample2 = source[offset];
+                channel0.Sample2 |= source[offset + 1] << 8;
+                if ((channel0.Sample2 & 0x8000) != 0)
+                    channel0.Sample2 -= 0x10000;
                 offset += 2;
                 if (stereo)
                 {
-                    channel1.sample2 = byteSpan[offset];
-                    channel1.sample2 |= byteSpan[offset + 1] << 8;
-                    if ((channel1.sample2 & 0x8000) != 0)
-                        channel1.sample2 -= 0x10000;
+                    channel1.Sample2 = source[offset];
+                    channel1.Sample2 |= source[offset + 1] << 8;
+                    if ((channel1.Sample2 & 0x8000) != 0)
+                        channel1.Sample2 -= 0x10000;
                     offset += 2;
                 }
 
                 if (stereo)
                 {
-                    samples[sampleOffset] = (byte)channel0.sample2;
-                    samples[sampleOffset + 1] = (byte)(channel0.sample2 >> 8);
-                    samples[sampleOffset + 2] = (byte)channel1.sample2;
-                    samples[sampleOffset + 3] = (byte)(channel1.sample2 >> 8);
-                    samples[sampleOffset + 4] = (byte)channel0.sample1;
-                    samples[sampleOffset + 5] = (byte)(channel0.sample1 >> 8);
-                    samples[sampleOffset + 6] = (byte)channel1.sample1;
-                    samples[sampleOffset + 7] = (byte)(channel1.sample1 >> 8);
-                    sampleOffset += 8;
+                    sampleDst[3] = (short)channel1.Sample1;
+                    sampleDst[2] = (short)channel0.Sample1;
+                    sampleDst[1] = (short)channel1.Sample2;
+                    sampleDst[0] = (short)channel0.Sample2;
+                    sampleDst = sampleDst.Slice(4);
                 }
                 else
                 {
-                    samples[sampleOffset] = (byte)channel0.sample2;
-                    samples[sampleOffset + 1] = (byte)(channel0.sample2 >> 8);
-                    samples[sampleOffset + 2] = (byte)channel0.sample1;
-                    samples[sampleOffset + 3] = (byte)(channel0.sample1 >> 8);
-                    sampleOffset += 4;
+                    sampleDst[1] = (short)channel0.Sample1;
+                    sampleDst[0] = (short)channel0.Sample2;
+                    sampleDst = sampleDst.Slice(2);
                 }
 
                 blockSize -= offset - offsetStart;
+
+                var srcSlice = source.Slice(offset, blockSize);
+                offset += srcSlice.Length;
+
                 if (stereo)
                 {
-                    for (int i = 0; i < blockSize; ++i)
+                    for (int i = 0; i < srcSlice.Length; i++)
                     {
-                        int nibbles = byteSpan[offset];
+                        byte nibbles = srcSlice[i];
+                        short sample1 = AdpcmMsExpandNibble(ref channel0, nibbles >> 4);
+                        short sample2 = AdpcmMsExpandNibble(ref channel1, nibbles & 0x0f);
 
-                        int sample = AdpcmMsExpandNibble(ref channel0, nibbles >> 4);
-                        samples[sampleOffset] = (byte)sample;
-                        samples[sampleOffset + 1] = (byte)(sample >> 8);
-
-                        sample = AdpcmMsExpandNibble(ref channel1, nibbles & 0x0f);
-                        samples[sampleOffset + 2] = (byte)sample;
-                        samples[sampleOffset + 3] = (byte)(sample >> 8);
-
-                        sampleOffset += 4;
-                        ++offset;
+                        sampleDst[1] = sample2;
+                        sampleDst[0] = sample1;
+                        sampleDst = sampleDst.Slice(2);
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < blockSize; ++i)
+                    for (int i = 0; i < srcSlice.Length; i++)
                     {
-                        int nibbles = byteSpan[offset];
+                        byte nibbles = srcSlice[offset];
+                        short sample1 = AdpcmMsExpandNibble(ref channel0, nibbles >> 4);
+                        short sample2 = AdpcmMsExpandNibble(ref channel0, nibbles & 0x0f);
 
-                        int sample = AdpcmMsExpandNibble(ref channel0, nibbles >> 4);
-                        samples[sampleOffset] = (byte)sample;
-                        samples[sampleOffset + 1] = (byte)(sample >> 8);
-
-                        sample = AdpcmMsExpandNibble(ref channel0, nibbles & 0x0f);
-                        samples[sampleOffset + 2] = (byte)sample;
-                        samples[sampleOffset + 3] = (byte)(sample >> 8);
-
-                        sampleOffset += 4;
-                        ++offset;
+                        sampleDst[1] = sample2;
+                        sampleDst[0] = sample1;
+                        sampleDst = sampleDst.Slice(2);
                     }
                 }
             }

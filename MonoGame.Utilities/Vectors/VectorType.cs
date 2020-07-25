@@ -41,8 +41,12 @@ namespace MonoGame.Framework.Vectors
                         $"The type does not implement {nameof(IVector)}.", nameof(type));
 
                 if (CreateMethod == null)
-                    CreateMethod = typeof(VectorType).GetMethod(
-                        nameof(Create), BindingFlags.NonPublic | BindingFlags.Static)!;
+                {
+                    var createMethod = typeof(VectorType).GetMethod(
+                        nameof(Create), BindingFlags.NonPublic | BindingFlags.Static);
+
+                    CreateMethod = createMethod ?? throw new Exception("Failed to get method for reflection.");
+                }
 
                 // We call the generic method with reflection to satisfy the unmanaged constraint.
                 var genericMethod = CreateMethod.MakeGenericMethod(type);

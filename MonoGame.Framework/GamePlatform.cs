@@ -4,35 +4,28 @@
 
 using System;
 using MonoGame.Framework.Graphics;
-using MonoGame.Framework.Input;
-using MonoGame.Framework.Input.Touch;
 
 namespace MonoGame.Framework
 {
     internal abstract partial class GamePlatform : IDisposable
     {
-        #region Fields
+        public event Event<GamePlatform>? AsyncRunLoopEnded;
+        public event Event<Game>? Activated;
+        public event Event<Game>? Deactivated;
+
+        private bool _isActive;
+        private bool _isMouseVisible;
 
         protected TimeSpan _inactiveSleepTime = TimeSpan.FromMilliseconds(20.0);
-        protected bool _needsToResetElapsedTime = false;
-        protected bool InFullScreenMode = false;
+        protected bool _needsToResetElapsedTime;
+        protected bool InFullScreenMode;
+
         protected bool IsDisposed { get; private set; }
-
-        #endregion
-
-        #region Construction/Destruction
 
         protected GamePlatform(Game game)
         {
             Game = game ?? throw new ArgumentNullException(nameof(game));
         }
-
-        ~GamePlatform()
-        {
-            Dispose(false);
-        }
-
-        #endregion Construction/Destruction
 
         #region Public Properties
 
@@ -47,7 +40,6 @@ namespace MonoGame.Framework
         /// </summary>
         public Game Game { get; private set; }
 
-        private bool _isActive;
         public bool IsActive
         {
             get => _isActive;
@@ -64,7 +56,6 @@ namespace MonoGame.Framework
             }
         }
 
-        private bool _isMouseVisible;
         public bool IsMouseVisible
         {
             get => _isMouseVisible;
@@ -78,28 +69,9 @@ namespace MonoGame.Framework
             }
         }
 
-        private GameWindow _window;
-        public GameWindow Window
-        {
-            get => _window;
-            protected set
-            {
-                if (_window == null)
-                {
-                    Mouse.PrimaryWindow = value;
-                    TouchPanel.PrimaryWindow = value;
-                }
-                _window = value;
-            }
-        }
+        public abstract GameWindow? Window { get; }
 
         #endregion
-
-        #region Events
-
-        public event Event<GamePlatform> AsyncRunLoopEnded;
-        public event Event<Game> Activated;
-        public event Event<Game> Deactivated;
 
         /// <summary>
         /// Raises the <see cref="AsyncRunLoopEnded"/> event. 
@@ -107,8 +79,6 @@ namespace MonoGame.Framework
         /// the asynchronous run loop they start has stopped running.
         /// </summary>
         protected void RaiseAsyncRunLoopEnded() => AsyncRunLoopEnded?.Invoke(this);
-
-        #endregion Events
 
         #region Methods
 
@@ -212,9 +182,12 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// MSDN: Use this method if your game is recovering from a slow-running state, and ElapsedGameTime is too large to be useful.
-        /// Frame timing is generally handled by the Game class, but some platforms still handle it elsewhere. Once all platforms
-        /// rely on the Game class's functionality, this method and any overrides should be removed.
+        /// MSDN: Use this method if your game is recovering from a slow-running state,
+        /// and ElapsedGameTime is too large to be useful. 
+        /// Frame timing is generally handled by the Game class, 
+        /// but some platforms still handle it elsewhere. 
+        /// Once all platforms rely on the Game class's functionality, 
+        /// this method and any overrides should be removed.
         /// </summary>
         public virtual void ResetElapsedTime()
         {
@@ -239,7 +212,13 @@ namespace MonoGame.Framework
 
         #endregion Methods
 
-        #region IDisposable implementation
+        /// <summary>
+        /// Log the specified Message.
+        /// </summary>
+        [System.Diagnostics.Conditional("DEBUG")]
+        public virtual void Log(string Message)
+        {
+        }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing,
@@ -251,24 +230,17 @@ namespace MonoGame.Framework
             GC.SuppressFinalize(this);
         }
 
+        /// <inheritdoc/>
         protected virtual void Dispose(bool disposing)
         {
             if (!IsDisposed)
-            {
-                Mouse.PrimaryWindow = null;
-                TouchPanel.PrimaryWindow = null;
-
                 IsDisposed = true;
-            }
         }
 
-        /// <summary>
-        /// Log the specified Message.
-        /// </summary>
-        [System.Diagnostics.Conditional("DEBUG")]
-        public virtual void Log(string Message) { }
-
-        #endregion
+        ~GamePlatform()
+        {
+            Dispose(false);
+        }
     }
 }
 

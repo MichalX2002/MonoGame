@@ -55,10 +55,11 @@ namespace MonoGame.Framework.Vectors
             return new Vector2(X, Y);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Pack(Vector2 vector, out Short2 destination)
         {
-            vector.Clamp(short.MinValue, short.MaxValue);
-            vector.Round();
+            vector = VectorHelper.Clamp(vector, short.MinValue, short.MaxValue);
+            vector = VectorHelper.Round(vector);
 
             destination.X = (short)vector.X;
             destination.Y = (short)vector.Y;
@@ -73,7 +74,7 @@ namespace MonoGame.Framework.Vectors
             set => Unsafe.As<Short2, uint>(ref this) = value;
         }
 
-        public void FromScaledVector(Vector4 scaledVector)
+        public void FromScaledVector(Vector3 scaledVector)
         {
             var vector = scaledVector.ToVector2();
             vector *= ushort.MaxValue;
@@ -82,23 +83,77 @@ namespace MonoGame.Framework.Vectors
             Pack(vector, out this);
         }
 
-        public readonly Vector4 ToScaledVector4()
+        public void FromScaledVector(Vector4 scaledVector)
+        {
+            FromScaledVector(scaledVector.ToVector3());
+        }
+
+        public readonly Vector3 ToScaledVector3()
         {
             var scaledVector = ToVector2();
             scaledVector += Offset;
             scaledVector /= ushort.MaxValue;
 
-            return new Vector4(scaledVector, 0, 1);
+            return new Vector3(scaledVector, 0);
         }
 
-        public void FromVector(Vector4 vector)
+        public readonly Vector4 ToScaledVector4()
+        {
+            return new Vector4(ToScaledVector3(), 1);
+        }
+
+        public void FromVector(Vector3 vector)
         {
             Pack(vector.ToVector2(), out this);
         }
 
+        public void FromVector(Vector4 vector)
+        {
+            FromVector(vector.ToVector3());
+        }
+
+        public readonly Vector3 ToVector3()
+        {
+            return new Vector3(ToVector2(), 0);
+        }
+
         public readonly Vector4 ToVector4()
         {
-            return new Vector4(ToVector2(), 0, 1);
+            return new Vector4(ToVector3(), 1);
+        }
+
+        #endregion
+
+        #region IPixel
+
+        public void FromAlpha(Alpha8 source)
+        {
+            X = Y = short.MaxValue;
+        }
+
+        public void FromAlpha(Alpha16 source)
+        {
+            X = Y = short.MaxValue;
+        }
+
+        public void FromAlpha(AlphaF source)
+        {
+            X = Y = short.MaxValue;
+        }
+
+        public Alpha8 ToAlpha8()
+        {
+            return Alpha8.Opaque;
+        }
+
+        public Alpha16 ToAlpha16()
+        {
+            return Alpha16.Opaque;
+        }
+
+        public AlphaF ToAlphaF()
+        {
+            return AlphaF.Opaque;
         }
 
         #endregion

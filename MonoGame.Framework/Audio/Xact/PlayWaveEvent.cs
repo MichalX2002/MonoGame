@@ -2,6 +2,10 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
+using System.Diagnostics;
+using System.Numerics;
+
 namespace MonoGame.Framework.Audio
 {
     enum VariationType
@@ -42,7 +46,7 @@ namespace MonoGame.Framework.Audio
         private int _wavIndex;
         private int _loopIndex;
 
-        private SoundEffectInstance _wav;
+        private SoundEffectInstance? _wave;
         private bool _streaming;
 
         public PlayWaveEvent(   
@@ -79,15 +83,15 @@ namespace MonoGame.Framework.Audio
 
         public override void Play() 
         {
-            if (_wav != null)
+            if (_wave != null)
             {
-                if (_wav.State != SoundState.Stopped)
-                    _wav.Stop();
+                if (_wave.State != SoundState.Stopped)
+                    _wave.Stop();
                 if (_streaming)
-                    _wav.Dispose();
+                    _wave.Dispose();
                 else					
-                    _wav._isXAct = false;					
-                _wav = null;
+                    _wave._isXAct = false;					
+                _wave = null;
             }
 
             Play(true);
@@ -159,8 +163,8 @@ namespace MonoGame.Framework.Audio
                 };
             }
 
-            _wav = _soundBank.GetSoundEffectInstance(_waveBanks[_wavIndex], _tracks[_wavIndex], out _streaming);
-            if (_wav == null)
+            _wave = _soundBank.GetSoundEffectInstance(_waveBanks[_wavIndex], _tracks[_wavIndex], out _streaming);
+            if (_wave == null)
             {
                 // We couldn't create a sound effect instance, most likely
                 // because we've reached the sound pool limits.
@@ -170,14 +174,19 @@ namespace MonoGame.Framework.Audio
             // Do all the randoms before we play.
             if (_volumeVar.HasValue)
                 _trackVolume = _volumeVar.Value.X + ((float)XactHelpers.Random.NextDouble() * _volumeVar.Value.Y);
+
             if (_pitchVar.HasValue)
                 _trackPitch = _pitchVar.Value.X + ((float)XactHelpers.Random.NextDouble() * _pitchVar.Value.Y);
+
             if (_clip.FilterEnabled)
             {
                 if (_filterVar.HasValue)
                 {
-                    _trackFilterFrequency = _filterVar.Value.X + ((float)XactHelpers.Random.NextDouble() * _filterVar.Value.Y);
-                    _trackFilterQFactor = _filterVar.Value.Z + ((float)XactHelpers.Random.NextDouble() * _filterVar.Value.W);
+                    _trackFilterFrequency = 
+                        _filterVar.Value.X + ((float)XactHelpers.Random.NextDouble() * _filterVar.Value.Y);
+
+                    _trackFilterQFactor = 
+                        _filterVar.Value.Z + ((float)XactHelpers.Random.NextDouble() * _filterVar.Value.W);
                 }
                 else
                 {
@@ -187,53 +196,54 @@ namespace MonoGame.Framework.Audio
             }
  
             // This is a shortcut for infinite looping of a single track.
-            _wav.IsLooped = _loopCount == 255 && trackCount == 1;
+            _wave.IsLooped = _loopCount == 255 && trackCount == 1;
 
             // Update all the wave states then play.
             UpdateState();
-            _wav.Play();
+            _wave.Play();
         }
 
         public override void Stop()
         {
-            if (_wav != null)
+            if (_wave != null)
             {
-                _wav.Stop();
+                _wave.Stop();
                 if (_streaming)
-                    _wav.Dispose();
+                    _wave.Dispose();
                 else
-                    _wav._isXAct = false;				
-                _wav = null;
+                    _wave._isXAct = false;				
+                _wave = null;
             }
             _loopIndex = 0;
         }
 
         public override void Pause() 
         {
-            if (_wav != null)
-                _wav.Pause();
+            if (_wave != null)
+                _wave.Pause();
         }
 
         public override void Resume()
         {
-            if (_wav != null && _wav.State == SoundState.Paused)
-                _wav.Resume();
+            if (_wave != null && _wave.State == SoundState.Paused)
+                _wave.Resume();
         }
 
         public override void SetTrackVolume(float volume)
         {
             _clipVolume = volume;
-            if (_wav != null)
-                _wav.Volume = _trackVolume * _clipVolume;
+            if (_wave != null)
+                _wave.Volume = _trackVolume * _clipVolume;
         }
 
         public override void SetTrackPan(float pan)
         {
-            if (_wav != null)
-                _wav.Pan = pan;
+            if (_wave != null)
+                _wave.Pan = pan;
         }
 
-        public override void SetState(float volume, float pitch, float reverbMix, float? filterFrequency, float? filterQFactor)
+        public override void SetState(
+            float volume, float pitch, float reverbMix, float? filterFrequency, float? filterQFactor)
         {
             _clipVolume = volume;
             _clipPitch = pitch;
@@ -245,20 +255,22 @@ namespace MonoGame.Framework.Audio
             if (filterQFactor.HasValue)
                 _trackFilterQFactor = filterQFactor.Value;
 
-            if (_wav != null)
+            if (_wave != null)
                 UpdateState();
         }
 
         private void UpdateState()
         {
-            _wav.Volume = _trackVolume * _clipVolume;
-            _wav.Pitch = _trackPitch + _clipPitch;
+            Debug.Assert(_wave != null);
+
+            _wave.Volume = _trackVolume * _clipVolume;
+            _wave.Pitch = _trackPitch + _clipPitch;
 
             if (_clip.UseReverb)
-                _wav.PlatformSetReverbMix(_clipReverbMix);
+                _wave.PlatformSetReverbMix(_clipReverbMix);
 
             if (_clip.FilterEnabled)
-                _wav.PlatformSetFilter(_clip.FilterMode, _trackFilterQFactor, _trackFilterFrequency);
+                _wave.PlatformSetFilter(_clip.FilterMode, _trackFilterQFactor, _trackFilterFrequency);
         }
 
         public override void SetFade(float fadeInDuration, float fadeOutDuration)
@@ -268,31 +280,30 @@ namespace MonoGame.Framework.Audio
 
         public override bool Update(float dt)
         {
-            if (_wav != null && _wav.State == SoundState.Stopped)
+            if (_wave != null && _wave.State == SoundState.Stopped)
             {
-                // If we're not looping or reached our loop 
-                // limit then we can stop.
+                // If we're not looping or reached our loop limit then we can stop.
                 if (_loopCount == 0 || _loopIndex >= _loopCount)
                 {
                     if (_streaming)
-                        _wav.Dispose();
+                        _wave.Dispose();
                     else
-                        _wav._isXAct = false;						
-                    _wav = null;
+                        _wave._isXAct = false;						
+                    _wave = null;
                     _loopIndex = 0;
                 }
                 else
                 {
                     // Increment the loop count if it isn't infinite.
                     if (_loopCount != 255)
-                        ++_loopIndex;
+                        _loopIndex++;
 
                     // Play the next track.
                     Play(_newWaveOnLoop);
                 }
             }
 
-            return _wav != null;
+            return _wave != null;
         }
     }
 }

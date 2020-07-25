@@ -2,6 +2,8 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System.Numerics;
+
 namespace MonoGame.Framework.Content.Pipeline.Utilities
 {
     interface IVector4Converter<T> where T : struct
@@ -11,7 +13,8 @@ namespace MonoGame.Framework.Content.Pipeline.Utilities
     }
 
     /// <summary>
-    /// Helper class used by PixelBitmapContent.TryCopyFrom and TryCopyTo to convert between non-PackedValue types and Vector4.
+    /// Helper class used by PixelBitmapContent.TryCopyFrom and 
+    /// TryCopyTo to convert between non-PackedValue types and Vector4.
     /// </summary>
     internal class Vector4Converter :
         IVector4Converter<byte>,

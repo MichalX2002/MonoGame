@@ -123,7 +123,7 @@ namespace MonoGame.Framework.Input
 
             if (IsConnected)
             {
-                if (Axes.Length > 0)
+                if (!Axes.IsEmpty)
                 {
                     ret.Append(", Axes=");
                     foreach (var axis in Axes.Span)
@@ -131,14 +131,14 @@ namespace MonoGame.Framework.Input
                     ret.Length--;
                 }
 
-                if (Buttons.Length > 0)
+                if (!Buttons.IsEmpty)
                 {
                     ret.Append(", Buttons=");
                     foreach (var button in Buttons.Span)
                         ret.Append((int)button);
                 }
 
-                if (Hats.Length > 0)
+                if (!Hats.IsEmpty)
                 {
                     ret.Append(", Hats=");
                     foreach (var hat in Hats.Span)
@@ -147,7 +147,7 @@ namespace MonoGame.Framework.Input
                 }
             }
 
-            ret.Append("]");
+            ret.Append(']');
             return ret.ToString();
         }
 

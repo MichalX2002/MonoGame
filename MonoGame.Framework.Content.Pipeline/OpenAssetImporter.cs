@@ -828,7 +828,7 @@ namespace MonoGame.Framework.Content.Pipeline
                     Matrix InvertedOffset()
                     {
                         if (!Matrix.Invert(offsetMatrix, out var result))
-                            throw new InvalidDataException("Failed to invert matrix.");
+                            throw new InvalidDataException("Failed to invert offset matrix.");
                         return result;
                     }
 
@@ -856,7 +856,9 @@ namespace MonoGame.Framework.Content.Pipeline
                         // The current bone is the second bone in the chain.
                         // The parent offset matrix is missing. :(
                         // --> Derive matrix from parent bone, which is the root bone.
-                        parentOffsetMatrix = Matrix.Invert(parent.Transform);
+                        if (!Matrix.Invert(parent.Transform, out parentOffsetMatrix))
+                            throw new InvalidDataException("Failed to invert parent offset matrix.");
+
                         node.Transform = InvertedOffset() * parentOffsetMatrix;
                     }
                     else

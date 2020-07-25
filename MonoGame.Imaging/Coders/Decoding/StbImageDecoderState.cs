@@ -69,7 +69,7 @@ namespace MonoGame.Imaging.Coders.Decoding
             var dstType = PreferredPixelType ?? SourcePixelType;
             var size = new Size(state.Width, state.Height);
 
-            if (GetCoderOptions<DecoderOptions>().ClearImageMemory)
+            if (GetCoderOptionsOrDefault<DecoderOptions>().ClearImageMemory)
                 CurrentImage = Image.Create(dstType, size);
             else
                 CurrentImage = Image.CreateUninitialized(dstType, size);
@@ -171,7 +171,7 @@ namespace MonoGame.Imaging.Coders.Decoding
                     var imageRow = CurrentImage.GetPixelByteRowSpan(line).Slice(start * elementSize);
                     int srcElementSize = SourcePixelType!.ElementSize;
 
-                    while (pixels.Length > 0)
+                    while (!pixels.IsEmpty)
                     {
                         var pixelSlice = pixels.Length > buffer.Length
                             ? pixels.Slice(0, buffer.Length)

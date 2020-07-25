@@ -17,7 +17,7 @@ namespace MonoGame.Framework.Input.Touch
         /// <summary>
         /// Gets the type of the gesture.
         /// </summary>
-        public GestureType GestureType { get; }
+        public GestureTypes GestureType { get; }
 
         /// <summary>
         /// Gets the starting time for this multi-touch gesture sample.
@@ -49,7 +49,7 @@ namespace MonoGame.Framework.Input.Touch
         /// Initializes a new <see cref="GestureSample"/>.
         /// </summary>
         public GestureSample(
-            GestureType gestureType,
+            GestureTypes gestureType,
             TimeSpan timestamp,
             Vector2 position1, Vector2 position2,
             Vector2 delta1, Vector2 delta2)

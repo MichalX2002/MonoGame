@@ -212,14 +212,17 @@ namespace MonoGame
                 FL.LoadFunction<d_sdl_setwindowsize>(NativeLibrary, "SDL_SetWindowSize");
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            private delegate void d_sdl_setwindowtitle(IntPtr window, ref byte value);
+            private delegate void d_sdl_setwindowtitle(IntPtr window, in byte value);
             private static readonly d_sdl_setwindowtitle SDL_SetWindowTitle = 
                 FL.LoadFunction<d_sdl_setwindowtitle>(NativeLibrary, "SDL_SetWindowTitle");
 
-            public static void SetTitle(IntPtr handle, string title)
+            public static void SetTitle(IntPtr handle, ReadOnlySpan<char> title)
             {
-                byte[] bytes = Encoding.UTF8.GetBytes(title);
-                SDL_SetWindowTitle(handle, ref bytes[0]);
+                int byteCount = Encoding.UTF8.GetByteCount(title) + 1;
+                Span<byte> tmp = byteCount <= 2048 ? stackalloc byte[byteCount] : new byte[byteCount];
+                tmp[Encoding.UTF8.GetBytes(title, tmp)] = 0; // null-terminate
+
+                SDL_SetWindowTitle(handle, MemoryMarshal.GetReference(tmp));
             }
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

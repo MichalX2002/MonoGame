@@ -25,23 +25,21 @@ namespace MonoGame.Framework.Vectors
             new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Green),
             new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Blue));
 
-        [CLSCompliant(false)]
         public byte R;
-
-        [CLSCompliant(false)]
         public byte G;
-
-        [CLSCompliant(false)]
         public byte B;
 
         #region Constructors
 
-        [CLSCompliant(false)]
         public Rgb24(byte r, byte g, byte b)
         {
             R = r;
             G = g;
             B = b;
+        }
+
+        public Rgb24(byte value) : this(value, value, value)
+        {
         }
 
         #endregion
@@ -130,7 +128,7 @@ namespace MonoGame.Framework.Vectors
             return this == other;
         }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is Rgb24 other && Equals(other);
         }

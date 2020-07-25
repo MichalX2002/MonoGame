@@ -269,52 +269,52 @@ namespace MonoGame.Framework.Memory
         /// <summary>
         /// Triggered when a new block is created.
         /// </summary>
-        public event Action BlockCreated;
+        public event Action? BlockCreated;
 
         /// <summary>
         /// Triggered when a new block is created.
         /// </summary>
-        public event TaggedActionHandler BlockDiscarded;
+        public event TaggedActionHandler? BlockDiscarded;
 
         /// <summary>
         /// Triggered when a new buffer is created.
         /// </summary>
-        public event ImportantActionHandler BufferCreated;
+        public event ImportantActionHandler? BufferCreated;
 
         /// <summary>
         /// Triggered when a new stream is created.
         /// </summary>
-        public event Action StreamCreated;
+        public event Action? StreamCreated;
 
         /// <summary>
         /// Triggered when a stream is disposed.
         /// </summary>
-        public event Action StreamDisposed;
+        public event Action? StreamDisposed;
 
         /// <summary>
         /// Triggered when a stream is finalized.
         /// </summary>
-        public event Action StreamFinalized;
+        public event Action? StreamFinalized;
 
         /// <summary>
         /// Triggered when a stream is converted to an array.
         /// </summary>
-        public event ImportantActionHandler StreamConvertedToArray;
+        public event ImportantActionHandler? StreamConvertedToArray;
 
         /// <summary>
         /// Triggered when a stream is finalized.
         /// </summary>
-        public event StreamLengthReportHandler StreamLength;
+        public event StreamLengthReportHandler? StreamLength;
 
         /// <summary>
         /// Triggered when a buffer is discarded, along with the reason for the discard.
         /// </summary>
-        public event BufferDiscardedEventHandler BufferDiscarded;
+        public event BufferDiscardedEventHandler? BufferDiscarded;
 
         /// <summary>
         /// Periodically triggered to report usage statistics.
         /// </summary>
-        public event UsageReportEventHandler UsageReport;
+        public event UsageReportEventHandler? UsageReport;
 
         #endregion
 
@@ -379,7 +379,8 @@ namespace MonoGame.Framework.Memory
             if (!IsBufferSize(maximumBufferSize))
                 throw new ArgumentException(
                     string.Format("maximumBufferSize is not {0} of bufferMultiple",
-                    UseExponentialBuffer ? "an exponential" : "a multiple"), nameof(maximumBufferSize));
+                    UseExponentialBuffer ? "an exponential" : "a multiple"), 
+                    nameof(maximumBufferSize));
 
             _blockPool = new ConcurrentStack<byte[]>();
             int bufferPoolCount = useExponentialBuffer
@@ -565,12 +566,11 @@ namespace MonoGame.Framework.Memory
         /// Returns a block to the pool.
         /// </summary>
         /// <param name="block">The block to return to the pool.</param>
-        /// <exception cref="ArgumentNullException">block is null.</exception>
         /// <exception cref="ArgumentException">block is the wrong size for this memory manager.</exception>
-        public void ReturnBlock(byte[] block, string? tag = null)
+        public void ReturnBlock(byte[]? block, string? tag = null)
         {
             if (block == null)
-                throw new ArgumentNullException(nameof(block));
+                return;
 
             if (block.Length != BlockSize)
                 throw new ArgumentException("The block is the wrong size for this memory manager.");

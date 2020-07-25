@@ -20,22 +20,22 @@ namespace MonoGame.Framework
 
         private static class OperatingSystemProbe
         {
-            private static bool _init = false;
+            [DllImport("libc")]
+            [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
+            static extern int uname(IntPtr buf);
+
+            private static bool _probed;
             private static OperatingSystem _cachedOS;
 
             public static OperatingSystem Probe()
             {
-                if (!_init)
+                if (!_probed)
                 {
                     _cachedOS = ProbeCore();
-                    _init = true;
+                    _probed = true;
                 }
                 return _cachedOS;
             }
-
-            [DllImport("libc")]
-            [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
-            static extern int uname(IntPtr buf);
 
             private static OperatingSystem ProbeCore()
             {

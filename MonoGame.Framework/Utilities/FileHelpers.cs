@@ -107,7 +107,7 @@ namespace MonoGame.Framework.Utilities
                     int byteCount = encoder.GetBytes(url.AsSpan(i, 1), tmp);
                     for (int j = 0; j < byteCount; j++)
                     {
-                        builder.Append("%");
+                        builder.Append('%');
                         builder.Append(tmp[j].ToString("X"));
                     }
                 }

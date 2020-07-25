@@ -41,6 +41,7 @@ namespace MonoGame.OpenGL
         }
 
         internal static RenderApi BoundApi = RenderApi.GL;
+
         private const CallingConvention callingConvention = CallingConvention.Winapi;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -133,6 +134,12 @@ namespace MonoGame.OpenGL
         internal delegate void GenTexturesDelegte(int count, [Out] out int id);
         internal static GenTexturesDelegte GenTextures;
 
+        internal static GLHandle GenTexture()
+        {
+            GenTextures(1, out int id);
+            return GLHandle.Texture(id);
+        }
+
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
@@ -202,6 +209,12 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
+        internal delegate void Uniform1fDelegate(int location, float value);
+        internal static Uniform1fDelegate Uniform1f;
+
+        [SuppressUnmanagedCodeSecurity()]
+        [UnmanagedFunctionPointer(callingConvention)]
+        [MonoNativeFunctionWrapper]
         internal delegate void ScissorDelegate(int x, int y, int width, int height);
         internal static ScissorDelegate Scissor;
 
@@ -235,58 +248,58 @@ namespace MonoGame.OpenGL
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         internal delegate void GenRenderbuffersDelegate(int count, [Out] out int buffer);
-        internal static GenRenderbuffersDelegate GenRenderbuffers;
+        internal static GenRenderbuffersDelegate? GenRenderbuffers;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         internal delegate void BindRenderbufferDelegate(RenderbufferTarget target, int buffer);
-        internal static BindRenderbufferDelegate BindRenderbuffer;
+        internal static BindRenderbufferDelegate? BindRenderbuffer;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         internal delegate void DeleteRenderbuffersDelegate(int count, [In] in int buffer);
-        internal static DeleteRenderbuffersDelegate DeleteRenderbuffers;
+        internal static DeleteRenderbuffersDelegate? DeleteRenderbuffers;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         internal delegate void RenderbufferStorageMultisampleDelegate(RenderbufferTarget target, int sampleCount,
             RenderbufferStorage storage, int width, int height);
-        internal static RenderbufferStorageMultisampleDelegate RenderbufferStorageMultisample;
+        internal static RenderbufferStorageMultisampleDelegate? RenderbufferStorageMultisample;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         internal delegate void GenFramebuffersDelegate(int count, out int buffer);
-        internal static GenFramebuffersDelegate GenFramebuffers;
+        internal static GenFramebuffersDelegate? GenFramebuffers;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         internal delegate void BindFramebufferDelegate(FramebufferTarget target, int buffer);
-        internal static BindFramebufferDelegate BindFramebuffer;
+        internal static BindFramebufferDelegate? BindFramebuffer;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         internal delegate void DeleteFramebuffersDelegate(int count, [In] in int buffer);
-        internal static DeleteFramebuffersDelegate DeleteFramebuffers;
+        internal static DeleteFramebuffersDelegate? DeleteFramebuffers;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         public delegate void InvalidateFramebufferDelegate(
             FramebufferTarget target, int numAttachments, FramebufferAttachment[] attachments);
-        public static InvalidateFramebufferDelegate InvalidateFramebuffer;
+        public static InvalidateFramebufferDelegate? InvalidateFramebuffer;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         internal delegate void FramebufferTexture2DDelegate(
             FramebufferTarget target, FramebufferAttachment attachement, TextureTarget textureTarget, int texture, int level);
-        internal static FramebufferTexture2DDelegate FramebufferTexture2D;
+        internal static FramebufferTexture2DDelegate? FramebufferTexture2D;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
@@ -294,39 +307,39 @@ namespace MonoGame.OpenGL
         internal delegate void FramebufferTexture2DMultiSampleDelegate(
             FramebufferTarget target, FramebufferAttachment attachement,
             TextureTarget textureTarget, int texture, int level, int samples);
-        internal static FramebufferTexture2DMultiSampleDelegate FramebufferTexture2DMultiSample;
+        internal static FramebufferTexture2DMultiSampleDelegate? FramebufferTexture2DMultiSample;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         internal delegate void FramebufferRenderbufferDelegate(FramebufferTarget target, FramebufferAttachment attachement,
             RenderbufferTarget renderBufferTarget, int buffer);
-        internal static FramebufferRenderbufferDelegate FramebufferRenderbuffer;
+        internal static FramebufferRenderbufferDelegate? FramebufferRenderbuffer;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         public delegate void RenderbufferStorageDelegate(
             RenderbufferTarget target, RenderbufferStorage storage, int width, int hegiht);
-        public static RenderbufferStorageDelegate RenderbufferStorage;
+        public static RenderbufferStorageDelegate? RenderbufferStorage;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         internal delegate void GenerateMipmapDelegate(GenerateMipmapTarget target);
-        internal static GenerateMipmapDelegate GenerateMipmap;
+        internal static GenerateMipmapDelegate? GenerateMipmap;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         internal delegate void ReadBufferDelegate(ReadBufferMode buffer);
-        internal static ReadBufferDelegate ReadBuffer;
+        internal static ReadBufferDelegate? ReadBuffer;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
         internal delegate void DrawBufferDelegate(DrawBufferMode buffer);
-        internal static DrawBufferDelegate DrawBuffer;
+        internal static DrawBufferDelegate? DrawBuffer;
 
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
@@ -665,6 +678,12 @@ namespace MonoGame.OpenGL
         internal delegate void GenBuffersDelegate(int count, out int buffer);
         internal static GenBuffersDelegate GenBuffers;
 
+        internal static GLHandle GenBuffer()
+        {
+            GenBuffers(1, out int buffer);
+            return GLHandle.Buffer(buffer);
+        }
+
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
@@ -930,7 +949,7 @@ namespace MonoGame.OpenGL
 
         internal static void LoadExtensions()
         {
-            string extstring = GetString(StringName.Extensions);
+            string? extstring = GetString(StringName.Extensions);
             var error = GetError();
             if (!string.IsNullOrEmpty(extstring) && error == ErrorCode.NoError)
                 Extensions.AddRange(extstring.Split(' '));
@@ -994,9 +1013,9 @@ namespace MonoGame.OpenGL
 
         static partial void LoadPlatformEntryPoints();
 
-        internal static IGraphicsContext CreateContext(IWindowInfo info)
+        internal static IGraphicsContext CreateContext(IWindowHandle window)
         {
-            return PlatformCreateContext(info);
+            return PlatformCreateContext(window);
         }
 
         #region Helper Functions
@@ -1014,12 +1033,17 @@ namespace MonoGame.OpenGL
             Uniform1i(location, value);
         }
 
+        internal static void Uniform1(int location, float value)
+        {
+            Uniform1f(location, value);
+        }
+
         internal static unsafe void Uniform4(int location, int size, ReadOnlySpan<float> values)
         {
             Uniform4fv(location, size, values[0]);
         }
 
-        internal unsafe static string GetString(StringName name)
+        internal unsafe static string? GetString(StringName name)
         {
             return Marshal.PtrToStringAnsi(GetStringInternal(name));
         }

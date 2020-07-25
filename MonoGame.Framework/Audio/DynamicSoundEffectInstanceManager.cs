@@ -12,30 +12,24 @@ namespace MonoGame.Framework.Audio
     /// </summary>
     internal static class DynamicSoundEffectInstanceManager
     {
-        private static readonly List<WeakReference<DynamicSoundEffectInstance>> _playingInstances;
-
-        static DynamicSoundEffectInstanceManager()
-        {
-            _playingInstances = new List<WeakReference<DynamicSoundEffectInstance>>();
-        }
+        private static List<WeakReference<DynamicSoundEffectInstance>> PlayingInstances { get; } =
+            new List<WeakReference<DynamicSoundEffectInstance>>();
 
         public static void AddInstance(DynamicSoundEffectInstance instance)
         {
             var weakRef = new WeakReference<DynamicSoundEffectInstance>(instance);
-            _playingInstances.Add(weakRef);
+            PlayingInstances.Add(weakRef);
         }
 
         public static void RemoveInstance(DynamicSoundEffectInstance instance)
         {
-            for (int i = _playingInstances.Count - 1; i >= 0; i--)
+            for (int i = PlayingInstances.Count; i-- > 0;)
             {
-                if (_playingInstances[i].TryGetTarget(out var target))
+                if (PlayingInstances[i].TryGetTarget(out var target) &&
+                    target == instance)
                 {
-                    if (target == instance)
-                    {
-                        _playingInstances.RemoveAt(i);
-                        return;
-                    }
+                    PlayingInstances.RemoveAt(i);
+                    return;
                 }
             }
         }
@@ -44,22 +38,20 @@ namespace MonoGame.Framework.Audio
         /// Updates buffer queues of the currently playing instances.
         /// </summary>
         /// <remarks>
-        /// XNA posts <see cref="DynamicSoundEffectInstance.BufferNeeded"/> events always on the main thread.
+        /// XNA always posts <see cref="DynamicSoundEffectInstance.BufferNeeded"/> events on the main thread.
         /// </remarks>
         public static void Update()
         {
-            for (int i = _playingInstances.Count - 1; i >= 0; i--)
+            for (int i = PlayingInstances.Count; i-- > 0;)
             {
-                if (_playingInstances[i].TryGetTarget(out DynamicSoundEffectInstance target))
+                if (!PlayingInstances[i].TryGetTarget(out var target) ||
+                    target.IsDisposed)
                 {
-                    if (!target.IsDisposed)
-                        target.UpdateQueue();
+                    PlayingInstances.RemoveAt(i);
+                    continue;
                 }
-                else
-                {
-                    // The instance has been disposed.
-                    _playingInstances.RemoveAt(i);
-                }
+
+                target.UpdateQueue();
             }
         }
     }

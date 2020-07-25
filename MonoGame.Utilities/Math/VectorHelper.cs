@@ -1,10 +1,123 @@
-﻿
+﻿using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace MonoGame.Framework
 {
     public static class VectorHelper
     {
+        #region Vector3 Constants
+
+        public static Vector3 UnitX => new Vector3(1f, 0f, 0f);
+        public static Vector3 UnitY => new Vector3(0f, 1f, 0f);
+        public static Vector3 UnitZ => new Vector3(0f, 0f, 1f);
+        public static Vector3 Up => new Vector3(0f, 1f, 0f);
+        public static Vector3 Down => new Vector3(0f, -1f, 0f);
+        public static Vector3 Right => new Vector3(1f, 0f, 0f);
+        public static Vector3 Left => new Vector3(-1f, 0f, 0f);
+        public static Vector3 Forward => new Vector3(0f, 0f, -1f);
+        public static Vector3 Backward => new Vector3(0f, 0f, 1f);
+
+        #endregion
+
+        #region Round
+
+        // TODO: optimize 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 Round(Vector2 vector)
+        {
+            vector.X = MathF.Round(vector.X);
+            vector.Y = MathF.Round(vector.Y);
+
+            return vector;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 Round(Vector3 vector)
+        {
+            vector.X = MathF.Round(vector.X);
+            vector.Y = MathF.Round(vector.Y);
+            vector.Z = MathF.Round(vector.Z);
+
+            return vector;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 Round(Vector4 vector)
+        {
+            vector.X = MathF.Round(vector.X);
+            vector.Y = MathF.Round(vector.Y);
+            vector.Z = MathF.Round(vector.Z);
+            vector.W = MathF.Round(vector.W);
+
+            return vector;
+        }
+
+        #endregion
+
+        #region ZeroMax
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 ZeroMax(Vector2 vector, Vector2 max)
+        {
+            return Vector2.Clamp(vector, Vector2.Zero, max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 ZeroMax(Vector2 vector, float max)
+        {
+            return ZeroMax(vector, new Vector2(max));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 ZeroMax(Vector3 vector, Vector3 max)
+        {
+            return Vector3.Clamp(vector, Vector3.Zero, max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 ZeroMax(Vector3 vector, float max)
+        {
+            return ZeroMax(vector, new Vector3(max));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 ZeroMax(Vector4 vector, Vector4 max)
+        {
+            return Vector4.Clamp(vector, Vector4.Zero, max);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 ZeroMax(Vector4 vector, float max)
+        {
+            return ZeroMax(vector, new Vector4(max));
+        }
+
+        #endregion
+
+        #region Clamp
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 Clamp(Vector2 vector, float min, float max)
+        {
+            return Vector2.Clamp(vector, new Vector2(min), new Vector2(max));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 Clamp(Vector3 vector, float min, float max)
+        {
+            return Vector3.Clamp(vector, new Vector3(min), new Vector3(max));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 Clamp(Vector4 vector, float min, float max)
+        {
+            return Vector4.Clamp(vector, new Vector4(min), new Vector4(max));
+        }
+
+        #endregion
+
         #region Barycentric
 
         /// <summary>

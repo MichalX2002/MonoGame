@@ -9,49 +9,31 @@ namespace MonoGame.Framework.Input
     /// <summary>
     /// Allows reading position and button click information from mouse.
     /// </summary>
-    public static partial class Mouse
+    public partial class Mouse
     {
-        internal static GameWindow PrimaryWindow;
+        public GameWindow Window { get; }
 
-        private static readonly MouseState _defaultState = new MouseState();
-
-        /// <summary>
-        /// Gets the window handle for current mouse processing.
-        /// </summary> 
-        public static IntPtr WindowHandle
+        public Mouse(GameWindow window)
         {
-            get => PlatformGetWindowHandle();
-            set => PlatformSetWindowHandle(value);
+            Window = window ?? throw new ArgumentNullException(nameof(window));
         }
 
         /// <summary>
         /// Gets mouse state information that includes position and button
-        /// presses for the provided window.
+        /// presses for the bound window.
         /// </summary>
         /// <returns>Snapshot of current mouse state.</returns>
-        public static MouseState GetState(GameWindow window)
+        public MouseState GetState()
         {
-            return PlatformGetState(window);
+            return PlatformGetState();
         }
 
         /// <summary>
-        /// Gets mouse state information that includes position and button presses
-        /// for the primary window
-        /// </summary>
-        /// <returns>Snapshot of current mouse state.</returns>
-        public static MouseState GetState()
-        {
-            if (PrimaryWindow != null)
-                return GetState(PrimaryWindow);
-            return _defaultState;
-        }
-
-        /// <summary>
-        /// Sets mouse cursor's relative position to game-window.
+        /// Sets the mouse cursor's position relative to the window.
         /// </summary>
         /// <param name="x">Relative horizontal position of the cursor.</param>
         /// <param name="y">Relative vertical position of the cursor.</param>
-        public static void SetPosition(int x, int y)
+        public void SetPosition(int x, int y)
         {
             PlatformSetPosition(x, y);
         }
@@ -60,8 +42,11 @@ namespace MonoGame.Framework.Input
         /// Sets the cursor image to the specified <see cref="MouseCursor"/>.
         /// </summary>
         /// <param name="cursor">Mouse cursor to use for the cursor image.</param>
-        public static void SetCursor(MouseCursor cursor)
+        public void SetCursor(MouseCursor cursor)
         {
+            if (cursor == null)
+                throw new ArgumentNullException(nameof(cursor));
+
             PlatformSetCursor(cursor);
         }
     }

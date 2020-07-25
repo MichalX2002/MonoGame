@@ -61,12 +61,29 @@ namespace MonoGame.Framework.Vectors
             set => Unsafe.As<Short4, ulong>(ref this) = value;
         }
 
+        public void FromScaledVector(Vector3 scaledVector)
+        {
+            scaledVector *= ushort.MaxValue;
+            scaledVector -= Offset.ToVector3();
+
+            FromVector(scaledVector);
+        }
+
         public void FromScaledVector(Vector4 scaledVector)
         {
             scaledVector *= ushort.MaxValue;
             scaledVector -= Offset;
 
             FromVector(scaledVector);
+        }
+
+        public readonly Vector3 ToScaledVector3()
+        {
+            var scaledVector = ToVector3();
+            scaledVector += Offset.ToVector3();
+            scaledVector /= ushort.MaxValue;
+
+            return scaledVector;
         }
 
         public readonly Vector4 ToScaledVector4()
@@ -78,10 +95,20 @@ namespace MonoGame.Framework.Vectors
             return scaledVector;
         }
 
+        public void FromVector(Vector3 vector)
+        {
+            vector = VectorHelper.Clamp(vector, short.MinValue, short.MaxValue);
+            vector = VectorHelper.Round(vector);
+
+            X = (short)vector.X;
+            Y = (short)vector.Y;
+            Z = (short)vector.Z;
+        }
+
         public void FromVector(Vector4 vector)
         {
-            vector.Clamp(short.MinValue, short.MaxValue);
-            vector.Round();
+            vector = VectorHelper.Clamp(vector, short.MinValue, short.MaxValue);
+            vector = VectorHelper.Round(vector);
 
             X = (short)vector.X;
             Y = (short)vector.Y;
@@ -89,9 +116,51 @@ namespace MonoGame.Framework.Vectors
             W = (short)vector.W;
         }
 
+        public readonly Vector3 ToVector3()
+        {
+            return new Vector3(X, Y, Z);
+        }
+
         public readonly Vector4 ToVector4()
         {
-            return new Vector4(X, Y, Z, W);
+            return new Vector4(ToVector3(), W);
+        }
+
+        #endregion
+
+        #region IPixel
+
+        public void FromAlpha(Alpha8 source)
+        {
+            X = Y = Z = short.MaxValue;
+            W = ScalingHelper.ToInt16(source);
+        }
+
+        public void FromAlpha(Alpha16 source)
+        {
+            X = Y = Z = short.MaxValue;
+            W = ScalingHelper.ToInt16(source);
+        }
+
+        public void FromAlpha(AlphaF source)
+        {
+            X = Y = Z = short.MaxValue;
+            W = ScalingHelper.ToInt16(source);
+        }
+
+        public Alpha8 ToAlpha8()
+        {
+            return ScalingHelper.ToUInt8(W);
+        }
+
+        public Alpha16 ToAlpha16()
+        {
+            return ScalingHelper.ToUInt16(W);
+        }
+
+        public AlphaF ToAlphaF()
+        {
+            return ScalingHelper.ToFloat32(W);
         }
 
         #endregion
@@ -103,7 +172,7 @@ namespace MonoGame.Framework.Vectors
             return this == other;
         }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is Short4 other && Equals(other);
         }

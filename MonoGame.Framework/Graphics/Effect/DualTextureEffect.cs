@@ -1,16 +1,9 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// DualTextureEffect.cs
-//
 // Microsoft XNA Community Game Platform
 // Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
 
-#region Using Statements
+using System.Numerics;
 using MonoGame.Framework;
 using MonoGame.Framework.Graphics;
-#endregion
 
 namespace MonoGame.Framework.Graphics
 {
@@ -32,23 +25,20 @@ namespace MonoGame.Framework.Graphics
 
         #region Fields
 
-        bool fogEnabled;
-        bool vertexColorEnabled;
+        Matrix4x4 _world = Matrix4x4.Identity;
+        Matrix4x4 _view = Matrix4x4.Identity;
+        Matrix4x4 _projection = Matrix4x4.Identity;
+        Matrix4x4 _worldView;
 
-        Matrix world = Matrix.Identity;
-        Matrix view = Matrix.Identity;
-        Matrix projection = Matrix.Identity;
+        bool _vertexColorEnabled;
+        Vector3 _diffuseColor = Vector3.One;
+        float _alpha = 1;
 
-        Matrix worldView;
+        bool _fogEnabled;
+        float _fogStart;
+        float _fogEnd = 1;
 
-        Vector3 diffuseColor = Vector3.One;
-
-        float alpha = 1;
-
-        float fogStart = 0;
-        float fogEnd = 1;
-
-        EffectDirtyFlags dirtyFlags = EffectDirtyFlags.All;
+        EffectDirtyFlags _dirtyFlags = EffectDirtyFlags.All;
 
         #endregion
 
@@ -58,13 +48,13 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets or sets the world matrix.
         /// </summary>
-        public Matrix World
+        public Matrix4x4 World
         {
-            get => world;
+            get => _world;
             set
             {
-                world = value;
-                dirtyFlags |= EffectDirtyFlags.WorldViewProj | EffectDirtyFlags.Fog;
+                _world = value;
+                _dirtyFlags |= EffectDirtyFlags.WorldViewProj | EffectDirtyFlags.Fog;
             }
         }
 
@@ -72,13 +62,13 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets or sets the view matrix.
         /// </summary>
-        public Matrix View
+        public Matrix4x4 View
         {
-            get => view;
+            get => _view;
             set
             {
-                view = value;
-                dirtyFlags |= EffectDirtyFlags.WorldViewProj | EffectDirtyFlags.Fog;
+                _view = value;
+                _dirtyFlags |= EffectDirtyFlags.WorldViewProj | EffectDirtyFlags.Fog;
             }
         }
 
@@ -86,13 +76,13 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets or sets the projection matrix.
         /// </summary>
-        public Matrix Projection
+        public Matrix4x4 Projection
         {
-            get => projection;
+            get => _projection;
             set
             {
-                projection = value;
-                dirtyFlags |= EffectDirtyFlags.WorldViewProj;
+                _projection = value;
+                _dirtyFlags |= EffectDirtyFlags.WorldViewProj;
             }
         }
 
@@ -102,11 +92,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public Vector3 DiffuseColor
         {
-            get => diffuseColor;
+            get => _diffuseColor;
             set
             {
-                diffuseColor = value;
-                dirtyFlags |= EffectDirtyFlags.MaterialColor;
+                _diffuseColor = value;
+                _dirtyFlags |= EffectDirtyFlags.MaterialColor;
             }
         }
 
@@ -116,11 +106,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public float Alpha
         {
-            get => alpha;
+            get => _alpha;
             set
             {
-                alpha = value;
-                dirtyFlags |= EffectDirtyFlags.MaterialColor;
+                _alpha = value;
+                _dirtyFlags |= EffectDirtyFlags.MaterialColor;
             }
         }
 
@@ -130,13 +120,13 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public bool FogEnabled
         {
-            get => fogEnabled;
+            get => _fogEnabled;
             set
             {
-                if (fogEnabled != value)
+                if (_fogEnabled != value)
                 {
-                    fogEnabled = value;
-                    dirtyFlags |= EffectDirtyFlags.ShaderIndex | EffectDirtyFlags.FogEnable;
+                    _fogEnabled = value;
+                    _dirtyFlags |= EffectDirtyFlags.ShaderIndex | EffectDirtyFlags.FogEnable;
                 }
             }
         }
@@ -147,11 +137,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public float FogStart
         {
-            get => fogStart;
+            get => _fogStart;
             set
             {
-                fogStart = value;
-                dirtyFlags |= EffectDirtyFlags.Fog;
+                _fogStart = value;
+                _dirtyFlags |= EffectDirtyFlags.Fog;
             }
         }
 
@@ -161,11 +151,11 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public float FogEnd
         {
-            get => fogEnd;
+            get => _fogEnd;
             set
             {
-                fogEnd = value;
-                dirtyFlags |= EffectDirtyFlags.Fog;
+                _fogEnd = value;
+                _dirtyFlags |= EffectDirtyFlags.Fog;
             }
         }
 
@@ -205,13 +195,13 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         public bool VertexColorEnabled
         {
-            get => vertexColorEnabled;
+            get => _vertexColorEnabled;
             set
             {
-                if (vertexColorEnabled != value)
+                if (_vertexColorEnabled != value)
                 {
-                    vertexColorEnabled = value;
-                    dirtyFlags |= EffectDirtyFlags.ShaderIndex;
+                    _vertexColorEnabled = value;
+                    _dirtyFlags |= EffectDirtyFlags.ShaderIndex;
                 }
             }
         }
@@ -230,7 +220,6 @@ namespace MonoGame.Framework.Graphics
             CacheEffectParameters();
         }
 
-
         /// <summary>
         /// Creates a new DualTextureEffect by cloning parameter settings from an existing instance.
         /// </summary>
@@ -239,19 +228,19 @@ namespace MonoGame.Framework.Graphics
         {
             CacheEffectParameters();
 
-            fogEnabled = cloneSource.fogEnabled;
-            vertexColorEnabled = cloneSource.vertexColorEnabled;
+            _fogEnabled = cloneSource._fogEnabled;
+            _vertexColorEnabled = cloneSource._vertexColorEnabled;
 
-            world = cloneSource.world;
-            view = cloneSource.view;
-            projection = cloneSource.projection;
+            _world = cloneSource._world;
+            _view = cloneSource._view;
+            _projection = cloneSource._projection;
 
-            diffuseColor = cloneSource.diffuseColor;
+            _diffuseColor = cloneSource._diffuseColor;
 
-            alpha = cloneSource.alpha;
+            _alpha = cloneSource._alpha;
 
-            fogStart = cloneSource.fogStart;
-            fogEnd = cloneSource.fogEnd;
+            _fogStart = cloneSource._fogStart;
+            _fogEnd = cloneSource._fogEnd;
         }
 
 
@@ -284,30 +273,30 @@ namespace MonoGame.Framework.Graphics
         protected internal override void OnApply()
         {
             // Recompute the world+view+projection matrix or fog vector?
-            dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
-                dirtyFlags, world, view, projection, worldView,
-                fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
+            _dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
+                _dirtyFlags, _world, _view, _projection, _worldView,
+                _fogEnabled, _fogStart, _fogEnd, worldViewProjParam, fogVectorParam);
 
             // Recompute the diffuse/alpha material color parameter?
-            if ((dirtyFlags & EffectDirtyFlags.MaterialColor) != 0)
+            if ((_dirtyFlags & EffectDirtyFlags.MaterialColor) != 0)
             {
-                diffuseColorParam.SetValue(new Vector4(diffuseColor * alpha, alpha));
+                diffuseColorParam.SetValue(new Vector4(_diffuseColor * _alpha, _alpha));
 
-                dirtyFlags &= ~EffectDirtyFlags.MaterialColor;
+                _dirtyFlags &= ~EffectDirtyFlags.MaterialColor;
             }
 
             // Recompute the shader index?
-            if ((dirtyFlags & EffectDirtyFlags.ShaderIndex) != 0)
+            if ((_dirtyFlags & EffectDirtyFlags.ShaderIndex) != 0)
             {
                 int shaderIndex = 0;
 
-                if (!fogEnabled)
+                if (!_fogEnabled)
                     shaderIndex += 1;
 
-                if (vertexColorEnabled)
+                if (_vertexColorEnabled)
                     shaderIndex += 2;
 
-                dirtyFlags &= ~EffectDirtyFlags.ShaderIndex;
+                _dirtyFlags &= ~EffectDirtyFlags.ShaderIndex;
 
                 CurrentTechnique = Techniques[shaderIndex];
             }

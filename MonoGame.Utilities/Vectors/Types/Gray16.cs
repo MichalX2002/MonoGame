@@ -18,7 +18,7 @@ namespace MonoGame.Framework.Vectors
     public struct Gray16 : IPackedPixel<Gray16, ushort>
     {
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Luminance));
+            new VectorComponent(VectorComponentType.UInt16, VectorComponentChannel.Luminance));
 
         [CLSCompliant(false)]
         public ushort L;
@@ -38,7 +38,7 @@ namespace MonoGame.Framework.Vectors
         {
             scaledVector *= ushort.MaxValue;
             scaledVector += new Vector4(0.5f);
-            scaledVector.Clamp(ushort.MinValue, ushort.MaxValue);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, ushort.MaxValue);
 
             L = (ushort)(LuminanceHelper.BT709.ToGrayF(scaledVector.ToVector3()) + 0.5f);
         }
@@ -90,9 +90,24 @@ namespace MonoGame.Framework.Vectors
             L = LuminanceHelper.BT709.ToGray16(source.R, source.G, source.B);
         }
 
-        public readonly Color ToColor()
+        public readonly Rgb24 ToRgb24()
+        {
+            return new Rgb24(ScalingHelper.ToUInt8(L));
+        }
+
+        public readonly Color ToRgba32()
         {
             return new Color(ScalingHelper.ToUInt8(L), byte.MaxValue);
+        }
+
+        public readonly Rgb48 ToRgb48()
+        {
+            return new Rgb48(L);
+        }
+
+        public readonly Rgba64 ToRgba64()
+        {
+            return new Rgba64(L, ushort.MaxValue);
         }
 
         #endregion

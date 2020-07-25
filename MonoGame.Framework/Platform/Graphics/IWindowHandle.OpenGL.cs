@@ -6,8 +6,8 @@ using System;
 
 namespace MonoGame.OpenGL
 {
-    public interface IWindowInfo
+    public interface IWindowHandle
     {
-        IntPtr Handle { get; }
+        IntPtr WindowHandle { get; }
     }
 }

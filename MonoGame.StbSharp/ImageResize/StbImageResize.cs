@@ -84,7 +84,7 @@ namespace StbSharp
             public int ring_buffer_size;
             public int encode_buffer_size;
 
-            public int ring_buffer_length => ring_buffer_length_bytes / sizeof(float);
+            public int RingBufferLength => ring_buffer_length_bytes / sizeof(float);
         }
 
         [StructLayout(LayoutKind.Explicit)]

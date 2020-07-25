@@ -105,7 +105,17 @@ namespace MonoGame.Framework
 
         #region Equals
 
-        public static bool operator ==(CurveKey value1, CurveKey value2)
+        public bool Equals(CurveKey? other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is CurveKey other && this == other;
+        }
+
+        public static bool operator ==(CurveKey? value1, CurveKey? value2)
         {
             if (Equals(value1, null))
                 return Equals(value2, null);
@@ -119,19 +129,9 @@ namespace MonoGame.Framework
                 && (value1.Continuity == value2.Continuity);
         }
 
-        public static bool operator !=(CurveKey value1, CurveKey value2)
+        public static bool operator !=(CurveKey? value1, CurveKey? value2)
         {
             return !(value1 == value2);
-        }
-
-        public bool Equals(CurveKey other)
-        {
-            return this == other;
-        }
-
-        public override bool Equals(object obj)
-        {
-            return obj is CurveKey other && this == other;
         }
 
         #endregion
@@ -144,8 +144,11 @@ namespace MonoGame.Framework
             return new CurveKey(Position, Value, TangentIn, TangentOut, Continuity);
         }
 
-        public int CompareTo(CurveKey other)
+        public int CompareTo(CurveKey? other)
         {
+            if (other is null)
+                return 1;
+
             return Position.CompareTo(other.Position);
         }
 

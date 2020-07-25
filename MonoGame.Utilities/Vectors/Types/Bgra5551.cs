@@ -51,7 +51,7 @@ namespace MonoGame.Framework.Vectors
         {
             scaledVector *= MaxValue;
             scaledVector += new Vector4(0.5f);
-            scaledVector.Clamp(Vector4.Zero, MaxValue);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, MaxValue);
 
             PackedValue = (ushort)(
                 (((int)scaledVector.X & MaxXYZ) << 10) |
@@ -71,6 +71,17 @@ namespace MonoGame.Framework.Vectors
 
         #endregion
 
+        #region IPixel
+        
+        public readonly Color ToRgba32()
+        {
+            Color rgba = default; // TODO: Unsafe.SkipInit
+            rgba.FromScaledVector(ToScaledVector4());
+            return rgba;
+        }
+
+        #endregion
+
         #region Equals
 
         public readonly bool Equals(Bgra5551 other)
@@ -78,7 +89,7 @@ namespace MonoGame.Framework.Vectors
             return this == other;
         }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is Bgra5551 other && Equals(other);
         }

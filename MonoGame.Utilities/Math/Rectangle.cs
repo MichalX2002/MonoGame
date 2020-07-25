@@ -9,6 +9,8 @@ using System.Numerics;
 
 namespace MonoGame.Framework
 {
+    // TODO: rename to Rect
+
     /// <summary>
     /// Describes a 2D-rectangle. 
     /// </summary>

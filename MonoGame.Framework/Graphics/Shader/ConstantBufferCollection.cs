@@ -6,7 +6,7 @@ namespace MonoGame.Framework.Graphics
 {
     internal sealed class ConstantBufferCollection
     {
-        private readonly ConstantBuffer[] _buffers;
+        private readonly ConstantBuffer?[] _buffers;
         private ShaderStage Stage { get; }
 
         private int _valid;
@@ -18,7 +18,7 @@ namespace MonoGame.Framework.Graphics
             _valid = 0;
         }
 
-        public ConstantBuffer this[int index]
+        public ConstantBuffer? this[int index]
         {
             get => _buffers[index];
             set

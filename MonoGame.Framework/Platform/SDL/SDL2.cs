@@ -75,7 +75,7 @@ namespace MonoGame
             ControllerButtonUp = 0x652,
             ControllerDeviceAdded = 0x653,
             ControllerDeviceRemoved = 0x654,
-            ControllerDeviceRemapped = 0x654,
+            ControllerDeviceRemapped = 0x655,
 
             FingerDown = 0x700,
             FingerUp = 0x701,
@@ -114,15 +114,18 @@ namespace MonoGame
         public struct Event
         {
             [FieldOffset(0)] public EventType Type;
+
             [FieldOffset(0)] public Window.Event Window;
-            [FieldOffset(0)] public Keyboard.Event Key;
-            [FieldOffset(0)] public Mouse.MotionEvent Motion;
-            [FieldOffset(0)] public Keyboard.TextEditingEvent Edit;
-            [FieldOffset(0)] public Keyboard.TextInputEvent Text;
-            [FieldOffset(0)] public Mouse.WheelEvent Wheel;
+            [FieldOffset(0)] public Drop.DropEvent Drop;
+            [FieldOffset(0)] public Keyboard.Event KeyboardKey;
+            [FieldOffset(0)] public Keyboard.TextEditingEvent TextEditing;
+            [FieldOffset(0)] public Keyboard.TextInputEvent TextInput;
+            [FieldOffset(0)] public Mouse.MotionEvent MouseMotion;
+            [FieldOffset(0)] public Mouse.WheelEvent MouseWheel;
+            [FieldOffset(0)] public Touch.FingerEvent TouchFinger;
+            [FieldOffset(0)] public Touch.MultiGestureEvent TouchMultiGesture;
             [FieldOffset(0)] public Joystick.DeviceEvent JoystickDevice;
             [FieldOffset(0)] public GameController.DeviceEvent ControllerDevice;
-            [FieldOffset(0)] public Drop.DropEvent Drop;
         }
 
         public struct Rectangle

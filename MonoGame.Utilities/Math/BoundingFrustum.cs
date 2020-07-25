@@ -313,11 +313,11 @@ namespace MonoGame.Framework
 
         #region Equals
 
-        public bool Equals(BoundingFrustum other) => this == other;
+        public bool Equals(BoundingFrustum? other) => this == other;
 
-        public override bool Equals(object obj) => obj is BoundingFrustum other && Equals(other);
+        public override bool Equals(object? obj) => obj is BoundingFrustum other && Equals(other);
 
-        public static bool operator ==(BoundingFrustum a, BoundingFrustum b)
+        public static bool operator ==(BoundingFrustum? a, BoundingFrustum? b)
         {
             if (Equals(a, null))
                 return Equals(b, null);
@@ -327,7 +327,7 @@ namespace MonoGame.Framework
             return a._matrix == b._matrix;
         }
 
-        public static bool operator !=(BoundingFrustum a, BoundingFrustum b)
+        public static bool operator !=(BoundingFrustum? a, BoundingFrustum? b)
         {
             return !(a == b);
         }

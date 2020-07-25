@@ -29,218 +29,26 @@ namespace MonoGame.Imaging.Tests
     {
         public const string DataZip = "testdata.zip";
 
-        static void TestBmp(ZipArchive archive)
-        {
-            Directory.CreateDirectory("test/bmp");
-
-            using (var stream = archive.GetEntry("bmp/32bit.bmp").Open())
-            using (var img = Image.Load(stream))
-                img.Save("32bit.png");
-
-            using (var stream = archive.GetEntry("bmp/24bit.bmp").Open())
-            using (var img = Image.Load(stream))
-                img.Save("24bit.png");
-
-            using (var stream = archive.GetEntry("bmp/8bit.bmp").Open())
-            using (var img = Image.Load(stream))
-                img.Save("8bit.png");
-
-            using (var stream = archive.GetEntry("bmp/4bit.bmp").Open())
-            using (var img = Image.Load(stream))
-                img.Save("4bit.png");
-        }
-
-        static unsafe void OriginalLoad(MemoryStream endmee)
-        {
-            fixed (byte* omg = endmee.GetBuffer())
-            {
-                var ccc = new StbImageSharp.StbImage.stbi__context();
-                ccc.img_buffer = omg;
-                ccc.img_buffer_end = omg + endmee.Length;
-
-                int w;
-                int h;
-                int comp;
-                StbImageSharp.StbImage.stbi__result_info ri;
-                void* pp = StbImageSharp.StbImage.stbi__png_load(ccc, &w, &h, &comp, 0, &ri);
-
-                var vec = StbImageDecoderState.GetVectorType(
-                    new ImageRead.ReadState() { OutComponents = comp, OutDepth = ri.bits_per_channel });
-                var uu = new UnmanagedMemory<byte>(w * h * comp * ri.bits_per_channel / 8);
-                new Span<byte>(pp, w * h * comp * ri.bits_per_channel / 8).CopyTo(uu.Span);
-                var mg = Image.WrapMemory(vec, uu, new Size(w, h));
-                mg.Save("wtf/_OMG.png");
-            }
-        }
-
-        static void TestPng()
-        {
-            Directory.CreateDirectory("test/png/cgbi");
-
-            //using (var archive = new ZipArchive(File.OpenRead("testdata.zip"), ZipArchiveMode.Read, false))
-            //{
-            //    var entri = archive.GetEntry("png/cgbi/prop.png");
-            //    using (var ffff = entri.Open())
-            //    using (var ihponeimg = Image.Load(ffff))
-            //    {
-            //        ihponeimg.Save("test/png/cgbi/prop.png");
-            //    }
-            //}
-
-            using (var archive = new ZipArchive(File.OpenRead("PngSuite-2017jul19.zip"), ZipArchiveMode.Read, false))
-            {
-                Directory.CreateDirectory("wtf");
-
-                //var testtt = "basi0g01.png";
-                //
-                //var endmee = new MemoryStream();
-                //archive.GetEntry(testtt).Open().CopyTo(endmee);
-                //
-                //var original = new MemoryStream();
-                //endmee.Position = 0;
-                //endmee.CopyTo(original);
-                //
-                //OriginalLoad(endmee);
-                //
-                //endmee.Position = 0;
-                //original.Position = 0;
-                //for (int i = 0; i < endmee.Length; i++)
-                //    if (endmee.ReadByte() != original.ReadByte())
-                //        throw new Exception();
-
-                foreach (var entry in archive.Entries)
-                {
-                    if (!entry.Name.EndsWith(".png"))
-                        continue;
-
-                    if (entry.Name[0] == 'x')
-                        continue;
-
-                    //if (entry.Name != "basi6a16.png")
-                    //    continue;
-
-                    Console.WriteLine(entry.Name);
-
-                    using (var stream = entry.Open())
-                    {
-                        var ms = new MemoryStream();
-                        stream.CopyTo(ms);
-
-                        var sha = SHA1.Create();
-
-                        try
-                        {
-                            Image img = null;
-
-                            for (int i = 0; i < 1; i++)
-                            {
-                                img?.Dispose();
-
-                                ms.Position = 0;
-                                img = Image.Load(ms, VectorType.Get<Color>());
-
-                                byte[] hash = sha.ComputeHash(((Image<Color>)img).GetPixelByteSpan().ToArray());
-                                //Console.WriteLine("hash: " + BitConverter.ToString(hash));
-                            }
-
-                            string dstName = "wtf/" + entry.Name;
-                            img.Save(dstName);
-
-                            //for (int i = 0; i < 100; i++)
-                            //{
-                            //    File.Copy(dstName, "wtf/" + Guid.NewGuid() + ".png");
-                            //}
-
-                            img.Dispose();
-
-                            //fixed (byte* omg = ms.GetBuffer())
-                            //{
-                            //    var ccc = new StbImageSharp.StbImage.stbi__context();
-                            //    ccc.img_buffer = omg;
-                            //    ccc.img_buffer_end = omg + ms.Length;
-                            //
-                            //    int w;
-                            //    int h;
-                            //    int comp;
-                            //    StbImageSharp.StbImage.stbi__result_info ri;
-                            //    void* pp = StbImageSharp.StbImage.stbi__png_load(ccc, &w, &h, &comp, 0, &ri);
-                            //
-                            //    var vec = StbImageDecoderState.GetVectorType(
-                            //        new ImageRead.ReadState() { OutComponents = comp, OutDepth = ri.bits_per_channel });
-                            //    var uu = new UnmanagedMemory<byte>(w * h * comp * ri.bits_per_channel / 8);
-                            //    new Span<byte>(pp, w * h * comp * ri.bits_per_channel / 8).CopyTo(uu.Span);
-                            //    Image.WrapMemory(vec, uu, new Size(w, h)).Save("wtf/" + entry.Name[0..^4] + "_.png");
-                            //}
-                        }
-                        //catch (NotImplementedException ex)
-                        //{
-                        //    //Console.WriteLine("what " + ex);
-                        //}
-                        //catch (Exception ex)
-                        //{
-                        //    Console.WriteLine("ex: " + ex);
-                        //}
-                        finally
-                        {
-
-                        }
-                    }
-
-                    Console.WriteLine();
-                    Console.WriteLine();
-                    Console.WriteLine();
-                }
-            }
-        }
-
-        static Image<Color> CreateColorfulImage(int size)
-        {
-            var imagee = new Image<Color>(new Size(size));
-            var pixels = imagee.GetPixelSpan();
-            for (int x = 0; x < size; x++)
-            {
-                for (int y = 0; y < size; y++)
-                {
-                    pixels[y * size + x] = new Color(
-                        x * 255 / (size - 1),
-                        y * 255 / (size - 1),
-                        127);
-                }
-            }
-            return imagee;
-        }
-
         static void Main(string[] args)
         {
+            using (var imagee = CreateColorfulImage(256))
             {
-                var imagee = CreateColorfulImage(256);
-
                 Directory.CreateDirectory("savetest");
 
-                //var ms = new MemoryStream();
-                for (int i = 0; i < 1000; i++)
+                for (int i = 10; i < 100; i++)
                 {
-                    //ms.Position = 0;
                     using (var fs = new FileStream(
-                        "savetest/test.jpeg", FileMode.Create, FileAccess.Write, FileShare.None, 4096,
-                        ((i != 999) ? FileOptions.DeleteOnClose : 0)))
+                        $"savetest/test_q{i}.jpeg", FileMode.Create, FileAccess.Write, FileShare.None, 4096))
                     {
-                        imagee.Save(fs, ImageFormat.Jpeg);
+                        imagee.Save(fs, ImageFormat.Jpeg, new JpegEncoderOptions(i));
                     }
                 }
 
-                //using (var fs = new FileStream("savetest/test.jpeg", FileMode.Create))
-                //{
-                //    ms.Position = 0;
-                //    ms.CopyTo(fs);
-                //}
-
                 imagee.Save("savetest/test.png");
-                imagee.Save("savetest/test.tga");
+                imagee.Save("savetest/test_rle.tga", null, TgaEncoderOptions.Default);
                 imagee.Save("savetest/test_norle.tga", null, TgaEncoderOptions.NoRLE);
                 imagee.Save("savetest/test.bmp");
             }
-
             return;
 
             TestPng();
@@ -477,6 +285,23 @@ namespace MonoGame.Imaging.Tests
             Console.ReadKey();
         }
 
+        static Image<Color> CreateColorfulImage(int size)
+        {
+            var imagee = new Image<Color>(new Size(size));
+            var pixels = imagee.GetPixelSpan();
+            for (int x = 0; x < size; x++)
+            {
+                for (int y = 0; y < size; y++)
+                {
+                    pixels[y * size + x] = new Color(
+                        x * 255 / (size - 1),
+                        y * 255 / (size - 1),
+                        127);
+                }
+            }
+            return imagee;
+        }
+
         //static void TestEntry(MemoryStream ms,
         //    SaveConfiguration config, ZipArchive archive, string name)
         //{
@@ -558,5 +383,170 @@ namespace MonoGame.Imaging.Tests
         //    //Console.WriteLine($"Lifetime Allocated (Arrays: {manager.LifetimeAllocatedArrays}): " + manager.AllocatedBytes + " bytes");
         //    Console.WriteLine("----------------------------------------------------");
         //}
+
+
+        static void TestBmp(ZipArchive archive)
+        {
+            Directory.CreateDirectory("test/bmp");
+
+            using (var stream = archive.GetEntry("bmp/32bit.bmp").Open())
+            using (var img = Image.Load(stream))
+                img.Save("32bit.png");
+
+            using (var stream = archive.GetEntry("bmp/24bit.bmp").Open())
+            using (var img = Image.Load(stream))
+                img.Save("24bit.png");
+
+            using (var stream = archive.GetEntry("bmp/8bit.bmp").Open())
+            using (var img = Image.Load(stream))
+                img.Save("8bit.png");
+
+            using (var stream = archive.GetEntry("bmp/4bit.bmp").Open())
+            using (var img = Image.Load(stream))
+                img.Save("4bit.png");
+        }
+
+        static void TestPng()
+        {
+            Directory.CreateDirectory("test/png/cgbi");
+
+            //using (var archive = new ZipArchive(File.OpenRead("testdata.zip"), ZipArchiveMode.Read, false))
+            //{
+            //    var entri = archive.GetEntry("png/cgbi/prop.png");
+            //    using (var ffff = entri.Open())
+            //    using (var ihponeimg = Image.Load(ffff))
+            //    {
+            //        ihponeimg.Save("test/png/cgbi/prop.png");
+            //    }
+            //}
+
+            using (var archive = new ZipArchive(File.OpenRead("PngSuite-2017jul19.zip"), ZipArchiveMode.Read, false))
+            {
+                Directory.CreateDirectory("wtf");
+
+                //var testtt = "basi0g01.png";
+                //
+                //var endmee = new MemoryStream();
+                //archive.GetEntry(testtt).Open().CopyTo(endmee);
+                //
+                //var original = new MemoryStream();
+                //endmee.Position = 0;
+                //endmee.CopyTo(original);
+                //
+                //OriginalLoad(endmee);
+                //
+                //endmee.Position = 0;
+                //original.Position = 0;
+                //for (int i = 0; i < endmee.Length; i++)
+                //    if (endmee.ReadByte() != original.ReadByte())
+                //        throw new Exception();
+
+                foreach (var entry in archive.Entries)
+                {
+                    if (!entry.Name.EndsWith(".png"))
+                        continue;
+
+                    if (entry.Name[0] == 'x')
+                        continue;
+
+                    //if (entry.Name != "basi6a16.png")
+                    //    continue;
+
+                    Console.WriteLine(entry.Name);
+
+                    using (var stream = entry.Open())
+                    {
+                        var ms = new MemoryStream();
+                        stream.CopyTo(ms);
+
+                        var sha = SHA1.Create();
+
+                        try
+                        {
+                            Image img = null;
+
+                            for (int i = 0; i < 1; i++)
+                            {
+                                img?.Dispose();
+
+                                ms.Position = 0;
+                                img = Image.Load(ms, VectorType.Get<Color>());
+
+                                byte[] hash = sha.ComputeHash(((Image<Color>)img).GetPixelByteSpan().ToArray());
+                                //Console.WriteLine("hash: " + BitConverter.ToString(hash));
+                            }
+
+                            string dstName = "wtf/" + entry.Name;
+                            img.Save(dstName);
+
+                            //for (int i = 0; i < 100; i++)
+                            //{
+                            //    File.Copy(dstName, "wtf/" + Guid.NewGuid() + ".png");
+                            //}
+
+                            img.Dispose();
+
+                            //fixed (byte* omg = ms.GetBuffer())
+                            //{
+                            //    var ccc = new StbImageSharp.StbImage.stbi__context();
+                            //    ccc.img_buffer = omg;
+                            //    ccc.img_buffer_end = omg + ms.Length;
+                            //
+                            //    int w;
+                            //    int h;
+                            //    int comp;
+                            //    StbImageSharp.StbImage.stbi__result_info ri;
+                            //    void* pp = StbImageSharp.StbImage.stbi__png_load(ccc, &w, &h, &comp, 0, &ri);
+                            //
+                            //    var vec = StbImageDecoderState.GetVectorType(
+                            //        new ImageRead.ReadState() { OutComponents = comp, OutDepth = ri.bits_per_channel });
+                            //    var uu = new UnmanagedMemory<byte>(w * h * comp * ri.bits_per_channel / 8);
+                            //    new Span<byte>(pp, w * h * comp * ri.bits_per_channel / 8).CopyTo(uu.Span);
+                            //    Image.WrapMemory(vec, uu, new Size(w, h)).Save("wtf/" + entry.Name[0..^4] + "_.png");
+                            //}
+                        }
+                        //catch (NotImplementedException ex)
+                        //{
+                        //    //Console.WriteLine("what " + ex);
+                        //}
+                        //catch (Exception ex)
+                        //{
+                        //    Console.WriteLine("ex: " + ex);
+                        //}
+                        finally
+                        {
+
+                        }
+                    }
+
+                    Console.WriteLine();
+                    Console.WriteLine();
+                    Console.WriteLine();
+                }
+            }
+        }
+
+        static unsafe void OriginalLoad(MemoryStream endmee)
+        {
+            fixed (byte* omg = endmee.GetBuffer())
+            {
+                var ccc = new StbImageSharp.StbImage.stbi__context();
+                ccc.img_buffer = omg;
+                ccc.img_buffer_end = omg + endmee.Length;
+
+                int w;
+                int h;
+                int comp;
+                StbImageSharp.StbImage.stbi__result_info ri;
+                void* pp = StbImageSharp.StbImage.stbi__png_load(ccc, &w, &h, &comp, 0, &ri);
+
+                var vec = StbImageDecoderState.GetVectorType(
+                    new ImageRead.ReadState() { OutComponents = comp, OutDepth = ri.bits_per_channel });
+                var uu = new UnmanagedMemory<byte>(w * h * comp * ri.bits_per_channel / 8);
+                new Span<byte>(pp, w * h * comp * ri.bits_per_channel / 8).CopyTo(uu.Span);
+                var mg = Image.WrapMemory(vec, uu, new Size(w, h));
+                mg.Save("wtf/_OMG.png");
+            }
+        }
     }
 }

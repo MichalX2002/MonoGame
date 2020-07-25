@@ -2,22 +2,12 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System.Numerics;
+
 namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     public sealed class ModelBoneContent
     {
-        private Matrix _transform;
-
-        internal ModelBoneContent() { }
-
-        internal ModelBoneContent(string name, int index, Matrix transform, ModelBoneContent parent)
-        {
-            Name = name;
-            Index = index;
-            _transform = transform;
-            Parent = parent;
-        }
-
         public ModelBoneContentCollection Children { get; internal set; }
 
         public int Index { get; }
@@ -26,10 +16,18 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
 
         public ModelBoneContent Parent { get; }
 
-        public Matrix Transform
+        public Matrix4x4 Transform { get; set; }
+
+        internal ModelBoneContent()
         {
-            get => _transform;
-            set => _transform = value;
+        }
+
+        internal ModelBoneContent(string name, int index, Matrix4x4 transform, ModelBoneContent parent)
+        {
+            Name = name;
+            Index = index;
+            Transform = transform;
+            Parent = parent;
         }
     }
 }

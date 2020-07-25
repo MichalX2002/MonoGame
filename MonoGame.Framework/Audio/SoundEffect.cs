@@ -56,25 +56,17 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Only used by <see cref="FromStream"/>.
         /// </summary>
-        /// <param name="stream"></param>
         private SoundEffect(Stream stream)
         {
             Initialize();
             AssertInitialized();
 
-            // TODO: add more audio formats
-            /*
-              The audio has the following restrictions:
-              Must be a PCM wave or Ogg Vorbis file
-              Can only be mono or stereo
-              Must be 8 or 16-bit
-              Sample rate must be between 8,000 Hz and 48,000 Hz
-            */
-
             PlatformLoadAudioStream(stream, out _duration);
         }
 
-        // Only used from SoundEffectReader.
+        /// <summary>
+        /// Only used by <see cref="Content.SoundEffectReader"/>.
+        /// </summary>
         internal SoundEffect(
             ReadOnlySpan<byte> header,
             ReadOnlySpan<byte> data,
@@ -94,12 +86,15 @@ namespace MonoGame.Framework.Audio
                 var channels = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(2));
                 var sampleRate = BinaryPrimitives.ReadInt32LittleEndian(header.Slice(4));
                 var bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(14));
-                PlatformInitializePcm(data, bitsPerSample, sampleRate, (AudioChannels)channels, loopStart, loopLength);
-                return;
-            }
 
-            // Everything else is platform specific.
-            PlatformInitializeFormat(header, data, loopStart, loopLength);
+                PlatformInitializePcm(
+                    data, bitsPerSample, sampleRate, (AudioChannels)channels, loopStart, loopLength);
+            }
+            else
+            {
+                // Everything else is platform specific.
+                PlatformInitializeFormat(header, data, loopStart, loopLength);
+            }
         }
 
         // Only used from XACT WaveBank.
@@ -130,7 +125,7 @@ namespace MonoGame.Framework.Audio
         {
             NotInitialized,
             Initialized,
-            FailedToInitialized
+            FailedToInitialize
         }
 
         internal static SoundSystemState _systemState = SoundSystemState.NotInitialized;
@@ -138,10 +133,12 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Initializes the sound system.
         /// This method is automatically called when a <see cref="SoundEffect"/> is loaded,
-        /// a <see cref="DynamicSoundEffectInstance"/> is created, or <see cref="Microphone.All "/> is queried.
+        /// a <see cref="DynamicSoundEffectInstance"/> is created, 
+        /// or <see cref="Microphone.All "/> is queried.
         /// <para>
-        /// You can however call this method manually (preferably inside or before the <see cref="Game"/> constructor) to
-        /// catch any exception that may occur during the sound system initialization (and act accordingly).
+        /// You can however call this method manually
+        /// (preferably inside or before the <see cref="Game"/> constructor) 
+        /// to catch any exception that may occur during the sound system initialization (and act accordingly).
         /// </para>
         /// </summary>
         public static void Initialize()
@@ -154,9 +151,9 @@ namespace MonoGame.Framework.Audio
                 PlatformInitialize();
                 _systemState = SoundSystemState.Initialized;
             }
-            catch (Exception)
+            catch
             {
-                _systemState = SoundSystemState.FailedToInitialized;
+                _systemState = SoundSystemState.FailedToInitialize;
                 throw;
             }
         }
@@ -182,27 +179,32 @@ namespace MonoGame.Framework.Audio
             if ((int)channels != 1 && (int)channels != 2)
                 throw new ArgumentOutOfRangeException(nameof(channels));
 
-            if (data.Length == 0)
+            if (data.IsEmpty)
                 throw new ArgumentException("Ensure that the buffer length is non-zero.", nameof(data));
 
             var blockAlign = (int)channels * 2;
             if ((data.Length % blockAlign) != 0)
                 throw new ArgumentException(
-                    "Ensure that the buffer meets the block alignment requirements for the number of channels.", nameof(data));
+                    "Ensure that the buffer meets the block alignment requirements for the number of channels.",
+                    nameof(data));
 
-            if (data.Length <= 0)
-                throw new ArgumentException("Ensure that the buffer length is greater than zero.", nameof(data));
+            if (data.IsEmpty)
+                throw new ArgumentException(
+                    "Ensure that the buffer length is greater than zero.", nameof(data));
 
             if (data.Length % blockAlign != 0)
                 throw new ArgumentException(
-                    "Ensure that the buffer length meets the block alignment requirements for the number of channels.", nameof(data));
+                    "Ensure that the buffer length meets the block alignment requirements for the number of channels.",
+                    nameof(data));
 
             int totalSamples = data.Length / blockAlign;
 
             if (loopStart < 0)
                 throw new ArgumentException("Value cannot not be negative.", nameof(loopStart));
+
             if (loopStart > totalSamples)
-                throw new ArgumentException("Value cannot be greater than the total number of samples.", nameof(loopStart));
+                throw new ArgumentException(
+                    "Value cannot be greater than the total number of samples.", nameof(loopStart));
 
             if (loopLength == 0)
                 loopLength = totalSamples - loopStart;
@@ -254,48 +256,38 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Creates a new SoundEffect object based on the specified data stream.
-        /// This internally calls <see cref="FromStream"/>.
+        /// Creates a new <see cref="SoundEffect"/> based on the specified file data.
         /// </summary>
-        /// <param name="path">The path to the audio file.</param>
+        /// <param name="filePath">The path to the audio file.</param>
         /// <returns>The <see cref="SoundEffect"/> loaded from the given file.</returns>
-        /// <remarks>The stream must point to the head of a valid wave file in the RIFF bitstream format.  The formats supported are:
-        /// <list type="bullet">
-        /// <item>
-        /// <description>8-bit unsigned PCM</description>
-        /// <description>16-bit signed PCM</description>
-        /// <description>24-bit signed PCM</description>
-        /// <description>32-bit IEEE float PCM</description>
-        /// <description>MS-ADPCM 4-bit compressed</description>
-        /// <description>IMA/ADPCM (IMA4) 4-bit compressed</description>
-        /// </item>
-        /// </list>
+        /// <remarks>
+        /// For supported formats see remarks of <see cref="FromStream(Stream)"/>.
         /// </remarks>
-        public static SoundEffect FromFile(string path)
+        public static SoundEffect FromFile(string filePath)
         {
-            if (path == null)
-                throw new ArgumentNullException(nameof(path));
+            if (filePath == null)
+                throw new ArgumentNullException(nameof(filePath));
 
-            using (var stream = File.OpenRead(path))
+            using (var stream = File.OpenRead(filePath))
                 return FromStream(stream);
         }
 
         /// <summary>
-        /// Creates a new SoundEffect object based on the specified data stream.
+        /// Creates a new <see cref="SoundEffect"/> based on the specified data stream.
         /// </summary>
-        /// <param name="stream">A stream containing PCM wave or Ogg Vorbis data.</param>
-        /// <returns>A new sound effect.</returns>
+        /// <param name="stream">The stream containing audio data.</param>
+        /// <returns>The <see cref="SoundEffect"/> loaded from the given stream.</returns>
         /// <remarks>
-        /// The stream must point to the start of a valid audio file. The formats supported are:
+        /// The stream must point to the beginning of a valid audio file.  
+        /// The supported containers/formats are:
         /// <list type="bullet">
-        /// <item>
-        /// <description>Ogg Vorbis</description>
-        /// <description>8-bit unsigned PCM</description>
-        /// <description>16-bit signed PCM</description>
-        /// <description>24-bit signed PCM</description>
-        /// <description>32-bit IEEE float PCM</description>
-        /// <description>MS-ADPCM 4-bit compressed</description>
-        /// <description>IMA/ADPCM (IMA4) 4-bit compressed</description>
+        /// <item>Ogg container: Vorbis</item>
+        /// <item>RIFF (WAVE type) container:
+        ///   <list type="bullet">
+        ///   <item>PCM; 8-bit unsigned, 16-bit and 24-bit signed, 32-bit IEEE float</item>
+        ///   <item>MS-ADPCM; 4-bit compressed</item>
+        ///   <item>IMA/ADPCM (IMA4); 4-bit compressed</item>
+        ///   </list>
         /// </item>
         /// </list>
         /// </remarks>
@@ -303,6 +295,7 @@ namespace MonoGame.Framework.Audio
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
+
             return new SoundEffect(stream);
         }
 
@@ -348,7 +341,9 @@ namespace MonoGame.Framework.Audio
         /// </summary>
         /// <param name="duration">The total duration of the audio data.</param>
         /// <param name="sampleSize">The size of one sample in bits.</param>
-        /// <param name="sampleRate">Sample rate in hertz (Hz), of audio data. Must be between 8,000 and 48,000 Hz.</param>
+        /// <param name="sampleRate">
+        /// Sample rate in hertz (Hz), of audio data. Must be between 8,000 and 48,000 Hz.
+        /// </param>
         /// <param name="channels">Number of channels in the audio data.</param>
         /// <returns>The size in bytes of a single sample of audio data.</returns>
         public static int GetSampleSizeInBytes(
@@ -378,8 +373,10 @@ namespace MonoGame.Framework.Audio
         /// <returns>true if a instance was successfully played, false if not.</returns>
         /// <remarks>
         /// <para>Play returns false if more instances are currently playing then the platform allows.</para>
-        /// <para>To loop a sound or apply 3D effects, use instances from <see cref="CreateInstance"/> instead.</para>
         /// <para>Instances used by SoundEffect.Play() are pooled internally.</para>
+        /// <para>
+        /// To loop a sound or apply 3D effects, use instances from <see cref="CreateInstance"/> instead.
+        /// </para>
         /// </remarks>
         public bool Play()
         {
@@ -393,8 +390,13 @@ namespace MonoGame.Framework.Audio
 
         /// <summary>Gets an sound effect instance and plays it with the specified volume, pitch, and panning.</summary>
         /// <returns>true if a instance was successfully played, false if not.</returns>
-        /// <param name="volume">Volume, ranging from 0.0 (silence) to 1.0 (full volume). Volume during playback is scaled by <see cref="MasterVolume"/>.</param>
-        /// <param name="pitch">Pitch adjustment, ranging from 0.0 (down an octave) to 1.0 (no change) to 2.0 (up an octave).</param>
+        /// <param name="volume">
+        /// Volume, ranging from 0.0 (silence) to 1.0 (full volume). 
+        /// Volume during playback is scaled by <see cref="MasterVolume"/>.
+        /// </param>
+        /// <param name="pitch">
+        /// Pitch adjustment, ranging from 0.0 (down an octave) to 1.0 (no change) to 2.0 (up an octave).
+        /// </param>
         /// <param name="pan">Panning, ranging from -1.0 (left speaker) to 0.0 (centered), 1.0 (right speaker).</param>
         /// <remarks>
         /// <para>Play returns false if more instances are currently playing then the platform allows.</para>
@@ -418,7 +420,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Returns a sound effect instance from the pool or null if none are available.
         /// </summary>
-        internal SoundEffectInstance GetPooledInstance(bool forXAct)
+        internal SoundEffectInstance? GetPooledInstance(bool forXAct)
         {
             if (!SoundEffectInstancePool.SlotsAvailable)
                 return null;
@@ -449,8 +451,14 @@ namespace MonoGame.Framework.Audio
         /// Gets or sets the master volume scale applied to all SoundEffectInstances.
         /// </summary>
         /// <remarks>
-        /// <para>Each SoundEffectInstance has its own Volume property that is independent to SoundEffect.MasterVolume. During playback SoundEffectInstance.Volume is multiplied by SoundEffect.MasterVolume.</para>
-        /// <para>This property is used to adjust the volume on all current and newly created SoundEffectInstances. The volume of an individual SoundEffectInstance can be adjusted on its own.</para>
+        /// <para>
+        /// Each SoundEffectInstance has its own Volume property that is independent to SoundEffect.MasterVolume. 
+        /// During playback SoundEffectInstance.Volume is multiplied by SoundEffect.MasterVolume.
+        /// </para>
+        /// <para>
+        /// This property is used to adjust the volume on all current and newly created SoundEffectInstances. 
+        /// The volume of an individual SoundEffectInstance can be adjusted on its own.
+        /// </para>
         /// </remarks>
         public static float MasterVolume
         {
@@ -458,7 +466,7 @@ namespace MonoGame.Framework.Audio
             set
             {
                 if (value < 0f || value > 1f)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), value, null);
 
                 if (_masterVolume == value)
                     return;
@@ -482,7 +490,7 @@ namespace MonoGame.Framework.Audio
             set
             {
                 if (value <= 0f)
-                    throw new ArgumentOutOfRangeException(nameof(value), "value of DistanceScale: " + value);
+                    throw new ArgumentOutOfRangeException(nameof(value), value, null);
 
                 _distanceScale = value;
             }
@@ -495,7 +503,10 @@ namespace MonoGame.Framework.Audio
         /// <remarks>
         /// <para>DopplerScale defaults to 1.0 and must be greater or equal to 0.0</para>
         /// <para>Affects the relative velocity of emitters and listeners.</para>
-        /// <para>Higher values more dramatically shift the pitch for the given relative velocity of the emitter and listener.</para>
+        /// <para>
+        /// Higher values more dramatically shift the pitch for 
+        /// the given relative velocity of the emitter and listener.
+        /// </para>
         /// </remarks>
         public static float DopplerScale
         {
@@ -506,7 +517,7 @@ namespace MonoGame.Framework.Audio
                 //   although the documentation does not say it throws an error we will anyway
                 //   just so it is like the DistanceScale
                 if (value < 0f)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), value, null);
 
                 _dopplerScale = value;
             }
@@ -524,7 +535,7 @@ namespace MonoGame.Framework.Audio
             set
             {
                 if (value <= 0f)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), value, null);
 
                 speedOfSound = value;
             }

@@ -49,14 +49,14 @@ namespace MonoGame.Framework.Vectors
             Base = scaledVector;
         }
 
-        public readonly Vector3 ToScaledVector3()
-        {
-            return Base;
-        }
-
         public void FromScaledVector(Vector4 scaledVector)
         {
             Base = scaledVector.ToVector3();
+        }
+
+        public readonly Vector3 ToScaledVector3()
+        {
+            return Base;
         }
 
         public readonly Vector4 ToScaledVector4()

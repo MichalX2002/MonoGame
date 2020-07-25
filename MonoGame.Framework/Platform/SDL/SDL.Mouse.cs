@@ -4,7 +4,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using MonoGame.Framework;
 using FL = MonoGame.Framework.FuncLoader;
 
 namespace MonoGame

@@ -8,19 +8,19 @@ namespace MonoGame.Framework.Graphics
 {
     partial class OcclusionQuery
     {
-        private GLHandle _handle;
+        private GLHandle _glQuery;
 
         private void PlatformConstruct()
         {
             GL.GenQueries(1, out int query);
             GL.CheckError();
 
-            _handle = GLHandle.Query(query);
+            _glQuery = GLHandle.Query(query);
         }
 
         private void PlatformBegin()
         {
-            GL.BeginQuery(QueryTarget.SamplesPassed, _handle);
+            GL.BeginQuery(QueryTarget.SamplesPassed, _glQuery);
             GL.CheckError();
         }
 
@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Graphics
 
         private bool PlatformGetResult(out int pixelCount)
         {
-            GL.GetQueryObject(_handle, GetQueryObjectParam.QueryResultAvailable, out int resultReady);
+            GL.GetQueryObject(_glQuery, GetQueryObjectParam.QueryResultAvailable, out int resultReady);
             GL.CheckError();
 
             if (resultReady == 0)
@@ -41,7 +41,7 @@ namespace MonoGame.Framework.Graphics
                 return false;
             }
 
-            GL.GetQueryObject(_handle, GetQueryObjectParam.QueryResult, out pixelCount);
+            GL.GetQueryObject(_glQuery, GetQueryObjectParam.QueryResult, out pixelCount);
             GL.CheckError();
 
             return true;
@@ -51,7 +51,7 @@ namespace MonoGame.Framework.Graphics
         {
             if (!IsDisposed)
             {
-                GraphicsDevice.DisposeResource(_handle);
+                GraphicsDevice.DisposeResource(_glQuery);
             }
 
             base.Dispose(disposing);

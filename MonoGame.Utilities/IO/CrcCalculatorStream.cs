@@ -16,9 +16,9 @@ namespace MonoGame.Framework.IO
     public class CrcCalculatorStream : Stream
     {
         private const long UnsetLengthLimit = -99;
-        private readonly long _lengthLimit = UnsetLengthLimit;
 
-        private Stream _innerStream;
+        private readonly long _lengthLimit = UnsetLengthLimit;
+        private Stream _underlyingStream;
         private bool _leaveOpen;
         private Crc32 _crc32;
 
@@ -44,7 +44,7 @@ namespace MonoGame.Framework.IO
         /// <summary>
         /// Indicates whether the stream supports reading.
         /// </summary>
-        public override bool CanRead => _innerStream.CanRead;
+        public override bool CanRead => _underlyingStream.CanRead;
 
         /// <summary>
         /// Indicates whether the stream supports seeking.
@@ -57,7 +57,7 @@ namespace MonoGame.Framework.IO
         /// <summary>
         /// Indicates whether the stream supports writing.
         /// </summary>
-        public override bool CanWrite => _innerStream.CanWrite;
+        public override bool CanWrite => _underlyingStream.CanWrite;
 
         /// <summary>
         /// Returns the length of the underlying stream.
@@ -65,7 +65,7 @@ namespace MonoGame.Framework.IO
         public override long Length
         {
             get => _lengthLimit == UnsetLengthLimit ?
-                    _innerStream.Length : _lengthLimit;
+                    _underlyingStream.Length : _lengthLimit;
         }
 
         /// <summary>
@@ -158,29 +158,20 @@ namespace MonoGame.Framework.IO
                 throw new ArgumentOutOfRangeException(nameof(length));
         }
 
-
         // This ctor is private - no validation is done here.  This is to allow the use
         // of a (specific) negative value for the _lengthLimit, to indicate that there
         // is no length set.  So we validate the length limit in those ctors that use an
         // explicit param, otherwise we don't validate, because it could be our special
         // value.
-        private CrcCalculatorStream
-            (bool leaveOpen, long length, Stream stream, Crc32 crc32) : base()
+        private CrcCalculatorStream(bool leaveOpen, long length, Stream stream, Crc32? crc32) : base()
         {
-            _innerStream = stream;
+            _underlyingStream = stream;
             _crc32 = crc32 ?? new Crc32();
             _lengthLimit = length;
             _leaveOpen = leaveOpen;
         }
 
-        /// <summary>
-        /// Read from the stream.
-        /// </summary>
-        /// <param name="buffer">the buffer to read</param>
-        /// <param name="offset">the offset at which to start</param>
-        /// <param name="count">the number of bytes to read</param>
-        /// <returns>the number of bytes actually read</returns>
-        public override int Read(byte[] buffer, int offset, int count)
+        public override int Read(Span<byte> buffer)
         {
             // Need to limit the X of bytes returned, if the stream is intended to have
             // a definite length. This is especially useful when returning a stream for
@@ -190,58 +181,68 @@ namespace MonoGame.Framework.IO
             // and calling ReadToEnd() on it, We can "over-read" the zip data and get a
             // corrupt string. The length limits it, preventing that problem.
 
-            long bytesToRead = count;
+            long bytesToRead = buffer.Length;
             if (_lengthLimit != UnsetLengthLimit)
             {
                 if (_crc32.TotalBytesRead >= _lengthLimit)
                     return 0; // EOF
 
                 long bytesRemaining = _lengthLimit - _crc32.TotalBytesRead;
-                if (bytesRemaining < count)
+                if (bytesRemaining < buffer.Length)
                     bytesToRead = bytesRemaining;
             }
-            int n = _innerStream.Read(buffer, offset, (int)bytesToRead);
-            if (n > 0)
-                _crc32.SlurpBlock(buffer, offset, n);
-            return n;
+            int read = _underlyingStream.Read(buffer.Slice(0, (int)bytesToRead));
+            _crc32.SlurpBlock(buffer.Slice(0, read));
+            return read;
         }
 
-        /// <summary>
-        /// Write to the stream.
-        /// </summary>
-        /// <param name="buffer">the buffer from which to write</param>
-        /// <param name="offset">the offset at which to start writing</param>
-        /// <param name="count">the number of bytes to write</param>
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            return Read(buffer.AsSpan(offset, count));
+        }
+
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            _crc32.SlurpBlock(buffer);
+            _underlyingStream.Write(buffer);
+        }
+
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if (count > 0)
-                _crc32.SlurpBlock(buffer, offset, count);
-            _innerStream.Write(buffer, offset, count);
+            Write(buffer.AsSpan(offset, count));
         }
 
         /// <summary>
         /// Flush the stream.
         /// </summary>
-        public override void Flush() => _innerStream.Flush();
+        public override void Flush()
+        {
+            _underlyingStream.Flush();
+        }
 
         /// <summary>
         /// Seeking is not supported on this stream.
         /// This method always throws <see cref="NotSupportedException"/>
         /// </summary>
-        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            throw new NotSupportedException();
+        }
 
         /// <summary>
         /// This method always throws <see cref="NotSupportedException"/>
         /// </summary>
-        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void SetLength(long value)
+        {
+            throw new NotSupportedException();
+        }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 if (!_leaveOpen)
-                    _innerStream?.Dispose();
-                _innerStream = null;
+                    _underlyingStream?.Dispose();
             }
             base.Dispose(disposing);
         }

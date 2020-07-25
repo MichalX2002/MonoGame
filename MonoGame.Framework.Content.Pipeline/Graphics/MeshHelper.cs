@@ -291,7 +291,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 // TODO: This can be zero can cause NaNs on 
                 // normalize... how do we fix this?
                 var tangent = t - n * Vector3.Dot(n, t);
-                tangent.Normalize();
+                tangent = Vector3.Normalize(tangent);
                 Debug.Assert(tangent.IsFinite(), "Bad tangent!");
                 tangents[i] = tangent;
 

@@ -23,10 +23,10 @@ namespace MonoGame.Framework
     public partial struct Color : IPackedPixel<Color, uint>
     {
         VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Red),
-            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Green),
-            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Blue),
-            new VectorComponent(VectorComponentType.Int8, VectorComponentChannel.Alpha));
+            new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Blue),
+            new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Alpha));
 
         /// <summary>
         /// Gets or sets the red component.
@@ -179,16 +179,11 @@ namespace MonoGame.Framework
         /// <summary>
         /// Constructs the <see cref="Color"/> with vector form values.
         /// </summary>
-        /// <param name="vector"><see cref="Vector4"/> containing the components.</param>
-        public Color(Vector4 color)
+        /// <param name="scaledVector"><see cref="Vector4"/> containing the components.</param>
+        public Color(Vector4 scaledVector) : this()
         {
-            color *= byte.MaxValue;
-            color.Clamp(byte.MinValue, byte.MaxValue);
-
-            R = (byte)color.X;
-            G = (byte)color.Y;
-            B = (byte)color.Z;
-            A = (byte)color.W;
+            // TODO: Unsafe.SkipInit(out this)
+            FromScaledVector(scaledVector);
         }
 
         /// <summary>
@@ -211,7 +206,7 @@ namespace MonoGame.Framework
         public Color(Vector3 color)
         {
             color *= byte.MaxValue;
-            color.Clamp(byte.MinValue, byte.MaxValue);
+            color = VectorHelper.ZeroMax(color, byte.MaxValue);
 
             R = (byte)color.X;
             G = (byte)color.Y;
@@ -329,7 +324,7 @@ namespace MonoGame.Framework
         {
             scaledVector *= byte.MaxValue;
             scaledVector += new Vector3(0.5f);
-            scaledVector.Clamp(byte.MinValue, byte.MaxValue);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, byte.MaxValue);
 
             R = (byte)scaledVector.X;
             G = (byte)scaledVector.Y;
@@ -346,7 +341,7 @@ namespace MonoGame.Framework
         {
             scaledVector *= byte.MaxValue;
             scaledVector += new Vector4(0.5f);
-            scaledVector.Clamp(byte.MinValue, byte.MaxValue);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, byte.MaxValue);
 
             R = (byte)scaledVector.X;
             G = (byte)scaledVector.Y;
@@ -359,6 +354,24 @@ namespace MonoGame.Framework
         #region IPixel
 
         #region From
+
+        public void FromAlpha(Alpha8 source)
+        {
+            R = G = B = byte.MaxValue;
+            A = source;
+        }
+
+        public void FromAlpha(Alpha16 source)
+        {
+            R = G = B = byte.MaxValue;
+            A = ScalingHelper.ToUInt8(source);
+        }
+
+        public void FromAlpha(AlphaF source)
+        {
+            R = G = B = byte.MaxValue;
+            A = ScalingHelper.ToUInt8(source);
+        }
 
         public void FromGray(Gray8 source)
         {
@@ -402,11 +415,6 @@ namespace MonoGame.Framework
             A = ScalingHelper.ToUInt8(source.A);
         }
 
-        public void FromBgra(Bgra5551 source)
-        {
-            this = source.ToRgba32();
-        }
-
         public void FromBgr(Bgr24 source)
         {
             Bgr = source;
@@ -432,6 +440,21 @@ namespace MonoGame.Framework
         #endregion
 
         #region To
+
+        public readonly Alpha8 ToAlpha8()
+        {
+            return A;
+        }
+
+        public readonly Alpha16 ToAlpha16()
+        {
+            return ScalingHelper.ToUInt16(A);
+        }
+
+        public readonly AlphaF ToAlphaF()
+        {
+            return ScalingHelper.ToFloat32(A);
+        }
 
         public readonly Gray8 ToGray8()
         {
@@ -466,7 +489,6 @@ namespace MonoGame.Framework
             return new Argb32(R, G, B, A);
         }
 
-
         public readonly Rgba64 ToRgba64()
         {
             return new Rgba64(
@@ -479,6 +501,19 @@ namespace MonoGame.Framework
         #endregion
 
         #endregion
+
+        /// <summary>
+        /// Used to hint that the <see cref="Color(byte, byte, byte, byte)"/> constructor should be used.
+        /// </summary>
+        public static Color FromBytes(byte r, byte g, byte b, byte a)
+        {
+            return new Color(r, g, b, a);
+        }
+
+        public static Color FromBytes(ReadOnlySpan<byte> source)
+        {
+            return MemoryMarshal.Read<Color>(source);
+        }
 
         /// <summary>
         /// Translate a non-premultipled alpha <see cref="Vector4"/> color to a
@@ -633,7 +668,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Compares whether current instance is equal to specified object.
         /// </summary>
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is Color other && Equals(other);
         }
@@ -676,7 +711,7 @@ namespace MonoGame.Framework
             sb.Append(B);
             sb.Append(", A:");
             sb.Append(A);
-            sb.Append(")");
+            sb.Append(')');
             return sb.ToString();
         }
 

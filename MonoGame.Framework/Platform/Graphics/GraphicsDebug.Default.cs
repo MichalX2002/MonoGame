@@ -8,7 +8,7 @@ namespace MonoGame.Framework.Graphics
     {
         private bool PlatformTryDequeueMessage(out GraphicsDebugMessage message)
         {
-            message = null;
+            message = default;
             return false;
         }
     }

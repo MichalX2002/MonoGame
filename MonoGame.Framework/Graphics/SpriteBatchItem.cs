@@ -6,7 +6,7 @@ namespace MonoGame.Framework.Graphics
     public class SpriteBatchItem : IComparable<SpriteBatchItem>
     {
         public float SortKey;
-        public Texture2D Texture;
+        public Texture2D? Texture;
 
         public VertexPositionColorTexture VertexTL;
         public VertexPositionColorTexture VertexTR;
@@ -69,8 +69,11 @@ namespace MonoGame.Framework.Graphics
             VertexBR.TexCoord = new Vector2(texCoord.Z, texCoord.W);
         }
 
-        public int CompareTo(SpriteBatchItem other)
+        public int CompareTo(SpriteBatchItem? other)
         {
+            if (other == null)
+                return 1;
+
             return SortKey.CompareTo(other.SortKey);
         }
     }

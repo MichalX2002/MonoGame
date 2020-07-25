@@ -18,19 +18,16 @@ namespace MonoGame.Framework
         private string _title;
         private bool _allowAltF4 = true;
 
-        internal MouseState MouseState;
-        internal TouchPanelState TouchPanelState;
-
         #region Events
 
-        public event Event<GameWindow> SizeChanged;
-        public event Event<GameWindow> OrientationChanged;
-        public event Event<GameWindow> ScreenDeviceNameChanged;
+        public event Event<GameWindow>? SizeChanged;
+        public event Event<GameWindow>? OrientationChanged;
+        public event Event<GameWindow>? ScreenDeviceNameChanged;
 
         /// <summary>
         /// Event for a file group that was dropped on the window.
         /// </summary>
-        public event FilesDroppedEvent FilesDropped;
+        public event FilesDroppedEvent? FilesDropped;
 
         /// <summary>
         /// Use this event to retrieve text for objects like textboxes.
@@ -41,7 +38,7 @@ namespace MonoGame.Framework
         /// <remarks>
         /// This event is only supported on the Windows and Linux platforms.
         /// </remarks>
-        public event TextInputEvent TextInput;
+        public event TextInputEvent? TextInput;
 
         /// <summary>
         /// Buffered keyboard KeyDown event.
@@ -49,7 +46,7 @@ namespace MonoGame.Framework
         /// <remarks>
         /// This event is only supported on the Windows and Linux platforms.
         /// </remarks>
-        public event TextInputEvent KeyDown;
+        public event TextInputEvent? KeyDown;
 
         /// <summary>
         /// Buffered keyboard KeyUp event.
@@ -57,21 +54,28 @@ namespace MonoGame.Framework
         /// <remarks>
         /// This event is only supported on the Windows and Linux platforms.
         /// </remarks>
-        public event TextInputEvent KeyUp;
+        public event TextInputEvent? KeyUp;
 
         #endregion
 
         #region Properties
 
         internal bool IsTextInputHandled => TextInput != null;
+
         internal bool IsFilesDroppedHandled => FilesDropped != null;
 
         public TaskbarList TaskbarList { get; }
 
+        public Mouse Mouse { get; }
+
+        public TouchPanel TouchPanel { get; }
+
         public abstract bool AllowUserResizing { get; set; }
+
         public abstract Rectangle Bounds { get; }
 
         public abstract bool HasClipboardText { get; }
+
         public abstract string ClipboardText { get; set; }
 
         /// <summary>
@@ -87,7 +91,15 @@ namespace MonoGame.Framework
         public abstract Point Position { get; set; }
 
         public abstract DisplayOrientation CurrentOrientation { get; }
-        public abstract IntPtr Handle { get; }
+
+        /// <summary>
+        /// Gets the underlying platform-dependent handle of this window.
+        /// </summary>
+        public abstract IntPtr WindowHandle { get; }
+        
+        /// <summary>
+        /// Gets the name of the display device.
+        /// </summary>
         public abstract string ScreenDeviceName { get; }
 
         /// <summary>
@@ -129,7 +141,9 @@ namespace MonoGame.Framework
 
         protected GameWindow()
         {
-            TouchPanelState = new TouchPanelState(this);
+            Mouse = new Mouse(this);
+            TouchPanel = new TouchPanel(this);
+
             TaskbarList = new TaskbarList();
         }
 
@@ -187,7 +201,7 @@ namespace MonoGame.Framework
 
         protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);
 
-        protected abstract void SetTitle(string title);
+        protected abstract void SetTitle(ReadOnlySpan<char> title);
 
 #if DIRECTX && WINDOWS
         public static GameWindow Create(Game game, int width, int height)

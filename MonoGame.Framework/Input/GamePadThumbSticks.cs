@@ -91,11 +91,11 @@ namespace MonoGame.Framework.Input
             if (deadZoneMode == GamePadDeadZone.Circular)
             {
                 if (thumbstickPosition.LengthSquared() > 1f)
-                    thumbstickPosition.Normalize();
+                    thumbstickPosition = Vector2.Normalize(thumbstickPosition);
             }
             else
             {
-                thumbstickPosition.Clamp(-1, 1);
+                thumbstickPosition = VectorHelper.Clamp(thumbstickPosition, -1, 1);
             }
 
             return thumbstickPosition;

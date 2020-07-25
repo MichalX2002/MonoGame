@@ -34,7 +34,7 @@ namespace MonoGame.Framework.Vectors
         /// </summary>
         public Bgr24 Bgr
         {
-            readonly get => UnsafeR.AddByteOffset(UnsafeR.As<Abgr32, Bgr24>(this), sizeof(byte));
+            readonly get => UnsafeR.As<Abgr32, Bgr24>(UnsafeR.AddByteOffset(this, sizeof(byte)));
             set => Unsafe.AddByteOffset(ref Unsafe.As<Abgr32, Bgr24>(ref this), (IntPtr)sizeof(byte)) = value;
         }
 
@@ -225,7 +225,7 @@ namespace MonoGame.Framework.Vectors
 
         public readonly bool Equals(Abgr32 other) => this == other;
 
-        public override readonly bool Equals(object obj) => obj is Abgr32 other && Equals(other);
+        public override readonly bool Equals(object? obj) => obj is Abgr32 other && Equals(other);
 
         public static bool operator ==(in Abgr32 a, in Abgr32 b) => a.PackedValue == b.PackedValue;
 

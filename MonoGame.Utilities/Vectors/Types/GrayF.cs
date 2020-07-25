@@ -39,16 +39,26 @@ namespace MonoGame.Framework.Vectors
             set => Unsafe.As<GrayF, uint>(ref this) = value;
         }
 
+        public void FromScaledVector(Vector3 scaledVector)
+        {
+            scaledVector = VectorHelper.ZeroMax(scaledVector, Vector3.One);
+
+            L = LuminanceHelper.BT709.ToGrayF(scaledVector);
+        }
+
         public void FromScaledVector(Vector4 scaledVector)
         {
-            scaledVector.Clamp(0, 1);
+            FromScaledVector(scaledVector.ToVector3());
+        }
 
-            L = LuminanceHelper.BT709.ToGrayF(scaledVector.ToVector3());
+        public readonly Vector3 ToScaledVector3()
+        {
+            return new Vector3(L);
         }
 
         public readonly Vector4 ToScaledVector4()
         {
-            return new Vector4(L, L, L, 1);
+            return new Vector4(ToScaledVector3(), 1);
         }
 
         #endregion
@@ -82,7 +92,7 @@ namespace MonoGame.Framework.Vectors
 
         public void FromRgb(Rgb48 source)
         {
-            L = ScalingHelper.ToFloat32(LuminanceHelper.BT709.ToGray16(source)); 
+            L = ScalingHelper.ToFloat32(LuminanceHelper.BT709.ToGray16(source));
         }
 
         public void FromRgba(Rgba64 source)
@@ -104,7 +114,7 @@ namespace MonoGame.Framework.Vectors
             return this == other;
         }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is GrayF other && Equals(other);
         }

@@ -1,6 +1,7 @@
 using System.Runtime.Serialization;
 using System.Runtime.InteropServices;
 using System;
+using System.Numerics;
 
 namespace MonoGame.Framework.Graphics
 {

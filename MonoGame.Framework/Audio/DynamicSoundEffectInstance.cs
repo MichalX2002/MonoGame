@@ -150,7 +150,7 @@ namespace MonoGame.Framework.Audio
                 if (!SoundEffectInstancePool.SlotsAvailable)
                     throw new InstancePlayLimitException();
 
-                SoundEffectInstancePool.AddToPlaying(this);
+                SoundEffectInstancePool.Register(this);
 
                 PlatformPlay();
                 _state = SoundState.Playing;
@@ -190,7 +190,7 @@ namespace MonoGame.Framework.Audio
                 // Add the instance to the pool
                 if (!SoundEffectInstancePool.SlotsAvailable)
                     throw new InstancePlayLimitException();
-                SoundEffectInstancePool.AddToPlaying(this);
+                SoundEffectInstancePool.Register(this);
             }
 
             PlatformResume();

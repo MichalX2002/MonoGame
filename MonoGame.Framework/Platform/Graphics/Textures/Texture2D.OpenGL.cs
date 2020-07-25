@@ -15,14 +15,14 @@ namespace MonoGame.Framework.Graphics
             int width, int height, bool mipmap, SurfaceFormat format, SurfaceType type, bool shared)
         {
             _glTarget = TextureTarget.Texture2D;
-            format.GetGLFormat(GraphicsDevice, out glInternalFormat, out glFormat, out glType);
+            format.GetGLFormat(GraphicsDevice, out _glInternalFormat, out _glFormat, out _glType);
 
             GenerateGLTextureIfRequired();
             int level = 0;
 
             while (true)
             {
-                if (glFormat == GLPixelFormat.CompressedTextureFormats)
+                if (_glFormat == GLPixelFormat.CompressedTextureFormats)
                 {
                     // PVRTC has explicit calculations for imageSize
                     // https://www.khronos.org/registry/OpenGL/extensions/IMG/IMG_texture_compression_pvrtc.txt
@@ -51,13 +51,13 @@ namespace MonoGame.Framework.Graphics
                     }
 
                     GL.CompressedTexImage2D(
-                        TextureTarget.Texture2D, level, glInternalFormat, width, height, 0, imageSize, IntPtr.Zero);
+                        TextureTarget.Texture2D, level, _glInternalFormat, width, height, 0, imageSize, IntPtr.Zero);
                     GL.CheckError();
                 }
                 else
                 {
                     GL.TexImage2D(
-                        TextureTarget.Texture2D, level, glInternalFormat, width, height, 0, glFormat, glType, IntPtr.Zero);
+                        TextureTarget.Texture2D, level, _glInternalFormat, width, height, 0, _glFormat, _glType, IntPtr.Zero);
                     GL.CheckError();
                 }
 
@@ -96,33 +96,33 @@ namespace MonoGame.Framework.Graphics
                 if (rect.HasValue)
                 {
                     Rectangle r = rect.Value;
-                    if (glFormat == GLPixelFormat.CompressedTextureFormats)
+                    if (_glFormat == GLPixelFormat.CompressedTextureFormats)
                     {
                         GL.CompressedTexSubImage2D(
                             TextureTarget.Texture2D, level, r.X, r.Y, r.Width, r.Height,
-                            glInternalFormat, bytes, (IntPtr)ptr);
+                            _glInternalFormat, bytes, (IntPtr)ptr);
                     }
                     else
                     {
                         GL.TexSubImage2D(
                             TextureTarget.Texture2D, level, r.X, r.Y, r.Width, r.Height,
-                            glFormat, glType, (IntPtr)ptr);
+                            _glFormat, _glType, (IntPtr)ptr);
                     }
                 }
                 else
                 {
                     GetSizeForLevel(Width, Height, level, out int w, out int h);
-                    if (glFormat == GLPixelFormat.CompressedTextureFormats)
+                    if (_glFormat == GLPixelFormat.CompressedTextureFormats)
                     {
                         GL.CompressedTexImage2D(
-                            TextureTarget.Texture2D, level, glInternalFormat, 
+                            TextureTarget.Texture2D, level, _glInternalFormat, 
                             w, h, 0, bytes, (IntPtr)ptr);
                     }
                     else
                     {
                         GL.TexImage2D(
-                            TextureTarget.Texture2D, level, glInternalFormat,
-                            w, h, 0, glFormat, glType, (IntPtr)ptr);
+                            TextureTarget.Texture2D, level, _glInternalFormat,
+                            w, h, 0, _glFormat, _glType, (IntPtr)ptr);
                     }
                 }
             }
@@ -170,12 +170,14 @@ namespace MonoGame.Framework.Graphics
             GL.BindTexture(TextureTarget.Texture2D, _glTexture);
             GL.PixelStore(PixelStoreParameter.PackAlignment, Math.Min(sizeof(T), 8));
 
+            // TODO: optimize with stackalloc (will only work on certain sizes)
+
             int dstSize = destination.Length * sizeof(T);
             var dstBytes = MemoryMarshal.AsBytes(destination);
             var buffer = IntPtr.Zero;
             try
             {
-                if (glFormat == GLPixelFormat.CompressedTextureFormats)
+                if (_glFormat == GLPixelFormat.CompressedTextureFormats)
                 {
                     // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
                     int pixelToT = Format.GetSize() / sizeof(T);
@@ -208,7 +210,7 @@ namespace MonoGame.Framework.Graphics
                     buffer = Marshal.AllocHGlobal(bufferBytes);
                     var bufferSpan = new ReadOnlySpan<byte>((void*)buffer, bufferBytes);
 
-                    GL.GetTexImage(TextureTarget.Texture2D, level, glFormat, glType, buffer);
+                    GL.GetTexImage(TextureTarget.Texture2D, level, _glFormat, _glType, buffer);
                     GL.CheckError();
 
                     int pixelToT = Format.GetSize() / sizeof(T);
@@ -237,7 +239,7 @@ namespace MonoGame.Framework.Graphics
             if (_glTexture >= 0)
                 return;
 
-            GL.GenTextures(1, out _glTexture);
+            _glTexture = GL.GenTexture();
             GL.CheckError();
 
             // For best compatibility and to keep the default wrap mode of XNA, 

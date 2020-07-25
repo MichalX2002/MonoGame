@@ -9,9 +9,11 @@ namespace MonoGame.Imaging.Coders.Formats
     [Serializable]
     public class TgaEncoderOptions : EncoderOptions
     {
-        public new static TgaEncoderOptions Default { get; } = new TgaEncoderOptions(true);
+        public new static TgaEncoderOptions Default { get; } = 
+            new TgaEncoderOptions(useRunLengthEncoding: true);
 
-        public static TgaEncoderOptions NoRLE { get; } = new TgaEncoderOptions(false);
+        public static TgaEncoderOptions NoRLE { get; } =
+            new TgaEncoderOptions(useRunLengthEncoding: false);
 
         public bool UseRunLengthEncoding { get; }
 
@@ -33,7 +35,11 @@ namespace MonoGame.Imaging.Coders.Formats
                 IReadOnlyPixelRows image,
                 ImageWrite.WriteState writeState)
             {
-                var options = encoderState.GetCoderOptions<TgaEncoderOptions>();
+                if (encoderState == null) throw new ArgumentNullException(nameof(encoderState));
+                if (image == null) throw new ArgumentNullException(nameof(image));
+                if (writeState == null) throw new ArgumentNullException(nameof(writeState));
+
+                var options = encoderState.GetCoderOptionsOrDefault<TgaEncoderOptions>();
                 
                 ImageWrite.Tga.Write(writeState, options.UseRunLengthEncoding);
             }

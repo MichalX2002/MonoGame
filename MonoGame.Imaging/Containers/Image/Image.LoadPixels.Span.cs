@@ -14,6 +14,9 @@ namespace MonoGame.Imaging
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel
         {
+            if (destination == null)
+                throw new ArgumentNullException(nameof(destination));
+
             // TODO: check if the pixel span isn't padded and copy everything at once
             // TODO: use Image.ConvertPixels
 

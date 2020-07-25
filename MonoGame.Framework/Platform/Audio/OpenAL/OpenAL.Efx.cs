@@ -9,13 +9,13 @@ namespace MonoGame.Framework.Audio
         #region Effect Delegates
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private unsafe delegate void alGenEffectsDelegate(int count, uint* effect);
+        private unsafe delegate void alGenEffectsDelegate(int count, out uint effect);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private unsafe delegate void alDeleteEffectsDelegate(int count, uint* effect);
+        private unsafe delegate void alDeleteEffectsDelegate(int count, in uint effect);
 
-        [UnmanagedFunctionPointer (CallingConvention.Cdecl)]
-        public delegate bool alIsEffectDelegate (uint effect);
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate bool alIsEffectDelegate(uint effect);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alEffectfDelegate(uint effect, EfxEffectf param, float value);
@@ -24,10 +24,10 @@ namespace MonoGame.Framework.Audio
         private delegate void alEffectiDelegate(uint effect, EfxEffecti param, int value);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private unsafe delegate void alGenAuxiliaryEffectSlotsDelegate(int count, uint* effectslots);
+        private unsafe delegate void alGenAuxiliaryEffectSlotsDelegate(int count, out uint effectslots);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private unsafe delegate void alDeleteAuxiliaryEffectSlotsDelegate(int count, uint* effectslots);
+        private unsafe delegate void alDeleteAuxiliaryEffectSlotsDelegate(int count, in uint effectslots);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alAuxiliaryEffectSlotiDelegate(uint slot, EfxEffecti type, uint effect);
@@ -51,7 +51,7 @@ namespace MonoGame.Framework.Audio
         #region Filter Delegates
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private unsafe delegate void alGenFiltersDelegate(int count, uint* filters);
+        private unsafe delegate void alGenFiltersDelegate(int count, out uint filters);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         private delegate void alFilteriDelegate(uint fid, EfxFilteri param, int value);
@@ -60,7 +60,7 @@ namespace MonoGame.Framework.Audio
         private delegate void alFilterfDelegate(uint fid, EfxFilterf param, float value);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private unsafe delegate void alDeleteFiltersDelegate(int n, uint* filters);
+        private unsafe delegate void alDeleteFiltersDelegate(int n, in uint filters);
 
         private alGenFiltersDelegate alGenFilters;
         private alFilteriDelegate alFilteri;
@@ -68,8 +68,6 @@ namespace MonoGame.Framework.Audio
         private alDeleteFiltersDelegate alDeleteFilters;
 
         #endregion
-
-        private static EffectsExtension _instance;
 
         public bool IsAvailable { get; private set; }
 
@@ -109,11 +107,8 @@ namespace MonoGame.Framework.Audio
             if (output.IsEmpty)
                 return;
 
-            fixed (uint* ptr = output)
-            {
-                alGenAuxiliaryEffectSlots(output.Length, ptr);
-                ALHelper.CheckError("Failed to genereate aux slot.");
-            }
+            alGenAuxiliaryEffectSlots(output.Length, out MemoryMarshal.GetReference(output));
+            ALHelper.CheckError("Failed to genereate aux slot.");
         }
 
         public uint GenAuxiliaryEffectSlot()
@@ -128,11 +123,8 @@ namespace MonoGame.Framework.Audio
             if (output.IsEmpty)
                 return;
 
-            fixed (uint* ptr = output)
-            {
-                alGenEffects(output.Length, ptr);
-                ALHelper.CheckError("Failed to generate effects.");
-            }
+            alGenEffects(output.Length, out MemoryMarshal.GetReference(output));
+            ALHelper.CheckError("Failed to generate effects.");
         }
 
         public uint GenEffect()
@@ -147,8 +139,7 @@ namespace MonoGame.Framework.Audio
             if (slots.IsEmpty)
                 return;
 
-            fixed (uint* ptr = slots)
-                alDeleteAuxiliaryEffectSlots(slots.Length, ptr);
+            alDeleteAuxiliaryEffectSlots(slots.Length, MemoryMarshal.GetReference(slots));
         }
 
         public void DeleteAuxiliaryEffectSlot(uint slot)
@@ -162,8 +153,7 @@ namespace MonoGame.Framework.Audio
             if (effects.IsEmpty)
                 return;
 
-            fixed (uint* ptr = effects)
-                alDeleteEffects(effects.Length, ptr);
+            alDeleteEffects(effects.Length, MemoryMarshal.GetReference(effects));
         }
 
         public void DeleteEffect(uint effect)
@@ -201,13 +191,12 @@ namespace MonoGame.Framework.Audio
             ALHelper.CheckError("Failed to set " + param + " " + value);
         }
 
-        public unsafe void GenFilters(Span<uint> output)
+        public void GenFilters(Span<uint> output)
         {
             if (output.IsEmpty)
                 return;
 
-            fixed (uint* ptr = output)
-                alGenFilters(output.Length, ptr);
+            alGenFilters(output.Length, out MemoryMarshal.GetReference(output));
         }
 
         public uint GenFilter()
@@ -237,8 +226,7 @@ namespace MonoGame.Framework.Audio
             if (filters.IsEmpty)
                 return;
 
-            fixed (uint* ptr = filters)
-                alDeleteFilters(filters.Length, ptr);
+            alDeleteFilters(filters.Length, MemoryMarshal.GetReference(filters));
         }
 
         public void DeleteFilter(uint filter)

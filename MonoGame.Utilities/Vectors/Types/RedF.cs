@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 namespace MonoGame.Framework.Vectors
 {
     /// <summary>
-    /// Packed vector type containing an 32-bit X component.
+    /// Packed vector type containing an 32-bit floating-point X component.
     /// <para>
     /// Ranges from [0, 0, 0, 1] to [1, 0, 0, 1] in vector form.
     /// </para>
@@ -84,17 +84,17 @@ namespace MonoGame.Framework.Vectors
 
         public void FromAlpha(Alpha8 source)
         {
-            R = 0;
+            R = 1;
         }
 
         public void FromAlpha(Alpha16 source)
         {
-            R = 0;
+            R = 1;
         }
 
         public void FromAlpha(AlphaF source)
         {
-            R = 0;
+            R = 1;
         }
 
         public void FromGray(Gray8 source)
@@ -110,6 +110,11 @@ namespace MonoGame.Framework.Vectors
         public void FromGrayAlpha(GrayAlpha16 source)
         {
             R = ScalingHelper.ToFloat32(source.L);
+        }
+
+        public void FromGray(GrayF source)
+        {
+            R = source.L;
         }
 
         public void FromRgb(Rgb24 source)
@@ -202,7 +207,7 @@ namespace MonoGame.Framework.Vectors
             return this == other;
         }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is RedF other && Equals(other);
         }

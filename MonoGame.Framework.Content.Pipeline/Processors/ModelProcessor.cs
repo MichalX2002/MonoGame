@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Numerics;
 using MonoGame.Framework.Content.Pipeline.Graphics;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Vectors;
@@ -71,10 +72,10 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             // Perform the processor transforms.
             if (RotationX != 0.0f || RotationY != 0.0f || RotationZ != 0.0f || Scale != 1.0f)
             {
-                var rotX = Matrix.CreateRotationX(MathHelper.ToRadians(RotationX));
-                var rotY = Matrix.CreateRotationY(MathHelper.ToRadians(RotationY));
-                var rotZ = Matrix.CreateRotationZ(MathHelper.ToRadians(RotationZ));
-                var scale = Matrix.CreateScale(Scale);
+                var rotX = Matrix4x4.CreateRotationX(MathHelper.ToRadians(RotationX));
+                var rotY = Matrix4x4.CreateRotationY(MathHelper.ToRadians(RotationY));
+                var rotZ = Matrix4x4.CreateRotationZ(MathHelper.ToRadians(RotationZ));
+                var scale = Matrix4x4.CreateScale(Scale);
                 MeshHelper.TransformScene(input, rotZ * rotX * rotY * scale);
             }
 
@@ -102,7 +103,12 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             return new ModelContent(rootNode, boneList, meshList);
         }
 
-        private ModelBoneContent ProcessNode(NodeContent node, ModelBoneContent parent, List<ModelBoneContent> boneList, List<ModelMeshContent> meshList, ContentProcessorContext context)
+        private ModelBoneContent ProcessNode(
+            NodeContent node,
+            ModelBoneContent parent,
+            List<ModelBoneContent> boneList,
+            List<ModelMeshContent> meshList,
+            ContentProcessorContext context)
         {
             var result = new ModelBoneContent(node.Name, boneList.Count, node.Transform, parent);
             boneList.Add(result);
@@ -118,7 +124,8 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             return result;
         }
 
-        private ModelMeshContent ProcessMesh(MeshContent mesh, ModelBoneContent parent, ContentProcessorContext context)
+        private ModelMeshContent ProcessMesh(
+            MeshContent mesh, ModelBoneContent parent, ContentProcessorContext context)
         {
             var parts = new List<ModelMeshPartContent>();
             var vertexBuffer = new VertexBufferContent();
@@ -163,7 +170,8 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                     indexBuffer.AddRange(geometry.Indices);
 
                     partContent = new ModelMeshPartContent(
-                        vertexBuffer, indexBuffer, startVertex, vertexCount, startIndex, geometry.Indices.Count / 3);
+                        vertexBuffer, indexBuffer,
+                        startVertex, vertexCount, startIndex, geometry.Indices.Count / 3);
 
                     // Geoms are supposed to all have the same decl, so just steal one of these
                     vertexBuffer.VertexDeclaration = geomBuffer.VertexDeclaration;
@@ -182,7 +190,8 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             return new ModelMeshContent(mesh.Name, mesh, parent, bounds, parts);
         }
 
-        protected virtual MaterialContent ConvertMaterial(MaterialContent material, ContentProcessorContext context)
+        protected virtual MaterialContent ConvertMaterial(
+            MaterialContent material, ContentProcessorContext context)
         {
             var parameters = new OpaqueDataDictionary();
             parameters.Add("ColorKeyColor", ColorKeyColor);
@@ -193,11 +202,14 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             parameters.Add("TextureFormat", TextureFormat);
             parameters.Add("DefaultEffect", DefaultEffect);
 
-            return context.Convert<MaterialContent, MaterialContent>(material, "MaterialProcessor", parameters);
+            return context.Convert<MaterialContent, MaterialContent>(
+                material, "MaterialProcessor", parameters);
         }
 
         protected virtual void ProcessGeometryUsingMaterial(
-            MaterialContent material, IEnumerable<GeometryContent> geometryCollection, ContentProcessorContext context)
+            MaterialContent material,
+            IEnumerable<GeometryContent> geometryCollection,
+            ContentProcessorContext context)
         {
             // If we don't get a material then assign a default one.
             if (material == null)
@@ -248,9 +260,9 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                 {
                     if (!geometry.Vertices.Channels.Contains(VertexChannelNames.TextureCoordinate(i)))
                         throw new InvalidContentException(
-                            string.Format(
-                                "The mesh \"{0}\", using {1}, contains geometry that is missing texture coordinates for channel {2}.",
-                                geometry.Parent.Name, MaterialProcessor.GetDefaultEffect(material), i),
+                            $"The mesh \"{geometry.Parent.Name}\", " +
+                            $"using { MaterialProcessor.GetDefaultEffect(material)}, " +
+                            $"contains geometry that is missing texture coordinates for channel {i}.",
                             _identity);
                 }
 
@@ -266,7 +278,8 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                     var weightsName = VertexChannelNames.EncodeName(VertexElementUsage.BlendWeight, 0);
                     if (!geometry.Vertices.Channels.Contains(weightsName))
                         throw new InvalidContentException(
-                            string.Format("The skinned mesh \"{0}\" contains geometry without any vertex weights.", geometry.Parent.Name),
+                            $"The skinned mesh \"{geometry.Parent.Name}\" contains " +
+                            $"geometry without any vertex weights.",
                             _identity);
                 }
             }
@@ -280,11 +293,12 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             // TODO: According to docs, channels with VertexElementUsage.Color -> Color
 
             // Channels[VertexChannelNames.Weights] -> { Byte4 boneIndices, Color boneWeights }
-            if (channel.Name.StartsWith(VertexChannelNames.Weights()))
+            if (channel.Name.StartsWith(VertexChannelNames.Weights(), StringComparison.Ordinal))
                 ProcessWeightsChannel(geometry, vertexChannelIndex, _identity);
         }
 
-        private static void ProcessWeightsChannel(GeometryContent geometry, int vertexChannelIndex, ContentIdentity identity)
+        private static void ProcessWeightsChannel(
+            GeometryContent geometry, int vertexChannelIndex, ContentIdentity identity)
         {
             // NOTE: Portions of this code is from the XNA CPU Skinning 
             // sample under Ms-PL, (c) Microsoft Corporation.
@@ -336,10 +350,10 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
 
         // From the XNA CPU Skinning Sample under Ms-PL, (c) Microsoft Corporation
         private static void ConvertWeights(
-            BoneWeightCollection weights, 
+            BoneWeightCollection weights,
             Dictionary<string, byte> boneIndices,
-            Byte4[] outIndices, 
-            Vector4[] outWeights, 
+            Byte4[] outIndices,
+            Vector4[] outWeights,
             int vertexIndex)
         {
             // we only handle 4 weights per bone

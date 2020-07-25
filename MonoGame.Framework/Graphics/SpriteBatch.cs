@@ -3,6 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -14,21 +16,20 @@ namespace MonoGame.Framework.Graphics
     /// </summary>
     public class SpriteBatch : GraphicsResource
     {
-        #region Private Fields
-
         private SpriteBatcher _batcher;
         private SpriteEffect _spriteEffect;
         private EffectPass _spritePass;
 
         private bool _beginCalled;
         private SpriteSortMode _sortMode;
-        private BlendState _blendState;
-        private SamplerState _samplerState;
-        private DepthStencilState _depthStencilState;
-        private RasterizerState _rasterizerState;
-        private Effect _effect;
+        private Effect? _effect;
 
-        #endregion
+#pragma warning disable CA2213 // Disposable fields should be disposed
+        private BlendState _blendState = BlendState.AlphaBlend;
+        private SamplerState _samplerState = SamplerState.LinearClamp;
+        private DepthStencilState _depthStencilState = DepthStencilState.None;
+        private RasterizerState _rasterizerState = RasterizerState.CullCounterClockwise;
+#pragma warning restore CA2213
 
         #region Constructors
 
@@ -59,24 +60,24 @@ namespace MonoGame.Framework.Graphics
         /// <param name="depthStencilState">State of the depth-stencil buffer. Uses <see cref="DepthStencilState.None"/> if null.</param>
         /// <param name="rasterizerState">State of the rasterization. Uses <see cref="RasterizerState.CullCounterClockwise"/> if null.</param>
         /// <param name="effect">A custom <see cref="Effect"/> to override the default sprite effect. Uses default sprite effect if null.</param>
-        /// <param name="transformMatrix">An optional matrix used to transform the sprite geometry. Uses <see cref="Matrix.Identity"/> if null.</param>
-        /// <exception cref="InvalidOperationException">Thrown if <see cref="Begin"/> is called next time without previous <see cref="End"/>.</exception>
+        /// <param name="transformMatrix">An optional matrix used to transform the sprite geometry. Uses <see cref="Matrix4x4.Identity"/> if null.</param>
+        /// <exception cref="InvalidOperationException"><see cref="Begin"/> is called next time without previous <see cref="End"/>.</exception>
         /// <remarks>
         /// <see cref="Begin"/> should be called before draw methods,
         /// and you cannot call it again before subsequent <see cref="End"/>.
         /// </remarks>
         public void Begin(
             SpriteSortMode sortMode = SpriteSortMode.Deferred,
-            BlendState blendState = null,
-            SamplerState samplerState = null,
-            DepthStencilState depthStencilState = null,
-            RasterizerState rasterizerState = null,
-            Effect effect = null,
+            BlendState? blendState = null,
+            SamplerState? samplerState = null,
+            DepthStencilState? depthStencilState = null,
+            RasterizerState? rasterizerState = null,
+            Effect? effect = null,
             Matrix4x4? transformMatrix = null)
         {
             if (_beginCalled)
                 throw new InvalidOperationException(
-                    "Begin cannot be called again until End has been successfully called.");
+                    "Begin cannot be called again until End has been called.");
 
             // defaults
             _sortMode = sortMode;
@@ -96,19 +97,35 @@ namespace MonoGame.Framework.Graphics
 
         #endregion
 
-        #region End
+        #region End, Flush
 
         /// <summary>
-        /// Flushes all batched text and sprites to the screen.
+        /// Flushes all batched text and sprites to the screen
+        /// without ending the current state.
         /// </summary>
-        /// <remarks>
-        /// This should be called after <see cref="Begin"/> and draw methods.
-        /// </remarks>
+        public void Flush()
+        {
+            AssertBeginCalled(nameof(Flush));
+
+            _batcher.DrawBatch(_sortMode, _effect);
+        }
+
+        /// <summary>
+        /// Flushes if the sort mode is <see cref="SpriteSortMode.Immediate"/>.
+        /// </summary>
+        public void FlushIfNeeded()
+        {
+            if (_sortMode == SpriteSortMode.Immediate)
+                Flush();
+        }
+
+        /// <summary>
+        /// Flushes all batched text and sprites to the screen
+        /// ending the current state.
+        /// </summary>
         public void End()
         {
-            if (!_beginCalled)
-                throw new InvalidOperationException(
-                    "Begin must be called before calling End.");
+            AssertBeginCalled(nameof(End));
 
             _beginCalled = false;
 
@@ -119,6 +136,8 @@ namespace MonoGame.Framework.Graphics
         }
 
         #endregion
+
+        #region Helpers
 
         /// <summary>
         /// Reuse a previously allocated <see cref="SpriteBatchItem"/> from the item pool. 
@@ -149,6 +168,11 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
+        /// <summary>
+        /// Gets a value used to sort a sprite, 
+        /// based on the current sort mode and the given parameters.
+        /// </summary>
+        [SuppressMessage("Design", "CA1062", Justification = "Performance")]
         public float GetSortKey(Texture2D texture, float depth)
         {
             // set SortKey based on SpriteSortMode.
@@ -182,14 +206,16 @@ namespace MonoGame.Framework.Graphics
             _spritePass.Apply();
         }
 
-        void AssertBeginCalled(string callerName)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void AssertBeginCalled(string callerName)
         {
             if (!_beginCalled)
                 throw new InvalidOperationException(
-                    $"{nameof(Begin)} must be called successfully before you can call {callerName}.");
+                    $"{nameof(Begin)} must be called before you can call {callerName}.");
         }
 
-        void AssertValidArguments(Texture2D texture, string callerName)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void AssertValidArguments(Texture2D texture, string callerName)
         {
             if (texture == null)
                 throw new ArgumentNullException(nameof(texture));
@@ -197,7 +223,8 @@ namespace MonoGame.Framework.Graphics
             AssertBeginCalled(callerName);
         }
 
-        void AssertValidArguments(SpriteFont spriteFont, string callerName)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void AssertValidArguments(SpriteFont spriteFont, string callerName)
         {
             if (spriteFont == null)
                 throw new ArgumentNullException(nameof(spriteFont));
@@ -205,24 +232,15 @@ namespace MonoGame.Framework.Graphics
             AssertBeginCalled(callerName);
         }
 
-        public void Flush()
-        {
-            _batcher.DrawBatch(_sortMode, _effect);
-        }
+        #endregion
 
-        /// <summary>
-        /// Called at the end of a draw operation for <see cref="SpriteSortMode.Immediate"/>.
-        /// </summary>
-        public void FlushIfNeeded()
-        {
-            if (_sortMode == SpriteSortMode.Immediate)
-                Flush();
-        }
-
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Draw(
             Texture2D texture,
-            in VertexPositionColorTexture vertexTL, in VertexPositionColorTexture vertexTR,
-            in VertexPositionColorTexture vertexBL, in VertexPositionColorTexture vertexBR,
+            VertexPositionColorTexture vertexTL,
+            VertexPositionColorTexture vertexTR,
+            VertexPositionColorTexture vertexBL,
+            VertexPositionColorTexture vertexBR,
             float depth)
         {
             var item = GetBatchItem(texture);
@@ -236,10 +254,13 @@ namespace MonoGame.Framework.Graphics
             FlushIfNeeded();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Draw(
             Texture2D texture,
-            in VertexPositionColorTexture vertexTL, in VertexPositionColorTexture vertexTR,
-            in VertexPositionColorTexture vertexBL, in VertexPositionColorTexture vertexBR)
+            VertexPositionColorTexture vertexTL,
+            VertexPositionColorTexture vertexTR,
+            VertexPositionColorTexture vertexBL,
+            VertexPositionColorTexture vertexBR)
         {
             Draw(texture, vertexTL, vertexTR, vertexBL, vertexBR, vertexTL.Position.Z);
         }
@@ -303,7 +324,7 @@ namespace MonoGame.Framework.Graphics
             else // Call Draw() using drawRectangle
             {
                 Draw(
-                    texture, destinationRectangle.Value, sourceRectangle, color.Value,
+                    texture, destinationRectangle!.Value, sourceRectangle, color.Value,
                     rotation, origin.Value, flip, layerDepth);
             }
         }
@@ -611,7 +632,7 @@ namespace MonoGame.Framework.Graphics
 
             var offset = Vector2.Zero;
             bool firstGlyphOfLine = true;
-            var glyphs = spriteFont.Glyphs;
+            var glyphs = spriteFont.GetGlyphSpan();
 
             foreach (Rune c in text)
             {
@@ -755,7 +776,7 @@ namespace MonoGame.Framework.Graphics
 
             var offset = Vector2.Zero;
             var firstGlyphOfLine = true;
-            var glyphs = spriteFont.Glyphs;
+            var glyphs = spriteFont.GetGlyphSpan();
 
             foreach (Rune c in text)
             {
@@ -838,27 +859,16 @@ namespace MonoGame.Framework.Graphics
             FlushIfNeeded();
         }
 
-        /// <summary>
-        /// Immediately releases the unmanaged resources used by this object.
-        /// </summary>
-        /// <param name="disposing">
-        /// <see langword="true"/> to release both managed and unmanaged resources;
-        /// <see langword="false"/> to release only unmanaged resources.
-        /// </param>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (!IsDisposed)
             {
-                _spritePass = null;
-
                 if (disposing)
                 {
                     _spriteEffect?.Dispose();
-                    _spriteEffect = null;
+                    _batcher?.Dispose();
                 }
-
-                _batcher?.Dispose();
-                _batcher = null;
             }
             base.Dispose(disposing);
         }

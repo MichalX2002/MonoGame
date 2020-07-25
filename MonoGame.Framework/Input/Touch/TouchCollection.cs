@@ -13,8 +13,6 @@ namespace MonoGame.Framework.Input.Touch
     /// </summary>
     public readonly struct TouchCollection : IReadOnlyList<TouchLocation>
     {
-        public static TouchCollection Empty => default;
-
         private readonly TouchLocation[] _collection;
 
         private TouchLocation[] Collection => _collection ?? Array.Empty<TouchLocation>();
@@ -119,20 +117,24 @@ namespace MonoGame.Framework.Input.Touch
                 _position = -1;
             }
 
+            /// <inheritdoc />
             public TouchLocation Current => _collection[_position];
             object IEnumerator.Current => Current;
 
+            /// <inheritdoc />
             public bool MoveNext()
             {
                 _position++;
                 return _position < _collection.Count;
             }
 
+            /// <inheritdoc />
             public void Reset()
             {
                 _position = -1;
             }
 
+            /// <inheritdoc />
             public void Dispose()
             {
             }

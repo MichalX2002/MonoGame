@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Numerics;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Utilities;
 
@@ -70,13 +71,13 @@ namespace MonoGame.Framework.Content
                     {
                         parameter.SetValue((Vector4[])item.Value);
                     }
-                    else if (typeof(Matrix).IsAssignableFrom(itemType))
+                    else if (typeof(Matrix4x4).IsAssignableFrom(itemType))
                     {
-                        parameter.SetValue((Matrix)item.Value);
+                        parameter.SetValue((Matrix4x4)item.Value);
                     }
-                    else if (typeof(Matrix[]).IsAssignableFrom(itemType))
+                    else if (typeof(Matrix4x4[]).IsAssignableFrom(itemType))
                     {
-                        parameter.SetValue((Matrix[])item.Value);
+                        parameter.SetValue((Matrix4x4[])item.Value);
                     }
                     else if (typeof(Quaternion).IsAssignableFrom(itemType))
                     {

@@ -10,7 +10,11 @@ namespace MonoGame.OpenGL
     internal class GraphicsContext : IGraphicsContext, IDisposable
     {
         private IntPtr _context;
-        private IntPtr _winHandle;
+        private IntPtr _windowHandle;
+
+        public bool IsDisposed { get; private set; }
+
+        public bool IsCurrent => true;
 
         public int SwapInterval
         {
@@ -18,19 +22,16 @@ namespace MonoGame.OpenGL
             set => SDL.GL.SetSwapInterval(value);
         }
 
-        public bool IsDisposed { get; private set; }
-
-        public bool IsCurrent => true;
-
-        public GraphicsContext(IWindowInfo info)
+        public GraphicsContext(IWindowHandle window)
         {
             if (IsDisposed)
                 return;
-            
-            SetWindowHandle(info);
-            _context = SDL.GL.CreateContext(_winHandle);
 
-            // GL entry points must be loaded after the GL context creation, otherwise some Windows drivers will return only GL 1.3 compatible functions
+            SetWindowHandle(window);
+            _context = SDL.GL.CreateContext(_windowHandle);
+
+            // GL entry points must be loaded after the GL context creation,
+            // otherwise some Windows drivers will return only GL 1.3 compatible functions
             try
             {
                 GL.LoadEntryPoints();
@@ -38,26 +39,27 @@ namespace MonoGame.OpenGL
             catch (EntryPointNotFoundException)
             {
                 throw new PlatformNotSupportedException(
-                    "MonoGame requires OpenGL 3.0 compatible drivers, or either ARB_framebuffer_object or EXT_framebuffer_object extensions. " +
+                    "MonoGame requires OpenGL 3.0 compatible drivers, " +
+                    "or either ARB_framebuffer_object or EXT_framebuffer_object extensions. " +
                     "Try updating your graphics drivers.");
             }
         }
 
-        public void MakeCurrent(IWindowInfo info)
+        public void MakeCurrent(IWindowHandle window)
         {
             if (IsDisposed)
                 return;
-            
-            SetWindowHandle(info);
-            SDL.GL.MakeCurrent(_winHandle, _context);
+
+            SetWindowHandle(window);
+            SDL.GL.MakeCurrent(_windowHandle, _context);
         }
 
         public void SwapBuffers()
         {
             if (IsDisposed)
                 return;
-            
-            SDL.GL.SwapWindow(_winHandle);
+
+            SDL.GL.SwapWindow(_windowHandle);
         }
 
         public void Dispose()
@@ -70,12 +72,9 @@ namespace MonoGame.OpenGL
             IsDisposed = true;
         }
 
-        private void SetWindowHandle(IWindowInfo info)
+        private void SetWindowHandle(IWindowHandle info)
         {
-            if (info == null)
-                _winHandle = IntPtr.Zero;
-            else
-                _winHandle = info.Handle;
+            _windowHandle = info?.WindowHandle ?? IntPtr.Zero;
         }
     }
 }

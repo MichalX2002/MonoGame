@@ -11,7 +11,7 @@ namespace MonoGame.Imaging.Coders.Encoding
     public class StbImageEncoderState : ImageEncoderState
     {
         public WriteProgressCallback ProgressCallback { get; }
-        private byte[] Buffer { get; set; }
+        private byte[]? Buffer { get; set; }
 
         public new IReadOnlyPixelRows? CurrentImage { get => base.CurrentImage; set => base.CurrentImage = value; }
         public new int FrameIndex { get => base.FrameIndex; set => base.FrameIndex = value; }
@@ -36,20 +36,22 @@ namespace MonoGame.Imaging.Coders.Encoding
         public WriteState<TPixelRowProvider> CreateWriteState<TPixelRowProvider>(TPixelRowProvider provider)
             where TPixelRowProvider : IPixelRowProvider
         {
+            AssertNotDisposed();
+
             return new WriteState<TPixelRowProvider>(
                 Stream,
-                Buffer,
-                CancellationToken,
+                Buffer!,
                 ProgressCallback,
-                provider);
+                provider,
+                CancellationToken);
         }
 
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
             RecyclableMemoryManager.Default.ReturnBlock(Buffer);
             Buffer = null;
 
-            base.Dispose();
+            base.Dispose(disposing);
         }
     }
 }

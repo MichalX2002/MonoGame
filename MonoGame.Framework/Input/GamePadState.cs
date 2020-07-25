@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 
 namespace MonoGame.Framework.Input
 {
@@ -116,14 +117,14 @@ namespace MonoGame.Framework.Input
         /// <param name="rightThumbStick">Right stick value. Each axis is clamped between −1.0 and 1.0.</param>
         /// <param name="leftTrigger">Left trigger value. This value is clamped between 0.0 and 1.0.</param>
         /// <param name="rightTrigger">Right trigger value. This value is clamped between 0.0 and 1.0.</param>
-        /// <param name="buttons"> Array of Buttons to initialize as pressed.</param>
+        /// <param name="buttons">Span of Buttons to initialize as pressed.</param>
         public GamePadState(
             bool isConnected,
             Vector2 leftThumbStick,
             Vector2 rightThumbStick,
             float leftTrigger,
             float rightTrigger,
-            Buttons[] buttons) : this(
+            ReadOnlySpan<Buttons> buttons) : this(
                 isConnected,
                 new GamePadThumbSticks(leftThumbStick, rightThumbStick),
                 new GamePadTriggers(leftTrigger, rightTrigger),
@@ -174,6 +175,10 @@ namespace MonoGame.Framework.Input
 
         #region Equals
 
+        public bool Equals(GamePadState other) => this == other;
+
+        public override bool Equals(object? obj) => obj is GamePadState other && Equals(other);
+
         public static bool operator ==(in GamePadState left, in GamePadState right)
         {
             return (left.IsConnected == right.IsConnected)
@@ -185,9 +190,6 @@ namespace MonoGame.Framework.Input
         }
 
         public static bool operator !=(in GamePadState left, in GamePadState right) => !(left == right);
-
-        public bool Equals(GamePadState other) => this == other;
-        public override bool Equals(object obj) => obj is GamePadState other && Equals(other);
 
         #endregion
 

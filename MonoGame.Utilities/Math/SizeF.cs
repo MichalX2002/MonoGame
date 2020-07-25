@@ -27,13 +27,13 @@ namespace MonoGame.Framework
         /// <summary>
         /// The horizontal component of this <see cref="SizeF" />.
         /// </summary>
-        [DataMember] 
+        [DataMember]
         public float Width;
 
         /// <summary>
         /// The vertical component of this <see cref="SizeF" />.
         /// </summary>
-        [DataMember] 
+        [DataMember]
         public float Height;
 
         /// <summary>
@@ -87,7 +87,39 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// Calculates the <see cref="SizeF" /> representing the vector addition of two <see cref="SizeF" /> structures as if
+        /// Calculates the <see cref="SizeF" /> representing the vector addition.
+        /// </summary>
+        /// <param name="a">The first size.</param>
+        /// <param name="b">The second size.</param>
+        /// <returns>The <see cref="SizeF" /> representing the vector addition.</returns>
+        public static SizeF Add(SizeF a, SizeF b)
+        {
+            return a + b;
+        }
+
+        /// <summary>
+        /// Calculates the <see cref="SizeF" /> representing the vector subtraction.
+        /// </summary>
+        /// <param name="left">The first size.</param>
+        /// <param name="right">The second size.</param>
+        /// <returns>The <see cref="SizeF" /> representing the vector subtraction.</returns>
+        public static SizeF Subtract(SizeF left, SizeF right)
+        {
+            return left - right;
+        }
+
+        public static SizeF Multiply(SizeF a, float b)
+        {
+            return a * b;
+        }
+
+        public static SizeF Divide(SizeF left, float divisor)
+        {
+            return left / divisor;
+        }
+
+        /// <summary>
+        /// Calculates the <see cref="SizeF" /> representing the vector addition of two <see cref="SizeF" /> as if
         /// they were <see cref="Vector2" /> structures.
         /// </summary>
         /// <param name="a">The first size.</param>
@@ -98,20 +130,7 @@ namespace MonoGame.Framework
         /// </returns>
         public static SizeF operator +(SizeF a, SizeF b)
         {
-            return new SizeF(a.Width + b.Width, a.Height + b.Height);
-        }
-
-        /// <summary>
-        /// Calculates the <see cref="SizeF" /> representing the vector addition of two <see cref="SizeF" /> structures.
-        /// </summary>
-        /// <param name="a">The first size.</param>
-        /// <param name="b">The second size.</param>
-        /// <returns>
-        /// The <see cref="SizeF" /> representing the vector addition of two <see cref="SizeF" /> structures.
-        /// </returns>
-        public static SizeF Add(SizeF a, SizeF b)
-        {
-            return a + b;
+            return (SizeF)Vector2.Add(a, b);
         }
 
         /// <summary>
@@ -124,30 +143,17 @@ namespace MonoGame.Framework
         /// </returns>
         public static SizeF operator -(SizeF left, SizeF right)
         {
-            return new SizeF(left.Width - right.Width, left.Height - right.Height);
+            return (SizeF)Vector2.Subtract(left, right);
         }
 
-        public static SizeF operator /(SizeF size, float value)
+        public static SizeF operator *(SizeF a, float b)
         {
-            return new SizeF(size.Width / value, size.Height / value);
+            return (SizeF)Vector2.Multiply(a, b);
         }
 
-        public static SizeF operator *(SizeF size, float value)
+        public static SizeF operator /(SizeF left, float divisor)
         {
-            return new SizeF(size.Width * value, size.Height * value);
-        }
-
-        /// <summary>
-        /// Calculates the <see cref="SizeF" /> representing the vector subtraction of two <see cref="SizeF" /> structures.
-        /// </summary>
-        /// <param name="left">The first size.</param>
-        /// <param name="right">The second size.</param>
-        /// <returns>
-        /// The <see cref="SizeF" /> representing the vector subtraction of two <see cref="SizeF" /> structures.
-        /// </returns>
-        public static SizeF Subtract(SizeF left, SizeF right)
-        {
-            return left - right;
+            return (SizeF)Vector2.Divide(left, divisor);
         }
 
         #region Equals
@@ -200,48 +206,18 @@ namespace MonoGame.Framework
 
         #region Explicit operators
 
-        public static explicit operator Size(in SizeF size)
+        public static explicit operator SizeF(Vector2 vector)
         {
-            return size.ToSize();
-        }
-
-        public static explicit operator Point(in SizeF size)
-        {
-            return size.ToPoint();
+            return vector.ToSizeF();
         }
 
         #endregion
 
         #region Implicit operators
 
-        public static implicit operator Vector2(in SizeF size)
+        public static implicit operator Vector2(SizeF size)
         {
             return size.ToVector2();
-        }
-
-        public static implicit operator PointF(in SizeF size)
-        {
-            return size.ToPointF();
-        }
-
-        public static implicit operator SizeF(in Vector2 vector)
-        {
-            return vector.ToSizeF();
-        }
-
-        public static implicit operator SizeF(in PointF point)
-        {
-            return point.ToSizeF();
-        }
-
-        public static implicit operator SizeF(in Point point)
-        {
-            return new SizeF(point.X, point.Y);
-        }
-
-        public static implicit operator SizeF(in Size size)
-        {
-            return new SizeF(size.Width, size.Height);
         }
 
         #endregion

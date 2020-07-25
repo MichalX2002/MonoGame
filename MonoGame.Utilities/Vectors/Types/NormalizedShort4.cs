@@ -58,6 +58,15 @@ namespace MonoGame.Framework.Vectors
             set => Unsafe.As<NormalizedShort4, ulong>(ref this) = value;
         }
 
+        public readonly Vector3 ToScaledVector3()
+        {
+            var scaled = new Vector3(X, Y, Z);
+            scaled += Offset.ToVector3();
+            scaled /= ushort.MaxValue;
+
+            return scaled;
+        }
+
         public readonly Vector4 ToScaledVector4()
         {
             var scaled = new Vector4(X, Y, Z, W);
@@ -67,11 +76,22 @@ namespace MonoGame.Framework.Vectors
             return scaled;
         }
 
+        public void FromScaledVector(Vector3 scaledVector)
+        {
+            scaledVector *= ushort.MaxValue;
+            scaledVector -= Offset.ToVector3();
+            scaledVector = VectorHelper.Clamp(scaledVector, short.MinValue, short.MaxValue);
+
+            X = (short)scaledVector.X;
+            Y = (short)scaledVector.Y;
+            Z = (short)scaledVector.Z;
+        }
+
         public void FromScaledVector(Vector4 scaledVector)
         {
             scaledVector *= ushort.MaxValue;
             scaledVector -= Offset;
-            scaledVector.Clamp(short.MinValue, short.MaxValue);
+            scaledVector = VectorHelper.Clamp(scaledVector, short.MinValue, short.MaxValue);
 
             X = (short)scaledVector.X;
             Y = (short)scaledVector.Y;
@@ -93,7 +113,7 @@ namespace MonoGame.Framework.Vectors
         {
             vector *= ushort.MaxValue / 2f;
             vector -= new Vector4(0.5f);
-            vector.Clamp(short.MinValue, short.MaxValue);
+            vector = VectorHelper.Clamp(vector, short.MinValue, short.MaxValue);
 
             X = (short)vector.X;
             Y = (short)vector.Y;
@@ -110,7 +130,7 @@ namespace MonoGame.Framework.Vectors
             return this == other;
         }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is NormalizedShort4 other && Equals(other);
         }

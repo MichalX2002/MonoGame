@@ -16,7 +16,7 @@ namespace MonoGame.Framework.Vectors
     {
         /// <summary>
         /// Describes the components of this vector.
-        /// Should be retrieved with <see cref="VectorType.Get(Type)"/>.
+        /// Should be retrieved through <see cref="VectorType"/>.
         /// </summary>
         // TODO: replace with static field (C# 9 or 10 role/shape)
         VectorComponentInfo ComponentInfo { get; }
@@ -67,13 +67,13 @@ namespace MonoGame.Framework.Vectors
         /// Gets the vector as a <see cref="Vector3"/>
         /// where the XYZ components correspond to RGB. 
         /// </summary>
-        Vector3 ToVector3() => ToScaledVector3();
+        Vector3 ToVector3(); // => ToScaledVector3();
 
         /// <summary>
         /// Gets the vector as a <see cref="Vector4"/>
         /// where the XYZW components correspond to RGBA. 
         /// </summary>
-        Vector4 ToVector4() => ToScaledVector4();
+        Vector4 ToVector4(); // => ToScaledVector4();
 
         #endregion
     }

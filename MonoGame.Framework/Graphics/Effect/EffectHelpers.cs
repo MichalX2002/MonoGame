@@ -8,6 +8,7 @@
 //#endregion
 
 using System;
+using System.Numerics;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -70,10 +71,10 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         internal static EffectDirtyFlags SetWorldViewProjAndFog(
             EffectDirtyFlags dirtyFlags,
-            in Matrix world, 
-            in Matrix view, 
-            in Matrix projection, 
-            Matrix worldView,
+            in Matrix4x4 world, 
+            in Matrix4x4 view, 
+            in Matrix4x4 projection, 
+            Matrix4x4 worldView,
             bool fogEnabled, 
             float fogStart,
             float fogEnd,
@@ -83,9 +84,9 @@ namespace MonoGame.Framework.Graphics
             // Recompute the world+view+projection matrix?
             if ((dirtyFlags & EffectDirtyFlags.WorldViewProj) != 0)
             {
-                worldView = Matrix.Multiply(world, view);
+                worldView = Matrix4x4.Multiply(world, view);
                 
-                var worldViewProj = Matrix.Multiply(worldView, projection);
+                var worldViewProj = Matrix4x4.Multiply(worldView, projection);
                 worldViewProjParam.SetValue(worldViewProj);
                 dirtyFlags &= ~EffectDirtyFlags.WorldViewProj;
             }
@@ -118,7 +119,7 @@ namespace MonoGame.Framework.Graphics
         /// space vertex position to compute fog amount.
         /// </summary>
         static void SetFogVector(
-            in Matrix worldView, 
+            in Matrix4x4 worldView, 
             float fogStart, 
             float fogEnd, 
             EffectParameter fogVectorParam)
@@ -154,8 +155,8 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         internal static EffectDirtyFlags SetLightingMatrices(
             EffectDirtyFlags dirtyFlags, 
-            in Matrix world, 
-            in Matrix view,
+            in Matrix4x4 world, 
+            in Matrix4x4 view,
             EffectParameter worldParam, 
             EffectParameter worldInverseTransposeParam, 
             EffectParameter eyePositionParam)
@@ -163,8 +164,9 @@ namespace MonoGame.Framework.Graphics
             // Set the world and world inverse transpose matrices.
             if ((dirtyFlags & EffectDirtyFlags.World) != 0)
             {
-                var worldTranspose = Matrix.Invert(world);
-                var worldInverseTranspose = Matrix.Transpose(worldTranspose);
+                if (!Matrix4x4.Invert(world, out var worldTranspose))
+                    throw new ArgumentException("Failed to invert matrix.", nameof(world));
+                var worldInverseTranspose = Matrix4x4.Transpose(worldTranspose);
 
                 worldParam.SetValue(world);
                 worldInverseTransposeParam.SetValue(worldInverseTranspose);
@@ -174,7 +176,8 @@ namespace MonoGame.Framework.Graphics
             // Set the eye position.
             if ((dirtyFlags & EffectDirtyFlags.EyePosition) != 0)
             {
-                var viewInverse = Matrix.Invert(view);
+                if(!Matrix4x4.Invert(view, out var viewInverse))
+                    throw new ArgumentException("Failed to invert matrix.", nameof(world));
 
                 eyePositionParam.SetValue(viewInverse.Translation);
                 dirtyFlags &= ~EffectDirtyFlags.EyePosition;

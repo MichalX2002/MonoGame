@@ -81,6 +81,10 @@ This package provides you with MonoGame Framework that works on Android.</Descri
     <Compile Include="Platform\Input\MessageBox.Android.cs" />
     <Compile Include="Platform\Input\Mouse.Default.cs" />
     <Compile Include="Platform\Input\MouseCursor.Default.cs" />
+    <Compile Include="Platform\Input\Touch\TouchPanelCapabilities.Android.cs">
+      <SubType>Code</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Compile>
     <Compile Include="Platform\Media\Song.NVorbis.cs">
       <SubType>Code</SubType>
       <Generator>MSBuild:Compile</Generator>

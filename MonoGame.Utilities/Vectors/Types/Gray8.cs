@@ -34,7 +34,7 @@ namespace MonoGame.Framework.Vectors
         {
             scaledVector *= byte.MaxValue;
             scaledVector += new Vector3(0.5f);
-            scaledVector.Clamp(byte.MinValue, byte.MaxValue);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, byte.MaxValue);
 
             L = (byte)(LuminanceHelper.BT709.ToGrayF(scaledVector) + 0.5f);
         }
@@ -86,7 +86,12 @@ namespace MonoGame.Framework.Vectors
                 LuminanceHelper.BT709.ToGray16(source.R, source.G, source.B));
         }
 
-        public readonly Color ToColor()
+        public readonly Rgb24 ToRgb24()
+        {
+            return new Rgb24(L);
+        }
+
+        public readonly Color ToRgba32()
         {
             return new Color(L, byte.MaxValue);
         }
@@ -115,7 +120,7 @@ namespace MonoGame.Framework.Vectors
             return this == other;
         }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is Gray8 other && Equals(other);
         }

@@ -9,7 +9,7 @@ namespace MonoGame.Framework.Graphics
     public sealed partial class TextureCollection
     {
         private readonly GraphicsDevice _graphicsDevice;
-        private readonly Texture[] _textures;
+        private readonly Texture?[] _textures;
         private readonly bool _applyToVertexStage;
         private int _dirty;
 
@@ -22,7 +22,7 @@ namespace MonoGame.Framework.Graphics
             PlatformInit();
         }
 
-        public Texture this[int index]
+        public Texture? this[int index]
         {
             get => _textures[index];
             set

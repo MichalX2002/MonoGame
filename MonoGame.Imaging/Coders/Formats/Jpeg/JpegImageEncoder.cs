@@ -35,11 +35,10 @@ namespace MonoGame.Imaging.Coders.Formats
                 if (image == null) throw new ArgumentNullException(nameof(image));
                 if (writeState == null) throw new ArgumentNullException(nameof(writeState));
 
-                var options = encoderState.GetCoderOptions<JpegEncoderOptions>();
+                var options = encoderState.GetCoderOptionsOrDefault<JpegEncoderOptions>();
 
                 bool useFloatPixels = writeState.Depth > 8;
 
-                // TODO: utilize readFloatPixels
                 ImageWrite.Jpeg.WriteCore(writeState, options.Quality, useFloatPixels);
             }
         }

@@ -26,9 +26,11 @@ namespace MonoGame.Framework
         // List is slightly faster than HashSet as low item count is the norm.
         private List<Keys> _keys;
 
-        private List<string> _fileDropList;
+        private List<string>? _fileDropList;
 
         public override GameRunBehavior DefaultRunBehavior => GameRunBehavior.Synchronous;
+
+        public override GameWindow Window => _window;
 
         public SDLGamePlatform(Game game) : base(game)
         {
@@ -56,7 +58,7 @@ namespace MonoGame.Framework
             SDL.DisableScreenSaver();
 
             GamePad.InitDatabase();
-            Window = _window = new SDLGameWindow(_game);
+            _window = new SDLGameWindow(_game);
         }
 
         public override void BeforeInitialize()
@@ -73,7 +75,7 @@ namespace MonoGame.Framework
 
         internal override void OnPresentationChanged(PresentationParameters pp)
         {
-            var displayIndex = SDL.Window.GetDisplayIndex(Window.Handle);
+            var displayIndex = SDL.Window.GetDisplayIndex(_window.WindowHandle);
             var displayName = SDL.Display.GetDisplayName(displayIndex);
             BeginScreenDeviceChange(pp.IsFullScreen);
             EndScreenDeviceChange(displayName, pp.BackBufferWidth, pp.BackBufferHeight);
@@ -81,7 +83,7 @@ namespace MonoGame.Framework
 
         public override void RunLoop()
         {
-            SDL.Window.Show(Window.Handle);
+            SDL.Window.Show(_window.WindowHandle);
             _window.TaskbarList.WindowHandle = _window.GetSubsystemWindowHandle();
 
             while (true)
@@ -109,6 +111,8 @@ namespace MonoGame.Framework
                         Interlocked.Increment(ref _isExiting);
                         break;
 
+                    #region Joystick
+
                     case SDL.EventType.JoyDeviceAdded:
                         Joystick.AddDevice(ev.JoystickDevice.Which);
                         break;
@@ -116,6 +120,10 @@ namespace MonoGame.Framework
                     case SDL.EventType.JoyDeviceRemoved:
                         Joystick.RemoveDevice(ev.JoystickDevice.Which);
                         break;
+
+                    #endregion
+
+                    #region GameController
 
                     case SDL.EventType.ControllerDeviceRemoved:
                         GamePad.RemoveDevice(ev.ControllerDevice.Which);
@@ -127,24 +135,32 @@ namespace MonoGame.Framework
                         GamePad.UpdatePacketInfo(ev.ControllerDevice.Which, ev.ControllerDevice.TimeStamp);
                         break;
 
+                    #endregion
+
+                    #region Mouse
+
                     case SDL.EventType.MouseWheel:
-                        Mouse.ScrollY += ev.Wheel.Y * MouseWheelDelta;
-                        Mouse.ScrollX += ev.Wheel.X * MouseWheelDelta;
+                        _window.Mouse.ScrollY += ev.MouseWheel.Y * MouseWheelDelta;
+                        _window.Mouse.ScrollX += ev.MouseWheel.X * MouseWheelDelta;
                         break;
 
                     case SDL.EventType.MouseMotion:
-                        Window.MouseState.X = ev.Motion.X;
-                        Window.MouseState.Y = ev.Motion.Y;
+                        _window.Mouse.State.X = ev.MouseMotion.X;
+                        _window.Mouse.State.Y = ev.MouseMotion.Y;
                         break;
+
+                    #endregion
+
+                    #region Keyboard
 
                     case SDL.EventType.KeyDown:
                     {
-                        bool hasMapping = KeyboardUtil.ToXna(ev.Key.Keysym.Sym, out var key);
+                        bool hasMapping = KeyboardUtil.ToXna(ev.KeyboardKey.Keysym.Sym, out var key);
                         if (hasMapping)
                             if (!_keys.Contains(key))
                                 _keys.Add(key);
 
-                        Rune.TryCreate(ev.Key.Keysym.Sym, out var rune);
+                        Rune.TryCreate(ev.KeyboardKey.Keysym.Sym, out var rune);
                         var inputEv = new TextInputEventArgs(rune, hasMapping ? key : (Keys?)null);
                         _window.OnKeyDown(inputEv);
 
@@ -155,11 +171,11 @@ namespace MonoGame.Framework
 
                     case SDL.EventType.KeyUp:
                     {
-                        bool hasMapping = KeyboardUtil.ToXna(ev.Key.Keysym.Sym, out var key);
+                        bool hasMapping = KeyboardUtil.ToXna(ev.KeyboardKey.Keysym.Sym, out var key);
                         if (hasMapping)
                             _keys.Remove(key);
 
-                        Rune.TryCreate(ev.Key.Keysym.Sym, out var rune);
+                        Rune.TryCreate(ev.KeyboardKey.Keysym.Sym, out var rune);
                         _window.OnKeyUp(new TextInputEventArgs(rune, hasMapping ? key : (Keys?)null));
                         break;
                     }
@@ -167,13 +183,13 @@ namespace MonoGame.Framework
                     case SDL.EventType.TextInput:
                         unsafe
                         {
-                            var utf8 = new Span<byte>(ev.Text.Text, SDL.Keyboard.TextInputEvent.TextSize);
+                            var utf8 = new Span<byte>(ev.TextInput.Text, SDL.Keyboard.TextInputEvent.TextSize);
                             int length = utf8.IndexOf((byte)0);
                             if (length == -1)
                                 throw new InvalidDataException();
 
                             utf8 = utf8.Slice(0, length);
-                            while (utf8.Length > 0)
+                            while (!utf8.IsEmpty)
                             {
                                 var status = Rune.DecodeFromUtf8(utf8, out Rune rune, out int consumed);
                                 if (status != OperationStatus.Done)
@@ -186,6 +202,10 @@ namespace MonoGame.Framework
                         }
                         break;
 
+                    #endregion
+
+                    #region Drop
+
                     case SDL.EventType.DropBegin:
                         if (_fileDropList == null)
                             _fileDropList = new List<string>();
@@ -197,7 +217,7 @@ namespace MonoGame.Framework
                             if (_window.IsFilesDroppedHandled)
                             {
                                 string filePath = InteropHelpers.Utf8ToString(ev.Drop.File);
-                                _fileDropList.Add(filePath);
+                                _fileDropList!.Add(filePath);
                             }
                         }
                         finally
@@ -207,12 +227,38 @@ namespace MonoGame.Framework
                         break;
 
                     case SDL.EventType.DropCompleted:
-                        if (_fileDropList.Count > 0)
+                        if (_fileDropList!.Count > 0)
                         {
                             _window.InvokeFileDropped(_fileDropList);
                             _fileDropList = null;
                         }
                         break;
+
+                    #endregion
+
+                    #region Touch
+
+                        // TODO:
+
+                    case SDL.EventType.FingerDown:
+                        // ev.TouchFinger;
+                        break;
+
+                    case SDL.EventType.FingerUp:
+                        // ev.TouchFinger;
+                        break;
+
+                    case SDL.EventType.FingerMotion:
+                        // ev.TouchFinger;
+                        break;
+
+                    case SDL.EventType.MultiGesture:
+                        // ev.TouchMultiGesture
+                        break;
+
+                    #endregion
+
+                    #region Window
 
                     case SDL.EventType.WindowEvent:
                         switch (ev.Window.EventId)
@@ -239,6 +285,8 @@ namespace MonoGame.Framework
                                 break;
                         }
                         break;
+
+                        #endregion
                 }
             }
         }
@@ -297,7 +345,6 @@ namespace MonoGame.Framework
             if (_window != null)
             {
                 _window.Dispose();
-                _window = null;
 
                 Joystick.CloseDevices();
                 SDL.Quit();

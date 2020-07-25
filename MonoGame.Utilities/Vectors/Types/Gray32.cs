@@ -34,24 +34,48 @@ namespace MonoGame.Framework.Vectors
         [CLSCompliant(false)]
         public uint PackedValue { readonly get => L; set => L = value; }
 
-        public void FromScaledVector4(Vector4 scaledVector)
+        public void FromScaledVector(Vector3 scaledVector)
         {
             scaledVector *= uint.MaxValue;
-            scaledVector += new Vector4(0.5f);
-            scaledVector.Clamp(uint.MinValue, uint.MaxValue);
+            scaledVector += new Vector3(0.5f);
+            scaledVector = VectorHelper.ZeroMax(scaledVector, uint.MaxValue);
 
-            L = (uint)(LuminanceHelper.BT709.ToGrayF(scaledVector.ToVector3()) + 0.5f);
+            L = (uint)(LuminanceHelper.BT709.ToGrayF(scaledVector) + 0.5f);
+        }
+
+        public void FromScaledVector(Vector4 scaledVector)
+        {
+            FromScaledVector(scaledVector.ToVector3());
+        }
+
+        public readonly Vector3 ToScaledVector3()
+        {
+            return new Vector3((float)(L / (double)uint.MaxValue));
         }
 
         public readonly Vector4 ToScaledVector4()
         {
-            float l = (float)(L / (double)uint.MaxValue);
-            return new Vector4(l, l, l, 1);
+            return new Vector4(ToScaledVector3(), 1);
         }
 
         #endregion
 
         #region IPixel
+
+        public void FromAlpha(Alpha8 source)
+        {
+            L = uint.MaxValue;
+        }
+
+        public void FromAlpha(Alpha16 source)
+        {
+            L = uint.MaxValue;
+        }
+
+        public void FromAlpha(AlphaF source)
+        {
+            L = uint.MaxValue;
+        }
 
         public void FromGray(Gray8 source)
         {
@@ -88,6 +112,21 @@ namespace MonoGame.Framework.Vectors
         public void FromRgba(Rgba64 source)
         {
             L = LuminanceHelper.BT709.ToGray32(source.R, source.G, source.B);
+        }
+
+        public readonly Alpha8 ToAlpha8()
+        {
+            return Alpha8.Opaque;
+        }
+        
+        public readonly Alpha16 ToAlpha16()
+        {
+            return Alpha16.Opaque;
+        }
+        
+        public readonly AlphaF ToAlphaF()
+        {
+            return AlphaF.Opaque;
         }
 
         public readonly Color ToColor()
