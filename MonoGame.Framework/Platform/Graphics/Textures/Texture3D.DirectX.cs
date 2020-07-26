@@ -3,12 +3,10 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.IO;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using SharpDX;
 using SharpDX.Direct3D11;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
+using Resource = SharpDX.Direct3D11.Resource;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -36,8 +34,7 @@ namespace MonoGame.Framework.Graphics
             GetTexture();
         }
 
-
-        internal override void CreateTexture()
+        internal override Resource CreateTexture()
         {
             var description = new Texture3DDescription
             {
@@ -55,6 +52,7 @@ namespace MonoGame.Framework.Graphics
             if (renderTarget)
             {
                 description.BindFlags |= BindFlags.RenderTarget;
+
                 if (mipMap)
                 {
                     // Note: XNA 4 does not have a method Texture.GenerateMipMaps() 
@@ -64,13 +62,12 @@ namespace MonoGame.Framework.Graphics
                 }
             }
 
-            _texture = new SharpDX.Direct3D11.Texture3D(GraphicsDevice._d3dDevice, description);
+            return new SharpDX.Direct3D11.Texture3D(GraphicsDevice._d3dDevice, description);
         }
 
-        private unsafe void PlatformSetData<T>(
+        private void PlatformSetData(
             int level, int left, int top, int right, int bottom, int front, int back,
-            int width, int height, int depth, ReadOnlySpan<T> data)
-            where T : unmanaged
+            int width, int height, int depth, ReadOnlySpan<byte> data)
         {
             int rowPitch = GetPitch(width);
             int slicePitch = rowPitch * height; // For 3D texture: Size of 2D image.
@@ -81,14 +78,13 @@ namespace MonoGame.Framework.Graphics
             lock (d3dContext)
             {
                 var texture = GetTexture();
-                ref var mutableData = ref Unsafe.AsRef(data.GetPinnableReference());
+                ref var mutableData = ref MemoryMarshal.GetReference(data);
                 d3dContext.UpdateSubresource(ref mutableData, texture, subresourceIndex, rowPitch, slicePitch, region);
             }
         }
 
-        private void PlatformGetData<T>(
-            int level, int left, int top, int right, int bottom, int front, int back, Span<T> destination)
-            where T : unmanaged
+        private void PlatformGetData(
+            int level, int left, int top, int right, int bottom, int front, int back, Span<byte> destination)
         {
             // Create a temp staging resource for copying the data.
             // 

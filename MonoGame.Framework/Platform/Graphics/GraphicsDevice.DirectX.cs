@@ -10,7 +10,7 @@ using SharpDX.Mathematics.Interop;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
+using Vector4 = System.Numerics.Vector4;
 using DXResource = SharpDX.Direct3D11.Resource;
 using DXTexture2D = SharpDX.Direct3D11.Texture2D;
 
@@ -28,8 +28,8 @@ namespace MonoGame.Framework.Graphics
         // Core Direct3D Objects
         internal SharpDX.Direct3D11.Device _d3dDevice;
         internal DeviceContext _d3dContext;
-        internal RenderTargetView _renderTargetView;
-        internal DepthStencilView _depthStencilView;
+        internal RenderTargetView? _renderTargetView;
+        internal DepthStencilView? _depthStencilView;
 
         private int _vertexBufferSlotsUsed;
         private bool _blendFactorDirty;
@@ -54,15 +54,15 @@ namespace MonoGame.Framework.Graphics
 
 #elif WINDOWS
 
-        private SwapChain _swapChain;
+        private SwapChain? _swapChain;
 
 #endif
 
         // The active render targets.
-        private readonly RenderTargetView[] _currentRenderTargets = new RenderTargetView[4];
+        private RenderTargetView?[] CurrentRenderTargets { get; } = new RenderTargetView?[4];
 
         // The active depth view.
-        private DepthStencilView _currentDepthStencilView;
+        private DepthStencilView? _currentDepthStencilView;
 
         private readonly Dictionary<VertexDeclaration, DynamicVertexBuffer> _userVertexBuffers =
             new Dictionary<VertexDeclaration, DynamicVertexBuffer>();
@@ -97,7 +97,7 @@ namespace MonoGame.Framework.Graphics
         {
             MaxTextureSlots = 16;
             MaxVertexTextureSlots = 16;
-            
+
             MaxTexture2DSize = DXResource.MaximumTexture2DSize;
             MaxTexture3DSize = DXResource.MaximumTexture3DSize;
             MaxTextureCubeSize = DXResource.MaximumTextureCubeSize;
@@ -110,8 +110,8 @@ namespace MonoGame.Framework.Graphics
 #if WINDOWS
             CreateDeviceResources();
 #endif
-            _maxVertexBufferSlots = _d3dDevice.FeatureLevel >= FeatureLevel.Level_11_0 
-                ? InputAssemblerStage.VertexInputResourceSlotCount 
+            _maxVertexBufferSlots = _d3dDevice.FeatureLevel >= FeatureLevel.Level_11_0
+                ? InputAssemblerStage.VertexInputResourceSlotCount
                 : 16;
         }
 
@@ -571,7 +571,7 @@ namespace MonoGame.Framework.Graphics
                     driverType = DriverType.Warp;
                     break;
             }
-            
+
             try
             {
                 // Create the Direct3D device.
@@ -599,12 +599,12 @@ namespace MonoGame.Framework.Graphics
         internal void SetHardwareFullscreen()
         {
             bool state = PresentationParameters.IsFullScreen && PresentationParameters.HardwareModeSwitch;
-            _swapChain.SetFullscreenState(state, null);
+            _swapChain!.SetFullscreenState(state, null);
         }
 
         internal void ClearHardwareFullscreen()
         {
-            _swapChain.SetFullscreenState(false, null);
+            _swapChain!.SetFullscreenState(false, null);
         }
 
         internal void ResizeTargets()
@@ -622,12 +622,12 @@ namespace MonoGame.Framework.Graphics
                 Height = PresentationParameters.BackBufferHeight,
             };
 
-            _swapChain.ResizeTarget(ref descr);
+            _swapChain!.ResizeTarget(ref descr);
         }
 
         internal void GetModeSwitchedSize(out int width, out int height)
         {
-            Output output = null;
+            Output? output = null;
             if (_swapChain == null)
             {
                 // get the primary output
@@ -685,13 +685,14 @@ namespace MonoGame.Framework.Graphics
             PresentationParameters.MultiSampleCount =
                 GetClampedMultisampleCount(PresentationParameters.MultiSampleCount);
 
-            _d3dContext.OutputMerger.SetTargets((DepthStencilView)null, (RenderTargetView)null);
+            _d3dContext.OutputMerger.SetTargets((DepthStencilView)null!, (RenderTargetView)null!);
 
             if (_renderTargetView != null)
             {
                 _renderTargetView.Dispose();
                 _renderTargetView = null;
             }
+
             if (_depthStencilView != null)
             {
                 _depthStencilView.Dispose();
@@ -700,7 +701,7 @@ namespace MonoGame.Framework.Graphics
 
             // Clear the current render targets.
             _currentDepthStencilView = null;
-            Array.Clear(_currentRenderTargets, 0, _currentRenderTargets.Length);
+            Array.Clear(CurrentRenderTargets, 0, CurrentRenderTargets.Length);
             Array.Clear(_currentRenderTargetBindings, 0, _currentRenderTargetBindings.Length);
             RenderTargetCount = 0;
 
@@ -720,7 +721,7 @@ namespace MonoGame.Framework.Graphics
 
             var format = SharpDXHelper.ToFormat(PresentationParameters.BackBufferFormat);
             var multisampleDesc = GetSupportedSampleDescription(
-                format, 
+                format,
                 PresentationParameters.MultiSampleCount);
 
             // If the swap chain already exists... update it.
@@ -845,7 +846,7 @@ namespace MonoGame.Framework.Graphics
             if (_swapChain == null)
                 return;
 
-            Output output = null;
+            Output? output = null;
             try
             {
                 output = _swapChain.ContainingOutput;
@@ -892,7 +893,7 @@ namespace MonoGame.Framework.Graphics
             // the level returned by CheckMultisampleQualityLevels
             // https://msdn.microsoft.com/en-us/library/windows/desktop/bb173072(v=vs.85).aspx
             var quality = _d3dDevice.CheckMultisampleQualityLevels(format, multiSampleCount) - 1;
-            
+
             // NOTE: should we always return highest quality?
             return Math.Max(quality, 0); // clamp minimum to 0 
         }
@@ -931,7 +932,7 @@ namespace MonoGame.Framework.Graphics
                 // Clear the diffuse render buffer.
                 if ((options & ClearOptions.Target) == ClearOptions.Target)
                 {
-                    foreach (var view in _currentRenderTargets)
+                    foreach (var view in CurrentRenderTargets)
                     {
                         if (view != null)
                             _d3dContext.ClearRenderTargetView(
@@ -967,7 +968,7 @@ namespace MonoGame.Framework.Graphics
             foreach (var vb in _userVertexBuffers.Values)
                 vb.Dispose();
 
-            SharpDX.Utilities.Dispose(ref _swapChain);
+            SharpDX.Utilities.Dispose(ref _swapChain!);
 
 #if WINDOWS_UAP
             if (_bitmapTarget != null)
@@ -1037,7 +1038,7 @@ namespace MonoGame.Framework.Graphics
 
                 // The first argument instructs DXGI to block n VSyncs before presenting.
                 lock (_d3dContext)
-                    _swapChain.Present(syncInterval, PresentFlags.None);
+                    _swapChain!.Present(syncInterval, PresentFlags.None);
             }
             catch (SharpDXException)
             {
@@ -1095,12 +1096,12 @@ namespace MonoGame.Framework.Graphics
         private void PlatformApplyDefaultRenderTarget()
         {
             // Set the default swap chain.
-            Array.Clear(_currentRenderTargets, 0, _currentRenderTargets.Length);
-            _currentRenderTargets[0] = _renderTargetView;
+            Array.Clear(CurrentRenderTargets, 0, CurrentRenderTargets.Length);
+            CurrentRenderTargets[0] = _renderTargetView;
             _currentDepthStencilView = _depthStencilView;
 
             lock (_d3dContext)
-                _d3dContext.OutputMerger.SetTargets(_currentDepthStencilView, _currentRenderTargets);
+                _d3dContext.OutputMerger.SetTargets(_currentDepthStencilView, CurrentRenderTargets);
         }
 
         internal void PlatformResolveRenderTargets()
@@ -1126,7 +1127,7 @@ namespace MonoGame.Framework.Graphics
         private IRenderTarget PlatformApplyRenderTargets()
         {
             // Clear the current render targets.
-            Array.Clear(_currentRenderTargets, 0, _currentRenderTargets.Length);
+            Array.Clear(CurrentRenderTargets, 0, CurrentRenderTargets.Length);
             _currentDepthStencilView = null;
 
             // Make sure none of the new targets are bound
@@ -1141,7 +1142,7 @@ namespace MonoGame.Framework.Graphics
             {
                 var binding = _currentRenderTargetBindings[i];
                 var target = (IRenderTarget)binding.RenderTarget;
-                _currentRenderTargets[i] = target.GetRenderTargetView(binding.ArraySlice);
+                CurrentRenderTargets[i] = target.GetRenderTargetView(binding.ArraySlice);
             }
 
             // Use the depth from the first target.
@@ -1150,7 +1151,7 @@ namespace MonoGame.Framework.Graphics
 
             // Set the targets.
             lock (_d3dContext)
-                _d3dContext.OutputMerger.SetTargets(_currentDepthStencilView, _currentRenderTargets);
+                _d3dContext.OutputMerger.SetTargets(_currentDepthStencilView, CurrentRenderTargets);
 
             return renderTarget;
         }
@@ -1331,29 +1332,43 @@ namespace MonoGame.Framework.Graphics
             SamplerStates.PlatformSetSamplers(this);
         }
 
-        private void SetUserVertexBuffer<T>(
-            ReadOnlySpan<T> vertexData, VertexDeclaration declaration)
-            where T : unmanaged
+        private int SetUserVertexBuffer(
+            ReadOnlySpan<byte> vertexData, VertexDeclaration declaration, out int vertexCount)
         {
-            if (!_userVertexBuffers.TryGetValue(declaration, out DynamicVertexBuffer buffer) || 
-                buffer.Capacity < vertexData.Length)
+            vertexCount = vertexData.Length / declaration.VertexStride;
+
+            if (!_userVertexBuffers.TryGetValue(declaration, out var buffer) ||
+                buffer.Capacity < vertexCount)
             {
                 // Dispose the previous buffer if we have one.
-                if (buffer != null)
-                    buffer.Dispose();
+                buffer?.Dispose();
 
                 buffer = new DynamicVertexBuffer(
-                    this, declaration, Math.Max(vertexData.Length, 2000), BufferUsage.WriteOnly);
+                    this, declaration, Math.Max(vertexCount, 2000), BufferUsage.WriteOnly);
                 _userVertexBuffers[declaration] = buffer;
             }
 
-            buffer.SetData(0, vertexData, declaration.VertexStride, SetDataOptions.Discard);
+            var startVertex = buffer.UserOffset;
+            if ((vertexCount + buffer.UserOffset) < buffer.Count)
+            {
+                buffer.UserOffset += vertexCount;
+                int byteOffset = startVertex * declaration.VertexStride;
+                buffer.SetData(byteOffset, vertexData, declaration.VertexStride, SetDataOptions.NoOverwrite);
+            }
+            else
+            {
+                buffer.UserOffset = vertexCount;
+                buffer.SetData(vertexData, declaration.VertexStride, SetDataOptions.Discard);
+                startVertex = 0;
+            }
+
             SetVertexBuffer(buffer);
+
+            return startVertex;
         }
 
-        private unsafe void SetUserIndexBuffer<TIndex>(
-            ReadOnlySpan<TIndex> indexData, IndexElementSize indexElementSize)
-            where TIndex : unmanaged
+        private int SetUserIndexBuffer(
+            ReadOnlySpan<byte> indexData, IndexElementSize indexElementSize)
         {
             DynamicIndexBuffer buffer;
             int requiredIndexCount = Math.Max(indexData.Length, 6000);
@@ -1375,11 +1390,28 @@ namespace MonoGame.Framework.Graphics
                     _userIndexBuffer32 = new DynamicIndexBuffer(
                         this, indexElementSize, requiredIndexCount, BufferUsage.WriteOnly);
                 }
-                buffer = _userIndexBuffer32;                
+                buffer = _userIndexBuffer32;
             }
 
-            buffer.SetData(indexData, SetDataOptions.Discard);
+            int startIndex = buffer.UserOffset;
+            int indexCount = indexData.Length / (int)indexElementSize;
+
+            if ((indexCount + buffer.UserOffset) < buffer.Count)
+            {
+                buffer.UserOffset += indexCount;
+                int byteOffset = startIndex * (int)indexElementSize;
+                buffer.SetData(byteOffset, indexData, SetDataOptions.NoOverwrite);
+            }
+            else
+            {
+                startIndex = 0;
+                buffer.UserOffset = indexCount;
+                buffer.SetData(indexData, SetDataOptions.Discard);
+            }
+
             Indices = buffer;
+
+            return startIndex;
         }
 
         private void PlatformDrawIndexedPrimitives(
@@ -1396,11 +1428,12 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        private void PlatformDrawUserPrimitives<T>(
-            PrimitiveType primitiveType, ReadOnlySpan<T> vertexData, VertexDeclaration vertexDeclaration) 
-            where T : unmanaged
+        private void PlatformDrawUserPrimitives(
+            PrimitiveType primitiveType,
+            ReadOnlySpan<byte> vertexData,
+            VertexDeclaration vertexDeclaration)
         {
-            var startVertex = SetUserVertexBuffer(vertexData, vertexOffset, vertexCount, vertexDeclaration);
+            var startVertex = SetUserVertexBuffer(vertexData, vertexDeclaration, out int vertexCount);
 
             lock (_d3dContext)
             {
@@ -1422,11 +1455,17 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, short[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
+        private void PlatformDrawUserIndexedPrimitives(
+            PrimitiveType primitiveType,
+            IndexElementSize elementSize,
+            ReadOnlySpan<byte> vertexData,
+            ReadOnlySpan<byte> indexData,
+            int primitiveCount,
+            VertexDeclaration vertexDeclaration)
         {
-            var indexCount = GetElementCountArray(primitiveType, primitiveCount);
-            var startVertex = SetUserVertexBuffer(vertexData, vertexOffset, numVertices, vertexDeclaration);
-            var startIndex = SetUserIndexBuffer(indexData, indexOffset, indexCount);
+            var indexCount = GetElementCountForType(primitiveType, primitiveCount);
+            var startVertex = SetUserVertexBuffer(vertexData, vertexDeclaration, out _);
+            var startIndex = SetUserIndexBuffer(indexData, elementSize);
 
             lock (_d3dContext)
             {
@@ -1437,147 +1476,22 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        private void PlatformDrawUserIndexedPrimitives<T>(PrimitiveType primitiveType, T[] vertexData, int vertexOffset, int numVertices, int[] indexData, int indexOffset, int primitiveCount, VertexDeclaration vertexDeclaration) where T : struct
-        {
-            var indexCount = GetElementCountArray(primitiveType, primitiveCount);
-            var startVertex = SetUserVertexBuffer(vertexData, vertexOffset, numVertices, vertexDeclaration);
-            var startIndex = SetUserIndexBuffer(indexData, indexOffset, indexCount);
-
-            lock (_d3dContext)
-            {
-                ApplyState(true);
-
-                _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
-                _d3dContext.DrawIndexed(indexCount, startIndex, startVertex);
-            }
-        }
-
-        private void PlatformDrawInstancedPrimitives(PrimitiveType primitiveType, int baseVertex, int startIndex,
-            int primitiveCount, int baseInstance, int instanceCount)
+        private void PlatformDrawInstancedPrimitives(
+            PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount,
+            int baseInstance, int instanceCount)
         {
             lock (_d3dContext)
             {
                 ApplyState(true);
 
                 _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
-                int indexCount = GetElementCountArray(primitiveType, primitiveCount);
+                int indexCount = GetElementCountForType(primitiveType, primitiveCount);
                 _d3dContext.DrawIndexedInstanced(indexCount, instanceCount, startIndex, baseVertex, baseInstance);
             }
         }
 
-        private void PlatformGetBackBufferData<T>(Rectangle? rect, T[] data, int startIndex, int count) where T : struct
+        private void PlatformGetBackBufferData(Span<byte> destination, Rectangle rect)
         {
-            // TODO share code with Texture2D.GetData and do pooling for staging textures
-            // first set up a staging texture
-            const SurfaceFormat format = SurfaceFormat.Color;
-
-            //You can't Map the BackBuffer surface, so we copy to another texture
-            using (var backBufferTexture = DXResource.FromSwapChain<DXTexture2D>(_swapChain, 0))
-            {
-                var desc = backBufferTexture.Description;
-                desc.SampleDescription = new SampleDescription(1, 0);
-                desc.BindFlags = BindFlags.None;
-                desc.CpuAccessFlags = CpuAccessFlags.Read;
-                desc.Usage = ResourceUsage.Staging;
-                desc.OptionFlags = ResourceOptionFlags.None;
-
-                bool rectFillsBackBuffer =
-                    rect.X == 0 &&
-                    rect.Y == 0 &&
-                    rect.Width == desc.Width &&
-                    rect.Height == desc.Height;
-
-                using (var stagingTex = new DXTexture2D(_d3dDevice, desc))
-                {
-                    lock (_d3dContext)
-                    {
-                        // Copy the data from the GPU to the staging texture.
-                        // if MSAA is enabled we need to first copy to a resource without MSAA
-                        if (backBufferTexture.Description.SampleDescription.Count > 1)
-                        {
-                            desc.Usage = ResourceUsage.Default;
-                            desc.CpuAccessFlags = CpuAccessFlags.None;
-                            using (var noMsTex = new DXTexture2D(_d3dDevice, desc))
-                            {
-                                _d3dContext.ResolveSubresource(backBufferTexture, 0, noMsTex, 0, desc.Format);
-                                if (rectFillsBackBuffer)
-                                {
-                                    _d3dContext.CopySubresourceRegion(noMsTex, 0,
-                                        new ResourceRegion(rect.Left, rect.Top, 0, rect.Right, rect.Bottom, 1), stagingTex,
-                                        0);
-                                }
-                                else
-                                    _d3dContext.CopyResource(noMsTex, stagingTex);
-                            }
-                        }
-                        else
-                        {
-                            if (rectFillsBackBuffer)
-                            {
-                                _d3dContext.CopySubresourceRegion(backBufferTexture, 0,
-                                    new ResourceRegion(rect.Left, rect.Top, 0, rect.Right, rect.Bottom, 1), stagingTex, 0);
-                            }
-                            else
-                                _d3dContext.CopyResource(backBufferTexture, stagingTex);
-                        }
-
-                        // Copy the data to the array.
-                        DataStream stream = null;
-                        try
-                        {
-                            var databox = _d3dContext.MapSubresource(
-                                stagingTex, 0, MapMode.Read, SharpDX.Direct3D11.MapFlags.None, out stream);
-
-                            int elementsInRow, rows;
-                            if (rectFillsBackBuffer)
-                            {
-                                elementsInRow = rect.Width;
-                                rows = rect.Height;
-                            }
-                            else
-                            {
-                                elementsInRow = stagingTex.Description.Width;
-                                rows = stagingTex.Description.Height;
-                            }
-
-                            var data = new T[destination.Length];
-                            var elementSize = format.GetSize();
-                            var rowSize = elementSize * elementsInRow;
-                            if (rowSize == databox.RowPitch)
-                            {
-                                stream.ReadRange(data, 0, destination.Length);
-                            }
-                            else
-                            {
-                                // Some drivers may add pitch to rows.
-                                // We need to copy each row separately and skip trailing zeroes.
-                                stream.Seek(0, System.IO.SeekOrigin.Begin);
-
-                                for (var row = 0; row < rows; row++)
-                                {
-                                    int i;
-                                    for (i = row * rowSize / sizeof(T); i < (row + 1) * rowSize / sizeof(T); i++)
-                                        data[i] = stream.Read<T>();
-
-                                    if (i >= destination.Length)
-                                        break;
-
-                                    stream.Seek(databox.RowPitch - rowSize, System.IO.SeekOrigin.Current);
-                                }
-                            }
-
-                            data.CopyTo(destination);
-                        }
-                        finally
-                        {
-                            SharpDX.Utilities.Dispose(ref stream);
-                        }
-                    }
-                }
-            }
-
-            /*
-
             // TODO share code with Texture2D.GetData and pool staging textures
             // first set up a staging texture
             const SurfaceFormat format = SurfaceFormat.Rgba32;
@@ -1586,16 +1500,19 @@ namespace MonoGame.Framework.Graphics
             using (var backBufferTexture = DXResource.FromSwapChain<DXTexture2D>(_swapChain, 0))
             {
                 var desc = backBufferTexture.Description;
+
                 desc.SampleDescription = new SampleDescription(1, 0);
                 desc.BindFlags = BindFlags.None;
                 desc.CpuAccessFlags = CpuAccessFlags.Read;
                 desc.Usage = ResourceUsage.Staging;
                 desc.OptionFlags = ResourceOptionFlags.None;
-                
+
                 using (var stagingTex = new DXTexture2D(_d3dDevice, desc))
                 {
-                    var resRegion = new ResourceRegion(rect.Left, rect.Top, 0, rect.Right, rect.Bottom, 1);
-                    bool isRectFull = 
+                    var resRegion = new ResourceRegion(
+                        rect.Left, rect.Top, 0, rect.Right, rect.Bottom, 1);
+
+                    bool isFilledRect =
                         rect.X == 0 &&
                         rect.Y == 0 &&
                         rect.Width == desc.Width &&
@@ -1613,7 +1530,7 @@ namespace MonoGame.Framework.Graphics
                             using (var noMsTex = new DXTexture2D(_d3dDevice, desc))
                             {
                                 _d3dContext.ResolveSubresource(backBufferTexture, 0, noMsTex, 0, desc.Format);
-                                if (isRectFull)
+                                if (isFilledRect)
                                     _d3dContext.CopyResource(noMsTex, stagingTex);
                                 else
                                     _d3dContext.CopySubresourceRegion(noMsTex, 0, resRegion, stagingTex, 0);
@@ -1621,7 +1538,7 @@ namespace MonoGame.Framework.Graphics
                         }
                         else
                         {
-                            if (isRectFull)
+                            if (isFilledRect)
                                 _d3dContext.CopyResource(backBufferTexture, stagingTex);
                             else
                                 _d3dContext.CopySubresourceRegion(backBufferTexture, 0, resRegion, stagingTex, 0);
@@ -1632,8 +1549,6 @@ namespace MonoGame.Framework.Graphics
                     }
                 }
             }
-
-            */
         }
 
         private void PlatformFlush()
@@ -1641,17 +1556,15 @@ namespace MonoGame.Framework.Graphics
             _d3dContext.Flush();
         }
 
-        internal static unsafe void CopyResourceTo<T>(
-            SurfaceFormat format, DataBox box, int columns, int rows, Span<T> destination)
-            where T : unmanaged
+        internal static unsafe void CopyResourceTo(
+            SurfaceFormat format, DataBox box, int columns, int rows, Span<byte> destination)
         {
             var byteSrc = new ReadOnlySpan<byte>((void*)box.DataPointer, box.RowPitch * rows);
-            var byteDst = MemoryMarshal.AsBytes(destination);
 
             int rowBytes = format.GetSize() * columns;
             if (rowBytes == box.RowPitch)
             {
-                byteSrc.CopyTo(byteDst);
+                byteSrc.CopyTo(destination);
             }
             else
             {
@@ -1659,21 +1572,11 @@ namespace MonoGame.Framework.Graphics
                 int byteOffset = 0;
                 for (int row = 0; row < rows; row++)
                 {
-                    var byteSrcSlice = byteSrc.Slice(byteOffset);
-                    var srcSlice = MemoryMarshal.Cast<byte, T>(byteSrcSlice);
+                    var srcSlice = byteSrc.Slice(byteOffset, rowBytes);
+                    var dstSlice = destination.Slice(row * rowBytes);
+                    srcSlice.CopyTo(dstSlice);
 
-                    int start = row * rowBytes / sizeof(T);
-                    int end = (row + 1) * rowBytes / sizeof(T);
-                    int x = 0;
-
-                    // iterate between start and end of the row in memory
-                    for (int i = start; i < end; i++, x++)
-                        destination[i] = srcSlice[x];
-
-                    if (end >= destination.Length)
-                        break;
-
-                    byteOffset += x * sizeof(T);
+                    byteOffset += rowBytes;
                     byteOffset += trailBytes;
                 }
             }

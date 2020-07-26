@@ -147,7 +147,7 @@ namespace MonoGame.Framework
             }
         }
 
-        public IntPtr GetSubsystemWindowHandle()
+        public override IntPtr GetSubsystemWindowHandle()
         {
             if (_windowHandle != IntPtr.Zero)
             {
@@ -365,11 +365,6 @@ namespace MonoGame.Framework
 
             SDL.Window.GetSize(WindowHandle, out _width, out _height);
             OnSizeChanged();
-        }
-
-        public void InvokeFileDropped(List<string> files)
-        {
-            OnFilesDropped(this, files);
         }
 
         protected internal override void SetSupportedOrientations(DisplayOrientation orientations)

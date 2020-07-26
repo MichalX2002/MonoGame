@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -45,8 +44,7 @@ namespace MonoGame.Framework.Graphics
                 0); // StructureSizeInBytes
         }
 
-        private unsafe void PlatformGetData<T>(int offsetInBytes, Span<T> destination)
-            where T : unmanaged
+        private unsafe void PlatformGetData(int byteOffset, Span<byte> destination)
         {
             if (_buffer == null)
                 return;
@@ -74,10 +72,9 @@ namespace MonoGame.Framework.Graphics
                         var box = deviceContext.MapSubresource(
                             stagingBuffer, 0, SharpDX.Direct3D11.MapMode.Read, SharpDX.Direct3D11.MapFlags.None);
 
-                        int srcBytes = Capacity * (int)ElementSize;
-                        var byteSrc = new ReadOnlySpan<byte>((void*)(box.DataPointer + offsetInBytes), srcBytes);
-                        var byteDst = MemoryMarshal.AsBytes(destination);
-                        byteSrc.Slice(0, byteDst.Length).CopyTo(byteDst);
+                        int srcBytes = Count * (int)ElementSize;
+                        var byteSrc = new ReadOnlySpan<byte>((void*)(box.DataPointer + byteOffset), srcBytes);
+                        byteSrc.Slice(0, destination.Length).CopyTo(destination);
                     }
                     finally
                     {
@@ -88,11 +85,9 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        private unsafe void PlatformSetData<T>(
-            int offsetInBytes, ReadOnlySpan<T> data, SetDataOptions options)
-            where T : unmanaged
+        private unsafe void PlatformSetData(
+            int byteOffset, ReadOnlySpan<byte> source, SetDataOptions options)
         {
-            int bytes = data.Length * sizeof(T);
             GenerateIfRequired();
 
             if (IsDynamic)
@@ -108,8 +103,8 @@ namespace MonoGame.Framework.Graphics
                     var box = d3dContext.MapSubresource(_buffer, 0, mode, SharpDX.Direct3D11.MapFlags.None);
 
                     int dstBytes = Capacity * (int)ElementSize;
-                    var dst = new Span<T>((void*)(box.DataPointer + offsetInBytes), dstBytes);
-                    data.CopyTo(dst);
+                    var dst = new Span<byte>((void*)(box.DataPointer + byteOffset), dstBytes);
+                    source.CopyTo(dst);
 
                     d3dContext.UnmapSubresource(_buffer, 0);
                 }
@@ -122,20 +117,21 @@ namespace MonoGame.Framework.Graphics
                     Front = 0,
                     Back = 1,
                     Bottom = 1,
-                    Left = offsetInBytes,
-                    Right = offsetInBytes + bytes
+                    Left = byteOffset,
+                    Right = byteOffset + source.Length
                 };
 
                 // TODO: We need to deal with threaded contexts here!
                 var d3dContext = GraphicsDevice._d3dContext;
                 lock (d3dContext)
                 {
-                    ref var mutableData = ref Unsafe.AsRef(data.GetPinnableReference());
-                    d3dContext.UpdateSubresource(ref mutableData, _buffer, 0, bytes, 0, region);
+                    ref var mutableData = ref MemoryMarshal.GetReference(source);
+                    d3dContext.UpdateSubresource(ref mutableData, _buffer, 0, source.Length, 0, region);
                 }
             }
         }
 
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)

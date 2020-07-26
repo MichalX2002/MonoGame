@@ -26,7 +26,7 @@ namespace MonoGame.Framework.Graphics
             GetTexture();
         }
 
-        internal override void CreateTexture()
+        internal override SharpDX.Direct3D11.Resource CreateTexture()
         {
             var description = new Texture2DDescription
             {
@@ -49,12 +49,11 @@ namespace MonoGame.Framework.Graphics
                     description.OptionFlags |= ResourceOptionFlags.GenerateMipMaps;
             }
 
-            _texture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, description);
+            return new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, description);
         }
 
-        private unsafe void PlatformGetData<T>(
-            CubeMapFace cubeMapFace, int level, Rectangle rect, Span<T> destination)
-            where T : unmanaged
+        private unsafe void PlatformGetData(
+            CubeMapFace cubeMapFace, int level, Rectangle rect, Span<byte> destination)
         {
             // Create a temp staging resource for copying the data.
             // 
@@ -126,7 +125,7 @@ namespace MonoGame.Framework.Graphics
             lock (d3dContext)
             {
                 var texture = GetTexture();
-                ref var mutableData = ref Unsafe.AsRef(data.GetPinnableReference());
+                ref var mutableData = ref MemoryMarshal.GetReference(data);
                 d3dContext.UpdateSubresource(ref mutableData, texture, subresourceIndex, pitch, 0, region);
 
             }

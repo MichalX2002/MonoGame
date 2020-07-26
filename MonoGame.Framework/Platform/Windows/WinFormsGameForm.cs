@@ -3,13 +3,14 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 using System.Windows.Forms;
 using MonoGame.Framework.Input.Touch;
 
 namespace MonoGame.Framework.Windows
 {
     internal static class MessageExtensions
-    {     
+    {
         public static int GetPointerId(this Message msg)
         {
             return (short)msg.WParam;
@@ -49,7 +50,7 @@ namespace MonoGame.Framework.Windows
 
         internal bool IsResizing { get; set; }
 
-        public event DataEvent <WinFormsGameForm, HorizontalMouseWheelEvent> MouseHorizontalWheel;
+        public event DataEvent<WinFormsGameForm, HorizontalMouseWheelEvent>? MouseHorizontalWheel;
 
         public WinFormsGameForm(WinFormsGameWindow window)
         {
@@ -58,9 +59,9 @@ namespace MonoGame.Framework.Windows
 
         public void CenterOnPrimaryMonitor()
         {
-             Location = new System.Drawing.Point(
-                 (Screen.PrimaryScreen.WorkingArea.Width  - Width ) / 2,
-                 (Screen.PrimaryScreen.WorkingArea.Height - Height) / 2);
+            Location = new System.Drawing.Point(
+                (Screen.PrimaryScreen.WorkingArea.Width - Width) / 2,
+                (Screen.PrimaryScreen.WorkingArea.Height - Height) / 2);
         }
 
         [System.Security.Permissions.PermissionSet(System.Security.Permissions.SecurityAction.Demand, Name = "FullTrust")]
@@ -71,21 +72,21 @@ namespace MonoGame.Framework.Windows
             switch (m.Msg)
             {
                 case WM_TABLET_QUERYSYSTEMGESTURESTA:
-                    {
-                        // This disables the windows touch helpers, popups, and 
-                        // guides that get in the way of touch gameplay.
-                        const int flags = 0x00000001 | // TABLET_DISABLE_PRESSANDHOLD
-                                          0x00000008 | // TABLET_DISABLE_PENTAPFEEDBACK
-                                          0x00000010 | // TABLET_DISABLE_PENBARRELFEEDBACK
-                                          0x00000100 | // TABLET_DISABLE_TOUCHUIFORCEON
-                                          0x00000200 | // TABLET_DISABLE_TOUCHUIFORCEOFF
-                                          0x00008000 | // TABLET_DISABLE_TOUCHSWITCH
-                                          0x00010000 | // TABLET_DISABLE_FLICKS
-                                          0x00080000 | // TABLET_DISABLE_SMOOTHSCROLLING 
-                                          0x00100000; // TABLET_DISABLE_FLICKFALLBACKKEYS
-                        m.Result = new IntPtr(flags);
-                        return;
-                    }
+                {
+                    // This disables the windows touch helpers, popups, and 
+                    // guides that get in the way of touch gameplay.
+                    const int flags = 0x00000001 | // TABLET_DISABLE_PRESSANDHOLD
+                                      0x00000008 | // TABLET_DISABLE_PENTAPFEEDBACK
+                                      0x00000010 | // TABLET_DISABLE_PENBARRELFEEDBACK
+                                      0x00000100 | // TABLET_DISABLE_TOUCHUIFORCEON
+                                      0x00000200 | // TABLET_DISABLE_TOUCHUIFORCEOFF
+                                      0x00008000 | // TABLET_DISABLE_TOUCHSWITCH
+                                      0x00010000 | // TABLET_DISABLE_FLICKS
+                                      0x00080000 | // TABLET_DISABLE_SMOOTHSCROLLING 
+                                      0x00100000; // TABLET_DISABLE_FLICKFALLBACKKEYS
+                    m.Result = new IntPtr(flags);
+                    return;
+                }
 
 #if WINDOWS && DIRECTX
                 case WM_KEYDOWN:
@@ -96,7 +97,7 @@ namespace MonoGame.Framework.Windows
                         case 0x5C: // Right Windows Key
 
                             if (_window.IsFullScreen && _window.HardwareModeSwitch)
-                                this.WindowState = FormWindowState.Minimized;
+                                WindowState = FormWindowState.Minimized;
 
                             break;
                     }
@@ -163,7 +164,7 @@ namespace MonoGame.Framework.Windows
                 position = PointToClient(position);
                 var vec = new Vector2(position.X, position.Y);
 
-                _window.TouchPanelState.AddEvent(id, state, vec, false);
+                _window.TouchPanel.AddEvent(id, state, vec, false);
             }
 
             base.WndProc(ref m);
@@ -186,12 +187,12 @@ namespace MonoGame.Framework.Windows
                 {
                     case WM_KEYDOWN:
                     case WM_SYSKEYDOWN:
-                        _window.OnKeyDown(new KeyInputEventArgs(key));
+                        _window.OnKeyDown(new TextInputEventArgs(new System.Text.Rune((char)key), key));
                         break;
 
                     case WM_KEYUP:
                     case WM_SYSKEYUP:
-                        _window.OnKeyUp(new KeyInputEventArgs(key));
+                        _window.OnKeyUp(new TextInputEventArgs(new System.Text.Rune((char)key), key));
                         break;
 
                     default:

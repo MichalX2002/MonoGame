@@ -84,7 +84,7 @@ namespace MonoGame.Framework
         public override void RunLoop()
         {
             SDL.Window.Show(_window.WindowHandle);
-            _window.TaskbarList.WindowHandle = _window.GetSubsystemWindowHandle();
+            Window.OnWindowHandleChanged();
 
             while (true)
             {
@@ -229,7 +229,7 @@ namespace MonoGame.Framework
                     case SDL.EventType.DropCompleted:
                         if (_fileDropList!.Count > 0)
                         {
-                            _window.InvokeFileDropped(_fileDropList);
+                            _window.OnFilesDropped(_fileDropList);
                             _fileDropList = null;
                         }
                         break;

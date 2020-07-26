@@ -2,47 +2,67 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
-using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace MonoGame.Framework.Input
 {
-    public static partial class Mouse
+    public partial class Mouse
     {
+        internal new WinFormsGameWindow Window => (WinFormsGameWindow)base.Window;
+
+        internal MouseState State;
+
+        private Control? _window;
+        private Cursor? _cursor;
+
+        /// <inheritdoc/>
+        protected override void WindowHandleChanged()
+        {
+            _window = Control.FromHandle(Window.WindowHandle);
+
+            UpdateMousePosition(); // TODO: check if this is smart
+            UpdateCursor();
+        }
+
+        private MouseState PlatformGetState()
+        {
+            return State;
+        }
+
+        private void PlatformSetPosition(int x, int y)
+        {
+            State.X = x;
+            State.Y = y;
+            UpdateMousePosition();
+        }
+
+        private void PlatformSetCursor(MouseCursor cursor)
+        {
+            _cursor = cursor.Cursor;
+            UpdateCursor();
+        }
+
         [DllImport("user32.dll", EntryPoint = "SetCursorPos")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetCursorPos(int X, int Y);
 
-        private static Control _window;
-
-        private static IntPtr PlatformGetWindowHandle()
+        private void UpdateMousePosition()
         {
-            return _window.Handle;
+            if (_window != null)
+            {
+                var pt = _window.PointToScreen(new System.Drawing.Point(State.X, State.Y));
+                SetCursorPos(pt.X, pt.Y);
+            }
         }
 
-        private static void PlatformSetWindowHandle(IntPtr windowHandle)
+        private void UpdateCursor()
         {
-            _window = Control.FromHandle(windowHandle);
-        }
-
-        private static MouseState PlatformGetState(GameWindow window)
-        {
-            return window.MouseState;
-        }
-
-        private static void PlatformSetPosition(int x, int y)
-        {
-            PrimaryWindow.MouseState.X = x;
-            PrimaryWindow.MouseState.Y = y;
-            
-            var pt = _window.PointToScreen(new System.Drawing.Point(x, y));
-            SetCursorPos(pt.X, pt.Y);
-        }
-
-        public static void PlatformSetCursor(MouseCursor cursor)
-        {
-            _window.Cursor = cursor.Cursor;
+            if (_window != null)
+            {
+                if (_cursor != null)
+                    _window.Cursor = _cursor;
+            }
         }
     }
 }

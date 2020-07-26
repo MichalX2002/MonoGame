@@ -5,34 +5,22 @@ namespace MonoGame.Framework.Utilities
     /// <summary>
     /// Exposes taskbar utilities on desktop platforms.
     /// </summary>
-    public partial class TaskbarList
+    public partial class TaskbarList : GameWindowDependency
     {
         private object SyncRoot { get; } = new object();
 
-        private IntPtr _windowHandle;
         private TaskbarProgressState _progressState;
         private TaskbarProgressValue _progressValue;
 
         /// <summary>
-        /// Gets whether taskbar functionality is available on the current platform.
+        /// Gets whether taskbar functionality is supported on the current platform.
         /// </summary>
         public bool IsSupported => PlatformGetIsSupported();
 
         /// <summary>
-        /// Gets or sets the OS window handle assigned to the taskbar.
+        /// Gets whether taskbar functionality is currently available.
         /// </summary>
-        public IntPtr WindowHandle
-        {
-            get => _windowHandle;
-            set
-            {
-                if (_windowHandle != value)
-                {
-                    _windowHandle = value;
-                    Update();
-                }
-            }
-        }
+        public bool IsAvailable => PlatformGetIsAvailable();
 
         /// <summary>
         /// Gets or sets the type of the progress indicator displayed on the taskbar.
@@ -47,7 +35,7 @@ namespace MonoGame.Framework.Utilities
                     if (_progressState != value)
                     {
                         _progressState = value;
-                        if (IsSupported)
+                        if (IsAvailable)
                             PlatformSetProgressState(value);
                     }
                 }
@@ -67,7 +55,7 @@ namespace MonoGame.Framework.Utilities
                     if (!_progressValue.Equals(value))
                     {
                         _progressValue = value;
-                        if (IsSupported)
+                        if (IsAvailable)
                             PlatformSetProgressValue(value);
                     }
                 }
@@ -77,9 +65,16 @@ namespace MonoGame.Framework.Utilities
         /// <summary>
         /// Constructs the <see cref="TaskbarList"/>.
         /// </summary>
-        public TaskbarList()
+        public TaskbarList(GameWindow window) : base(window)
         {
             PlatformConstruct();
+        }
+
+        /// <inheritdoc/>
+        protected override void WindowHandleChanged()
+        {
+            PlatformWindowHandleChanged();
+            Update();
         }
 
         /// <summary>
@@ -94,7 +89,7 @@ namespace MonoGame.Framework.Utilities
 
         internal void Update()
         {
-            if (!IsSupported)
+            if (!IsAvailable)
                 return;
 
             lock (SyncRoot)

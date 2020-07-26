@@ -22,7 +22,7 @@ namespace MonoGame.Framework.Graphics
                 var renderTargetViewDescription = new RenderTargetViewDescription
                 {
                     Dimension = RenderTargetViewDimension.Texture2DArray,
-                    Format = SharpDXHelper.ToFormat(this.Format),
+                    Format = SharpDXHelper.ToFormat(Format),
                     Texture2DArray =
                     {
                         ArraySize = 1,

@@ -23,7 +23,7 @@ namespace MonoGame.Framework.Vectors
             new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Blue),
             new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Green),
             new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Red));
-
+        
         public byte A;
         public byte B;
         public byte G;
@@ -223,13 +223,25 @@ namespace MonoGame.Framework.Vectors
 
         #region Equals
 
-        public readonly bool Equals(Abgr32 other) => this == other;
+        public readonly bool Equals(Abgr32 other)
+        {
+            return this == other;
+        }
 
-        public override readonly bool Equals(object? obj) => obj is Abgr32 other && Equals(other);
+        public override readonly bool Equals(object? obj)
+        {
+            return obj is Abgr32 other && Equals(other);
+        }
 
-        public static bool operator ==(in Abgr32 a, in Abgr32 b) => a.PackedValue == b.PackedValue;
+        public static bool operator ==(in Abgr32 a, in Abgr32 b)
+        {
+            return a.PackedValue == b.PackedValue;
+        }
 
-        public static bool operator !=(in Abgr32 a, in Abgr32 b) => a.PackedValue != b.PackedValue;
+        public static bool operator !=(in Abgr32 a, in Abgr32 b)
+        {
+            return a.PackedValue != b.PackedValue;
+        }
 
         #endregion
 
@@ -238,12 +250,18 @@ namespace MonoGame.Framework.Vectors
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override readonly int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode()
+        {
+            return PackedValue.GetHashCode();
+        }
 
         /// <summary>
         /// Gets a <see cref="string"/> representation of the packed vector.
         /// </summary>
-        public override readonly string ToString() => nameof(Abgr32) + $"(R:{R}, G:{G}, B:{B}, A:{A})";
+        public override readonly string ToString()
+        {
+            return nameof(Abgr32) + $"(R:{R}, G:{G}, B:{B}, A:{A})";
+        }
 
         #endregion
     }

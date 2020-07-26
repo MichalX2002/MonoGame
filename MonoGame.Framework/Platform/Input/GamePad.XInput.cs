@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Numerics;
 using SharpDX.XInput;
 using GBF = SharpDX.XInput.GamepadButtonFlags;
 

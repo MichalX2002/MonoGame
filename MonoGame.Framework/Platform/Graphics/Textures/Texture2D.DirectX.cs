@@ -5,9 +5,11 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
+using Resource = SharpDX.Direct3D11.Resource;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -17,7 +19,7 @@ namespace MonoGame.Framework.Graphics
         protected bool Mipmap { get; private set; }
 
         [CLSCompliant(false)]
-        protected SampleDescription SampleDescription { get; private set; }
+        private SampleDescription SampleDescription { get; set; }
 
         private SharpDX.Direct3D11.Texture2D _cachedStagingTexture;
 
@@ -81,14 +83,13 @@ namespace MonoGame.Framework.Graphics
             lock (d3dContext)
             {
                 var texture = GetTexture();
-                ref var mutableData = ref Unsafe.AsRef(data.GetPinnableReference());
+                ref var mutableData = ref MemoryMarshal.GetReference(data);
                 d3dContext.UpdateSubresource(ref mutableData, texture, subresourceIndex, pitch, 0, region);
             }
         }
 
-        private void PlatformGetData<T>(
-            int level, int arraySlice, Rectangle rect, Span<T> destination)
-            where T : unmanaged
+        private void PlatformGetData(
+            int level, int arraySlice, Rectangle rect, Span<byte> destination)
         {
             // Create a temp staging resource for copying the data.
             // 
@@ -185,16 +186,16 @@ namespace MonoGame.Framework.Graphics
             return desc;
         }
 
-        internal override void CreateTexture()
+        internal override Resource CreateTexture()
         {
             // TODO: Move this to SetData() if we want to make Immutable textures!
             var desc = GetTexture2DDescription();
-            _texture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
+            return new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
         }
 
         private void PlatformReload(Stream stream)
         {
-            throw new NotImplementedException();
+            // TODO
         }
     }
 }

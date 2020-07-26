@@ -5,6 +5,7 @@
     <DefineConstants>WINDOWS;XNADESIGNPROVIDED;NVORBIS</DefineConstants>
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
     <Description>MonoGame is an open source implementation of the Microsoft XNA 4.x Framework. The goal is to make it easy for XNA developers to create cross-platform games with extremely high code reuse.
 
 This package provides you with MonoGame Framework that uses DirectX for rendering and works on Windows.</Description>
@@ -52,6 +53,7 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
     <Compile Include="Platform\Input\Mouse.Windows.cs" />
     <Compile Include="Platform\Input\MouseCursor.Windows.cs" />
     <Compile Include="Platform\Input\TextInputEventArgs.cs" />
+    <Compile Include="Platform\Input\Touch\TouchPanelCapabilities.Windows.cs" />
 
     <Compile Include="Platform\Media\MediaManagerState.cs" />
     <Compile Include="Platform\Media\OggStream.cs" />

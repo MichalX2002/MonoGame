@@ -9,79 +9,74 @@ namespace MonoGame.Framework.Graphics
         public DepthFormat DepthStencilFormat { get; private set; }
         public int MultiSampleCount { get; private set; }
         public RenderTargetUsage RenderTargetUsage { get; private set; }
+
         public bool IsContentLost => false;
 
-        public event Event<RenderTarget2D> ContentLost;
-
-        public RenderTarget2D(
-            GraphicsDevice graphicsDevice,
-            int width,
-            int height,
-            bool mipMap,
-            SurfaceFormat preferredFormat,
-            DepthFormat preferredDepthFormat,
-            int preferredMultiSampleCount,
-            RenderTargetUsage usage,
-            bool shared,
-            int arraySize)
-            : this(
-                  graphicsDevice, width, height, mipMap, preferredFormat,
-                  preferredDepthFormat, preferredMultiSampleCount, usage,
-                  SurfaceType.RenderTarget, shared, arraySize)
-        {
-        }
-
-        public RenderTarget2D(
-            GraphicsDevice graphicsDevice,
-            int width,
-            int height,
-            bool mipMap,
-            SurfaceFormat preferredFormat,
-            DepthFormat preferredDepthFormat,
-            int preferredMultiSampleCount,
-            RenderTargetUsage usage,
-            bool shared)
-            : this(
-                  graphicsDevice, width, height, mipMap, preferredFormat,
-                  preferredDepthFormat, preferredMultiSampleCount, usage, shared, arraySize: 1)
-        {
-        }
-
-        public RenderTarget2D(
-            GraphicsDevice graphicsDevice, 
-            int width,
-            int height, 
-            bool mipMap, 
-            SurfaceFormat preferredFormat,
-            DepthFormat preferredDepthFormat, 
-            int preferredMultiSampleCount, 
-            RenderTargetUsage usage)
-            : this(
-                  graphicsDevice, width, height, mipMap, preferredFormat, 
-                  preferredDepthFormat, preferredMultiSampleCount, usage, false)
-        { 
-        }
+        public event Event<RenderTarget2D>? ContentLost;
 
         public RenderTarget2D(
             GraphicsDevice graphicsDevice, 
             int width, 
             int height,
-            bool mipMap, 
-            SurfaceFormat preferredFormat,
-            DepthFormat preferredDepthFormat)
-            : this(
-                  graphicsDevice, width, height, mipMap, preferredFormat,
-                  preferredDepthFormat, 0, RenderTargetUsage.DiscardContents)
+            bool mipMap,
+            SurfaceFormat preferredFormat, 
+            DepthFormat preferredDepthFormat, 
+            int preferredMultiSampleCount,
+            RenderTargetUsage usage, 
+            bool shared,
+            int arraySize)
+            : base(
+                  graphicsDevice, width, height, mipMap, 
+                  QuerySelectedFormat(graphicsDevice, preferredFormat), 
+                  SurfaceType.RenderTarget, shared, arraySize)
+        {
+            DepthStencilFormat = preferredDepthFormat;
+            MultiSampleCount = graphicsDevice.GetClampedMultisampleCount(preferredMultiSampleCount);
+            RenderTargetUsage = usage;
+
+            PlatformConstruct(
+                graphicsDevice, width, height, mipMap,
+                preferredDepthFormat, preferredMultiSampleCount, usage, shared);
+        }
+
+        public RenderTarget2D(
+            GraphicsDevice graphicsDevice, int width, int height, bool mipMap,
+            SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat, 
+            int preferredMultiSampleCount, RenderTargetUsage usage, bool shared)
+            : this(graphicsDevice, width, height, mipMap, preferredFormat,
+                  preferredDepthFormat, preferredMultiSampleCount, usage, shared, 1)
         {
         }
 
-        public RenderTarget2D(GraphicsDevice graphicsDevice, int width, int height)
-            : this(
-                  graphicsDevice, width, height, false, SurfaceFormat.Rgba32, 
-                  DepthFormat.None, 0, RenderTargetUsage.DiscardContents)
+        public RenderTarget2D(
+            GraphicsDevice graphicsDevice, int width, int height, bool mipMap,
+            SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat,
+            int preferredMultiSampleCount, RenderTargetUsage usage)
+            : this(graphicsDevice, width, height, mipMap, preferredFormat,
+                  preferredDepthFormat, preferredMultiSampleCount, usage, false)
         {
         }
 
+        public RenderTarget2D(
+            GraphicsDevice graphicsDevice, int width, int height, bool mipMap,
+            SurfaceFormat preferredFormat, DepthFormat preferredDepthFormat)
+            : this(
+                  graphicsDevice, width, height, mipMap, 
+                  preferredFormat, preferredDepthFormat, 0, RenderTargetUsage.DiscardContents)
+        {
+        }
+
+        public RenderTarget2D(
+            GraphicsDevice graphicsDevice, int width, int height)
+            : this(
+                  graphicsDevice, width, height, false, 
+                  SurfaceFormat.Rgba32, DepthFormat.None, 0, RenderTargetUsage.DiscardContents)
+        {
+        }
+
+        /// <summary>
+        /// Allows child class to specify the surface type, eg: a swap chain.
+        /// </summary>        
         protected RenderTarget2D(
             GraphicsDevice graphicsDevice,
             int width,
@@ -92,37 +87,12 @@ namespace MonoGame.Framework.Graphics
             int preferredMultiSampleCount,
             RenderTargetUsage usage,
             SurfaceType surfaceType)
-            : this(
-                  graphicsDevice, width, height, mipMap, format, 
-                  depthFormat, preferredMultiSampleCount, usage, surfaceType, false, 1)
-        {
-        }
-
-        /// <summary>
-        /// Allows a derived class to specify the surface type, eg: a swap chain.
-        /// </summary>        
-        protected RenderTarget2D(
-            GraphicsDevice graphicsDevice,
-            int width,
-            int height,
-            bool mipMap,
-            SurfaceFormat preferredFormat,
-            DepthFormat depthFormat,
-            int preferredMultiSampleCount,
-            RenderTargetUsage usage,
-            SurfaceType surfaceType,
-            bool shared,
-            int arraySize)
             : base(
-                  graphicsDevice, width, height, mipMap, 
-                  QuerySelectedFormat(graphicsDevice, preferredFormat), 
-                  surfaceType, shared, arraySize)
+                  graphicsDevice, width, height, mipMap, format, surfaceType)
         {
             DepthStencilFormat = depthFormat;
-            RenderTargetUsage = usage;
             MultiSampleCount = preferredMultiSampleCount;
-
-            PlatformConstruct(graphicsDevice, width, height, mipMap, depthFormat, preferredMultiSampleCount, usage, shared);
+            RenderTargetUsage = usage;
         }
 
         protected static SurfaceFormat QuerySelectedFormat(

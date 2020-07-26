@@ -59,9 +59,8 @@ namespace MonoGame.Framework.Graphics
             _cachedStagingBuffer = new SharpDX.Direct3D11.Buffer(GraphicsDevice._d3dDevice, stagingDesc);
         }
 
-        protected unsafe void PlatformGetData<T>(
-            int offsetInBytes, Span<T> destination, int destinationStride)
-            where T : unmanaged
+        protected unsafe void PlatformGetData(
+            int byteOffset, Span<byte> destination, int stride)
         {
             if (_buffer == null)
                 return;
@@ -84,9 +83,9 @@ namespace MonoGame.Framework.Graphics
                     _cachedStagingBuffer, 0, SharpDX.Direct3D11.MapMode.Read, SharpDX.Direct3D11.MapFlags.None);
 
                 int srcBytes = Capacity * VertexDeclaration.VertexStride;
-                var src = new ReadOnlySpan<T>((void*)(box.DataPointer + offsetInBytes), srcBytes);
+                var src = new ReadOnlySpan<byte>((void*)(box.DataPointer + byteOffset), srcBytes);
 
-                if (destinationStride == sizeof(T))
+                if (stride % VertexDeclaration.VertexStride == 0)
                 {
                     // the source and destination use tightly packed data,
                     // we can skip the interleaved copy
@@ -100,9 +99,9 @@ namespace MonoGame.Framework.Graphics
                     // interleaved copy from buffer to destination
                     for (int i = 0; i < destination.Length; i++)
                     {
-                        var srcElement = byteSrc.Slice(i * VertexDeclaration.VertexStride);
-                        var dstElement = byteDst.Slice(i * destinationStride, destinationStride);
-                        srcElement.Slice(0, destinationStride).CopyTo(dstElement);
+                        var srcElement = byteSrc.Slice(i * VertexDeclaration.VertexStride, stride);
+                        var dstElement = byteDst.Slice(i * stride);
+                        srcElement.CopyTo(dstElement);
                     }
                 }
 
@@ -111,11 +110,9 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        protected unsafe void PlatformSetData<T>(
-            int offsetInBytes, ReadOnlySpan<T> data, int dataStride, SetDataOptions options)
-            where T : unmanaged
+        protected unsafe void PlatformSetData(
+            int byteOffset, ReadOnlySpan<byte> data, int stride, SetDataOptions options)
         {
-            int bytes = dataStride * data.Length;
             GenerateIfRequired();
 
             var deviceContext = GraphicsDevice._d3dContext;
@@ -132,9 +129,9 @@ namespace MonoGame.Framework.Graphics
 
                     var byteSrc = MemoryMarshal.AsBytes(data);
                     int dstBytes = Capacity * VertexDeclaration.VertexStride;
-                    var byteDst = new Span<byte>((void*)(box.DataPointer + offsetInBytes), dstBytes);
+                    var byteDst = new Span<byte>((void*)(box.DataPointer + byteOffset), dstBytes);
 
-                    if (sizeof(T) % dataStride == 0)
+                    if (stride % VertexDeclaration.VertexStride == 0)
                     {
                         byteSrc.CopyTo(byteDst);
                     }
@@ -142,8 +139,8 @@ namespace MonoGame.Framework.Graphics
                     {
                         for (int i = 0; i < data.Length; i++)
                         {
-                            var srcElement = byteSrc.Slice(i * sizeof(T), sizeof(T));
-                            var dstElement = byteDst.Slice(i * dataStride, sizeof(T));
+                            var srcElement = byteSrc.Slice(i * stride, stride);
+                            var dstElement = byteDst.Slice(i * VertexDeclaration.VertexStride);
                             srcElement.CopyTo(dstElement);
                         }
                     }
@@ -153,7 +150,7 @@ namespace MonoGame.Framework.Graphics
             }
             else
             {
-                if (sizeof(T) % dataStride == 0)
+                if (stride % VertexDeclaration.VertexStride == 0)
                 {
                     var region = new SharpDX.Direct3D11.ResourceRegion
                     {
@@ -161,14 +158,14 @@ namespace MonoGame.Framework.Graphics
                         Front = 0,
                         Back = 1,
                         Bottom = 1,
-                        Left = offsetInBytes,
-                        Right = offsetInBytes + bytes
+                        Left = byteOffset,
+                        Right = byteOffset + data.Length
                     };
 
                     lock (deviceContext)
                     {
-                        ref var mutableData = ref Unsafe.AsRef(data.GetPinnableReference());
-                        deviceContext.UpdateSubresource(ref mutableData, _buffer, 0, bytes, 0, region);
+                        ref var mutableData = ref MemoryMarshal.GetReference(data);
+                        deviceContext.UpdateSubresource(ref mutableData, _buffer, 0, data.Length, 0, region);
                     }
                 }
                 else
@@ -186,12 +183,12 @@ namespace MonoGame.Framework.Graphics
 
                         int dstBytes = Capacity * VertexDeclaration.VertexStride;
                         var byteSrc = MemoryMarshal.AsBytes(data);
-                        var byteDst = new Span<byte>((void*)(box.DataPointer + offsetInBytes), dstBytes);
+                        var byteDst = new Span<byte>((void*)(box.DataPointer + byteOffset), dstBytes);
 
                         for (int i = 0; i < data.Length; i++)
                         {
-                            var srcElement = byteSrc.Slice(i * sizeof(T), sizeof(T));
-                            var dstElement = byteDst.Slice(i * dataStride, sizeof(T));
+                            var srcElement = byteSrc.Slice(i * stride, stride);
+                            var dstElement = byteDst.Slice(i * VertexDeclaration.VertexStride);
                             srcElement.CopyTo(dstElement);
                         }
 

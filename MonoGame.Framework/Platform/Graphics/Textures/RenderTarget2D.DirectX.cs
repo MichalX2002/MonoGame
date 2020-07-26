@@ -18,7 +18,8 @@ namespace MonoGame.Framework.Graphics
         private void PlatformConstruct(GraphicsDevice graphicsDevice, int width, int height, bool mipMap,
             DepthFormat preferredDepthFormat, int preferredMultiSampleCount, RenderTargetUsage usage, bool shared)
         {
-            _msSampleDescription = GraphicsDevice.GetSupportedSampleDescription(SharpDXHelper.ToFormat(this.Format), this.MultiSampleCount);
+            _msSampleDescription = GraphicsDevice.GetSupportedSampleDescription(
+                SharpDXHelper.ToFormat(Format), MultiSampleCount);
 
             GenerateIfRequired();
         }
@@ -154,10 +155,8 @@ namespace MonoGame.Framework.Graphics
                 desc.BindFlags |= BindFlags.RenderTarget;
 
             if (Mipmap)
-            {
                 desc.OptionFlags |= ResourceOptionFlags.GenerateMipMaps;
-            }
-
+            
             return desc;
         }
 
@@ -181,9 +180,12 @@ namespace MonoGame.Framework.Graphics
             var desc = base.GetTexture2DDescription();
 
             desc.BindFlags |= BindFlags.RenderTarget;
+
             // the multi sampled texture can never be bound directly
             desc.BindFlags &= ~BindFlags.ShaderResource;
+
             desc.SampleDescription = _msSampleDescription;
+
             // mip mapping is applied to the resolved texture, not the multisampled texture
             desc.MipLevels = 1;
             desc.OptionFlags &= ~ResourceOptionFlags.GenerateMipMaps;

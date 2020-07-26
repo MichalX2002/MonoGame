@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -48,7 +49,7 @@ namespace MonoGame.Framework.Graphics
 
             ValidateParams<T>(level, rect, destination.Length, out Rectangle checkedRect);
 
-            PlatformGetData(cubeMapFace, level, checkedRect, destination);
+            PlatformGetData(cubeMapFace, level, checkedRect, MemoryMarshal.AsBytes(destination));
         }
 
         /// <summary>

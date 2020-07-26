@@ -3,19 +3,21 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Input
 {
     /// <summary>
     /// Allows reading position and button click information from mouse.
     /// </summary>
-    public partial class Mouse
+    public partial class Mouse : GameWindowDependency
     {
-        public GameWindow Window { get; }
-
-        public Mouse(GameWindow window)
+        /// <summary>
+        /// Constructs the <see cref="Mouse"/>.
+        /// </summary>
+        /// <param name="window"></param>
+        public Mouse(GameWindow window) : base(window)
         {
-            Window = window ?? throw new ArgumentNullException(nameof(window));
         }
 
         /// <summary>
@@ -46,7 +48,7 @@ namespace MonoGame.Framework.Input
         {
             if (cursor == null)
                 throw new ArgumentNullException(nameof(cursor));
-
+            
             PlatformSetCursor(cursor);
         }
     }

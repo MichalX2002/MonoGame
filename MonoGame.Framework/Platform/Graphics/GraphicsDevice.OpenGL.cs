@@ -936,15 +936,13 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        private unsafe void PlatformDrawUserIndexedPrimitives<TVertex, TIndex>(
+        private unsafe void PlatformDrawUserIndexedPrimitives(
             PrimitiveType primitiveType,
-            ReadOnlySpan<TVertex> vertices,
             IndexElementSize indexElementSize,
-            ReadOnlySpan<TIndex> indices,
+            ReadOnlySpan<byte> vertices,
+            ReadOnlySpan<byte> indices,
             int primitiveCount,
             VertexDeclaration declaration)
-            where TVertex : unmanaged
-            where TIndex : unmanaged
         {
             ApplyState(true);
 
@@ -961,13 +959,13 @@ namespace MonoGame.Framework.Graphics
             var elementType = indexElementSize == IndexElementSize.Short
                 ? IndexElementType.UnsignedShort : IndexElementType.UnsignedInt;
 
-            fixed (TVertex* vertexPtr = vertices)
+            fixed (byte* vertexPtr = vertices)
             {
                 // Setup the vertex declaration to point at the VB data.
                 declaration.GraphicsDevice = this;
                 declaration.Apply(_vertexShader, (IntPtr)vertexPtr, ShaderProgramHash);
 
-                fixed (TIndex* indexPtr = indices)
+                fixed (byte* indexPtr = indices)
                 {
                     GL.DrawElements(pType, elementCount, elementType, (IntPtr)indexPtr);
                     GL.CheckError();

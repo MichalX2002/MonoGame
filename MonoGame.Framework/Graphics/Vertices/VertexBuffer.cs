@@ -3,6 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -60,7 +62,6 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Get the vertex data from this vertex buffer with an optional buffer offset.
         /// </summary>
-        /// <typeparam name="T">The struct you want to fill.</typeparam>
         /// <param name="destination">The span to be filled.</param>
         /// <param name="byteOffset">The offset to the first element in the vertex buffer in bytes.</param>
         /// <param name="elementStride">The size of how a vertex buffer element should be interpreted.</param>
@@ -68,7 +69,7 @@ namespace MonoGame.Framework.Graphics
         /// Note that this pulls data from VRAM into main memory and because of that it's an expensive operation.
         /// It is often a better idea to keep a copy of the data in main memory.
         /// </remarks>
-        public unsafe void GetData<T>(
+        public void GetData<T>(
             int byteOffset, Span<T> destination, int elementStride = 0)
             where T : unmanaged
         {
@@ -78,24 +79,23 @@ namespace MonoGame.Framework.Graphics
             AssertMainThread(true);
 
             if (elementStride == 0)
-                elementStride = sizeof(T);
+                elementStride = Unsafe.SizeOf<T>();
+
+            int dstSize = destination.Length * Unsafe.SizeOf<T>();
+            if (elementStride > dstSize)
+                throw new ArgumentOutOfRangeException(
+                    nameof(elementStride), "Element stride may not be larger than the given buffer size.");
 
             int bufferSize = Capacity * VertexDeclaration.VertexStride;
-            int requestedBytes = destination.Length * elementStride;
-
             if (elementStride > bufferSize)
                 throw new ArgumentOutOfRangeException(
                     nameof(elementStride), "The vertex stride may not be larger than the buffer capacity.");
 
-            if (requestedBytes > bufferSize)
+            if (byteOffset + dstSize > bufferSize)
                 throw new ArgumentOutOfRangeException(
-                    nameof(destination), "The amount of data requested exceeds the buffer capacity.");
+                    "The requested range of offset and length reaches beyond the buffer.");
 
-            if (byteOffset + requestedBytes > bufferSize)
-                throw new ArgumentOutOfRangeException(
-                    nameof(byteOffset), "The requested range reaches beyond the buffer.");
-
-            PlatformGetData(byteOffset, destination, elementStride);
+            PlatformGetData(byteOffset, MemoryMarshal.AsBytes(destination), elementStride);
         }
 
         public void GetData<T>(Span<T> destination, int elementStride = 0)
@@ -111,15 +111,14 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Sets the vertex buffer data.
         /// </summary>
-        /// <typeparam name="T">Type of elements in the data array.</typeparam>
         /// <param name="byteOffset">Offset in bytes from the beginning of the vertex buffer to start copying to.</param>
-        /// <param name="data">The span of vertex data.</param>
+        /// <param name="source">The span of vertex data.</param>
         /// <param name="elementStride">
-        /// Specifies how far apart, in bytes, elements from <paramref name="data"/> should be when 
+        /// Specifies how far apart, in bytes, elements from <paramref name="source"/> should be when 
         /// they are copied into the vertex buffer.
-        /// If you specify <c>sizeof(T)</c>, elements from <paramref name="data"/> will be copied into the 
+        /// If you specify <c>sizeof(T)</c>, elements from <paramref name="source"/> will be copied into the 
         /// vertex buffer with no padding between each element.
-        /// If you specify a value greater than <c>sizeof(T)</c>, elements from <paramref name="data"/> will be copied 
+        /// If you specify a value greater than <c>sizeof(T)</c>, elements from <paramref name="source"/> will be copied 
         /// into the vertex buffer with padding between each element.
         /// If you specify <c>0</c> for this parameter, it will be treated as if you had specified <c>sizeof(T)</c>.
         /// With the exception of <c>0</c>, you must specify a value greater than or equal to <c>sizeof(T)</c>.
@@ -133,64 +132,65 @@ namespace MonoGame.Framework.Graphics
         /// vertexBuffer.SetData(offsetInBytes: 12, texCoords);
         /// </code>
         /// </remarks>
-        public unsafe void SetData<T>(
+        public void SetData<T>(
             int byteOffset,
-            ReadOnlySpan<T> data,
+            ReadOnlySpan<T> source,
             int elementStride = 0,
             SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
-            if (data.IsEmpty)
-                throw new ArgumentEmptyException(nameof(data));
+            if (source.IsEmpty)
+                return;
 
             AssertMainThread(true);
 
             if (elementStride == 0)
-                elementStride = sizeof(T);
+                elementStride = Unsafe.SizeOf<T>();
 
-            var vertexByteSize = data.Length * VertexDeclaration.VertexStride;
-            if (elementStride > vertexByteSize)
+            int srcSize = source.Length * Unsafe.SizeOf<T>();
+            if (elementStride > srcSize)
                 throw new ArgumentOutOfRangeException(
-                    nameof(elementStride), "Data stride can not be larger than the vertex buffer size.");
+                    nameof(elementStride), "Element stride may not be larger than the given buffer size.");
 
-            if (data.Length > 1 && data.Length * sizeof(T) > vertexByteSize)
-                throw new InvalidOperationException(
-                    "The vertex stride is larger than the vertex buffer.");
-
-            if (elementStride < sizeof(T))
+            int bufferSize = Capacity * VertexDeclaration.VertexStride;
+            if (elementStride > bufferSize)
                 throw new ArgumentOutOfRangeException(
-                    $"The data stride must be greater than or equal to the size of the specified data ({sizeof(T)}).");
+                    nameof(elementStride), "Element stride may not be larger than the vertex buffer capacity.");
 
-            PlatformSetData(byteOffset, data, elementStride, options);
-            Count = data.Length * sizeof(T) / VertexDeclaration.VertexStride;
-        }
+            if (byteOffset + srcSize > bufferSize)
+                throw new ArgumentOutOfRangeException(
+                    "The given range of offset and range reaches beyond the buffer.");
 
-        public unsafe void SetData<T>(
-            ReadOnlySpan<T> data,
-            int elementStride = 0,
-            SetDataOptions options = SetDataOptions.None)
-            where T : unmanaged
-        {
-            SetData(0, data, elementStride, options);
+            PlatformSetData(byteOffset, MemoryMarshal.AsBytes(source), elementStride, options);
+            Count = srcSize / elementStride;
         }
 
         public void SetData<T>(
             int byteOffset,
-            Span<T> data,
+            Span<T> source,
             int elementStride = 0,
             SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
-            SetData(byteOffset, (ReadOnlySpan<T>)data, elementStride, options);
+            SetData(byteOffset, (ReadOnlySpan<T>)source, elementStride, options);
         }
 
         public void SetData<T>(
-            Span<T> data,
+            ReadOnlySpan<T> source,
             int elementStride = 0,
             SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
-            SetData(0, data, elementStride, options);
+            SetData(0, source, elementStride, options);
+        }
+
+        public void SetData<T>(
+            Span<T> source,
+            int elementStride = 0,
+            SetDataOptions options = SetDataOptions.None)
+            where T : unmanaged
+        {
+            SetData((ReadOnlySpan<T>)source, elementStride, options);
         }
 
         #endregion

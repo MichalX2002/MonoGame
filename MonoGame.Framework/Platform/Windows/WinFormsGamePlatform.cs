@@ -15,11 +15,11 @@ namespace MonoGame.Framework
 
         private WinFormsGameWindow _window;
 
+        public override GameWindow Window => _window;
+
         public WinFormsGamePlatform(Game game) : base(game)
         {
             _window = new WinFormsGameWindow(this);
-
-            Window = _window;
         }
 
         public override GameRunBehavior DefaultRunBehavior => GameRunBehavior.Synchronous;
@@ -66,9 +66,10 @@ namespace MonoGame.Framework
         public override void Exit()
         {
             if (_window != null)
+            {
                 _window.Dispose();
-            _window = null;
-            Window = null;
+                _window = null!;
+            }
         }
 
         public override bool BeforeUpdate(GameTime gameTime)
@@ -121,8 +122,7 @@ namespace MonoGame.Framework
                 if (_window != null)
                 {
                     _window.Dispose();
-                    _window = null;
-                    Window = null;
+                    _window = null!;
                 }
                 MediaManagerState.CheckShutdown();
             }

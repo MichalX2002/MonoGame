@@ -23,6 +23,7 @@ namespace MonoGame.Framework
         public event Event<GameWindow>? SizeChanged;
         public event Event<GameWindow>? OrientationChanged;
         public event Event<GameWindow>? ScreenDeviceNameChanged;
+        public event Event<GameWindow>? WindowHandleChanged;
 
         /// <summary>
         /// Event for a file group that was dropped on the window.
@@ -143,9 +144,10 @@ namespace MonoGame.Framework
         {
             Mouse = new Mouse(this);
             TouchPanel = new TouchPanel(this);
-
-            TaskbarList = new TaskbarList();
+            TaskbarList = new TaskbarList(this);
         }
+
+        public abstract IntPtr GetSubsystemWindowHandle();
 
         public abstract void BeginScreenDeviceChange(bool willBeFullScreen);
 
@@ -179,9 +181,9 @@ namespace MonoGame.Framework
             ScreenDeviceNameChanged?.Invoke(this);
         }
 
-        protected void OnFilesDropped(GameWindow window, List<string> files)
+        internal void OnFilesDropped(List<string> files)
         {
-            FilesDropped?.Invoke(window, files);
+            FilesDropped?.Invoke(this, files);
         }
 
         internal void OnTextInput(TextInputEventArgs ev)
@@ -197,6 +199,11 @@ namespace MonoGame.Framework
         internal void OnKeyUp(TextInputEventArgs e)
         {
             KeyUp?.Invoke(this, e);
+        }
+
+        internal void OnWindowHandleChanged()
+        {
+            WindowHandleChanged?.Invoke(this);
         }
 
         protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);

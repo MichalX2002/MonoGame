@@ -6,26 +6,40 @@ namespace MonoGame.Framework.Utilities
     public partial class TaskbarList
     {
         private ITaskbarList? _comObject;
+        private IntPtr _windowHandle;
+
+        private static bool PlatformGetIsSupported()
+        {
+            return PlatformInfo.OS != PlatformInfo.OperatingSystem.Windows;
+        }
 
         private void PlatformConstruct()
-        {
-            if (PlatformInfo.OS != PlatformInfo.OperatingSystem.Windows)
-                return;
-
-            _comObject = (ITaskbarList)new COMTaskbarList();
-            _comObject.HrInit();
-        }
-
-        private bool PlatformGetIsSupported()
-        {
-            return _comObject != null;
-        }
-
-        private void PlatformSetProgressState(TaskbarProgressState state)
         {
             if (!PlatformGetIsSupported())
                 return;
 
+            if (_comObject == null)
+            {
+                _comObject = (ITaskbarList)new COMTaskbarList();
+                _comObject.HrInit();
+            }
+        }
+
+        private void PlatformWindowHandleChanged()
+        {
+            if (_comObject == null)
+                return;
+
+            _windowHandle = Window.GetSubsystemWindowHandle();
+        }
+
+        private bool PlatformGetIsAvailable()
+        {
+            return _windowHandle != IntPtr.Zero;
+        }
+
+        private void PlatformSetProgressState(TaskbarProgressState state)
+        {
             int flags = state switch
             {
                 TaskbarProgressState.None => 0,
@@ -35,15 +49,12 @@ namespace MonoGame.Framework.Utilities
                 TaskbarProgressState.Paused => 0x8,
                 _ => throw new ArgumentOutOfRangeException(nameof(state))
             };
-            _comObject!.SetProgressState(WindowHandle, flags);
+            _comObject!.SetProgressState(_windowHandle, flags);
         }
 
         private void PlatformSetProgressValue(TaskbarProgressValue value)
         {
-            if (!PlatformGetIsSupported())
-                return;
-
-            _comObject!.SetProgressValue(WindowHandle, (ulong)value.Completed, (ulong)value.Total);
+            _comObject!.SetProgressValue(_windowHandle, (ulong)value.Completed, (ulong)value.Total);
         }
 
         #region COM Interface

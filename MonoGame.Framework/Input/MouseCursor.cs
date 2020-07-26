@@ -86,6 +86,16 @@ namespace MonoGame.Framework.Input
         /// </summary>
         public IntPtr Handle { get; private set; }
 
+        static MouseCursor()
+        {
+            PlatformInitalize();
+        }
+
+        private MouseCursor(IntPtr handle)
+        {
+            Handle = handle;
+        }
+
         /// <summary>
         /// Creates a mouse cursor from the specified texture.
         /// </summary>
@@ -114,7 +124,7 @@ namespace MonoGame.Framework.Input
                 throw new ArgumentOutOfRangeException(
                     "The source rectangle is outside the pixel buffer.", nameof(sourceRectangle));
 
-            IReadOnlyPixelMemory<Color> pixelBuffer = null;
+            IReadOnlyPixelMemory<Color>? pixelBuffer = null;
             try
             {
                 ReadOnlySpan<Color> pixelSpan;
@@ -139,16 +149,6 @@ namespace MonoGame.Framework.Input
             {
                 pixelBuffer?.Dispose();
             }
-        }
-
-        static MouseCursor()
-        {
-            PlatformInitalize();
-        }
-
-        private MouseCursor(IntPtr handle)
-        {
-            Handle = handle;
         }
 
         /// <summary>

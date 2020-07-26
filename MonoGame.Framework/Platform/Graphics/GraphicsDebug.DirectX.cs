@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Graphics
         {
             if (_infoQueue == null)
             {
-                message = null;
+                message = default;
                 return false;
             }
 
@@ -55,27 +55,25 @@ namespace MonoGame.Framework.Graphics
                 for (var i = 0; i < _infoQueue.NumStoredMessagesAllowedByRetrievalFilter; i++)
                 {
                     var dxMessage = _infoQueue.GetMessage(i);
-                    _cachedMessages.Enqueue(new GraphicsDebugMessage
-                    {
-                        Message = dxMessage.Description,
-                        Id = (int)dxMessage.Id,
-                        IdName = dxMessage.Id.ToString(),
-                        Severity = dxMessage.Severity.ToString(),
-                        Category = dxMessage.Category.ToString()
-                    });
+                    _cachedMessages.Enqueue(new GraphicsDebugMessage(
+                        (int)dxMessage.Id,
+                        dxMessage.Id.ToString(),
+                        dxMessage.Severity.ToString(),
+                        dxMessage.Category.ToString(),
+                        dxMessage.Description));
                 }
 
                 _infoQueue.ClearStoredMessages();
             }
-            
+
             if (_cachedMessages.Count > 0)
             {
                 message = _cachedMessages.Dequeue();
                 return true;
             }
-            
+
             // No messages to grab from DirectX.
-            message = null;
+            message = default;
             return false;
         }
     }

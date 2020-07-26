@@ -5,6 +5,7 @@
 namespace MonoGame.Framework
 {
     using System;
+    using System.Numerics;
     using Graphics;
     using SharpDX.Mathematics.Interop;
 
@@ -58,7 +59,7 @@ namespace MonoGame.Framework
         {
             switch (format)
             {
-                case SurfaceFormat.Color:
+                case SurfaceFormat.Rgba32:
                 default:
                     return SharpDX.DXGI.Format.R8G8B8A8_UNorm;
 
@@ -128,7 +129,7 @@ namespace MonoGame.Framework
             }
         }
 
-		static public RawVector2 ToVector2(this Vector2 vec)
+        static public RawVector2 ToVector2(this Vector2 vec)
         {
             return new RawVector2(vec.X, vec.Y);
         }

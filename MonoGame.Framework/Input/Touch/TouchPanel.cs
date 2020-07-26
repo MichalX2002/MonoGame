@@ -5,13 +5,14 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework.Input.Touch
 {
     /// <summary>
     /// Allows retrieval of information from a touch panel device.
     /// </summary>
-    public class TouchPanel
+    public class TouchPanel : GameWindowDependency
     {
         /// <summary>
         /// Maximum distance a touch location can wiggle and not be considered to have moved.
@@ -64,8 +65,6 @@ namespace MonoGame.Framework.Input.Touch
         /// The current timestamp that we use for setting the timestamp of new touch locations.
         /// </summary>
         internal static TimeSpan CurrentTimestamp { get; set; }
-
-        public GameWindow Window { get; }
 
         /// <summary>
         /// Gets or sets the display orientation of the touch panel.
@@ -120,9 +119,12 @@ namespace MonoGame.Framework.Input.Touch
             }
         }
 
-        public TouchPanel(GameWindow window)
+        public TouchPanel(GameWindow window) : base(window)
         {
-            Window = window;
+        }
+
+        protected override void WindowHandleChanged()
+        {
         }
 
         /// <summary>

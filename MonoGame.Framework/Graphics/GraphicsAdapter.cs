@@ -149,7 +149,7 @@ namespace MonoGame.Framework.Graphics
                 selectedFormat == SurfaceFormat.Dxt3SRgb ||
                 selectedFormat == SurfaceFormat.Dxt5SRgb)
             {
-                selectedFormat = SurfaceFormat.Color;
+                selectedFormat = SurfaceFormat.Rgba32;
             }
 
             return (format == selectedFormat) 

@@ -3,6 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -15,7 +17,7 @@ namespace MonoGame.Framework.Graphics
         #region Constructors
 
         protected Texture3D(
-            GraphicsDevice graphicsDevice, int width, int height, int depth, 
+            GraphicsDevice graphicsDevice, int width, int height, int depth,
             bool mipMap, SurfaceFormat format, bool renderTarget)
             : base(graphicsDevice)
         {
@@ -56,7 +58,8 @@ namespace MonoGame.Framework.Graphics
             var height = bottom - top;
             var depth = back - front;
 
-            PlatformSetData(level, left, top, right, bottom, front, back, width, height, depth, data);
+            PlatformSetData(
+                level, left, top, right, bottom, front, back, width, height, depth, MemoryMarshal.AsBytes(data));
         }
 
         public void SetData<T>(
@@ -98,7 +101,7 @@ namespace MonoGame.Framework.Graphics
             where T : unmanaged
         {
             ValidateParams<T>(level, left, top, right, bottom, front, back, destination);
-            PlatformGetData(level, left, top, right, bottom, front, back, destination);
+            PlatformGetData(level, left, top, right, bottom, front, back, MemoryMarshal.AsBytes(destination));
         }
 
         /// <summary>
@@ -106,14 +109,15 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <typeparam name="T">The type of the elements in the array.</typeparam>
         /// <param name="destination">The destination for the texture data.</param>
-        public void GetData<T>(Span<T> destination) where T : unmanaged
+        public void GetData<T>(Span<T> destination)
+            where T : unmanaged
         {
             GetData(0, 0, 0, Width, Height, 0, Depth, destination);
         }
 
         #endregion
 
-        private unsafe void ValidateParams<T>(
+        private void ValidateParams<T>(
             int level, int left, int top, int right, int bottom, int front, int back,
             ReadOnlySpan<T> data)
             where T : unmanaged
@@ -137,15 +141,15 @@ namespace MonoGame.Framework.Graphics
                     $"Level must be less than the number of levels in this texture.", nameof(level));
 
             var formatSize = Format.GetSize();
-            if (sizeof(T) > formatSize || formatSize % sizeof(T) != 0)
+            if (Unsafe.SizeOf<T>() > formatSize || formatSize % Unsafe.SizeOf<T>() != 0)
                 throw new ArgumentException(
                     $"{nameof(T)} is of an invalid size for the format of this texture.", nameof(T));
 
             int bytes = width * height * depth * formatSize;
-            if (data.Length * sizeof(T) < bytes)
+            if (data.Length * Unsafe.SizeOf<T>() < bytes)
                 throw new ArgumentException(
                     $"{nameof(data.Length)} is not the right size, " +
-                    $"{nameof(data.Length)} * sizeof({nameof(T)}) is {data.Length * sizeof(T)}, " +
+                    $"{nameof(data.Length)} * sizeof({nameof(T)}) is {data.Length * Unsafe.SizeOf<T>()}, " +
                     $"but data size is {bytes}.", nameof(data.Length));
         }
     }

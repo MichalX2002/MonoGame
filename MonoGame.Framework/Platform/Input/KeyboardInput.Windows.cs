@@ -6,13 +6,13 @@ namespace MonoGame.Framework.Input
 {
     public static partial class KeyboardInput
     {
-        private static Form _dialog;
-        private static TaskCompletionSource<string> _tcs;
+        private static Form? _dialog;
+        private static TaskCompletionSource<string?>? _tcs;
         
-        private static Task<string> PlatformShow(
+        private static Task<string?> PlatformShow(
             string title, string description, string defaultText, bool usePasswordMode)
         {
-            _tcs = new TaskCompletionSource<string>();
+            _tcs = new TaskCompletionSource<string?>();
 
             var parent = Application.OpenForms[0];
 
@@ -88,11 +88,12 @@ namespace MonoGame.Framework.Input
             return _tcs.Task;
         }
 
-        private static void PlatformCancel(string result)
+        private static void PlatformCancel(string? result)
         {
             if (_dialog != null)
                 _dialog.Close();
-            _tcs.SetResult(result);
+
+            _tcs?.SetResult(result);
         }
     }
 }

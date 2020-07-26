@@ -2,6 +2,8 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
+
 namespace MonoGame.Framework.Input
 {
     public partial class Mouse
@@ -10,6 +12,11 @@ namespace MonoGame.Framework.Input
 
         internal int ScrollX;
         internal int ScrollY;
+
+        /// <inheritdoc/>
+        protected override void WindowHandleChanged()
+        {
+        }
 
         private MouseState PlatformGetState()
         {

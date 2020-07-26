@@ -26,7 +26,7 @@ namespace MonoGame.Framework.Graphics
             GraphicsDevice graphicsDevice, IntPtr windowHandle, int width, int height) :
 
             this(graphicsDevice, windowHandle, width, height, 
-                 false, SurfaceFormat.Color, DepthFormat.Depth24, 0,
+                 false, SurfaceFormat.Rgba32, DepthFormat.Depth24, 0,
                  RenderTargetUsage.DiscardContents, PresentInterval.Default)
         {
         }
@@ -41,7 +41,7 @@ namespace MonoGame.Framework.Graphics
                  depthFormat, preferredMultiSampleCount,
                  usage, SurfaceType.SwapChainRenderTarget)
         {
-            var dxgiFormat = surfaceFormat == SurfaceFormat.Color
+            var dxgiFormat = surfaceFormat == SurfaceFormat.Rgba32
                 ? SharpDX.DXGI.Format.B8G8R8A8_UNorm : SharpDXHelper.ToFormat(surfaceFormat);
 
             var multisampleDesc = new SampleDescription(1, 0);

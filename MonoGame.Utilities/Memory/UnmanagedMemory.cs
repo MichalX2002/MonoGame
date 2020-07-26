@@ -18,10 +18,10 @@ namespace MonoGame.Framework.Memory
         public int ElementSize => sizeof(T);
 
         public Span<T> Span => new Span<T>((void*)Pointer, _length);
-        Span<byte> IMemory.Span => new Span<byte>((void*)Pointer, GetByteCount(_length));
+        public Span<byte> ByteSpan => new Span<byte>((void*)Pointer, GetByteCount(_length));
 
         ReadOnlySpan<T> IReadOnlyMemory<T>.Span => new ReadOnlySpan<T>((void*)Pointer, _length);
-        ReadOnlySpan<byte> IReadOnlyMemory.Span => new ReadOnlySpan<byte>((void*)Pointer, GetByteCount(_length));
+        ReadOnlySpan<byte> IReadOnlyMemory.ByteSpan => new ReadOnlySpan<byte>((void*)Pointer, GetByteCount(_length));
 
         /// <summary>
         /// Gets the length of the allocated memory in bytes.

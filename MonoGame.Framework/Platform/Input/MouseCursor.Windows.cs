@@ -7,7 +7,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using MonoGame.Framework.Vector;
+using MonoGame.Framework.Vectors;
 
 namespace MonoGame.Framework.Input
 {
@@ -15,7 +15,7 @@ namespace MonoGame.Framework.Input
     {
         bool _needsDisposing;
 
-        internal Cursor Cursor { get; private set; }
+        internal Cursor? Cursor { get; private set; }
 
         private MouseCursor(Cursor cursor, bool needsDisposing = false)
         {
@@ -56,7 +56,7 @@ namespace MonoGame.Framework.Input
                         var dstRow = new Span<Bgra32>((byte*)bmpData.Scan0 + y * bmpData.Stride, bmpData.Width);
                         
                         for (int x = 0; x < width; x++)
-                            dstRow[x].FromColor(srcRow[x]);
+                            dstRow[x].FromRgba(srcRow[x]);
                     }
                 }
                 finally
@@ -82,6 +82,7 @@ namespace MonoGame.Framework.Input
             {
                 Cursor.Dispose();
                 Cursor = null;
+
                 _needsDisposing = false;
             }
         }

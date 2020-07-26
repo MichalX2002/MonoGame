@@ -3,6 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -40,8 +42,8 @@ namespace MonoGame.Framework.Graphics
         }
 
         public IndexBuffer(
-            GraphicsDevice graphicsDevice, 
-            IndexElementSize elementSize, 
+            GraphicsDevice graphicsDevice,
+            IndexElementSize elementSize,
             int capacity,
             BufferUsage bufferUsage) :
             this(graphicsDevice, elementSize, capacity, bufferUsage, false)
@@ -52,29 +54,32 @@ namespace MonoGame.Framework.Graphics
 
         #region GetData
 
-        public unsafe void GetData<T>(int offsetInBytes, Span<T> destination) 
+        public void GetData<T>(int byteOffset, Span<T> destination)
             where T : unmanaged
         {
+            if (destination.IsEmpty)
+                return;
+
             if (BufferUsage == BufferUsage.WriteOnly)
                 throw new InvalidOperationException(FrameworkResources.WriteOnlyResource);
 
             AssertMainThread(true);
 
             int bufferSize = Capacity * (int)ElementSize;
-            int requestedBytes = destination.Length * sizeof(T);
+            int dstSize = destination.Length * Unsafe.SizeOf<T>();
 
-            if (requestedBytes > bufferSize)
+            if (dstSize > bufferSize)
                 throw new ArgumentOutOfRangeException(
                     nameof(destination), "The amount of data requested exceeds the buffer capacity.");
 
-            if (offsetInBytes + requestedBytes > bufferSize)
+            if (byteOffset + dstSize > bufferSize)
                 throw new ArgumentOutOfRangeException(
-                    nameof(offsetInBytes), "The requested range reaches beyond the buffer.");
+                    nameof(byteOffset), "The requested range reaches beyond the buffer.");
 
-            PlatformGetData(offsetInBytes, destination);
+            PlatformGetData(byteOffset, MemoryMarshal.AsBytes(destination));
         }
 
-        public void GetData<T>(Span<T> destination) 
+        public void GetData<T>(Span<T> destination)
             where T : unmanaged
         {
             GetData(0, destination);
@@ -84,57 +89,66 @@ namespace MonoGame.Framework.Graphics
 
         #region SetData
 
-        public unsafe void SetData<T>(
+        public void SetData<T>(
             int byteOffset,
-            ReadOnlySpan<T> data,
+            ReadOnlySpan<T> source,
             SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
-            if (data.IsEmpty)
-                throw new ArgumentEmptyException(nameof(data));
+            if (source.IsEmpty)
+                return;
 
             AssertMainThread(true);
 
             int bufferBytes = Capacity * (int)ElementSize;
-            int requestedBytes = data.Length * sizeof(T);
+            int srcSize = source.Length * Unsafe.SizeOf<T>();
 
-            if (requestedBytes > bufferBytes)
+            if (srcSize > bufferBytes)
                 throw new ArgumentOutOfRangeException(
-                    nameof(data), "The buffer doesn't have enough capacity.");
+                    nameof(source), "The buffer doesn't have enough capacity.");
 
-            if (byteOffset + requestedBytes > bufferBytes)
+            if (byteOffset + srcSize > bufferBytes)
                 throw new ArgumentOutOfRangeException(
                     nameof(byteOffset), "The range reaches beyond the buffer.");
 
-            PlatformSetData(byteOffset, data, options);
-            Count = data.Length * sizeof(T) / (int)ElementSize;
-        }
-
-        public void SetData<T>(
-            ReadOnlySpan<T> data,
-            SetDataOptions options = SetDataOptions.None)
-            where T : unmanaged
-        {
-            SetData(0, data, options);
+            PlatformSetData(byteOffset, MemoryMarshal.AsBytes(source), options);
+            Count = srcSize / (int)ElementSize;
         }
 
         public void SetData<T>(
             int byteOffset,
-            Span<T> data,
+            Span<T> source,
             SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
-            SetData(byteOffset, (ReadOnlySpan<T>)data, options);
+            SetData(byteOffset, (ReadOnlySpan<T>)source, options);
         }
 
         public void SetData<T>(
-            Span<T> data,
+            ReadOnlySpan<T> source,
             SetDataOptions options = SetDataOptions.None)
             where T : unmanaged
         {
-            SetData(0, data, options);
+            SetData(0, source, options);
+        }
+
+        public void SetData<T>(
+            Span<T> source,
+            SetDataOptions options = SetDataOptions.None)
+            where T : unmanaged
+        {
+            SetData((ReadOnlySpan<T>)source, options);
         }
 
         #endregion
+
+        public static IndexElementSize ToIndexElementSize(Type type)
+        {
+            return (type == typeof(short) || type == typeof(ushort))
+                ? IndexElementSize.Short
+                : (type == typeof(int) || type == typeof(uint))
+                ? IndexElementSize.Int
+                : throw new ArgumentException($"Could not determine index element size from {type}.");
+        }
     }
 }

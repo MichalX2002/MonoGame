@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.Vectors;
 using MonoGame.Imaging;
@@ -294,7 +295,7 @@ namespace MonoGame.Framework.Graphics
 
             AssertMainThread(true);
 
-            PlatformGetData(level, arraySlice, checkedRect, destination);
+            PlatformGetData(level, arraySlice, checkedRect, MemoryMarshal.AsBytes(destination));
         }
 
         /// <summary>
@@ -316,7 +317,7 @@ namespace MonoGame.Framework.Graphics
 
             void GetData()
             {
-                PlatformGetData(level, arraySlice, checkedRect, destination.Span);
+                PlatformGetData(level, arraySlice, checkedRect, MemoryMarshal.AsBytes(destination.Span));
             }
 
             if (IsValidThreadContext)
@@ -343,7 +344,7 @@ namespace MonoGame.Framework.Graphics
             ValidateSizes(Unsafe.SizeOf<T>(), elementCount, byteSize);
 
             var ptr = new UnmanagedMemory<T>(elementCount);
-            PlatformGetData(level, arraySlice, checkedRect, ptr.Span);
+            PlatformGetData(level, arraySlice, checkedRect, ptr.ByteSpan);
             return ptr;
         }
 
@@ -528,7 +529,7 @@ namespace MonoGame.Framework.Graphics
 
                 using (data)
                     return Image.LoadPixelData<TPixel>(
-                        types[0], data.Span, checkedRect.Size);
+                        types[0], data.ByteSpan, checkedRect.Size);
             }
             catch
             {

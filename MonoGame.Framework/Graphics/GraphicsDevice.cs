@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -51,7 +52,7 @@ namespace MonoGame.Framework.Graphics
         internal VertexBufferBindings _vertexBuffers;
         private bool _vertexBuffersDirty;
 
-        private IndexBuffer _indexBuffer;
+        private IndexBuffer? _indexBuffer;
         private bool _indexBufferDirty;
 
         private readonly RenderTargetBinding[] _currentRenderTargetBindings = new RenderTargetBinding[4];
@@ -158,9 +159,10 @@ namespace MonoGame.Framework.Graphics
         public GraphicsMetrics Metrics => _graphicsMetrics;
 
         public DisplayMode DisplayMode => Adapter.CurrentDisplayMode;
+
         public GraphicsDeviceStatus GraphicsDeviceStatus => GraphicsDeviceStatus.Normal;
 
-        public IndexBuffer Indices { set => SetIndexBuffer(value); get => _indexBuffer; }
+        public IndexBuffer? Indices { set => SetIndexBuffer(value); get => _indexBuffer; }
 
         internal Shader VertexShader
         {
@@ -763,14 +765,14 @@ namespace MonoGame.Framework.Graphics
 
         #region Buffers
 
-        public void SetVertexBuffer(VertexBuffer vertexBuffer)
+        public void SetVertexBuffer(VertexBuffer? vertexBuffer)
         {
             _vertexBuffersDirty |= vertexBuffer == null
                 ? _vertexBuffers.Clear()
                 : _vertexBuffers.Set(vertexBuffer, 0);
         }
 
-        public void SetVertexBuffer(VertexBuffer vertexBuffer, int vertexOffset)
+        public void SetVertexBuffer(VertexBuffer? vertexBuffer, int vertexOffset)
         {
             // Validate vertexOffset.
             if (vertexOffset < 0 ||
@@ -806,7 +808,7 @@ namespace MonoGame.Framework.Graphics
             SetVertexBuffers(vertexBuffers.AsSpan());
         }
 
-        private void SetIndexBuffer(IndexBuffer indexBuffer)
+        private void SetIndexBuffer(IndexBuffer? indexBuffer)
         {
             if (_indexBuffer == indexBuffer)
                 return;
@@ -865,33 +867,17 @@ namespace MonoGame.Framework.Graphics
         #region DrawUserPrimitives
 
         /// <summary>
-        /// Draw primitives of the specified type from the data in a span of vertices without indexing.
-        /// </summary>
-        /// <typeparam name="T">The type of the vertex data.</typeparam>
-        /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
-        /// <param name="vertexData">The span of vertices to draw.</param>
-        /// <remarks>
-        /// The <see cref="VertexDeclaration"/> will be found by getting <see cref="IVertexType.VertexDeclaration"/>
-        /// from an instance of <typeparamref name="T"/> and cached for subsequent calls.
-        /// </remarks>
-        public void DrawUserPrimitives<T>(
-            PrimitiveType primitiveType, ReadOnlySpan<T> vertexData)
-            where T : unmanaged, IVertexType
-        {
-            var declaration = VertexDeclarationCache<T>.VertexDeclaration;
-            DrawUserPrimitives(primitiveType, vertexData, declaration);
-        }
-
-        /// <summary>
         /// Draw primitives of the specified type from the data in the given span of vertices without indexing.
         /// </summary>
-        /// <typeparam name="T">The type of the vertex data.</typeparam>
         /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
         /// <param name="vertexData">The span of vertices to draw.</param>
+        /// <param name="primitiveCount">The number of primitives to draw.</param>
         /// <param name="vertexDeclaration">The layout of the vertices.</param>
-        public void DrawUserPrimitives<T>(
-            PrimitiveType primitiveType, ReadOnlySpan<T> vertexData, VertexDeclaration vertexDeclaration)
-            where T : unmanaged
+        public void DrawUserPrimitives(
+            PrimitiveType primitiveType,
+            ReadOnlySpan<byte> vertexData,
+            int primitiveCount,
+            VertexDeclaration vertexDeclaration)
         {
             if (vertexData.IsEmpty)
                 throw new ArgumentEmptyException(nameof(vertexData));
@@ -899,7 +885,7 @@ namespace MonoGame.Framework.Graphics
             if (vertexDeclaration is null)
                 throw new ArgumentNullException(nameof(vertexDeclaration));
 
-            int vertexCount = GetElementCountForType(primitiveType, vertexData.Length);
+            int vertexCount = GetElementCountForType(primitiveType, primitiveCount);
             if (vertexCount > vertexData.Length)
                 throw new ArgumentOutOfRangeException(nameof(vertexData));
 
@@ -910,6 +896,25 @@ namespace MonoGame.Framework.Graphics
                 _graphicsMetrics._drawCount++;
                 _graphicsMetrics._primitiveCount += vertexCount;
             }
+        }
+
+        /// <summary>
+        /// Draw primitives of the specified type from the data in a span of vertices without indexing.
+        /// </summary>
+        /// <typeparam name="T">The type of the vertex data.</typeparam>
+        /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
+        /// <param name="vertexData">The span of vertices to draw.</param>
+        /// <param name="primitiveCount">The number of primitives to draw.</param>
+        /// <remarks>
+        /// The <see cref="VertexDeclaration"/> will be found by getting <see cref="IVertexType.VertexDeclaration"/>
+        /// from an instance of <typeparamref name="T"/> and cached for subsequent calls.
+        /// </remarks>
+        public void DrawUserPrimitives<T>(
+            PrimitiveType primitiveType, ReadOnlySpan<T> vertexData, int primitiveCount)
+            where T : unmanaged, IVertexType
+        {
+            var declaration = VertexDeclarationCache<T>.VertexDeclaration;
+            DrawUserPrimitives(primitiveType, MemoryMarshal.AsBytes(vertexData), primitiveCount, declaration);
         }
 
         #endregion
@@ -954,6 +959,7 @@ namespace MonoGame.Framework.Graphics
         /// <typeparam name="TVertex">The type of the vertex data.</typeparam>
         /// <typeparam name="TIndex">The type of the index data.</typeparam>
         /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
+        /// <param name="elementSize">The size of index elements.</param>
         /// <param name="vertexData">The span of vertices to draw.</param>
         /// <param name="indexData">The span of indices for indexing the vertices.</param>
         /// <param name="primitiveCount">The number of primitives to draw.</param>
@@ -964,6 +970,7 @@ namespace MonoGame.Framework.Graphics
         /// </remarks>
         public void DrawUserIndexedPrimitives<TVertex, TIndex>(
             PrimitiveType primitiveType,
+            IndexElementSize elementSize,
             ReadOnlySpan<TVertex> vertexData,
             ReadOnlySpan<TIndex> indexData,
             int primitiveCount,
@@ -982,29 +989,60 @@ namespace MonoGame.Framework.Graphics
             if (primitiveCount <= 0 || GetElementCountForType(primitiveType, primitiveCount) > indexData.Length)
                 throw new ArgumentOutOfRangeException(nameof(primitiveCount));
 
-            if (vertexDeclaration.VertexStride < Unsafe.SizeOf<TIndex>())
-                throw new ArgumentOutOfRangeException(nameof(vertexDeclaration),
-                    $"Vertex stride of {nameof(vertexDeclaration)} should be at least as big as the stride of the actual vertices.");
-
-            IndexElementSize indexElementSize;
-            int indexSize = Unsafe.SizeOf<TIndex>();
-            if (indexSize == 2)
-                indexElementSize = IndexElementSize.Short;
-            else if (indexSize == 4)
-                indexElementSize = IndexElementSize.Int;
-            else
-                throw new ArgumentException(
-                    "The only index element sizes supported are 2 or 4 bytes.", nameof(indexData));
-
             PlatformDrawUserIndexedPrimitives(
-                primitiveType, vertexData, indexElementSize, indexData, primitiveCount, vertexDeclaration);
+                primitiveType,
+                elementSize,
+                MemoryMarshal.AsBytes(vertexData),
+                MemoryMarshal.AsBytes(indexData),
+                primitiveCount,
+                vertexDeclaration);
 
             unchecked
             {
                 _graphicsMetrics._drawCount++;
-                _graphicsMetrics._primitiveCount +=  primitiveCount;
+                _graphicsMetrics._primitiveCount += primitiveCount;
             }
         }
+
+        /// <summary>
+        /// Draw primitives of the specified type by indexing into the given span of vertices with 
+        /// 16- or 32-bit indices.
+        /// </summary>
+        /// <typeparam name="TVertex">The type of the vertex data.</typeparam>
+        /// <typeparam name="TIndex">The type of the index data.</typeparam>
+        /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
+        /// <param name="elementSize">The size of index elements.</param>
+        /// <param name="vertexData">The span of vertices to draw.</param>
+        /// <param name="indexData">The span of indices for indexing the vertices.</param>
+        /// <param name="primitiveCount">The number of primitives to draw.</param>
+        /// <remarks>
+        /// The <see cref="VertexDeclaration"/> will be found by getting <see cref="IVertexType.VertexDeclaration"/>
+        /// from an instance of <typeparamref name="TVertex"/> and cached for subsequent calls.
+        /// </remarks>
+        /// <remarks>
+        /// All indices in the span are relative to the first vertex.
+        /// An index of zero in the index span points to the first vertex in the vertex span.
+        /// </remarks>
+        public void DrawUserIndexedPrimitives<TVertex, TIndex>(
+            PrimitiveType primitiveType,
+            IndexElementSize elementSize,
+            ReadOnlySpan<TVertex> vertexData,
+            ReadOnlySpan<TIndex> indexData,
+            int primitiveCount)
+            where TVertex : unmanaged, IVertexType
+            where TIndex : unmanaged
+        {
+            var declaration = VertexDeclarationCache<TVertex>.VertexDeclaration;
+
+            DrawUserIndexedPrimitives(
+                primitiveType,
+                elementSize,
+                MemoryMarshal.AsBytes(vertexData),
+                MemoryMarshal.AsBytes(indexData),
+                primitiveCount,
+                declaration);
+        }
+
 
         /// <summary>
         /// Draw primitives of the specified type by indexing into the given span of vertices with 
@@ -1032,9 +1070,14 @@ namespace MonoGame.Framework.Graphics
             where TVertex : unmanaged, IVertexType
             where TIndex : unmanaged
         {
-            var declaration = VertexDeclarationCache<TVertex>.VertexDeclaration;
+            var elementSize = IndexBuffer.ToIndexElementSize(typeof(TIndex));
+                
             DrawUserIndexedPrimitives(
-                primitiveType, vertexData, indexData, primitiveCount, declaration);
+                primitiveType,
+                elementSize,
+                vertexData,
+                indexData,
+                primitiveCount);
         }
 
         #endregion
@@ -1125,12 +1168,12 @@ namespace MonoGame.Framework.Graphics
                 throw new InvalidOperationException(
                     $"{nameof(T)} is of an invalid size for the format of the backbuffer.");
 
-            int spanBytes = destination.Length * sizeof(T);
-            if (spanBytes > rect.Width * rect.Height * formatSize)
+            int byteCount = destination.Length * sizeof(T);
+            if (byteCount > rect.Width * rect.Height * formatSize)
                 throw new ArgumentOutOfRangeException(
                      nameof(destination), "The amount of data requested exceeds the backbuffer size.");
 
-            PlatformGetBackBufferData(destination, rect);
+            PlatformGetBackBufferData(MemoryMarshal.AsBytes(destination), rect);
         }
 
         #endregion
@@ -1243,6 +1286,9 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
+        /// <summary>
+        /// Disposes this <see cref="GraphicsDevice"/>.
+        /// </summary>
         ~GraphicsDevice()
         {
             Dispose(false);

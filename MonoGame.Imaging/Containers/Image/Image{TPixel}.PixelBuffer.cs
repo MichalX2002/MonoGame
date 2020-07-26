@@ -88,7 +88,7 @@ namespace MonoGame.Imaging
                 get
                 {
                     if (_imemory != null)
-                        return MemoryMarshal.Cast<byte, TPixel>(_imemory.Span);
+                        return MemoryMarshal.Cast<byte, TPixel>(_imemory.ByteSpan);
                     if (!_bmemory.IsEmpty)
                         return MemoryMarshal.Cast<byte, TPixel>(_bmemory.Span);
                     return _memory.Span;
@@ -100,7 +100,7 @@ namespace MonoGame.Imaging
                 get
                 {
                     if (_imemory != null)
-                        return _imemory.Span;
+                        return _imemory.ByteSpan;
                     if (!_bmemory.IsEmpty)
                         return _bmemory.Span;
                     return MemoryMarshal.Cast<TPixel, byte>(_memory.Span);
