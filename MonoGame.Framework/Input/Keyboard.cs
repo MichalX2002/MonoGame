@@ -2,6 +2,8 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using MonoGame.Framework.Collections;
+
 namespace MonoGame.Framework.Input
 {
     /// <summary>
@@ -9,6 +11,16 @@ namespace MonoGame.Framework.Input
     /// </summary>
     public static partial class Keyboard
     {
+        /// <summary>
+        /// Gets the currently active key modifiers.
+        /// </summary>
+        public static KeyModifiers Modifiers => PlatformGetModifiers();
+
+        /// <summary>
+        /// Gets all the currently pressed keys.
+        /// </summary>
+        public static ReadOnlyList<Keys> KeysDown => PlatformGetKeysDown();
+
         /// <summary>
         /// Returns the current keyboard state.
         /// </summary>

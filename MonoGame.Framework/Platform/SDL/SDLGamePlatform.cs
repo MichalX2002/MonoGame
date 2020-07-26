@@ -23,9 +23,6 @@ namespace MonoGame.Framework
         private int _isExiting;
         private SDLGameWindow _window;
 
-        // List is slightly faster than HashSet as low item count is the norm.
-        private List<Keys> _keys;
-
         private List<string>? _fileDropList;
 
         public override GameRunBehavior DefaultRunBehavior => GameRunBehavior.Synchronous;
@@ -35,8 +32,6 @@ namespace MonoGame.Framework
         public SDLGamePlatform(Game game) : base(game)
         {
             _game = game;
-            _keys = new List<Keys>();
-            Keyboard.SetKeysDownList(_keys);
 
             SDL.GetVersion(out SDL.Version version);
 
@@ -89,7 +84,7 @@ namespace MonoGame.Framework
             while (true)
             {
                 PollSDLEvents();
-                Keyboard.Modifiers = SDL.Keyboard.GetModState();
+                Keyboard._modifiers = SDL.Keyboard.GetModState();
 
                 Game.Tick();
 
@@ -157,8 +152,8 @@ namespace MonoGame.Framework
                     {
                         bool hasMapping = KeyboardUtil.ToXna(ev.KeyboardKey.Keysym.Sym, out var key);
                         if (hasMapping)
-                            if (!_keys.Contains(key))
-                                _keys.Add(key);
+                            if (!Keyboard._keysDown.Contains(key))
+                                Keyboard._keysDown.Add(key);
 
                         Rune.TryCreate(ev.KeyboardKey.Keysym.Sym, out var rune);
                         var inputEv = new TextInputEventArgs(rune, hasMapping ? key : (Keys?)null);
@@ -173,7 +168,7 @@ namespace MonoGame.Framework
                     {
                         bool hasMapping = KeyboardUtil.ToXna(ev.KeyboardKey.Keysym.Sym, out var key);
                         if (hasMapping)
-                            _keys.Remove(key);
+                            Keyboard._keysDown.Remove(key);
 
                         Rune.TryCreate(ev.KeyboardKey.Keysym.Sym, out var rune);
                         _window.OnKeyUp(new TextInputEventArgs(rune, hasMapping ? key : (Keys?)null));
@@ -270,10 +265,12 @@ namespace MonoGame.Framework
 
                             case SDL.Window.EventId.FocusGained:
                                 IsActive = true;
+                                SDL.DisableScreenSaver();
                                 break;
 
                             case SDL.Window.EventId.FocusLost:
                                 IsActive = false;
+                                SDL.EnableScreenSaver();
                                 break;
 
                             case SDL.Window.EventId.Moved:

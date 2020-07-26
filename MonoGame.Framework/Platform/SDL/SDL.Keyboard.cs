@@ -16,7 +16,7 @@ namespace MonoGame
             {
                 public int Scancode;
                 public int Sym;
-                public KeyModifier Mod;
+                public KeyModifiers Mod;
                 public uint Unicode;
             }
 
@@ -58,7 +58,7 @@ namespace MonoGame
             }
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate KeyModifier d_sdl_getmodstate();
+            public delegate KeyModifiers d_sdl_getmodstate();
             public static d_sdl_getmodstate GetModState = 
                 FL.LoadFunction<d_sdl_getmodstate>(NativeLibrary, "SDL_GetModState");
         }

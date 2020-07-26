@@ -34,12 +34,12 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Gets the state of the Caps Lock key.
         /// </summary>
-        public bool CapsLock { get; private set; }
+        public bool CapsLock { get; }
 
         /// <summary>
         /// Gets the state of the Num Lock key.
         /// </summary>
-        public bool NumLock { get; private set; }
+        public bool NumberLock { get; }
 
         /// <summary>
         /// Gets the amount of pressed keys.
@@ -71,11 +71,11 @@ namespace MonoGame.Framework.Input
         /// </summary>
         /// <param name="keys">List of keys to be flagged as pressed on initialization.</param>
         /// <param name="capsLock">Caps Lock state.</param>
-        /// <param name="numLock">Num Lock state.</param>
-        public KeyboardState(IEnumerable<Keys> keys, bool capsLock = false, bool numLock = false) : this()
+        /// <param name="numberLock">Number Lock state.</param>
+        public KeyboardState(IEnumerable<Keys> keys, bool capsLock = false, bool numberLock = false) : this()
         {
             CapsLock = capsLock;
-            NumLock = numLock;
+            NumberLock = numberLock;
 
             if (keys != null)
             {
@@ -97,11 +97,11 @@ namespace MonoGame.Framework.Input
         /// </summary>
         /// <param name="keys">List of keys to be flagged as pressed on initialization.</param>
         /// <param name="capsLock">Caps Lock state.</param>
-        /// <param name="numLock">Num Lock state.</param>
-        public KeyboardState(ReadOnlySpan<Keys> keys, bool capsLock = false, bool numLock = false) : this()
+        /// <param name="numberLock">Num Lock state.</param>
+        public KeyboardState(ReadOnlySpan<Keys> keys, bool capsLock = false, bool numberLock = false) : this()
         {
             CapsLock = capsLock;
-            NumLock = numLock;
+            NumberLock = numberLock;
 
             for (int i = 0; i < keys.Length; i++)
                 SetKey(keys[i]);
@@ -240,14 +240,20 @@ namespace MonoGame.Framework.Input
 
         #region Equals
 
-        public readonly bool Equals(KeyboardState other) => this == other;
+        public readonly bool Equals(KeyboardState other)
+        {
+            return this == other;
+        }
 
-        public override readonly bool Equals(object obj) => obj is KeyboardState other && Equals(other);
+        public override readonly bool Equals(object obj)
+        {
+            return obj is KeyboardState other && Equals(other);
+        }
 
         public static bool operator ==(in KeyboardState a, in KeyboardState b)
         {
             return a.CapsLock == b.CapsLock
-                && a.NumLock == b.NumLock
+                && a.NumberLock == b.NumberLock
                 && a._key0 == b._key0
                 && a._key1 == b._key1
                 && a._key2 == b._key2
@@ -273,13 +279,13 @@ namespace MonoGame.Framework.Input
         public override readonly int GetHashCode()
         {
             return HashCode.Combine(
-                HashCode.Combine(CapsLock, NumLock),
+                HashCode.Combine(CapsLock, NumberLock),
                 HashCode.Combine(_key0, _key1, _key2, _key3, _key4, _key5, _key6, _key7));
         }
 
         #endregion
 
-        #region IEnumerable and Enumerator
+        #region IEnumerable, Enumerator
 
         /// <summary>
         /// Returns an <see cref="Enumerator"/> that enumerates the currently pressed keys.

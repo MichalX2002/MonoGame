@@ -62,12 +62,14 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
     <Compile Include="Platform\Media\Video.WMS.cs" />
     <Compile Include="Platform\Media\VideoPlayer.WMS.cs" />
     <Compile Include="Platform\Media\VideoSampleGrabber.cs" />
+    <Compile Include="Platform\Utilities\DummyTaskbarList.cs" />
     <Compile Include="Platform\TitleContainer.Desktop.cs" />
     <Compile Include="Platform\Utilities\AssemblyHelper.cs" />
     <Compile Include="Platform\Utilities\FuncLoader.Desktop.cs" />
+    <Compile Include="Platform\Utilities\TaskbarList.Desktop.cs" />
     <Compile Include="Platform\Utilities\Threading.cs" />
     <Compile Include="Platform\Windows\HorizontalMouseWheelEvent.cs" />
-    <Compile Include="Platform\Windows\TaskbarList.Windows.cs" />
+    <Compile Include="Platform\Windows\WindowsTaskbarList.cs" />
     <Compile Include="Platform\Windows\WinFormsGameForm.cs" />
     <Compile Include="Platform\Windows\WinFormsGamePlatform.cs" />
     <Compile Include="Platform\Windows\WinFormsGameWindow.cs" />

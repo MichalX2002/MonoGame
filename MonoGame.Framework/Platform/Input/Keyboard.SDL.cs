@@ -3,36 +3,33 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using MonoGame.Framework.Collections;
 
 namespace MonoGame.Framework.Input
 {
     public static partial class Keyboard
     {
-        private static List<Keys> _keys;
+        internal static readonly List<Keys> _keysDown = new List<Keys>();
+        internal static KeyModifiers _modifiers;
 
-        /// <summary>
-        /// Gets all the currently pressed keys.
-        /// </summary>
-        public static ReadOnlyCollection<Keys> KeysDown { get; private set; }
+        private static ReadOnlyList<Keys> _keysDownRO = _keysDown.AsReadOnlyList();
 
-        /// <summary>
-        /// Gets the currently active key modifiers.
-        /// </summary>
-        public static KeyModifier Modifiers { get; internal set; }
+        private static KeyModifiers PlatformGetModifiers()
+        {
+            return _modifiers;
+        }
+
+        private static ReadOnlyList<Keys> PlatformGetKeysDown()
+        {
+            return _keysDownRO;
+        }
 
         private static KeyboardState PlatformGetState()
         {
             return new KeyboardState(
-                _keys,
-                (Modifiers & KeyModifier.CapsLock) == KeyModifier.CapsLock,
-                (Modifiers & KeyModifier.NumLock) == KeyModifier.NumLock);
-        }
-
-        internal static void SetKeysDownList(List<Keys> keys)
-        {
-            _keys = keys;
-            KeysDown = _keys.AsReadOnly();
+                _keysDown,
+                (Modifiers & KeyModifiers.CapsLock) == KeyModifiers.CapsLock,
+                (Modifiers & KeyModifiers.NumLock) == KeyModifiers.NumLock);
         }
     }
 }

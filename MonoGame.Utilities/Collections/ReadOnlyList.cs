@@ -12,9 +12,10 @@ namespace MonoGame.Framework.Collections
             get
             {
                 if (_empty == null)
+                {
                     // we don't care about threading; concurrency can only cause some extra allocs here
                     _empty = new ReadOnlyList<T>(new List<T>());
-
+                }
                 return _empty;
             }
         }

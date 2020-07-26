@@ -1,11 +1,12 @@
-﻿using System;
+﻿
+using System;
 
 namespace MonoGame.Framework.Utilities
 {
     /// <summary>
     /// Exposes taskbar utilities on desktop platforms.
     /// </summary>
-    public partial class TaskbarList : GameWindowDependency
+    public abstract partial class TaskbarList : GameWindowDependency
     {
         private object SyncRoot { get; } = new object();
 
@@ -15,12 +16,12 @@ namespace MonoGame.Framework.Utilities
         /// <summary>
         /// Gets whether taskbar functionality is supported on the current platform.
         /// </summary>
-        public bool IsSupported => PlatformGetIsSupported();
+        public abstract bool IsSupported { get; }
 
         /// <summary>
         /// Gets whether taskbar functionality is currently available.
         /// </summary>
-        public bool IsAvailable => PlatformGetIsAvailable();
+        public abstract bool IsAvailable { get; }
 
         /// <summary>
         /// Gets or sets the type of the progress indicator displayed on the taskbar.
@@ -30,13 +31,14 @@ namespace MonoGame.Framework.Utilities
             get => _progressState;
             set
             {
+                AssertIsSupported();
                 lock (SyncRoot)
                 {
                     if (_progressState != value)
                     {
                         _progressState = value;
                         if (IsAvailable)
-                            PlatformSetProgressState(value);
+                            SetProgressState(value);
                     }
                 }
             }
@@ -50,13 +52,14 @@ namespace MonoGame.Framework.Utilities
             get => _progressValue;
             set
             {
+                AssertIsSupported();
                 lock (SyncRoot)
                 {
                     if (!_progressValue.Equals(value))
                     {
                         _progressValue = value;
                         if (IsAvailable)
-                            PlatformSetProgressValue(value);
+                            SetProgressValue(value);
                     }
                 }
             }
@@ -67,14 +70,11 @@ namespace MonoGame.Framework.Utilities
         /// </summary>
         public TaskbarList(GameWindow window) : base(window)
         {
-            PlatformConstruct();
         }
 
-        /// <inheritdoc/>
-        protected override void WindowHandleChanged()
+        public static TaskbarList Create(GameWindow window)
         {
-            PlatformWindowHandleChanged();
-            Update();
+            return PlatformCreate(window);
         }
 
         /// <summary>
@@ -94,9 +94,25 @@ namespace MonoGame.Framework.Utilities
 
             lock (SyncRoot)
             {
-                PlatformSetProgressState(_progressState);
-                PlatformSetProgressValue(_progressValue);
+                SetProgressState(_progressState);
+                SetProgressValue(_progressValue);
             }
+        }
+
+        protected void AssertIsSupported()
+        {
+            if (!IsSupported)
+                throw new PlatformNotSupportedException();
+        }
+
+        protected abstract void SetProgressState(TaskbarProgressState state);
+
+        protected abstract void SetProgressValue(TaskbarProgressValue value);
+
+        /// <inheritdoc/>
+        protected override void WindowHandleChanged()
+        {
+            Update();
         }
     }
 }

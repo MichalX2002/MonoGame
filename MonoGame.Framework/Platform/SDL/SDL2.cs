@@ -200,6 +200,11 @@ namespace MonoGame
             FL.LoadFunction<d_sdl_setclipboardtext>(NativeLibrary, "SDL_SetClipboardText");
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        public delegate void d_SDL_EnableScreenSaver();
+        public static d_SDL_EnableScreenSaver EnableScreenSaver =
+            FL.LoadFunction<d_SDL_EnableScreenSaver>(NativeLibrary, "SDL_EnableScreenSaver");
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void d_sdl_disablescreensaver();
         public static d_sdl_disablescreensaver DisableScreenSaver =
             FL.LoadFunction<d_sdl_disablescreensaver>(NativeLibrary, "SDL_DisableScreenSaver");

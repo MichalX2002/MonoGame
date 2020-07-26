@@ -144,7 +144,7 @@ namespace MonoGame.Framework
         {
             Mouse = new Mouse(this);
             TouchPanel = new TouchPanel(this);
-            TaskbarList = new TaskbarList(this);
+            TaskbarList = Utilities.TaskbarList.Create(this);
         }
 
         public abstract IntPtr GetSubsystemWindowHandle();
