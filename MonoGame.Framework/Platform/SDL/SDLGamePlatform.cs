@@ -115,7 +115,7 @@ namespace MonoGame.Framework
                     case SDL.EventType.JoyDeviceRemoved:
                         Joystick.RemoveDevice(ev.JoystickDevice.Which);
                         break;
-
+                            
                     #endregion
 
                     #region GameController
@@ -155,7 +155,9 @@ namespace MonoGame.Framework
                             if (!Keyboard._keysDown.Contains(key))
                                 Keyboard._keysDown.Add(key);
 
+                        // TODO: validate rune?
                         Rune.TryCreate(ev.KeyboardKey.Keysym.Sym, out var rune);
+
                         var inputEv = new TextInputEventArgs(rune, hasMapping ? key : (Keys?)null);
                         _window.OnKeyDown(inputEv);
 
@@ -170,7 +172,9 @@ namespace MonoGame.Framework
                         if (hasMapping)
                             Keyboard._keysDown.Remove(key);
 
+                        // TODO: validate rune?
                         Rune.TryCreate(ev.KeyboardKey.Keysym.Sym, out var rune);
+
                         _window.OnKeyUp(new TextInputEventArgs(rune, hasMapping ? key : (Keys?)null));
                         break;
                     }
@@ -181,14 +185,18 @@ namespace MonoGame.Framework
                             var utf8 = new Span<byte>(ev.TextInput.Text, SDL.Keyboard.TextInputEvent.TextSize);
                             int length = utf8.IndexOf((byte)0);
                             if (length == -1)
-                                throw new InvalidDataException();
+                                throw new InvalidDataException(
+                                    "Missing terminating null character in UTF-8 text input.");
 
                             utf8 = utf8.Slice(0, length);
                             while (!utf8.IsEmpty)
                             {
                                 var status = Rune.DecodeFromUtf8(utf8, out Rune rune, out int consumed);
                                 if (status != OperationStatus.Done)
-                                    break;
+                                {
+                                    // This should never occur if SDL gives use valid data.
+                                    throw new InvalidDataException("Failed to decode UTF-8 text input: " + status);
+                                }
                                 utf8 = utf8.Slice(consumed);
 
                                 var nkey = KeyboardUtil.ToXna(rune.Value, out var key) ? key : (Keys?)null;
@@ -246,7 +254,7 @@ namespace MonoGame.Framework
                     case SDL.EventType.FingerMotion:
                         // ev.TouchFinger;
                         break;
-
+                            
                     case SDL.EventType.MultiGesture:
                         // ev.TouchMultiGesture
                         break;

@@ -56,7 +56,8 @@ namespace MonoGame.Tools.Pipeline
         private const string verb = "open";
         private const string commandText = "Open with MGCB Editor";
 
-        private readonly static string startMenuLink = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", "MGCB Editor.lnk");
+        private static string StartMenuLink { get; } = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "Programs", "MGCB Editor.lnk");
 
         public static void Associate()
         {
@@ -67,15 +68,19 @@ namespace MonoGame.Tools.Pipeline
                 FileName = assembly.GetName().Name,
                 Arguments = "\"%1\""
             }.ResolveDotnetApp();
+
             var command = $"\"{startInfo.FileName}\" {startInfo.Arguments}";
             var iconPath = $"{assembly.Location},0";
 
             SetWindowsAssociation(extension, progId, fileTypeDescription, iconPath, verb, commandText, command);
             RefreshEnvironment();
 
+            var assemblyLocation = typeof(FileAssociation).Assembly.Location;
+            var programPath = Path.Combine(Path.GetDirectoryName(assemblyLocation), "mgcb-editor-wpf.exe");
+
             var link = (IShellLink)new ShellLink();
-            link.SetPath(Path.Combine(Path.GetDirectoryName(typeof(FileAssociation).Assembly.Location), "mgcb-editor-wpf.exe"));
-            ((IPersistFile)link).Save(startMenuLink, false);
+            link.SetPath(programPath);
+            ((IPersistFile)link).Save(StartMenuLink, false);
         }
 
         public static void Unassociate()
@@ -83,10 +88,12 @@ namespace MonoGame.Tools.Pipeline
             UnsetWindowsAssociation(extension, progId);
             RefreshEnvironment();
 
-            File.Delete(startMenuLink);
+            File.Delete(StartMenuLink);
         }
 
-        private static bool SetWindowsAssociation(string extension, string progId, string fileTypeDescription, string icon, string verb, string commandText, string command)
+        private static bool SetWindowsAssociation(
+            string extension, string progId, string fileTypeDescription, 
+            string icon, string verb, string commandText, string command)
         {
             var madeChanges = false;
             Console.WriteLine($"Associating MGCB Editor with .{extension} extension in Windows...");
@@ -110,7 +117,8 @@ namespace MonoGame.Tools.Pipeline
             return madeChanges;
         }
 
-        private static bool SetRegistryKey<T>(string keyPath, string name, T value, RegistryValueKind valueKind = RegistryValueKind.String)
+        private static bool SetRegistryKey<T>(
+            string keyPath, string name, T value, RegistryValueKind valueKind = RegistryValueKind.String)
         {
             using (var key = Registry.CurrentUser.CreateSubKey(keyPath))
             {

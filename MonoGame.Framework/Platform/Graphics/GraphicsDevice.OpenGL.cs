@@ -398,13 +398,13 @@ namespace MonoGame.Framework.Graphics
         }
 
 #if DESKTOPGL || ANGLE
-        static internal void DisposeContext(IntPtr resource)
+        internal static void DisposeContext(IntPtr resource)
         {
             lock (DisposeContextsLock)
                 ContextDisposeQueue.Add(resource);
         }
 
-        static internal void DisposeContexts()
+        internal static void DisposeContexts()
         {
             lock (DisposeContextsLock)
             {

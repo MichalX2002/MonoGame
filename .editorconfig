@@ -53,3 +53,6 @@ dotnet_diagnostic.CA1810.severity = none
 
 # CA1714: Flags enums should have plural names
 dotnet_diagnostic.CA1714.severity = none
+
+# CA2225: Operator overloads have named alternates
+dotnet_diagnostic.CA2225.severity = none

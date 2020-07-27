@@ -9,7 +9,7 @@ namespace MonoGame.Imaging.Coders.Formats
     [Serializable]
     public class TgaEncoderOptions : EncoderOptions
     {
-        public new static TgaEncoderOptions Default { get; } = 
+        public static new TgaEncoderOptions Default { get; } = 
             new TgaEncoderOptions(useRunLengthEncoding: true);
 
         public static TgaEncoderOptions NoRLE { get; } =

@@ -177,7 +177,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 content.ConvertBitmapType(typeof(Dxt5BitmapContent));
         }
 
-        static public void CompressAti(TextureContent content, bool isSpriteFont)
+        public static void CompressAti(TextureContent content, bool isSpriteFont)
         {
             // If sharp alpha is required (for a font texture page), use 16-bit color instead of PVR
             if (isSpriteFont)
@@ -195,7 +195,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 content.ConvertBitmapType(typeof(AtcInterpolatedBitmapContent));
         }
 
-        static public void CompressEtc1(ContentProcessorContext context, TextureContent content, bool isSpriteFont)
+        public static void CompressEtc1(ContentProcessorContext context, TextureContent content, bool isSpriteFont)
         {
             // If sharp alpha is required (for a font texture page), use 16-bit color instead of PVR
             if (isSpriteFont)
@@ -229,7 +229,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             }
         }
 
-        static public void CompressColor16Bit(TextureContent content)
+        public static void CompressColor16Bit(TextureContent content)
         {
             var face = content.Faces[0][0];
             var alphaRange = CalculateAlphaRange(face);
@@ -243,7 +243,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         }
 
         // Compress the greyscale font texture page using a specially-formulated DXT3 mode
-        static public unsafe void CompressFontDXT3(TextureContent content)
+        public static unsafe void CompressFontDXT3(TextureContent content)
         {
             if (content.Faces.Count > 1)
                 throw new PipelineException("Font textures should only have one face");

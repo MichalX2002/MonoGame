@@ -1043,7 +1043,7 @@ namespace MonoGame.OpenGL
             Uniform4fv(location, size, values[0]);
         }
 
-        internal unsafe static string? GetString(StringName name)
+        internal static unsafe string? GetString(StringName name)
         {
             return Marshal.PtrToStringAnsi(GetStringInternal(name));
         }
@@ -1077,7 +1077,7 @@ namespace MonoGame.OpenGL
             return intPtr;
         }
 
-        protected unsafe static IntPtr MarshalStringToPtr(string str)
+        protected static unsafe IntPtr MarshalStringToPtr(string str)
         {
             if (string.IsNullOrEmpty(str))
                 return IntPtr.Zero;
@@ -1118,29 +1118,29 @@ namespace MonoGame.OpenGL
             return sb;
         }
 
-        internal unsafe static void ShaderSource(int shaderId, string code)
+        internal static unsafe void ShaderSource(int shaderId, string code)
         {
             IntPtr intPtr = MarshalStringArrayToPtr(new string[] { code });
             ShaderSourceInternal(shaderId, 1, intPtr, code.Length);
             FreeStringArrayPtr(intPtr, 1);
         }
 
-        internal unsafe static void GetShader(int shaderId, ShaderParameter name, out int result)
+        internal static unsafe void GetShader(int shaderId, ShaderParameter name, out int result)
         {
             GetShaderiv(shaderId, (int)name, out result);
         }
 
-        internal unsafe static void GetProgram(int programId, GetProgramParameterName name, out int result)
+        internal static unsafe void GetProgram(int programId, GetProgramParameterName name, out int result)
         {
             GetProgramiv(programId, (int)name, out result);
         }
 
-        internal unsafe static void GetInteger(GetPName name, out int result)
+        internal static unsafe void GetInteger(GetPName name, out int result)
         {
             GetIntegerv((int)name, out result);
         }
 
-        internal unsafe static void GetInteger(int name, out int result)
+        internal static unsafe void GetInteger(int name, out int result)
         {
             GetIntegerv(name, out result);
         }
@@ -1150,7 +1150,7 @@ namespace MonoGame.OpenGL
             TexParameterf(target, name, value);
         }
 
-        internal unsafe static void TexParameter(
+        internal static unsafe void TexParameter(
             TextureTarget target, TextureParameterName name, ReadOnlySpan<float> values)
         {
             TexParameterfv(target, name, values[0]);

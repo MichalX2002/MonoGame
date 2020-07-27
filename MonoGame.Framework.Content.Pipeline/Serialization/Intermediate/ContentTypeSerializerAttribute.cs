@@ -26,7 +26,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 
         private static ReadOnlyCollection<Type> _types;
 
-        static internal ReadOnlyCollection<Type> GetTypes()
+        internal static ReadOnlyCollection<Type> GetTypes()
         {
             lock (_lock)
             {

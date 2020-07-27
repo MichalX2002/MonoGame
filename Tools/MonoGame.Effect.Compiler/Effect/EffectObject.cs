@@ -570,7 +570,7 @@ namespace MonoGame.Effect
             new StateInfo(STATE_CLASS.SETSAMPLER, 0, "Sampler"),
         };
 
-        static public EffectParameterClass ToXNAParameterClass(D3DXPARAMETER_CLASS class_)
+        public static EffectParameterClass ToXNAParameterClass(D3DXPARAMETER_CLASS class_)
         {
             switch (class_)
             {
@@ -590,7 +590,7 @@ namespace MonoGame.Effect
             }
         }
 
-        static public EffectParameterType ToXNAParameterType(D3DXPARAMETER_TYPE type)
+        public static EffectParameterType ToXNAParameterType(D3DXPARAMETER_TYPE type)
         {
             switch (type)
             {
@@ -617,7 +617,7 @@ namespace MonoGame.Effect
             }
         }
 
-        static internal VertexElementUsage ToXNAVertexElementUsage(MojoShader.MOJOSHADER_usage usage)
+        internal static VertexElementUsage ToXNAVertexElementUsage(MojoShader.MOJOSHADER_usage usage)
         {
             switch (usage)
             {
@@ -654,7 +654,7 @@ namespace MonoGame.Effect
         }
 
 
-        static public EffectObject CompileEffect(ShaderResult shaderResult, out string errorsAndWarnings)
+        public static EffectObject CompileEffect(ShaderResult shaderResult, out string errorsAndWarnings)
         {
             var effect = new EffectObject();
             errorsAndWarnings = string.Empty;

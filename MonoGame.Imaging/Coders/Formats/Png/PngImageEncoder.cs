@@ -10,7 +10,7 @@ namespace MonoGame.Imaging.Coders.Formats
     [Serializable]
     public class PngEncoderOptions : EncoderOptions
     {
-        public new static PngEncoderOptions Default { get; } =
+        public static new PngEncoderOptions Default { get; } =
             new PngEncoderOptions(CompressionLevel.Optimal);
 
         public CompressionLevel CompressionLevel { get; }

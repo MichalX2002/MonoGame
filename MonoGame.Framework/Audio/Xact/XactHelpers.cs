@@ -8,7 +8,7 @@ namespace MonoGame.Framework.Audio
 {
     static class XactHelpers
     {
-        static internal readonly Random Random = new Random();
+        internal static readonly Random Random = new Random();
 
         public static float ParseDecibels(byte decibles)
         {

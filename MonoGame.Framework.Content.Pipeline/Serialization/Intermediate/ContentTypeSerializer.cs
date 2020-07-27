@@ -37,6 +37,6 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 
         protected internal abstract void Serialize(IntermediateWriter output, object value, ContentSerializerAttribute format);
 
-        internal protected delegate void ChildCallback(ContentTypeSerializer typeSerializer, object value);
+        protected internal delegate void ChildCallback(ContentTypeSerializer typeSerializer, object value);
     }
 }

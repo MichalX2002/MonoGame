@@ -9,7 +9,7 @@ namespace MonoGame.Imaging.Coders.Formats
     [Serializable]
     public class JpegEncoderOptions : EncoderOptions
     {
-        public new static JpegEncoderOptions Default { get; } = new JpegEncoderOptions(90);
+        public static new JpegEncoderOptions Default { get; } = new JpegEncoderOptions(90);
 
         public int Quality { get; }
 

@@ -18,7 +18,7 @@ namespace MonoGame.Framework
             PlatformInit();
         }
 
-        static internal string Location { get; private set; }
+        internal static string Location { get; private set; }
 
         /// <summary>
         /// Returns a stream to an exsiting file in the title storage area.

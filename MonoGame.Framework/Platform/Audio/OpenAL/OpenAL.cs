@@ -82,7 +82,7 @@ namespace MonoGame.OpenAL
         private unsafe delegate void d_aldeletebuffers(int count, uint* buffers);
         private static d_aldeletebuffers alDeleteBuffers = FuncLoader.LoadFunction<d_aldeletebuffers>(NativeLibrary, "alDeleteBuffers");
 
-        public unsafe static void DeleteBuffers(ReadOnlySpan<uint> buffers)
+        public static unsafe void DeleteBuffers(ReadOnlySpan<uint> buffers)
         {
             if (buffers.IsEmpty)
                 return;
@@ -91,7 +91,7 @@ namespace MonoGame.OpenAL
                 alDeleteBuffers(buffers.Length, ptr);
         }
 
-        public unsafe static void DeleteBuffer(uint buffer)
+        public static unsafe void DeleteBuffer(uint buffer)
         {
             Span<uint> buffers = stackalloc uint[] { buffer };
             DeleteBuffers(buffers);
@@ -264,7 +264,7 @@ namespace MonoGame.OpenAL
                 alSourceQueueBuffers(source, buffers.Length, ptr);
         }
 
-        public unsafe static void SourceQueueBuffer(uint source, uint buffer)
+        public static unsafe void SourceQueueBuffer(uint source, uint buffer)
         {
             alSourceQueueBuffers(source, 1, &buffer);
         }

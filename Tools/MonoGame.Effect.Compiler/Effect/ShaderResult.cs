@@ -28,13 +28,13 @@ namespace MonoGame.Effect
         public bool Debug { get; private set; }
 
 
-        static public ShaderResult FromFile(string path, Options options, IEffectCompilerOutput output)
+        public static ShaderResult FromFile(string path, Options options, IEffectCompilerOutput output)
         {
             var effectSource = File.ReadAllText(path);
             return FromString(effectSource, path, options, output);
         }
 
-        static public ShaderResult FromString(string effectSource, string filePath, Options options, IEffectCompilerOutput output)
+        public static ShaderResult FromString(string effectSource, string filePath, Options options, IEffectCompilerOutput output)
         {
             var macros = new Dictionary<string, string>();
             macros.Add("MGFX", "1");

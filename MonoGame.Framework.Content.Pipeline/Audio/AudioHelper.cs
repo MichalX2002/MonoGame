@@ -20,7 +20,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         /// </summary>
         /// <param name="format">The conversion format</param>
         /// <returns>The file extension for the given conversion format.</returns>
-        static public string GetExtension(ConversionFormat format)
+        public static string GetExtension(ConversionFormat format)
         {
             return conversionFormatExtensions[(int)format];
         }

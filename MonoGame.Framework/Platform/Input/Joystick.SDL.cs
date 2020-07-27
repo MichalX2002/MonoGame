@@ -14,6 +14,7 @@ namespace MonoGame.Framework.Input
         internal static void AddDevice(int deviceId)
         {
             IntPtr jdevice = SDL.Joystick.Open(deviceId);
+
             int id = 0;
             while (Joysticks.ContainsKey(id))
                 id++;

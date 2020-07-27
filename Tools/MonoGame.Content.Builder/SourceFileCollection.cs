@@ -32,7 +32,7 @@ namespace MonoGame.Content.Builder
             Config = string.Empty;
         }
 
-        static public SourceFileCollection Read(string filePath)
+        public static SourceFileCollection Read(string filePath)
         {
             var deserializer = new XmlSerializer(typeof(SourceFileCollection));
             try
