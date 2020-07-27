@@ -21,10 +21,13 @@ namespace MonoGame.Framework.Input
         /// var name = await KeyboardInput.Show("Name", "What's your name?", "Player");
         /// </code>
         /// </example>
-        public static async Task<string> Show(string title, string description, string defaultText = "", bool usePasswordMode = false)
+        public static async Task<string> Show(
+            string title, string description, string defaultText = "", bool usePasswordMode = false)
         {
             if (IsVisible)
-                throw new Exception("The function cannot be completed at this time: the KeyboardInput UI is already active. Wait until KeyboardInput.IsVisible is false before issuing this call.");
+                throw new Exception(
+                    "The function cannot be completed at this time: the KeyboardInput UI is already active. " +
+                    "Wait until KeyboardInput.IsVisible is false before issuing this call.");
 
             IsVisible = true;
 

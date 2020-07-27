@@ -13,6 +13,7 @@ namespace MonoGame.Framework
     public abstract class GameWindow
     {
         public delegate void FilesDroppedEvent(GameWindow window, List<string> files);
+        public delegate void TextEditingEvent(GameWindow window, TextEditingEventArgs textEditing);
         public delegate void TextInputEvent(GameWindow window, TextInputEventArgs textInput);
 
         private string _title;
@@ -29,6 +30,15 @@ namespace MonoGame.Framework
         /// Event for a file group that was dropped on the window.
         /// </summary>
         public event FilesDroppedEvent? FilesDropped;
+
+        /// <summary>
+        /// Use this event to draw the current text input.
+        /// This event is not raised by non-character.
+        /// </summary>
+        /// <remarks>
+        /// This event is only supported on the Windows and Linux platforms.
+        /// </remarks>
+        public event TextEditingEvent? TextEditing;
 
         /// <summary>
         /// Use this event to retrieve text for objects like textboxes.
@@ -184,6 +194,11 @@ namespace MonoGame.Framework
         internal void OnFilesDropped(List<string> files)
         {
             FilesDropped?.Invoke(this, files);
+        }
+
+        internal void OnTextEditing(TextEditingEventArgs ev)
+        {
+            TextEditing?.Invoke(this, ev);
         }
 
         internal void OnTextInput(TextInputEventArgs ev)

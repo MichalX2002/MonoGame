@@ -56,10 +56,11 @@ namespace MonoGame.Framework.Graphics
                 }
             }
 
-            public virtual void GenRenderbuffer(out int renderbuffer)
+            public virtual int GenRenderbuffer()
             {
-                GL.GenRenderbuffers(1, out renderbuffer);
+                GL.GenRenderbuffers(1, out int renderbuffer);
                 GL.CheckError();
+                return renderbuffer;
             }
 
             public virtual void BindRenderbuffer(int renderbuffer)

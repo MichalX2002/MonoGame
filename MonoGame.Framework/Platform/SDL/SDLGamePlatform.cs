@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Text.Unicode;
 using System.Threading;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
@@ -96,8 +97,20 @@ namespace MonoGame.Framework
             }
         }
 
+        private static Span<byte> SliceToNullTerminator(Span<byte> utf8)
+        {
+            int length = utf8.IndexOf((byte)0);
+            if (length == -1)
+                throw new InvalidDataException(
+                    "Missing terminating null character in UTF-8 text input.");
+
+            return utf8.Slice(0, length);
+        }
+
         private void PollSDLEvents()
         {
+            Span<char> textEditingUtf16 = stackalloc char[SDL.Keyboard.TextEditingEvent.TextSize];
+
             while (SDL.PollEvent(out SDL.Event ev) == 1)
             {
                 switch (ev.Type)
@@ -115,7 +128,7 @@ namespace MonoGame.Framework
                     case SDL.EventType.JoyDeviceRemoved:
                         Joystick.RemoveDevice(ev.JoystickDevice.Which);
                         break;
-                            
+
                     #endregion
 
                     #region GameController
@@ -179,16 +192,15 @@ namespace MonoGame.Framework
                         break;
                     }
 
+                    #endregion
+
+                    #region Text-Input/Editing
+
                     case SDL.EventType.TextInput:
                         unsafe
                         {
                             var utf8 = new Span<byte>(ev.TextInput.Text, SDL.Keyboard.TextInputEvent.TextSize);
-                            int length = utf8.IndexOf((byte)0);
-                            if (length == -1)
-                                throw new InvalidDataException(
-                                    "Missing terminating null character in UTF-8 text input.");
-
-                            utf8 = utf8.Slice(0, length);
+                            utf8 = SliceToNullTerminator(utf8);
                             while (!utf8.IsEmpty)
                             {
                                 var status = Rune.DecodeFromUtf8(utf8, out Rune rune, out int consumed);
@@ -202,6 +214,26 @@ namespace MonoGame.Framework
                                 var nkey = KeyboardUtil.ToXna(rune.Value, out var key) ? key : (Keys?)null;
                                 _window.OnTextInput(new TextInputEventArgs(rune, nkey));
                             }
+                        }
+                        break;
+
+                    case SDL.EventType.TextEditing:
+                        unsafe
+                        {
+                            var utf8 = new Span<byte>(ev.TextEditing.Text, SDL.Keyboard.TextEditingEvent.TextSize);
+                            utf8 = SliceToNullTerminator(utf8);
+
+                            var status = Utf8.ToUtf16(utf8, textEditingUtf16, out _, out int charsWritten);
+                            if (status != OperationStatus.Done)
+                            {
+                                // This should never occur if SDL gives use valid data.
+                                throw new InvalidDataException("Failed to decode UTF-8 text input: " + status);
+                            }
+
+                            _window.OnTextEditing(new TextEditingEventArgs(
+                                text: textEditingUtf16.Slice(0, charsWritten),
+                                cursor: ev.TextEditing.Start,
+                                selectionLength: ev.TextEditing.Length));
                         }
                         break;
 
@@ -241,7 +273,7 @@ namespace MonoGame.Framework
 
                     #region Touch
 
-                        // TODO:
+                    // TODO:
 
                     case SDL.EventType.FingerDown:
                         // ev.TouchFinger;
@@ -254,7 +286,7 @@ namespace MonoGame.Framework
                     case SDL.EventType.FingerMotion:
                         // ev.TouchFinger;
                         break;
-                            
+
                     case SDL.EventType.MultiGesture:
                         // ev.TouchMultiGesture
                         break;

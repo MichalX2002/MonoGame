@@ -118,8 +118,8 @@ namespace MonoGame
             [FieldOffset(0)] public Window.Event Window;
             [FieldOffset(0)] public Drop.DropEvent Drop;
             [FieldOffset(0)] public Keyboard.Event KeyboardKey;
-            [FieldOffset(0)] public Keyboard.TextEditingEvent TextEditing;
             [FieldOffset(0)] public Keyboard.TextInputEvent TextInput;
+            [FieldOffset(0)] public Keyboard.TextEditingEvent TextEditing;
             [FieldOffset(0)] public Mouse.MotionEvent MouseMotion;
             [FieldOffset(0)] public Mouse.WheelEvent MouseWheel;
             [FieldOffset(0)] public Touch.FingerEvent TouchFinger;

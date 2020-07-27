@@ -40,7 +40,6 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
     <Compile Include="Platform\Graphics\RenderTargetBindingArrayComparer.cs" />
     <Compile Include="Platform\Graphics\Shader\Shader.Structure.cs" />
     <Compile Include="Platform\Input\Joystick.Instance.SDL.cs" />
-    <Compile Include="Platform\Input\TextInputEventArgs.cs" />
     <Compile Include="Platform\Input\Touch\TouchPanelCapabilities.SDL.cs" />
     <Compile Include="Platform\SDL\SDL.Touch.cs" />
     <Compile Include="Platform\SDL\SDL.Display.cs" />
