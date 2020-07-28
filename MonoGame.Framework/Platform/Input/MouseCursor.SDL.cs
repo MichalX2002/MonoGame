@@ -3,7 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Runtime.InteropServices;
+using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Framework.Input
 {
@@ -31,16 +31,16 @@ namespace MonoGame.Framework.Input
         }
 
         private static unsafe MouseCursor PlatformFromPixels(
-            ReadOnlySpan<Color> data, int width, int height, Point origin)
+            IReadOnlyPixelMemory<Color> data, int width, int height, Point origin)
         {
             var surface = IntPtr.Zero;
             var handle = IntPtr.Zero;
             try
             {
-                fixed (Color* ptr = data)
+                fixed (Color* ptr = data.GetPixelSpan())
                 {
                     surface = SDL.CreateRGBSurfaceFrom(
-                        (IntPtr)ptr, width, height, 32, width * sizeof(Color),
+                        (IntPtr)ptr, width, height, 32, data.ByteStride,
                         0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000);
                 }
 

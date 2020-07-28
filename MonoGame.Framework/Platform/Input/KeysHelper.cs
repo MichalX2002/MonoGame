@@ -9,16 +9,14 @@ namespace MonoGame.Framework.Input
 {
     internal static class KeysHelper
     {
-        static HashSet<int> _map;
+        private static HashSet<int> _map;
 
         static KeysHelper()
         {
-            _map = new HashSet<int>();
             var allKeys = (Keys[])Enum.GetValues(typeof(Keys));
+            _map = new HashSet<int>(allKeys.Length);
             foreach (var key in allKeys)
-            {
                 _map.Add((int)key);
-            }
         }
 
         /// <summary>

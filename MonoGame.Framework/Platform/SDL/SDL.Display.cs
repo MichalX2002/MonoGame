@@ -23,11 +23,11 @@ namespace MonoGame
             }
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            private delegate int d_sdl_getdisplaybounds(int displayIndex, out Rectangle rect);
+            private delegate int d_sdl_getdisplaybounds(int displayIndex, out Rect rect);
             private static readonly d_sdl_getdisplaybounds SDL_GetDisplayBounds = 
                 FL.LoadFunction<d_sdl_getdisplaybounds>(NativeLibrary, "SDL_GetDisplayBounds");
 
-            public static void GetBounds(int displayIndex, out Rectangle rect)
+            public static void GetBounds(int displayIndex, out Rect rect)
             {
                 GetError(SDL_GetDisplayBounds(displayIndex, out rect));
             }

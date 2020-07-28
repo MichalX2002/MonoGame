@@ -8,7 +8,6 @@ using System.Drawing;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using MonoGame.Framework.Graphics;
@@ -19,7 +18,6 @@ using MonoGame.Framework.Windows;
 using ButtonState = MonoGame.Framework.Input.ButtonState;
 using DrawingPoint = System.Drawing.Point;
 using DrawingSize = System.Drawing.Size;
-using Keys = MonoGame.Framework.Input.Keys;
 
 namespace MonoGame.Framework
 {
@@ -143,10 +141,9 @@ namespace MonoGame.Framework
             Form.MouseEnter += OnMouseEnter;
             Form.MouseLeave += OnMouseLeave;
 
-            Form.KeyPress += OnKeyPress;
-
-            _resizeTickTimer = new System.Timers.Timer(1) { SynchronizingObject = Form, AutoReset = false };
-            _resizeTickTimer.Elapsed += OnResizeTick;
+            Form.DragEnter += OnDragEnter;
+            Form.DragOver += OnDragOver;
+            Form.DragDrop += OnDragDrop;
 
             Form.Activated += OnActivated;
             Form.Deactivate += OnDeactivate;
@@ -154,18 +151,65 @@ namespace MonoGame.Framework
             Form.ResizeBegin += OnResizeBegin;
             Form.ResizeEnd += OnResizeEnd;
 
-            Form.HandleCreated += Form_HandleCreated;
-            Form.HandleDestroyed += Form_HandleDestroyed;
+            Form.HandleCreated += OnHandleCreated;
+            Form.HandleDestroyed += OnHandleDestroyed;
+
+            _resizeTickTimer = new System.Timers.Timer(1) { SynchronizingObject = Form, AutoReset = false };
+            _resizeTickTimer.Elapsed += OnResizeTick;
 
             RegisterToAllWindows();
         }
 
-        private void Form_HandleCreated(object? sender, EventArgs e)
+        private void OnDragEnter(object sender, DragEventArgs e)
+        {
+            if (GetDraggedObjectType(e.Data) != DraggedObjectType.Unknown)
+                e.Effect = DragDropEffects.All;
+            else
+                e.Effect = DragDropEffects.None;
+        }
+
+        private DraggedObjectType GetDraggedObjectType(IDataObject data)
+        {
+            if (data.GetDataPresent(DataFormats.FileDrop, false))
+                return DraggedObjectType.FileGroup;
+
+            else if (data.GetDataPresent(DataFormats.Text, true))
+                return DraggedObjectType.Text;
+
+            return DraggedObjectType.Unknown;
+        }
+
+        private void OnDragOver(object sender, DragEventArgs e)
+        {
+            var position = new Point(e.X, e.Y);
+            var objectType = GetDraggedObjectType(e.Data);
+            OnDragOver(new DragOverEventArgs(position, objectType));
+        }
+
+        private void OnDragDrop(object sender, DragEventArgs e)
+        {
+            var position = new Point(e.X, e.Y);
+            var objectType = GetDraggedObjectType(e.Data);
+            switch (objectType)
+            {
+                case DraggedObjectType.FileGroup:
+                    var filePaths = (string[]?)e.Data.GetData(DataFormats.FileDrop, false);
+                    OnFilesDropped(new FilesDroppedEventArgs(position, filePaths));
+                    break;
+
+                case DraggedObjectType.Text:
+                    var text = (string?)e.Data.GetData(DataFormats.Text, true);
+                    OnTextDropped(new TextDroppedEventArgs(position, text));
+                    break;
+            }
+        }
+
+        private void OnHandleCreated(object? sender, EventArgs e)
         {
             OnWindowHandleChanged();
         }
 
-        private void Form_HandleDestroyed(object? sender, EventArgs e)
+        private void OnHandleDestroyed(object? sender, EventArgs e)
         {
             OnWindowHandleChanged();
         }
@@ -331,15 +375,6 @@ namespace MonoGame.Framework
             }
         }
 
-        [DllImport("user32.dll")]
-        private static extern short VkKeyScanEx(char ch, IntPtr dwhkl);
-
-        private void OnKeyPress(object? sender, KeyPressEventArgs e)
-        {
-            var key = (Keys)(VkKeyScanEx(e.KeyChar, InputLanguage.CurrentInputLanguage.Handle) & 0xff);
-            OnTextInput(new TextInputEventArgs(new Rune(e.KeyChar), key));
-        }
-
         internal void Initialize(int width, int height)
         {
             ChangeSize(new DrawingSize(width, height));
@@ -438,6 +473,23 @@ namespace MonoGame.Framework
         protected override void SetTitle(ReadOnlySpan<char> title)
         {
             Form.Text = title.ToString();
+        }
+
+        public override void StartTextInput()
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        public override void SetTextInputPosition(Point position)
+        {
+            Form.Ime.SetTextInputPosition(position);
+        }
+
+        public override void StopTextInput()
+        {
+            // TODO
+            throw new NotImplementedException();
         }
 
         internal void RunLoop()

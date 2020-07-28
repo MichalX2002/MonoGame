@@ -128,7 +128,7 @@ namespace MonoGame
             [FieldOffset(0)] public GameController.DeviceEvent ControllerDevice;
         }
 
-        public struct Rectangle
+        public struct Rect
         {
             public int X;
             public int Y;

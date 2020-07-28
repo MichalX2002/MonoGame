@@ -2,7 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using System;
 using System.Runtime.InteropServices;
 using MonoGame.Framework.Input;
 using FL = MonoGame.Framework.FuncLoader;
@@ -13,12 +12,13 @@ namespace MonoGame
     {
         public static class Keyboard
         {
+            [StructLayout(LayoutKind.Sequential)]
             public struct Keysym
             {
                 public int Scancode;
                 public int Sym;
                 public KeyModifiers Mod;
-                public uint Unicode;
+                private readonly uint unused1;
             }
 
             [StructLayout(LayoutKind.Sequential)]
@@ -59,9 +59,24 @@ namespace MonoGame
             }
 
             [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-            public delegate KeyModifiers d_sdl_getmodstate();
-            public static d_sdl_getmodstate GetModState = 
-                FL.LoadFunction<d_sdl_getmodstate>(NativeLibrary, "SDL_GetModState");
+            public delegate KeyModifiers d_SDL_GetModState();
+            public static d_SDL_GetModState GetModState = 
+                FL.LoadFunction<d_SDL_GetModState>(NativeLibrary, "SDL_GetModState");
+
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            public delegate void d_SDL_StartTextInput();
+            public static d_SDL_StartTextInput StartTextInput = 
+                FL.LoadFunction<d_SDL_StartTextInput>(NativeLibrary, "SDL_StartTextInput");
+
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            public delegate void d_SDL_StopTextInput();
+            public static d_SDL_StopTextInput StopTextInput =
+                FL.LoadFunction<d_SDL_StopTextInput>(NativeLibrary, "SDL_StopTextInput");
+
+            [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+            public delegate void d_SDL_SetTextInputRect(in Rect rect);
+            public static d_SDL_SetTextInputRect SetTextInputRect =
+                FL.LoadFunction<d_SDL_SetTextInputRect>(NativeLibrary, "SDL_SetTextInputRect");
         }
     }
 }

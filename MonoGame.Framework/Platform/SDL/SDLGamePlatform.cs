@@ -24,7 +24,7 @@ namespace MonoGame.Framework
         private int _isExiting;
         private SDLGameWindow _window;
 
-        private List<string>? _fileDropList;
+        private List<string> _fileDropBuffer = new List<string>();
 
         public override GameRunBehavior DefaultRunBehavior => GameRunBehavior.Synchronous;
 
@@ -82,6 +82,8 @@ namespace MonoGame.Framework
             SDL.Window.Show(_window.WindowHandle);
             Window.OnWindowHandleChanged();
 
+            var filesDroppedBuffer = new List<string>();
+
             while (true)
             {
                 PollSDLEvents();
@@ -109,7 +111,7 @@ namespace MonoGame.Framework
 
         private void PollSDLEvents()
         {
-            Span<char> textEditingUtf16 = stackalloc char[SDL.Keyboard.TextEditingEvent.TextSize];
+            Span<char> textEditingBuffer = stackalloc char[SDL.Keyboard.TextEditingEvent.TextSize];
 
             while (SDL.PollEvent(out SDL.Event ev) == 1)
             {
@@ -173,9 +175,6 @@ namespace MonoGame.Framework
 
                         var inputEv = new TextInputEventArgs(rune, hasMapping ? key : (Keys?)null);
                         _window.OnKeyDown(inputEv);
-
-                        if (Rune.IsControl(rune))
-                            _window.OnTextInput(inputEv);
                         break;
                     }
 
@@ -203,13 +202,13 @@ namespace MonoGame.Framework
                             utf8 = SliceToNullTerminator(utf8);
                             while (!utf8.IsEmpty)
                             {
-                                var status = Rune.DecodeFromUtf8(utf8, out Rune rune, out int consumed);
+                                var status = Rune.DecodeFromUtf8(utf8, out Rune rune, out int bytesConsumed);
                                 if (status != OperationStatus.Done)
                                 {
                                     // This should never occur if SDL gives use valid data.
                                     throw new InvalidDataException("Failed to decode UTF-8 text input: " + status);
                                 }
-                                utf8 = utf8.Slice(consumed);
+                                utf8 = utf8.Slice(bytesConsumed);
 
                                 var nkey = KeyboardUtil.ToXna(rune.Value, out var key) ? key : (Keys?)null;
                                 _window.OnTextInput(new TextInputEventArgs(rune, nkey));
@@ -223,7 +222,7 @@ namespace MonoGame.Framework
                             var utf8 = new Span<byte>(ev.TextEditing.Text, SDL.Keyboard.TextEditingEvent.TextSize);
                             utf8 = SliceToNullTerminator(utf8);
 
-                            var status = Utf8.ToUtf16(utf8, textEditingUtf16, out _, out int charsWritten);
+                            var status = Utf8.ToUtf16(utf8, textEditingBuffer, out _, out int charsWritten);
                             if (status != OperationStatus.Done)
                             {
                                 // This should never occur if SDL gives use valid data.
@@ -231,7 +230,7 @@ namespace MonoGame.Framework
                             }
 
                             _window.OnTextEditing(new TextEditingEventArgs(
-                                text: textEditingUtf16.Slice(0, charsWritten),
+                                text: textEditingBuffer.Slice(0, charsWritten),
                                 cursor: ev.TextEditing.Start,
                                 selectionLength: ev.TextEditing.Length));
                         }
@@ -242,8 +241,22 @@ namespace MonoGame.Framework
                     #region Drop
 
                     case SDL.EventType.DropBegin:
-                        if (_fileDropList == null)
-                            _fileDropList = new List<string>();
+                        break;
+
+                    case SDL.EventType.DropText:
+                        try
+                        {
+                            if (_window.IsTextDroppedHandled)
+                            {
+                                var position = _window.Mouse.GetState().Position;
+                                string text = InteropHelpers.Utf8ToString(ev.Drop.File);
+                                Window.OnTextDropped(new TextDroppedEventArgs(position, text));
+                            }
+                        }
+                        finally
+                        {
+                            SDL.Free(ev.Drop.File);
+                        }
                         break;
 
                     case SDL.EventType.DropFile:
@@ -252,7 +265,7 @@ namespace MonoGame.Framework
                             if (_window.IsFilesDroppedHandled)
                             {
                                 string filePath = InteropHelpers.Utf8ToString(ev.Drop.File);
-                                _fileDropList!.Add(filePath);
+                                _fileDropBuffer.Add(filePath);
                             }
                         }
                         finally
@@ -262,10 +275,11 @@ namespace MonoGame.Framework
                         break;
 
                     case SDL.EventType.DropCompleted:
-                        if (_fileDropList!.Count > 0)
+                        if (_window.IsFilesDroppedHandled && _fileDropBuffer.Count > 0)
                         {
-                            _window.OnFilesDropped(_fileDropList);
-                            _fileDropList = null;
+                            var position = _window.Mouse.GetState().Position;
+                            var filePaths = _fileDropBuffer.ToArray();
+                            _window.OnFilesDropped(new FilesDroppedEventArgs(position, filePaths));
                         }
                         break;
 

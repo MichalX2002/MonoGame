@@ -21,8 +21,7 @@ namespace MonoGame.Framework.Input
         }
 
         /// <summary>
-        /// Gets mouse state information that includes position and button
-        /// presses for the bound window.
+        /// Gets mouse state information that includes position and button presses.
         /// </summary>
         /// <returns>Snapshot of current mouse state.</returns>
         public MouseState GetState()

@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using MonoGame.Framework.Graphics;
@@ -278,7 +277,7 @@ namespace MonoGame.Framework
             Rectangle prevBounds = Bounds;
             int displayIndex = SDL.Window.GetDisplayIndex(WindowHandle);
 
-            SDL.Display.GetBounds(displayIndex, out SDL.Rectangle displayRect);
+            SDL.Display.GetBounds(displayIndex, out SDL.Rect displayRect);
 
             if (_willBeFullScreen != IsFullScreen ||
                 _hardwareSwitch != _game.GraphicsDeviceManager.HardwareModeSwitch)
@@ -374,6 +373,27 @@ namespace MonoGame.Framework
         protected override void SetTitle(ReadOnlySpan<char> title)
         {
             SDL.Window.SetTitle(_windowHandle, title);
+        }
+
+        public override void StartTextInput()
+        {
+            SDL.Keyboard.StartTextInput();
+        }
+
+        public override void SetTextInputPosition(Point position)
+        {
+            SDL.Keyboard.SetTextInputRect(new SDL.Rect()
+            {
+                X = position.X,
+                Y = position.Y,
+                //Width = rectangle.Width,
+                //Height = rectangle.Height
+            });
+        }
+
+        public override void StopTextInput()
+        {
+            SDL.Keyboard.StopTextInput();
         }
 
         /// <inheritdoc />

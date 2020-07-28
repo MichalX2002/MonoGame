@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
 using MonoGame.Framework.Input;
 using MonoGame.Framework.Input.Touch;
 using MonoGame.Framework.Utilities;
@@ -12,8 +11,7 @@ namespace MonoGame.Framework
 {
     public abstract class GameWindow
     {
-        public delegate void FilesDroppedEvent(GameWindow window, List<string> files);
-        public delegate void TextEditingEvent(GameWindow window, TextEditingEventArgs textEditing);
+        public delegate void TextEditingEvent(GameWindow sender, TextEditingEventArgs eventArgs);
         public delegate void TextInputEvent(GameWindow window, TextInputEventArgs textInput);
 
         private string _title;
@@ -27,16 +25,35 @@ namespace MonoGame.Framework
         public event Event<GameWindow>? WindowHandleChanged;
 
         /// <summary>
-        /// Event for a file group that was dropped on the window.
+        /// Occurs when the user is dragging an object over the window.
         /// </summary>
-        public event FilesDroppedEvent? FilesDropped;
+        /// <remarks>
+        /// This event is only supported on Windows.
+        /// </remarks>
+        public event DataEvent<GameWindow, DragOverEventArgs>? DragOver;
+
+        /// <summary>
+        ///  Occurs when the user drops files on the window.
+        /// </summary>
+        /// <remarks>
+        /// This event is only supported on the Windows, Linux, and MacOS.
+        /// </remarks>
+        public event DataEvent<GameWindow, FilesDroppedEventArgs>? FilesDropped;
+
+        /// <summary>
+        ///  Occurs when the user drops files on the window.
+        /// </summary>
+        /// <remarks>
+        /// This event is only supported on the Windows, Linux, and MacOS.
+        /// </remarks>
+        public event DataEvent<GameWindow, TextDroppedEventArgs>? TextDropped;
 
         /// <summary>
         /// Use this event to draw the current text input.
         /// This event is not raised by non-character.
         /// </summary>
         /// <remarks>
-        /// This event is only supported on the Windows and Linux platforms.
+        /// This event is only supported on the Windows, Linux, and MacOS.
         /// </remarks>
         public event TextEditingEvent? TextEditing;
 
@@ -47,7 +64,7 @@ namespace MonoGame.Framework
         /// http://msdn.microsoft.com/en-AU/library/system.windows.forms.control.keypress.aspx
         /// </summary>
         /// <remarks>
-        /// This event is only supported on the Windows and Linux platforms.
+        /// This event is only supported on the Windows, Linux, and MacOS.
         /// </remarks>
         public event TextInputEvent? TextInput;
 
@@ -55,7 +72,7 @@ namespace MonoGame.Framework
         /// Buffered keyboard KeyDown event.
         /// </summary>
         /// <remarks>
-        /// This event is only supported on the Windows and Linux platforms.
+        /// This event is only supported on the Windows, Linux, and MacOS.
         /// </remarks>
         public event TextInputEvent? KeyDown;
 
@@ -63,7 +80,7 @@ namespace MonoGame.Framework
         /// Buffered keyboard KeyUp event.
         /// </summary>
         /// <remarks>
-        /// This event is only supported on the Windows and Linux platforms.
+        /// This event is only supported on the Windows, Linux, and MacOS.
         /// </remarks>
         public event TextInputEvent? KeyUp;
 
@@ -71,22 +88,17 @@ namespace MonoGame.Framework
 
         #region Properties
 
-        internal bool IsTextInputHandled => TextInput != null;
-
         internal bool IsFilesDroppedHandled => FilesDropped != null;
-
-        public TaskbarList TaskbarList { get; }
+        internal bool IsTextDroppedHandled => TextDropped != null;
 
         public Mouse Mouse { get; }
-
         public TouchPanel TouchPanel { get; }
+        public TaskbarList TaskbarList { get; }
 
         public abstract bool AllowUserResizing { get; set; }
-
         public abstract Rectangle Bounds { get; }
 
         public abstract bool HasClipboardText { get; }
-
         public abstract string ClipboardText { get; set; }
 
         /// <summary>
@@ -154,7 +166,7 @@ namespace MonoGame.Framework
         {
             Mouse = new Mouse(this);
             TouchPanel = new TouchPanel(this);
-            TaskbarList = Utilities.TaskbarList.Create(this);
+            TaskbarList = TaskbarList.Create(this);
         }
 
         public abstract IntPtr GetSubsystemWindowHandle();
@@ -191,9 +203,19 @@ namespace MonoGame.Framework
             ScreenDeviceNameChanged?.Invoke(this);
         }
 
-        internal void OnFilesDropped(List<string> files)
+        internal void OnDragOver(DragOverEventArgs ev)
         {
-            FilesDropped?.Invoke(this, files);
+            DragOver?.Invoke(this, ev);
+        }
+
+        internal void OnFilesDropped(FilesDroppedEventArgs ev)
+        {
+            FilesDropped?.Invoke(this, ev);
+        }
+
+        internal void OnTextDropped(TextDroppedEventArgs ev)
+        {
+            TextDropped?.Invoke(this, ev);
         }
 
         internal void OnTextEditing(TextEditingEventArgs ev)
@@ -224,6 +246,12 @@ namespace MonoGame.Framework
         protected internal abstract void SetSupportedOrientations(DisplayOrientation orientations);
 
         protected abstract void SetTitle(ReadOnlySpan<char> title);
+
+        public abstract void StartTextInput();
+
+        public abstract void SetTextInputPosition(Point position);
+
+        public abstract void StopTextInput();
 
 #if DIRECTX && WINDOWS
         public static GameWindow Create(Game game, int width, int height)

@@ -15,77 +15,83 @@ namespace MonoGame.Framework.Input
     /// </summary>
     public partial class MouseCursor : IDisposable
     {
-        #region Predefined Cursors
+        #region System Cursors
 
         /// <summary>
         /// Gets the default arrow cursor.
         /// </summary>
-        public static MouseCursor Arrow { get; private set; }
+        public static MouseCursor? Arrow { get; private set; }
 
         /// <summary>
         /// Gets the cursor that appears when the mouse is over text editing regions.
         /// </summary>
-        public static MouseCursor IBeam { get; private set; }
+        public static MouseCursor? IBeam { get; private set; }
 
         /// <summary>
         /// Gets the waiting cursor that appears while the application/system is busy.
         /// </summary>
-        public static MouseCursor Wait { get; private set; }
+        public static MouseCursor? Wait { get; private set; }
 
         /// <summary>
         /// Gets the crosshair ("+") cursor.
         /// </summary>
-        public static MouseCursor Crosshair { get; private set; }
+        public static MouseCursor? Crosshair { get; private set; }
 
         /// <summary>
-        /// Gets the cross between Arrow and Wait cursors.
+        /// Gets a cross between Arrow and Wait cursors.
         /// </summary>
-        public static MouseCursor WaitArrow { get; private set; }
+        public static MouseCursor? WaitArrow { get; private set; }
 
         /// <summary>
         /// Gets the northwest/southeast ("\") cursor.
         /// </summary>
-        public static MouseCursor SizeNWSE { get; private set; }
+        public static MouseCursor? SizeNWSE { get; private set; }
 
         /// <summary>
         /// Gets the northeast/southwest ("/") cursor.
         /// </summary>
-        public static MouseCursor SizeNESW { get; private set; }
+        public static MouseCursor? SizeNESW { get; private set; }
 
         /// <summary>
         /// Gets the horizontal west/east ("-") cursor.
         /// </summary>
-        public static MouseCursor SizeWE { get; private set; }
+        public static MouseCursor? SizeWE { get; private set; }
 
         /// <summary>
         /// Gets the vertical north/south ("|") cursor.
         /// </summary>
-        public static MouseCursor SizeNS { get; private set; }
+        public static MouseCursor? SizeNS { get; private set; }
 
         /// <summary>
         /// Gets the size all cursor which points in all directions.
         /// </summary>
-        public static MouseCursor SizeAll { get; private set; }
+        public static MouseCursor? SizeAll { get; private set; }
 
         /// <summary>
         /// Gets the cursor that points that something is invalid, usually a cross.
         /// </summary>
-        public static MouseCursor No { get; private set; }
+        public static MouseCursor? No { get; private set; }
 
         /// <summary>
         /// Gets the hand cursor, usually used for web links.
         /// </summary>
-        public static MouseCursor Hand { get; private set; }
+        public static MouseCursor? Hand { get; private set; }
 
         #endregion
 
-        private bool _disposed;
+        /// <summary>
+        /// Gets whether this cursor is disposed.
+        /// </summary>
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Gets the platform handle to the cursor.
         /// </summary>
         public IntPtr Handle { get; private set; }
 
+        /// <summary>
+        /// Initializes system cursors.
+        /// </summary>
         static MouseCursor()
         {
             PlatformInitalize();
@@ -105,6 +111,9 @@ namespace MonoGame.Framework.Input
         public static MouseCursor FromTexture2D(
             Texture2D texture, Point origin, Rectangle? sourceRectangle = null)
         {
+            if (texture == null)
+                throw new ArgumentNullException(nameof(texture));
+
             using (var image = texture.ToImage<Color>(sourceRectangle))
                 return FromPixels(image, origin);
         }
@@ -119,31 +128,29 @@ namespace MonoGame.Framework.Input
         public static unsafe MouseCursor FromPixels(
             IReadOnlyPixelRows pixels, Point origin, Rectangle? sourceRectangle = null)
         {
+            if (pixels == null)
+                throw new ArgumentNullException(nameof(pixels));
+
             Rectangle rect = sourceRectangle ?? pixels.GetBounds();
             if (!pixels.GetBounds().Contains(rect))
                 throw new ArgumentOutOfRangeException(
-                    "The source rectangle is outside the pixel buffer.", nameof(sourceRectangle));
+                     nameof(sourceRectangle), "The source rectangle is outside the pixel buffer.");
 
             IReadOnlyPixelMemory<Color>? pixelBuffer = null;
             try
             {
-                ReadOnlySpan<Color> pixelSpan;
-
                 if (rect.Position == Point.Zero &&
                     pixels is IReadOnlyPixelMemory<Color> rgbaMemory &&
                     rgbaMemory.IsPixelContiguous)
                 {
-                    // PlatformFromPixels takes stride so we don't need to worry
-                    // about a source rect whose width differs from the buffer's stride.
-                    pixelSpan = rgbaMemory.GetPixelSpan();
+                    pixelBuffer = rgbaMemory;
                 }
                 else
                 {
                     pixelBuffer = Image.LoadPixels<Color>(pixels.Project(x => x.Crop(rect)));
-                    pixelSpan = pixelBuffer.GetPixelSpan();
                 }
 
-                return PlatformFromPixels(pixelSpan, rect.Width, rect.Height, origin);
+                return PlatformFromPixels(pixelBuffer, rect.Width, rect.Height, origin);
             }
             finally
             {
@@ -154,13 +161,29 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Releases the cursor handle.
         /// </summary>
-        public void Dispose()
+        protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!IsDisposed)
             {
                 PlatformDispose();
-                _disposed = true;
+
+                IsDisposed = true;
             }
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes the cursor handle.
+        /// </summary>
+        ~MouseCursor()
+        {
+            Dispose(disposing: false);
         }
     }
 }
