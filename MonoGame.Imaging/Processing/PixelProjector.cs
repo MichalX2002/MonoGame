@@ -1,5 +1,6 @@
 ﻿using System;
 using MonoGame.Framework;
+using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging.Processing
 {

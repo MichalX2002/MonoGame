@@ -400,7 +400,7 @@ namespace MonoGame.Framework
             presentationParameters.HardwareModeSwitch = _hardwareModeSwitch;
             presentationParameters.PresentationInterval = _presentInterval;
             presentationParameters.DisplayOrientation = _game.Window.CurrentOrientation;
-            presentationParameters.DeviceWindowHandle = _game.Window.WindowHandle;
+            presentationParameters.DeviceWindowHandle = _game.Window.GetPlatformWindowHandle();
 
             if (_preferMultiSampling)
             {

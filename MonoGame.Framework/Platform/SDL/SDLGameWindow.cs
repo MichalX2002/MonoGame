@@ -26,11 +26,12 @@ namespace MonoGame.Framework
         private int _width, _height;
         private bool _wasMoved, _supressMoved;
 
-        public bool IsDisposed { get; private set; }
-
         public override DisplayOrientation CurrentOrientation => DisplayOrientation.Default;
 
-        public override IntPtr WindowHandle => _windowHandle;
+        public override IntPtr GetPlatformWindowHandle()
+        {
+            return _windowHandle;
+        }
 
         public override string ScreenDeviceName => _screenDeviceName;
 
@@ -70,14 +71,14 @@ namespace MonoGame.Framework
             {
                 if (!IsFullScreen)
                 {
-                    SDL.Window.GetPosition(WindowHandle, out int x, out int y);
+                    SDL.Window.GetPosition(GetPlatformWindowHandle(), out int x, out int y);
                     return new Point(x, y);
                 }
                 return Point.Zero;
             }
             set
             {
-                SDL.Window.SetPosition(WindowHandle, value.X, value.Y);
+                SDL.Window.SetPosition(GetPlatformWindowHandle(), value.X, value.Y);
                 _wasMoved = true;
             }
         }
@@ -275,7 +276,7 @@ namespace MonoGame.Framework
             _screenDeviceName = screenDeviceName;
 
             Rectangle prevBounds = Bounds;
-            int displayIndex = SDL.Window.GetDisplayIndex(WindowHandle);
+            int displayIndex = SDL.Window.GetDisplayIndex(GetPlatformWindowHandle());
 
             SDL.Display.GetBounds(displayIndex, out SDL.Rect displayRect);
 
@@ -286,7 +287,7 @@ namespace MonoGame.Framework
                     ? SDL.Window.State.Fullscreen
                     : SDL.Window.State.FullscreenDesktop;
 
-                SDL.Window.SetFullscreen(WindowHandle, _willBeFullScreen ? fullscreenFlag : 0);
+                SDL.Window.SetFullscreen(GetPlatformWindowHandle(), _willBeFullScreen ? fullscreenFlag : 0);
                 _hardwareSwitch = _game.GraphicsDeviceManager.HardwareModeSwitch;
             }
 
@@ -296,7 +297,7 @@ namespace MonoGame.Framework
 
             if (!_willBeFullScreen || _game.GraphicsDeviceManager.HardwareModeSwitch)
             {
-                SDL.Window.SetSize(WindowHandle, clientWidth, clientHeight);
+                SDL.Window.SetSize(GetPlatformWindowHandle(), clientWidth, clientHeight);
                 _width = clientWidth;
                 _height = clientHeight;
             }
@@ -329,7 +330,7 @@ namespace MonoGame.Framework
             // to not try and set the window position because it will be wrong.
             SDL.GetVersion(out var version);
             if ((version.Patch > 4 || !AllowUserResizing) && !_wasMoved)
-                SDL.Window.SetPosition(WindowHandle, centerX, centerY);
+                SDL.Window.SetPosition(GetPlatformWindowHandle(), centerX, centerY);
 
             if (IsFullScreen != _willBeFullScreen)
                 OnSizeChanged();
@@ -362,7 +363,7 @@ namespace MonoGame.Framework
             _game.GraphicsDevice.PresentationParameters.BackBufferHeight = height;
             _game.GraphicsDevice.Viewport = new Viewport(0, 0, width, height);
 
-            SDL.Window.GetSize(WindowHandle, out _width, out _height);
+            SDL.Window.GetSize(GetPlatformWindowHandle(), out _width, out _height);
             OnSizeChanged();
         }
 
@@ -397,29 +398,19 @@ namespace MonoGame.Framework
         }
 
         /// <inheritdoc />
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
-            if (IsDisposed)
-                return;
+            if (!IsDisposed)
+            {
+                OnDisposing();
 
-            SDL.Window.Destroy(_windowHandle);
-            _windowHandle = IntPtr.Zero;
+                SDL.Window.Destroy(_windowHandle);
+                _windowHandle = IntPtr.Zero;
 
-            if (_iconHandle != IntPtr.Zero)
-                SDL.FreeSurface(_iconHandle);
-
-            IsDisposed = true;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~SDLGameWindow()
-        {
-            Dispose(false);
+                if (_iconHandle != IntPtr.Zero)
+                    SDL.FreeSurface(_iconHandle);
+            }
+            base.Dispose(disposing);
         }
     }
 }

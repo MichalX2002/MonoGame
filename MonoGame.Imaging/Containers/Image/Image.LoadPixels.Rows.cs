@@ -71,7 +71,7 @@ namespace MonoGame.Imaging
 
             if (pixels.PixelType.Type == typeof(TPixel) &&
                 pixels is IReadOnlyPixelMemory typeEqualMemory &&
-                typeEqualMemory.IsPixelContiguous &&
+                typeEqualMemory.IsPixelContiguous() &&
                 rect.Position == Point.Zero &&
                 rect.Size == pixels.Size)
             {

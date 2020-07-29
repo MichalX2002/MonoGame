@@ -74,7 +74,7 @@ namespace MonoGame.OpenGL
 
         private void SetWindowHandle(IWindowHandle info)
         {
-            _windowHandle = info?.WindowHandle ?? IntPtr.Zero;
+            _windowHandle = info?.GetPlatformWindowHandle() ?? IntPtr.Zero;
         }
     }
 }

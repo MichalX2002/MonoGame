@@ -71,7 +71,7 @@ namespace MonoGame.Framework
 
         internal override void OnPresentationChanged(PresentationParameters pp)
         {
-            var displayIndex = SDL.Window.GetDisplayIndex(_window.WindowHandle);
+            var displayIndex = SDL.Window.GetDisplayIndex(_window.GetPlatformWindowHandle());
             var displayName = SDL.Display.GetDisplayName(displayIndex);
             BeginScreenDeviceChange(pp.IsFullScreen);
             EndScreenDeviceChange(displayName, pp.BackBufferWidth, pp.BackBufferHeight);
@@ -79,7 +79,7 @@ namespace MonoGame.Framework
 
         public override void RunLoop()
         {
-            SDL.Window.Show(_window.WindowHandle);
+            SDL.Window.Show(_window.GetPlatformWindowHandle());
             Window.OnWindowHandleChanged();
 
             while (_isExiting <= 0)

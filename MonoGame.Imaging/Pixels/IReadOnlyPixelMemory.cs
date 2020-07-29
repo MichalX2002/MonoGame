@@ -14,12 +14,6 @@ namespace MonoGame.Imaging.Pixels
         int ByteStride { get; }
 
         /// <summary>
-        /// Gets whether a contiguous span of pixels
-        /// can be created over the underlying memory.
-        /// </summary>
-        bool IsPixelContiguous { get; }
-
-        /// <summary>
         /// Gets the underlying memory as a contigous span of pixel bytes.
         /// </summary>
         ReadOnlySpan<byte> GetPixelByteSpan();

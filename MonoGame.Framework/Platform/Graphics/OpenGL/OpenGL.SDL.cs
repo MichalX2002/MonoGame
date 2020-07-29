@@ -14,7 +14,8 @@ namespace MonoGame.OpenGL
             BoundApi = RenderApi.GL;
         }
 
-        private static T LoadFunction<T>(string function, bool throwIfNotFound = false)
+        private static T? LoadFunction<T>(string function, bool throwIfNotFound = false)
+            where T : Delegate
         {
             var ret = SDL.GL.GetProcAddress(function);
 

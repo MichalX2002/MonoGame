@@ -28,8 +28,8 @@ namespace MonoGame.Framework.Input
         {
             return new KeyboardState(
                 _keysDown,
-                (Modifiers & KeyModifiers.CapsLock) == KeyModifiers.CapsLock,
-                (Modifiers & KeyModifiers.NumLock) == KeyModifiers.NumLock);
+                (_modifiers & KeyModifiers.CapsLock) == KeyModifiers.CapsLock,
+                (_modifiers & KeyModifiers.NumLock) == KeyModifiers.NumLock);
         }
     }
 }

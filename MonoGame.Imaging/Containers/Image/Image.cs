@@ -40,8 +40,6 @@ namespace MonoGame.Imaging
 
         public abstract int ByteStride { get; }
 
-        public bool IsPixelContiguous => Width * PixelType.ElementSize == ByteStride;
-
         int IElementContainer.ElementSize => PixelType.ElementSize;
         int IElementContainer.Length => Width * Height;
 

@@ -9,7 +9,7 @@ using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework
 {
-    public abstract class GameWindow
+    public abstract class GameWindow : IDisposable
     {
         public delegate void TextEditingEvent(GameWindow sender, TextEditingEventArgs eventArgs);
         public delegate void TextInputEvent(GameWindow window, TextInputEventArgs textInput);
@@ -18,6 +18,9 @@ namespace MonoGame.Framework
         private bool _allowAltF4 = true;
 
         #region Events
+
+        public event Event<GameWindow>? Disposing;
+        public event Event<GameWindow>? Disposed;
 
         /// <summary>
         /// Occurs when the size of the window changes.
@@ -92,12 +95,11 @@ namespace MonoGame.Framework
 
         #region Properties
 
-        internal bool IsFilesDroppedHandled => FilesDropped != null;
-        internal bool IsTextDroppedHandled => TextDropped != null;
-
         public Mouse Mouse { get; }
         public TouchPanel TouchPanel { get; }
         public TaskbarList TaskbarList { get; }
+
+        public bool IsDisposed { get; private set; }
 
         public abstract bool AllowUserResizing { get; set; }
         public abstract Rectangle Bounds { get; }
@@ -105,11 +107,8 @@ namespace MonoGame.Framework
         public abstract bool HasClipboardText { get; }
         public abstract string ClipboardText { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether the usage of Alt+F4 closes the window on desktop platforms. 
-        /// Set to <see langword="true"/> by default.
-        /// </summary>
-        public virtual bool AllowAltF4 { get => _allowAltF4; set => _allowAltF4 = value; }
+        internal bool IsFilesDroppedHandled => FilesDropped != null;
+        internal bool IsTextDroppedHandled => TextDropped != null;
 
         /// <summary>
         /// The location of this window on the desktop, 
@@ -123,17 +122,15 @@ namespace MonoGame.Framework
         public abstract DisplayOrientation CurrentOrientation { get; }
 
         /// <summary>
-        /// Gets the platform-dependent handle of this window.
-        /// </summary>
-        /// <remarks>
-        /// To get the OS-dependent subsystem window handle use <see cref="GetSubsystemWindowHandle"/>.
-        /// </remarks>
-        public abstract IntPtr WindowHandle { get; }
-        
-        /// <summary>
         /// Gets the name of the display device.
         /// </summary>
         public abstract string ScreenDeviceName { get; }
+
+        /// <summary>
+        /// Gets or sets whether the usage of Alt+F4 closes the window on desktop platforms. 
+        /// Set to <see langword="true"/> by default.
+        /// </summary>
+        public virtual bool AllowAltF4 { get => _allowAltF4; set => _allowAltF4 = value; }
 
         /// <summary>
         /// Gets or sets the title of the game window.
@@ -172,18 +169,30 @@ namespace MonoGame.Framework
 
         #endregion
 
+        /// <summary>
+        /// Constructs the <see cref="GameWindow"/>.
+        /// </summary>
         protected GameWindow()
         {
+            _title = string.Empty;
             Mouse = new Mouse(this);
             TouchPanel = new TouchPanel(this);
             TaskbarList = TaskbarList.Create(this);
         }
 
         /// <summary>
+        /// Gets the platform-dependent handle of this window.
+        /// </summary>
+        /// <remarks>
+        /// To get the OS-dependent subsystem window handle use <see cref="GetSubsystemWindowHandle"/>.
+        /// </remarks>
+        public abstract IntPtr GetPlatformWindowHandle();
+
+        /// <summary>
         /// Returns the OS-dependent subsystem handle for this window.
         /// </summary>
         /// <remarks>
-        /// To get the platform-dependent handle use <see cref="WindowHandle"/>.
+        /// To get the platform-dependent handle use <see cref="GetPlatformWindowHandle()"/>.
         /// </remarks>
         /// <returns>The subsystem window handle.</returns>
         public abstract IntPtr GetSubsystemWindowHandle();
@@ -270,14 +279,49 @@ namespace MonoGame.Framework
 
         public abstract void StopTextInput();
 
-#if DIRECTX && WINDOWS
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <exception cref="PlatformNotSupportedException">The platform does not support multiple windows.</exception>
         public static GameWindow Create(Game game, int width, int height)
         {
+#if DIRECTX && WINDOWS
             var window = new WinFormsGameWindow((WinFormsGamePlatform)game.Platform);
             window.Initialize(width, height);
 
             return window;
-        }
+#else
+            throw new PlatformNotSupportedException();
 #endif
+        }
+
+        protected void OnDisposing()
+        {
+            Disposing?.Invoke(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
+                IsDisposed = true;
+                Disposed?.Invoke(this);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes the <see cref="GameWindow"/>.
+        /// </summary>
+        ~GameWindow()
+        {
+            Dispose(disposing: false);
+        }
     }
 }

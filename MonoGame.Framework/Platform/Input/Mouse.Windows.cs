@@ -19,7 +19,7 @@ namespace MonoGame.Framework.Input
         /// <inheritdoc/>
         protected override void WindowHandleChanged()
         {
-            _window = Control.FromHandle(Window.WindowHandle);
+            _window = Control.FromHandle(Window.GetPlatformWindowHandle());
 
             UpdateMousePosition(); // TODO: check if this is smart
             UpdateCursor();

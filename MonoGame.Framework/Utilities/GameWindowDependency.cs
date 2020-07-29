@@ -2,23 +2,23 @@
 
 namespace MonoGame.Framework.Utilities
 {
-    public abstract class GameWindowDependency : IDisposable
+    public abstract class GameWindowDependency
     {
-        /// <summary>
-        /// Gets whether this dependency is disposed.
-        /// </summary>
-        public bool IsDisposed { get; private set; }
-
         /// <summary>
         /// Gets the window attached to this dependency.
         /// </summary>
         public GameWindow Window { get; }
 
-        protected GameWindowDependency(GameWindow window)
+        /// <summary>
+        /// Attaches this dependency to a window.
+        /// </summary>
+        /// <param name="window">The window to attach to.</param>
+        public GameWindowDependency(GameWindow window)
         {
             Window = window ?? throw new ArgumentNullException(nameof(window));
 
             Window.WindowHandleChanged += Window_WindowHandleChanged;
+            Window.Disposing += Window_Disposing;
         }
 
         private void Window_WindowHandleChanged(GameWindow sender)
@@ -26,30 +26,27 @@ namespace MonoGame.Framework.Utilities
             WindowHandleChanged();
         }
 
+        private void Window_Disposing(GameWindow sender)
+        {
+            Disposing();
+        }
+
         /// <summary>
         /// Called whenever <see cref="GameWindow.WindowHandleChanged"/> is 
         /// invoked on the attached window.
         /// </summary>
-        protected abstract void WindowHandleChanged();
-
-        protected virtual void Dispose(bool disposing)
+        protected virtual void WindowHandleChanged()
         {
-            if (!IsDisposed)
-            {
-                if (disposing)
-                {
-                    Window.WindowHandleChanged -= Window_WindowHandleChanged;
-                }
-
-                IsDisposed = true;
-            }
         }
 
-        /// <inheritdoc/>
-        public void Dispose()
+        /// <summary>
+        /// Called whenever <see cref="GameWindow.Disposing"/> is 
+        /// invoked on the attached window.
+        /// </summary>
+        protected virtual void Disposing()
         {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            Window.WindowHandleChanged -= Window_WindowHandleChanged;
+            Window.Disposing -= Window_Disposing;
         }
     }
 }

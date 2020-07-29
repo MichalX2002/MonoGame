@@ -26,7 +26,7 @@ namespace MonoGame.Imaging
 
         public Span<TPixel> GetPixelSpan()
         {
-            if (!IsPixelContiguous)
+            if (!this.IsPixelContiguous())
                 throw new InvalidOperationException("The underlying memory is not pixel contiguous.");
 
             return Buffer.PixelSpan;

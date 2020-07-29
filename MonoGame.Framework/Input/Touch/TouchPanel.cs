@@ -123,10 +123,6 @@ namespace MonoGame.Framework.Input.Touch
         {
         }
 
-        protected override void WindowHandleChanged()
-        {
-        }
-
         /// <summary>
         /// Returns capabilities of touch panel device.
         /// </summary>
@@ -168,7 +164,7 @@ namespace MonoGame.Framework.Input.Touch
         /// Apply the given new touch to the state.
         /// If it is a Pressed it will be added as a new touch, otherwise we update the existing touch it matches
         /// </summary>
-        private void ApplyTouch(List<TouchLocation> state, TouchLocation touch)
+        private static void ApplyTouch(List<TouchLocation> state, TouchLocation touch)
         {
             if (touch.State == TouchLocationState.Pressed)
             {

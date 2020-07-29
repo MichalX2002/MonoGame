@@ -82,10 +82,6 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
   <Import Project="Platform\XAudio.targets" />
 
   <ItemGroup>
-    <Content Include="MonoGame.Framework.WindowsDX.targets" PackagePath="build" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Version="4.0.1" Include="SharpDX" />
     <PackageReference Version="4.0.1" Include="SharpDX.Direct2D1" />
     <PackageReference Version="4.0.1" Include="SharpDX.Direct3D11" />

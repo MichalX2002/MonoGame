@@ -21,16 +21,18 @@ using DrawingSize = System.Drawing.Size;
 
 namespace MonoGame.Framework
 {
-    internal class WinFormsGameWindow : GameWindow, IDisposable
+    internal class WinFormsGameWindow : GameWindow
     {
+        private static ReaderWriterLockSlim _allWindowsReaderWriterLockSlim = 
+            new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+
+        private static List<WinFormsGameWindow> _allWindows =
+            new List<WinFormsGameWindow>();
+
         internal WinFormsGameForm Form;
 
-        private static ReaderWriterLockSlim _allWindowsReaderWriterLockSlim = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
-        private static List<WinFormsGameWindow> _allWindows = new List<WinFormsGameWindow>();
-
-        private WinFormsGamePlatform _platform;
-
         private FormWindowState _lastFormState;
+        private WinFormsGamePlatform _platform;
 
         private bool _isResizable;
         private bool _isBorderless;
@@ -38,6 +40,7 @@ namespace MonoGame.Framework
         private bool _isMouseInBounds;
 
         private DrawingPoint _locationBeforeFullScreen;
+
         // flag to indicate that we're switching to/from full screen and should ignore resize events
         private bool _switchingFullScreen;
 
@@ -49,7 +52,12 @@ namespace MonoGame.Framework
 
         internal Game Game { get; private set; }
 
-        public override IntPtr WindowHandle => Form.Handle;
+        public bool IsFullScreen { get; private set; }
+        public bool HardwareModeSwitch { get; private set; }
+
+        public override bool HasClipboardText => Clipboard.ContainsText();
+        public override string ClipboardText { get => Clipboard.GetText(); set => Clipboard.SetText(value); }
+
         public override string ScreenDeviceName => string.Empty;
         public override DisplayOrientation CurrentOrientation => DisplayOrientation.Default;
 
@@ -92,10 +100,6 @@ namespace MonoGame.Framework
             }
         }
 
-        protected internal override void SetSupportedOrientations(DisplayOrientation orientations)
-        {
-        }
-
         public override bool IsBorderless
         {
             get => _isBorderless;
@@ -111,12 +115,6 @@ namespace MonoGame.Framework
                     Form.FormBorderStyle = _isResizable ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
             }
         }
-
-        public bool IsFullScreen { get; private set; }
-        public bool HardwareModeSwitch { get; private set; }
-
-        public override bool HasClipboardText => Clipboard.ContainsText();
-        public override string ClipboardText { get => Clipboard.GetText(); set => Clipboard.SetText(value); }
 
         internal WinFormsGameWindow(WinFormsGamePlatform platform) : base()
         {
@@ -158,6 +156,54 @@ namespace MonoGame.Framework
             _resizeTickTimer.Elapsed += OnResizeTick;
 
             RegisterToAllWindows();
+        }
+
+        protected internal override void SetSupportedOrientations(DisplayOrientation orientations)
+        {
+        }
+
+        protected override void SetTitle(ReadOnlySpan<char> title)
+        {
+            Form.Text = title.ToString();
+        }
+
+        /// <inheritdoc/>
+        public override void BeginScreenDeviceChange(bool willBeFullScreen)
+        {
+        }
+
+        /// <inheritdoc/>
+        public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
+        {
+        }
+        
+        /// <inheritdoc/>
+        public override IntPtr GetPlatformWindowHandle()
+        {
+            return Form.Handle;
+        }
+        
+        /// <inheritdoc/>
+        public override IntPtr GetSubsystemWindowHandle()
+        {
+            return Form.Handle;
+        }
+
+        public override void StartTextInput()
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        public override void SetTextInputPosition(Point position)
+        {
+            Form.Ime.SetTextInputPosition(position);
+        }
+
+        public override void StopTextInput()
+        {
+            // TODO
+            throw new NotImplementedException();
         }
 
         private void OnDragEnter(object sender, DragEventArgs e)
@@ -229,7 +275,8 @@ namespace MonoGame.Framework
         internal static extern bool GetCursorPos(out POINTSTRUCT pt);
 
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
-        internal static extern int MapWindowPoints(HandleRef hWndFrom, HandleRef hWndTo, out POINTSTRUCT pt, int cPoints);
+        internal static extern int MapWindowPoints(
+            HandleRef hWndFrom, HandleRef hWndTo, out POINTSTRUCT pt, int cPoints);
 
         private void SetIcon()
         {
@@ -241,11 +288,6 @@ namespace MonoGame.Framework
                 if (handle != IntPtr.Zero)
                     Form.Icon = Icon.FromHandle(handle);
             }
-        }
-
-        public override IntPtr GetSubsystemWindowHandle()
-        {
-            return Form.Handle;
         }
 
         private void RegisterToAllWindows()
@@ -322,11 +364,11 @@ namespace MonoGame.Framework
 
             Mouse.State.X = clientPos.X;
             Mouse.State.Y = clientPos.Y;
-            Mouse.State.LeftButton = (buttons & MouseButtons.Left) == MouseButtons.Left ? ButtonState.Pressed : ButtonState.Released;
-            Mouse.State.MiddleButton = (buttons & MouseButtons.Middle) == MouseButtons.Middle ? ButtonState.Pressed : ButtonState.Released;
-            Mouse.State.RightButton = (buttons & MouseButtons.Right) == MouseButtons.Right ? ButtonState.Pressed : ButtonState.Released;
-            Mouse.State.XButton1 = (buttons & MouseButtons.XButton1) == MouseButtons.XButton1 ? ButtonState.Pressed : ButtonState.Released;
-            Mouse.State.XButton2 = (buttons & MouseButtons.XButton2) == MouseButtons.XButton2 ? ButtonState.Pressed : ButtonState.Released;
+            Mouse.State.LeftButton = buttons.HasFlags(MouseButtons.Left) ? ButtonState.Pressed : ButtonState.Released;
+            Mouse.State.MiddleButton = buttons.HasFlags(MouseButtons.Middle) ? ButtonState.Pressed : ButtonState.Released;
+            Mouse.State.RightButton = buttons.HasFlags(MouseButtons.Right) ? ButtonState.Pressed : ButtonState.Released;
+            Mouse.State.XButton1 = buttons.HasFlags(MouseButtons.XButton1) ? ButtonState.Pressed : ButtonState.Released;
+            Mouse.State.XButton2 = buttons.HasFlags(MouseButtons.XButton2) ? ButtonState.Pressed : ButtonState.Released;
 
             // Don't process touch state if we're not active 
             // and the mouse is within the client area.
@@ -470,28 +512,6 @@ namespace MonoGame.Framework
             manager.ApplyChanges();
         }
 
-        protected override void SetTitle(ReadOnlySpan<char> title)
-        {
-            Form.Text = title.ToString();
-        }
-
-        public override void StartTextInput()
-        {
-            // TODO
-            throw new NotImplementedException();
-        }
-
-        public override void SetTextInputPosition(Point position)
-        {
-            Form.Ime.SetTextInputPosition(position);
-        }
-
-        public override void StopTextInput()
-        {
-            // TODO
-            throw new NotImplementedException();
-        }
-
         internal void RunLoop()
         {
             Application.Idle += TickOnIdle;
@@ -576,14 +596,6 @@ namespace MonoGame.Framework
         private static extern bool PeekMessage(
             out NativeMessage msg, IntPtr hWnd, uint messageFilterMin, uint messageFilterMax, uint flags);
 
-        public override void BeginScreenDeviceChange(bool willBeFullScreen)
-        {
-        }
-
-        public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
-        {
-        }
-
         public void MouseVisibleToggled()
         {
             if (_platform.IsMouseVisible)
@@ -613,8 +625,9 @@ namespace MonoGame.Framework
                 }
                 else
                 {
-                    // This needs to be called in case the user presses the Windows key while the focus is on the second monitor,
-                    //	which (sometimes) causes the window to exit fullscreen mode, but still keeps it visible
+                    // This needs to be called in case the user presses the Windows key while the focus is on 
+                    // the second monitor, which (sometimes) causes the window to exit fullscreen mode,
+                    // but still keeps it visible
                     MinimizeFullScreen();
                 }
             }
@@ -647,9 +660,9 @@ namespace MonoGame.Framework
 
             if (!pp.HardwareModeSwitch)
             {
-                // FIXME: setting the WindowState to Maximized when the form is not shown will not update the ClientBounds
-                // this causes the back buffer to be the wrong size when initializing in soft full screen
-                // we show the form to bypass the issue
+                // FIXME: setting the WindowState to Maximized when the form is not shown will not update the 
+                // ClientBounds this causes the back buffer to be the wrong size when initializing in 
+                // soft full screen we show the form to bypass the issue
                 Form.Show();
                 IsBorderless = true;
                 Form.WindowState = FormWindowState.Maximized;
@@ -697,17 +710,20 @@ namespace MonoGame.Framework
             Form.Location = _locationBeforeFullScreen;
             IsFullScreen = false;
 
-            // Windows does not always correctly redraw the desktop when exiting soft full screen, so force a redraw
+            // Windows does not always correctly redraw the desktop when 
+            // exiting soft full screen, so force a redraw
             if (!HardwareModeSwitch)
                 RedrawWindow(IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, 1);
 
             _switchingFullScreen = false;
         }
 
-        private void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!IsDisposed)
             {
+                OnDisposing();
+
                 if (Form != null)
                 {
                     UnregisterFromAllWindows();
@@ -715,24 +731,16 @@ namespace MonoGame.Framework
                     Form = null!;
                 }
 
-                _resizeTickTimer?.Dispose();
-                _resizeTickTimer = null;
+                if (disposing)
+                {
+                    _resizeTickTimer?.Dispose();
+                    _resizeTickTimer = null;
+                }
+
+                _platform = null!;
+                Game = null!;
             }
-
-            _platform = null!;
-            Game = null!;
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~WinFormsGameWindow()
-        {
-            Dispose(false);
+            base.Dispose(disposing);
         }
     }
 }

@@ -8,6 +8,8 @@ namespace MonoGame.Framework.Input
 {
     public partial class Mouse
     {
+        private IntPtr _windowHandle;
+
         internal MouseState State;
 
         internal int ScrollX;
@@ -16,11 +18,23 @@ namespace MonoGame.Framework.Input
         /// <inheritdoc/>
         protected override void WindowHandleChanged()
         {
+            _windowHandle = Window.GetPlatformWindowHandle();
+        }
+
+        /// <inheritdoc/>
+        protected override void Disposing()
+        {
+            _windowHandle = IntPtr.Zero;
+
+            base.Disposing();
         }
 
         private MouseState PlatformGetState()
         {
-            var winFlags = SDL.Window.GetWindowFlags(Window.WindowHandle);
+            if (_windowHandle == IntPtr.Zero)
+                return default;
+
+            var winFlags = SDL.Window.GetWindowFlags(_windowHandle);
             var state = SDL.Mouse.GetGlobalState(out int x, out int y);
 
             if ((winFlags & SDL.Window.State.MouseFocus) != 0)
@@ -48,13 +62,19 @@ namespace MonoGame.Framework.Input
 
         private void PlatformSetPosition(int x, int y)
         {
+            if (_windowHandle == IntPtr.Zero)
+                return;
+
             State.X = x;
             State.Y = y;
-            SDL.Mouse.WarpInWindow(Window.WindowHandle, x, y);
+            SDL.Mouse.WarpInWindow(_windowHandle, x, y);
         }
 
         private void PlatformSetCursor(MouseCursor cursor)
         {
+            if (_windowHandle == IntPtr.Zero)
+                return;
+
             SDL.Mouse.SetCursor(cursor.Handle);
         }
     }

@@ -48,12 +48,12 @@ namespace MonoGame.Framework.Utilities
             _comObject!.SetProgressValue(_windowHandle, (ulong)value.Completed, (ulong)value.Total);
         }
 
-        protected override void Dispose(bool disposing)
+        protected override void Disposing()
         {
             _comObject = null;
             _windowHandle = IntPtr.Zero;
 
-            base.Dispose(disposing);
+            base.Disposing();
         }
 
         #region COM Interface

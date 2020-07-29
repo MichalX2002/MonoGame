@@ -191,8 +191,6 @@ namespace MonoGame.Framework.Graphics
 
             Context.MakeCurrent(window);
             Context.SwapInterval = PresentationParameters.PresentationInterval.GetSwapInterval();
-
-            Context.MakeCurrent(window);
 #endif
 
             GL.GetInteger(GetPName.MaxCombinedTextureImageUnits, out MaxTextureSlots);
@@ -498,7 +496,7 @@ namespace MonoGame.Framework.Graphics
 
                 if (preferredMultiSampleCount > 0 && _framebufferHelper.SupportsBlitFramebuffer)
                 {
-                    _framebufferHelper.GenRenderbuffer(out color);
+                    color = _framebufferHelper.GenRenderbuffer();
                     _framebufferHelper.BindRenderbuffer(color);
                     _framebufferHelper.RenderbufferStorageMultisample(
                         preferredMultiSampleCount, (int)RenderbufferStorage.Rgba8, width, height);
@@ -551,7 +549,7 @@ namespace MonoGame.Framework.Graphics
 
                     if (depthInternalFormat != 0)
                     {
-                        _framebufferHelper.GenRenderbuffer(out depth);
+                        depth = _framebufferHelper.GenRenderbuffer();
                         _framebufferHelper.BindRenderbuffer(depth);
                         _framebufferHelper.RenderbufferStorageMultisample(
                             preferredMultiSampleCount, (int)depthInternalFormat, width, height);
@@ -561,7 +559,7 @@ namespace MonoGame.Framework.Graphics
                             stencil = depth;
                             if (stencilInternalFormat != 0)
                             {
-                                _framebufferHelper.GenRenderbuffer(out stencil);
+                                stencil = _framebufferHelper.GenRenderbuffer();
                                 _framebufferHelper.BindRenderbuffer(stencil);
                                 _framebufferHelper.RenderbufferStorageMultisample(
                                     preferredMultiSampleCount, (int)stencilInternalFormat, width, height);
@@ -974,7 +972,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         private void PlatformDrawInstancedPrimitives(
-            PrimitiveType primitiveType, int baseVertex, 
+            PrimitiveType primitiveType, int baseVertex,
             int startIndex, int primitiveCount,
             int baseInstance, int instanceCount)
         {

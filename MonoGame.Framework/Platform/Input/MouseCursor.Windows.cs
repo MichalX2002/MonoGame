@@ -8,12 +8,13 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using MonoGame.Framework.Vectors;
+using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Framework.Input
 {
     public partial class MouseCursor
     {
-        bool _needsDisposing;
+        private bool _needsDisposing;
 
         internal Cursor? Cursor { get; private set; }
 
@@ -40,7 +41,7 @@ namespace MonoGame.Framework.Input
         }
 
         private static unsafe MouseCursor PlatformFromPixels(
-            ReadOnlySpan<Color> data, int width, int height, Point origin)
+            IReadOnlyPixelMemory<Color> data, int width, int height, Point origin)
         {
             // bitmaps can not be constructed from Rgba directly
             using (var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb))
@@ -50,12 +51,14 @@ namespace MonoGame.Framework.Input
 
                 try
                 {
+                    var source = data.GetPixelSpan();
+                    int pixelStride = data.GetPixelStride();
                     for (int y = 0; y < bmpData.Height; y++)
                     {
-                        var srcRow = data.Slice(y * width);
+                        var srcRow = source.Slice(y * pixelStride, width);
                         var dstRow = new Span<Bgra32>((byte*)bmpData.Scan0 + y * bmpData.Stride, bmpData.Width);
                         
-                        for (int x = 0; x < width; x++)
+                        for (int x = 0; x < srcRow.Length; x++)
                             dstRow[x].FromRgba(srcRow[x]);
                     }
                 }
@@ -71,16 +74,16 @@ namespace MonoGame.Framework.Input
                 iconInfo.yHotspot = origin.Y;
                 iconInfo.fIcon = false;
 
-                var cursor = new Cursor(CreateIconIndirect(ref iconInfo));
+                var cursor = new Cursor(CreateIconIndirect(iconInfo));
                 return new MouseCursor(cursor, needsDisposing: true);
             }
         }
 
         private void PlatformDispose()
         {
-            if (_needsDisposing && Cursor != null)
+            if (_needsDisposing)
             {
-                Cursor.Dispose();
+                Cursor?.Dispose();
                 Cursor = null;
 
                 _needsDisposing = false;
@@ -98,10 +101,10 @@ namespace MonoGame.Framework.Input
         };
 
         [DllImport("user32.dll")]
-        static extern IntPtr CreateIconIndirect([In] ref IconInfo iconInfo);
+        private static extern IntPtr CreateIconIndirect(in IconInfo iconInfo);
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool GetIconInfo(IntPtr hIcon, ref IconInfo pIconInfo);
+        private static extern bool GetIconInfo(IntPtr hIcon, ref IconInfo pIconInfo);
     }
 }
