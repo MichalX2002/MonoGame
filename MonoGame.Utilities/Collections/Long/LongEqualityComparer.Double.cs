@@ -3,7 +3,7 @@ namespace MonoGame.Framework.Collections
 {
     public partial class LongEqualityComparer<T>
     {
-        private class LongDoubleComparer : LongEqualityComparer<double>
+        private sealed class LongDoubleComparer : LongEqualityComparer<double>
         {
             public override unsafe long GetLongHashCode(double obj)
             {

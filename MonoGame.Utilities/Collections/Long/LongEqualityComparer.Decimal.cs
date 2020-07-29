@@ -4,7 +4,7 @@ namespace MonoGame.Framework.Collections
 {
     public partial class LongEqualityComparer<T>
     {
-        private class LongDecimalComparer : LongEqualityComparer<decimal>
+        private sealed class LongDecimalComparer : LongEqualityComparer<decimal>
         {
             [MethodImpl(MethodImplOptions.AggressiveOptimization)]
             public override long GetLongHashCode(decimal d)

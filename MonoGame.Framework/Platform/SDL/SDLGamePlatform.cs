@@ -82,9 +82,7 @@ namespace MonoGame.Framework
             SDL.Window.Show(_window.WindowHandle);
             Window.OnWindowHandleChanged();
 
-            var filesDroppedBuffer = new List<string>();
-
-            while (true)
+            while (_isExiting <= 0)
             {
                 PollSDLEvents();
                 Keyboard._modifiers = SDL.Keyboard.GetModState();
@@ -93,9 +91,6 @@ namespace MonoGame.Framework
 
                 Threading.Run();
                 GraphicsDevice.DisposeContexts();
-
-                if (_isExiting > 0)
-                    break;
             }
         }
 

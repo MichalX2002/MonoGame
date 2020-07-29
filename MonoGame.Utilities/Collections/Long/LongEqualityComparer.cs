@@ -7,8 +7,7 @@ namespace MonoGame.Framework.Collections
 {
     public abstract partial class LongEqualityComparer<T> : EqualityComparer<T>, ILongEqualityComparer<T>
     {
-        public static new LongEqualityComparer<T> Default { get; } = 
-            (LongEqualityComparer<T>)CreateComparer();
+        public static new LongEqualityComparer<T> Default { get; } = CreateComparer();
 
         public LongEqualityComparer()
         {
@@ -22,7 +21,7 @@ namespace MonoGame.Framework.Collections
 
         public abstract long GetLongHashCode([DisallowNull] T value);
 
-        private static ILongEqualityComparer<T> CreateComparer()
+        private static LongEqualityComparer<T> CreateComparer()
         {
             if (typeof(T).GetGenericTypeDefinition() == typeof(Nullable<>))
             {
@@ -33,25 +32,25 @@ namespace MonoGame.Framework.Collections
 
             if (typeof(T) == typeof(string))
                 // LongStringComparer is "randomized" by default
-                return (ILongEqualityComparer<T>)new LongStringComparer();
+                return (LongEqualityComparer<T>)(object)new LongStringComparer();
 
             if (typeof(T) == typeof(long))
-                return (ILongEqualityComparer<T>)new LongInt64Comparer();
+                return (LongEqualityComparer<T>)(object)new LongInt64Comparer();
 
             if (typeof(T) == typeof(ulong))
-                return (ILongEqualityComparer<T>)new LongUInt64Comparer();
+                return (LongEqualityComparer<T>)(object)new LongUInt64Comparer();
 
             if (typeof(T) == typeof(IntPtr))
-                return (ILongEqualityComparer<T>)new LongIntPtrComparer();
+                return (LongEqualityComparer<T>)(object)new LongIntPtrComparer();
 
             if (typeof(T) == typeof(UIntPtr))
-                return (ILongEqualityComparer<T>)new LongUIntPtrComparer();
+                return (LongEqualityComparer<T>)(object)new LongUIntPtrComparer();
 
             if (typeof(T) == typeof(double))
-                return (ILongEqualityComparer<T>)new LongDoubleComparer();
+                return (LongEqualityComparer<T>)(object)new LongDoubleComparer();
 
             if (typeof(T) == typeof(decimal))
-                return (ILongEqualityComparer<T>)new LongDecimalComparer();
+                return (LongEqualityComparer<T>)(object)new LongDecimalComparer();
 
             if (typeof(ILongHashable).IsAssignableFrom(typeof(T)))
             {

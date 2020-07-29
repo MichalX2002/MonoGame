@@ -19,7 +19,11 @@ namespace MonoGame.Framework
 
         #region Events
 
+        /// <summary>
+        /// Occurs when the size of the window changes.
+        /// </summary>
         public event Event<GameWindow>? SizeChanged;
+
         public event Event<GameWindow>? OrientationChanged;
         public event Event<GameWindow>? ScreenDeviceNameChanged;
         public event Event<GameWindow>? WindowHandleChanged;
@@ -36,7 +40,7 @@ namespace MonoGame.Framework
         ///  Occurs when the user drops files on the window.
         /// </summary>
         /// <remarks>
-        /// This event is only supported on the Windows, Linux, and MacOS.
+        /// This event is only supported on Windows, Linux, and MacOS.
         /// </remarks>
         public event DataEvent<GameWindow, FilesDroppedEventArgs>? FilesDropped;
 
@@ -44,7 +48,7 @@ namespace MonoGame.Framework
         ///  Occurs when the user drops files on the window.
         /// </summary>
         /// <remarks>
-        /// This event is only supported on the Windows, Linux, and MacOS.
+        /// This event is only supported on Windows, Linux, and MacOS.
         /// </remarks>
         public event DataEvent<GameWindow, TextDroppedEventArgs>? TextDropped;
 
@@ -53,7 +57,7 @@ namespace MonoGame.Framework
         /// This event is not raised by non-character.
         /// </summary>
         /// <remarks>
-        /// This event is only supported on the Windows, Linux, and MacOS.
+        /// This event is only supported on Windows, Linux, and MacOS.
         /// </remarks>
         public event TextEditingEvent? TextEditing;
 
@@ -64,7 +68,7 @@ namespace MonoGame.Framework
         /// http://msdn.microsoft.com/en-AU/library/system.windows.forms.control.keypress.aspx
         /// </summary>
         /// <remarks>
-        /// This event is only supported on the Windows, Linux, and MacOS.
+        /// This event is only supported on Windows, Linux, and MacOS.
         /// </remarks>
         public event TextInputEvent? TextInput;
 
@@ -72,7 +76,7 @@ namespace MonoGame.Framework
         /// Buffered keyboard KeyDown event.
         /// </summary>
         /// <remarks>
-        /// This event is only supported on the Windows, Linux, and MacOS.
+        /// This event is only supported on Windows, Linux, and MacOS.
         /// </remarks>
         public event TextInputEvent? KeyDown;
 
@@ -80,7 +84,7 @@ namespace MonoGame.Framework
         /// Buffered keyboard KeyUp event.
         /// </summary>
         /// <remarks>
-        /// This event is only supported on the Windows, Linux, and MacOS.
+        /// This event is only supported on Windows, Linux, and MacOS.
         /// </remarks>
         public event TextInputEvent? KeyUp;
 
@@ -113,11 +117,17 @@ namespace MonoGame.Framework
         /// </summary>
         public abstract Point Position { get; set; }
 
+        /// <summary>
+        /// Gets the orientation of the display.
+        /// </summary>
         public abstract DisplayOrientation CurrentOrientation { get; }
 
         /// <summary>
-        /// Gets the underlying platform-dependent handle of this window.
+        /// Gets the platform-dependent handle of this window.
         /// </summary>
+        /// <remarks>
+        /// To get the OS-dependent subsystem window handle use <see cref="GetSubsystemWindowHandle"/>.
+        /// </remarks>
         public abstract IntPtr WindowHandle { get; }
         
         /// <summary>
@@ -146,11 +156,11 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
-        /// <para>
         /// Determines whether the border of the window is visible.
-        /// </para>
-        /// Currently only supported on the Windows and Linux platforms.
         /// </summary>
+        /// <remarks>
+        /// Currently only supported on Windows and Linux.
+        /// </remarks>
         /// <exception cref="PlatformNotSupportedException">
         /// Set on a platform other than the Windows and Linux platforms.
         /// </exception>
@@ -169,6 +179,13 @@ namespace MonoGame.Framework
             TaskbarList = TaskbarList.Create(this);
         }
 
+        /// <summary>
+        /// Returns the OS-dependent subsystem handle for this window.
+        /// </summary>
+        /// <remarks>
+        /// To get the platform-dependent handle use <see cref="WindowHandle"/>.
+        /// </remarks>
+        /// <returns>The subsystem window handle.</returns>
         public abstract IntPtr GetSubsystemWindowHandle();
 
         public abstract void BeginScreenDeviceChange(bool willBeFullScreen);

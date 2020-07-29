@@ -15,6 +15,8 @@ namespace MonoGame.Imaging
             if (destination.Length < source.Length)
                 throw new ArgumentException("Destination is too short.");
 
+            // TODO: check performance of unsafe
+
             if (typeof(TPixelFrom) == typeof(TPixelTo))
             {
                 var src = MemoryMarshal.Cast<TPixelFrom, TPixelTo>(source);
@@ -23,67 +25,67 @@ namespace MonoGame.Imaging
             else if (typeof(TPixelFrom) == typeof(Alpha8))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, Alpha8>(source);
-                for (int x = 0; x < source.Length; x++)
+                for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromAlpha(typedSource[x]);
             }
             else if (typeof(TPixelFrom) == typeof(Alpha16))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, Alpha16>(source);
-                for (int x = 0; x < source.Length; x++)
+                for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromAlpha(typedSource[x]);
             }
             else if (typeof(TPixelFrom) == typeof(AlphaF))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, AlphaF>(source);
-                for (int x = 0; x < source.Length; x++)
+                for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromAlpha(typedSource[x]);
             }
             else if (typeof(TPixelFrom) == typeof(Gray8))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, Gray8>(source);
-                for (int x = 0; x < source.Length; x++)
+                for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromGray(typedSource[x]);
             }
             else if (typeof(TPixelFrom) == typeof(Gray16))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, Gray16>(source);
-                for (int x = 0; x < source.Length; x++)
+                for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromGray(typedSource[x]);
             }
             else if (typeof(TPixelFrom) == typeof(GrayAlpha16))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, GrayAlpha16>(source);
-                for (int x = 0; x < source.Length; x++)
+                for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromGrayAlpha(typedSource[x]);
             }
             else if (typeof(TPixelFrom) == typeof(GrayF))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, GrayF>(source);
-                for (int x = 0; x < source.Length; x++)
+                for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromGray(typedSource[x]);
             }
             else if (typeof(TPixelFrom) == typeof(Rgb24))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, Rgb24>(source);
-                for (int x = 0; x < source.Length; x++)
+                for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromRgb(typedSource[x]);
             }
             else if (typeof(TPixelFrom) == typeof(Color))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, Color>(source);
-                for (int x = 0; x < source.Length; x++)
+                for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromRgba(typedSource[x]);
             }
             else if (typeof(TPixelFrom) == typeof(Rgb48))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, Rgb48>(source);
-                for (int x = 0; x < source.Length; x++)
+                for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromRgb(typedSource[x]);
             }
             else if (typeof(TPixelFrom) == typeof(Rgba64))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, Rgba64>(source);
-                for (int x = 0; x < source.Length; x++)
+                for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromRgba(typedSource[x]);
             }
             else if (typeof(TPixelTo) == typeof(Gray8))
@@ -110,11 +112,47 @@ namespace MonoGame.Imaging
                 for (int x = 0; x < source.Length; x++)
                     typedDestination[x] = source[x].ToGrayAlpha16();
             }
+            else if (typeof(TPixelTo) == typeof(Rgb24))
+            {
+                var typedDestination = MemoryMarshal.Cast<TPixelTo, Rgb24>(destination);
+                for (int x = 0; x < source.Length; x++)
+                    typedDestination[x] = source[x].ToRgb24();
+            }
             else if (typeof(TPixelTo) == typeof(Color))
             {
                 var typedDestination = MemoryMarshal.Cast<TPixelTo, Color>(destination);
                 for (int x = 0; x < source.Length; x++)
                     typedDestination[x] = source[x].ToRgba32();
+            }
+            else if (typeof(TPixelTo) == typeof(Rgb48))
+            {
+                var typedDestination = MemoryMarshal.Cast<TPixelTo, Rgb48>(destination);
+                for (int x = 0; x < source.Length; x++)
+                    typedDestination[x] = source[x].ToRgb48();
+            }
+            else if (typeof(TPixelTo) == typeof(Rgba64))
+            {
+                var typedDestination = MemoryMarshal.Cast<TPixelTo, Rgba64>(destination);
+                for (int x = 0; x < source.Length; x++)
+                    typedDestination[x] = source[x].ToRgba64();
+            }
+            else if (typeof(TPixelTo) == typeof(RgVector))
+            {
+                var typedDestination = MemoryMarshal.Cast<TPixelTo, RgVector>(destination);
+                for (int x = 0; x < source.Length; x++)
+                    typedDestination[x] = source[x].ToRgbVector().Rg;
+            }
+            else if (typeof(TPixelTo) == typeof(RgbVector))
+            {
+                var typedDestination = MemoryMarshal.Cast<TPixelTo, RgbVector>(destination);
+                for (int x = 0; x < source.Length; x++)
+                    typedDestination[x] = source[x].ToRgbVector();
+            }
+            else if (typeof(TPixelTo) == typeof(RgbaVector))
+            {
+                var typedDestination = MemoryMarshal.Cast<TPixelTo, RgbaVector>(destination);
+                for (int x = 0; x < source.Length; x++)
+                    typedDestination[x] = source[x].ToRgbaVector();
             }
             else
             {

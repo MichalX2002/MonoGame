@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vectors
 {
-    //[Obsolete("This class will be replaced in favor of C# (9 or 10) shapes/role/type classes.")]
     public class VectorType
     {
-        private static MethodInfo? CreateMethod { get; set; }
-
         private static ConcurrentDictionary<Type, VectorType> GetCache { get; } =
             new ConcurrentDictionary<Type, VectorType>();
 
@@ -29,35 +27,29 @@ namespace MonoGame.Framework.Vectors
         public static VectorType Get<TVector>()
             where TVector : unmanaged, IVector
         {
-            return GetCache.GetOrAdd(typeof(TVector), (type) => Create<TVector>());
+            // Using a static generic class should allow the JIT to devirtualize the getter,
+            // granting performance equal to accessing a static field 
+            // instead of a (expensive in comparison) dictionary lookup when using a Type.
+            return Helper<TVector>.Instance;
         }
 
-        public static VectorType Get(Type type)
+        public static VectorType Get(Type vectorType)
         {
-            return GetCache.GetOrAdd(type, (type) =>
+            static VectorType ValueFactory(Type type)
             {
-                if (!typeof(IVector).IsAssignableFrom(type))
-                    throw new ArgumentException(
-                        $"The type does not implement {nameof(IVector)}.", nameof(type));
-
-                if (CreateMethod == null)
-                {
-                    var createMethod = typeof(VectorType).GetMethod(
-                        nameof(Create), BindingFlags.NonPublic | BindingFlags.Static);
-
-                    CreateMethod = createMethod ?? throw new Exception("Failed to get method for reflection.");
-                }
-
-                // We call the generic method with reflection to satisfy the unmanaged constraint.
-                var genericMethod = CreateMethod.MakeGenericMethod(type);
-                return (VectorType)genericMethod.Invoke(null, null)!;
-            });
+                // MakeGenericType validates generic constraints.
+                var helper = typeof(Helper<>).MakeGenericType(type);
+                var property = helper.GetProperties()[0];
+                return (VectorType)property.GetValue(null)!;
+            }
+            return GetCache.GetOrAdd(vectorType, ValueFactory);
         }
 
-        private static VectorType Create<TVector>()
+        private static class Helper<TVector>
             where TVector : unmanaged, IVector
         {
-            return new VectorType(typeof(TVector), new TVector().ComponentInfo);
+            public static VectorType Instance { get; } =
+                new VectorType(typeof(TVector), new TVector().ComponentInfo);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Numerics;
 using MonoGame.Framework;
 using MonoGame.Framework.Graphics;
@@ -26,13 +25,19 @@ namespace MonoGame.TestingD
             IsMouseVisible = true;
 
             Window.FilesDropped += Window_FilesDropped;
+            Window.TextDropped += Window_TextDropped;
 
             base.Initialize();
         }
 
-        private void Window_FilesDropped(GameWindow window, List<string> files)
+        private void Window_FilesDropped(GameWindow window, FilesDroppedEventArgs ev)
         {
-            Console.WriteLine(files.Count);
+            Console.WriteLine("FilesDropped: " + ev.FilePaths.Length);
+        }
+
+        private void Window_TextDropped(GameWindow window, TextDroppedEventArgs ev)
+        {
+            Console.WriteLine("TextDropped: " + ev.Text);
         }
 
         protected override void LoadContent()

@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Collections
 {
-    internal class LongStringComparer : LongEqualityComparer<string?>
+    internal sealed class LongStringComparer : LongEqualityComparer<string?>
     {
         public override long GetLongHashCode(string? str)
         {
