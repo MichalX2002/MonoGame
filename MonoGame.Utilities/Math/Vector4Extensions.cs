@@ -16,17 +16,5 @@ namespace MonoGame.Framework
         {
             return UnsafeR.As<Vector4, Vector3>(vector);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 ToScaledVector3(in this Vector4 vector)
-        {
-            return vector.ToVector3();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 ToScaledVector4(in this Vector4 vector)
-        {
-            return vector;
-        }
     }
 }

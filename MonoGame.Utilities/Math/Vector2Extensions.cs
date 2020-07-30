@@ -38,17 +38,5 @@ namespace MonoGame.Framework
         {
             return new Vector4(vector, 0, 1);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 ToScaledVector3(in this Vector2 vector)
-        {
-            return vector.ToVector3();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 ToScaledVector4(in this Vector2 vector)
-        {
-            return vector.ToVector4();
-        }
     }
 }
