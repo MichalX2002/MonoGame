@@ -99,7 +99,7 @@ namespace MonoGame.Imaging
            int? byteStride,
            Image<TPixelTo> destination)
            where TPixelFrom : unmanaged, IPixel
-           where TPixelTo : unmanaged, IPixel
+           where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
             var pixels = MemoryMarshal.Cast<byte, TPixelFrom>(pixelData);
             LoadPixels(pixels, sourceRectangle, byteStride, destination);
@@ -152,7 +152,7 @@ namespace MonoGame.Imaging
         private static void ReflectionLoadPixelRows<TPixelFrom, TPixelTo>(
             IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image destination)
             where TPixelFrom : unmanaged, IPixel
-            where TPixelTo : unmanaged, IPixel
+            where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
             LoadPixels<TPixelFrom, TPixelTo>(pixels, sourceRectangle, (Image<TPixelTo>)destination);
         }
@@ -195,7 +195,7 @@ namespace MonoGame.Imaging
 
         private static Image ReflectionWrapMemory<TPixel>(
             IMemory memory, Size size, bool leaveOpen = false, int? byteStride = null)
-            where TPixel : unmanaged, IPixel
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             return WrapMemory<TPixel>(memory, size, leaveOpen, byteStride);
         }
@@ -234,7 +234,7 @@ namespace MonoGame.Imaging
             new ConcurrentDictionary<VectorType, CreateDelegate>();
 
         internal static Image ReflectionCreate<TPixel>(Size size, bool zeroFill)
-           where TPixel : unmanaged, IPixel
+           where TPixel : unmanaged, IPixel<TPixel>
         {
             return Image<TPixel>.CreateCore(size, zeroFill);
         }

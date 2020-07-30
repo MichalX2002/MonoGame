@@ -11,27 +11,34 @@ namespace MonoGame.Imaging
         public static void LoadPixels<TPixelFrom, TPixelTo>(
             IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image<TPixelTo> destination)
             where TPixelFrom : unmanaged, IPixel
-            where TPixelTo : unmanaged, IPixel
+            where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
-            // TODO: use stack-allocated/ArrayPool buffer
-            // TODO: use Image.ConvertPixels
+            if (destination == null)
+                throw new ArgumentNullException(nameof(destination));
 
-            var rowBuffer = new TPixelFrom[destination.Width];
-            var rowBufferBytes = MemoryMarshal.AsBytes(rowBuffer.AsSpan());
+            ImagingArgumentGuard.AssertRectangleInSource(pixels, sourceRectangle, nameof(sourceRectangle));
+
+            int byteStride = destination.ByteStride;
+            var rowBuffer = byteStride < 4096 ? stackalloc byte[byteStride] : new byte[byteStride];
+            var row = MemoryMarshal.Cast<byte, TPixelFrom>(rowBuffer);
 
             for (int y = 0; y < sourceRectangle.Height; y++)
             {
-                pixels.GetPixelByteRow(sourceRectangle.X, sourceRectangle.Y + y, rowBufferBytes);
-
+                pixels.GetPixelByteRow(sourceRectangle.X, sourceRectangle.Y + y, rowBuffer);
                 var dstRow = destination.GetPixelRowSpan(y);
-                for (int x = 0; x < sourceRectangle.Width; x++)
-                    dstRow[x].FromScaledVector(rowBuffer[x].ToScaledVector4());
+
+                ConvertPixels(row, dstRow);
             }
         }
 
         public static void LoadPixels(
             IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image destination)
         {
+            if (pixels == null)
+                throw new ArgumentNullException(nameof(pixels));
+            if (destination == null)
+                throw new ArgumentNullException(nameof(destination));
+
             var loadDelegate = GetLoadPixelRowsDelegate(pixels.PixelType, destination.PixelType);
             loadDelegate.Invoke(pixels, sourceRectangle, destination);
         }
@@ -39,7 +46,8 @@ namespace MonoGame.Imaging
         public static Image LoadPixels(
             IReadOnlyPixelRows pixels, VectorType destinationType, Rectangle? sourceRectangle = null)
         {
-            if (pixels == null) throw new ArgumentNullException(nameof(pixels));
+            if (pixels == null) 
+                throw new ArgumentNullException(nameof(pixels));
 
             var rect = sourceRectangle ?? pixels.GetBounds();
             ImagingArgumentGuard.AssertNonEmptyRectangle(rect, nameof(sourceRectangle));
@@ -59,11 +67,11 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> LoadPixels<TPixel>(
             IReadOnlyPixelRows pixels, Rectangle? sourceRectangle = null)
-            where TPixel : unmanaged, IPixel
+            where TPixel : unmanaged, IPixel<TPixel>
         {
-            // TODO: benchmark; replace Span<>.CopyTo with possibly faster memcpy
-
-            if (pixels == null) throw new ArgumentEmptyException(nameof(pixels));
+            if (pixels == null) 
+                throw new ArgumentEmptyException(nameof(pixels));
+            
             ImagingArgumentGuard.AssertNonEmptyRectangle(sourceRectangle, nameof(sourceRectangle));
             var rect = sourceRectangle ?? pixels.GetBounds();
 

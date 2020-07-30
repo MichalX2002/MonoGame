@@ -7,6 +7,8 @@ namespace MonoGame.Imaging.Processing
 {
     public static partial class PixelProcessor
     {
+        // TODO: FIXME:
+
         /// <summary>
         /// Creates a resized version of the source image using the default resampler.
         /// </summary>
@@ -30,7 +32,7 @@ namespace MonoGame.Imaging.Processing
         /// </summary>
         public static Image<TPixel> Resize<TPixel>(
             this ReadOnlyPixelRowsContext<TPixel> context, Size size)
-            where TPixel : unmanaged, IPixel
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             //var inputImg = context.Image;
             //var outputImg = new Image<TPixel>(width, height);

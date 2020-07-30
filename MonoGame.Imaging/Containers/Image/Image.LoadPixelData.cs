@@ -66,7 +66,7 @@ namespace MonoGame.Imaging
         public static Image<TPixelTo> LoadPixelData<TPixelFrom, TPixelTo>(
             ReadOnlySpan<byte> pixelData, Rectangle sourceRectangle, int? byteStride = null)
             where TPixelFrom : unmanaged, IPixel
-            where TPixelTo : unmanaged, IPixel
+            where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
             var fromType = VectorType.Get<TPixelFrom>();
             return LoadPixelData<TPixelTo>(fromType, pixelData, sourceRectangle, byteStride);
@@ -75,7 +75,7 @@ namespace MonoGame.Imaging
         public static Image<TPixelTo> LoadPixelData<TPixelFrom, TPixelTo>(
             ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
             where TPixelFrom : unmanaged, IPixel
-            where TPixelTo : unmanaged, IPixel
+            where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
             return LoadPixelData<TPixelFrom, TPixelTo>(pixelData, new Rectangle(size), byteStride);
         }
@@ -89,7 +89,7 @@ namespace MonoGame.Imaging
             ReadOnlySpan<byte> pixelData,
             Rectangle sourceRectangle,
             int? byteStride = null)
-            where TPixelTo : unmanaged, IPixel
+            where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
             var toType = VectorType.Get<TPixelTo>();
             var image = LoadPixelData(sourceType, toType, pixelData, sourceRectangle, byteStride);
@@ -98,7 +98,7 @@ namespace MonoGame.Imaging
 
         public static Image<TPixelTo> LoadPixelData<TPixelTo>(
             VectorType sourceType, ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
-            where TPixelTo : unmanaged, IPixel
+            where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
             return LoadPixelData<TPixelTo>(sourceType, pixelData, new Rectangle(size), byteStride);
         }
@@ -109,14 +109,14 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> LoadPixelData<TPixel>(
             ReadOnlySpan<byte> pixelData, Rectangle sourceRectangle, int? byteStride = null)
-            where TPixel : unmanaged, IPixel
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             return LoadPixelData<TPixel, TPixel>(pixelData, sourceRectangle, byteStride);
         }
 
         public static Image<TPixel> LoadPixelData<TPixel>(
             ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
-            where TPixel : unmanaged, IPixel
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             return LoadPixelData<TPixel, TPixel>(pixelData, new Rectangle(size), byteStride);
         }

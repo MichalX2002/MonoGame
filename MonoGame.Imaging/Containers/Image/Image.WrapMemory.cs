@@ -18,8 +18,11 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> WrapMemory<TPixel>(
             IMemory memory, Size size, bool leaveOpen = false, int? byteStride = null)
-            where TPixel : unmanaged, IPixel
+            where TPixel : unmanaged, IPixel<TPixel>
         {
+            if (memory == null)
+                throw new ArgumentNullException(nameof(memory));
+
             ArgumentGuard.AssertDimensionsGreaterThanZero(size, nameof(size));
             ImagingArgumentGuard.AssertContigousLargeEnough(memory.Length, size.Area, nameof(memory));
 
@@ -33,7 +36,7 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> WrapMemory<TPixel>(
             Memory<TPixel> memory, Size size, int? byteStride = null)
-            where TPixel : unmanaged, IPixel
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             ArgumentGuard.AssertDimensionsGreaterThanZero(size, nameof(size));
             ImagingArgumentGuard.AssertContigousLargeEnough(memory.Length, size.Area, nameof(memory));
@@ -49,7 +52,7 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> WrapMemory<TPixel>(
             Memory<byte> memory, Size size, int? byteStride = null)
-            where TPixel : unmanaged, IPixel
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             ArgumentGuard.AssertDimensionsGreaterThanZero(size, nameof(size));
             ImagingArgumentGuard.AssertContigousLargeEnough(memory.Length, size.Area, nameof(memory));
@@ -68,7 +71,7 @@ namespace MonoGame.Imaging
         {
             if (size.Width * Unsafe.SizeOf<T>() < byteStride)
                 throw new ArgumentOutOfRangeException(
-                    "The byte stride is smaller than the byte size of one row.");
+                    nameof(byteStride), "The byte stride is smaller than the byte size of one row.");
 
             if (memoryByteSize % byteStride != 0)
                 throw new ArgumentException(

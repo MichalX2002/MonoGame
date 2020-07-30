@@ -141,7 +141,7 @@ namespace MonoGame.Framework.Input
             {
                 if (rect.Position == Point.Zero &&
                     pixels is IReadOnlyPixelMemory<Color> rgbaMemory &&
-                    rgbaMemory.IsPixelContiguous())
+                    rgbaMemory.IsPaddedPixelContiguous())
                 {
                     pixelBuffer = rgbaMemory;
                 }

@@ -6,9 +6,27 @@ namespace MonoGame.Imaging.Pixels
     public static class PixelMemoryExtensions
     {
         /// <summary>
-        /// Gets whether a contiguous span of pixels
+        /// Gets whether a possibly padded contiguous span of pixels
         /// can be created over the underlying memory.
         /// </summary>
+        /// <remarks>
+        /// To exclude padding use <see cref="IsPixelContiguous"/>
+        /// </remarks>
+        public static bool IsPaddedPixelContiguous(this IReadOnlyPixelMemory buffer)
+        {
+            if (buffer == null)
+                throw new ArgumentNullException(nameof(buffer));
+
+            return buffer.ByteStride % buffer.ElementSize == 0;
+        }
+
+        /// <summary>
+        /// Gets whether a non-padded contiguous span of pixels
+        /// can be created over the underlying memory.
+        /// </summary>
+        /// <remarks>
+        /// To include padding use <see cref="IsPaddedPixelContiguous"/>
+        /// </remarks>
         public static bool IsPixelContiguous(this IReadOnlyPixelMemory buffer)
         {
             if (buffer == null)
@@ -21,7 +39,7 @@ namespace MonoGame.Imaging.Pixels
         {
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
-            if (!buffer.IsPixelContiguous())
+            if (!buffer.IsPaddedPixelContiguous())
                 throw new InvalidOperationException("The buffer is not pixel-contiguous.");
 
             return buffer.ByteStride / buffer.ElementSize;

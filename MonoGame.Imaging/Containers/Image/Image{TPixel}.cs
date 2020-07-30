@@ -6,7 +6,7 @@ using MonoGame.Imaging.Pixels;
 namespace MonoGame.Imaging
 {
     public partial class Image<TPixel> : Image, IPixelMemory<TPixel>
-        where TPixel : unmanaged, IPixel
+        where TPixel : unmanaged, IPixel<TPixel>
     {
         private PixelBuffer _buffer;
 
@@ -19,7 +19,7 @@ namespace MonoGame.Imaging
             }
         }
 
-        public override int ByteStride => Buffer.ByteStride;
+        public override int ByteStride => _buffer.ByteStride;
 
         #region Constructors
 

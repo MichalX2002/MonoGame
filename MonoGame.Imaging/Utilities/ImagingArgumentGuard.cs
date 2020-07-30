@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Imaging.Attributes.Format;

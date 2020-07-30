@@ -40,8 +40,15 @@ namespace MonoGame.Imaging
 
         public abstract int ByteStride { get; }
 
-        int IElementContainer.ElementSize => PixelType.ElementSize;
-        int IElementContainer.Length => Width * Height;
+        /// <summary>
+        /// Gets the size of one pixel in bytes.
+        /// </summary>
+        public int ElementSize => PixelType.ElementSize;
+
+        /// <summary>
+        /// Gets the amount of pixels in the image.
+        /// </summary>
+        public int Length => Width * Height;
 
         #endregion
 

@@ -514,7 +514,7 @@ namespace MonoGame.Framework.Graphics
         [CLSCompliant(false)]
         public Image<TPixel> ToImage<TPixel>(
             Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
-            where TPixel : unmanaged, IPixel
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             CheckRect(level, rectangle, out Rectangle checkedRect);
 

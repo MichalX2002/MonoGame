@@ -55,7 +55,7 @@ namespace MonoGame.Imaging
             DecoderOptions? decoderOptions = null,
             DecodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
-            where TPixel : unmanaged, IPixel
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             var preferredType = VectorType.Get<TPixel>();
 
@@ -70,7 +70,7 @@ namespace MonoGame.Imaging
             DecoderOptions? decoderOptions = null,
             DecodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
-            where TPixel : unmanaged, IPixel
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             return Load<TPixel>(
                 ImagingConfig.Default, stream, decoderOptions, onProgress, cancellationToken);

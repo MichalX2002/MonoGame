@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 namespace MonoGame.Imaging
 {
     public partial class Image<TPixel> : IPixelBuffer<TPixel>, IDisposable
-        where TPixel : unmanaged, IPixel
+        where TPixel : unmanaged, IPixel<TPixel>
     {
         public override Span<byte> GetPixelByteSpan()
         {
@@ -26,7 +26,7 @@ namespace MonoGame.Imaging
 
         public Span<TPixel> GetPixelSpan()
         {
-            if (!this.IsPixelContiguous())
+            if (!this.IsPaddedPixelContiguous())
                 throw new InvalidOperationException("The underlying memory is not pixel contiguous.");
 
             return Buffer.PixelSpan;
