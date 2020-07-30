@@ -67,13 +67,13 @@ namespace MonoGame.Framework.Vectors
         /// Gets the vector as a <see cref="Vector3"/>
         /// where the XYZ components correspond to RGB. 
         /// </summary>
-        Vector3 ToVector3(); // => ToScaledVector3();
+        Vector3 ToVector3();
 
         /// <summary>
         /// Gets the vector as a <see cref="Vector4"/>
         /// where the XYZW components correspond to RGBA. 
         /// </summary>
-        Vector4 ToVector4(); // => ToScaledVector4();
+        Vector4 ToVector4();
 
         #endregion
     }

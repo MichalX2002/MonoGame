@@ -19,7 +19,7 @@ dotnet_diagnostic.CA1034.severity = none
 dotnet_diagnostic.CA1000.severity = none
 
 # CA1815: Override equals and operator equals on value types
-dotnet_diagnostic.CA1815.severity = suggestion
+dotnet_diagnostic.CA1815.severity = none
 
 # CA1710: Identifiers should have correct suffix
 dotnet_diagnostic.CA1710.severity = none

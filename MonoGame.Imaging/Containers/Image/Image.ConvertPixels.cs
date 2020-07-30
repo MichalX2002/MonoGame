@@ -18,6 +18,7 @@ namespace MonoGame.Imaging
                 throw new ArgumentException("Destination is too short.");
 
             // TODO: check performance of unsafe
+            // TODO: add more types
 
             // This massive check should be JITted down to the respective type.
 

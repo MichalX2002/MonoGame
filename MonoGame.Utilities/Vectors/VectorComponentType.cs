@@ -6,7 +6,7 @@ namespace MonoGame.Framework.Vectors
         Undefined,
 
         /// <summary>
-        /// Represents a bit field component that has a unique encoding.
+        /// Represents a bit field component that has a specialized encoding.
         /// </summary>
         BitField,
 
