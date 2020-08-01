@@ -56,46 +56,6 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #region ZeroMax
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 ZeroMax(Vector2 vector, Vector2 max)
-        {
-            return Vector2.Clamp(vector, Vector2.Zero, max);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector2 ZeroMax(Vector2 vector, float max)
-        {
-            return ZeroMax(vector, new Vector2(max));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 ZeroMax(Vector3 vector, Vector3 max)
-        {
-            return Vector3.Clamp(vector, Vector3.Zero, max);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 ZeroMax(Vector3 vector, float max)
-        {
-            return ZeroMax(vector, new Vector3(max));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 ZeroMax(Vector4 vector, Vector4 max)
-        {
-            return Vector4.Clamp(vector, Vector4.Zero, max);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 ZeroMax(Vector4 vector, float max)
-        {
-            return ZeroMax(vector, new Vector4(max));
-        }
-
-        #endregion
-
         #region Clamp
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -114,6 +74,28 @@ namespace MonoGame.Framework
         public static Vector4 Clamp(Vector4 vector, float min, float max)
         {
             return Vector4.Clamp(vector, new Vector4(min), new Vector4(max));
+        }
+
+        #endregion
+
+        #region ScaleClamp
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector2 ScaledClamp(Vector2 vector)
+        {
+            return Vector2.Clamp(vector, Vector2.Zero, Vector2.One);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 ScaledClamp(Vector3 vector)
+        {
+            return Vector3.Clamp(vector, Vector3.Zero, Vector3.One);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 ScaledClamp(Vector4 vector)
+        {
+            return Vector4.Clamp(vector, Vector4.Zero, Vector4.One);
         }
 
         #endregion
