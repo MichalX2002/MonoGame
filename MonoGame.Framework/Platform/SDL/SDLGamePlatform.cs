@@ -42,7 +42,7 @@ namespace MonoGame.Framework
             // Needed so VS can debug the project on Windows
             if (version.Major >= 2 && version.Minor >= 0 && version.Patch >= 5 &&
                 Debugger.IsAttached &&
-                PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+                PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
                 SDL.SetHint("SDL_WINDOWS_DISABLE_THREAD_NAMING", "1");
 
             SDL.Init(

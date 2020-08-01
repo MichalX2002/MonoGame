@@ -17,11 +17,11 @@ namespace MonoGame
 
         private static IntPtr GetNativeLibrary()
         {
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
                 return FL.LoadLibraryExt("SDL2.dll");
-            else if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Linux)
+            else if (PlatformInfo.CurrentOS == PlatformInfo.OS.Linux)
                 return FL.LoadLibraryExt("libSDL2-2.0.so.0");
-            else if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
+            else if (PlatformInfo.CurrentOS == PlatformInfo.OS.MacOSX)
                 return FL.LoadLibraryExt("libSDL2-2.0.0.dylib");
             else
                 return FL.LoadLibraryExt("sdl2");

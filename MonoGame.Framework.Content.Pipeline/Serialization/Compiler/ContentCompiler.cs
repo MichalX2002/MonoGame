@@ -72,9 +72,12 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// <remarks>This should be called from the ContentTypeWriter.Initialize method.</remarks>
         public ContentTypeWriter GetTypeWriter(Type type)
         {
-            var contentTypeWriterType = typeof(ContentTypeWriter<>).MakeGenericType(type);
-            ContentTypeWriter result;
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
 
+            var contentTypeWriterType = typeof(ContentTypeWriter<>).MakeGenericType(type);
+
+            ContentTypeWriter result;
             if (type == typeof(Array))
             {
                 result = new ArrayWriter<Array>();
@@ -147,8 +150,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                 }
                 catch (Exception)
                 {
-                    throw new InvalidContentException(
-                        string.Format("Could not find ContentTypeWriter for type '{0}'", type.Name));
+                    throw new InvalidContentException($"Could not find ContentTypeWriter for type '{type.Name}'");
                 }
             }
             else

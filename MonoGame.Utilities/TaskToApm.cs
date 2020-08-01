@@ -54,9 +54,9 @@ namespace MonoGame.Framework
         [DoesNotReturn]
         private static void ThrowArgumentException(IAsyncResult asyncResult)
         {
-            throw (asyncResult is null ?
+            throw asyncResult is null ?
                 new ArgumentNullException(nameof(asyncResult)) :
-                new ArgumentException(null, nameof(asyncResult)));
+                new ArgumentException(null, nameof(asyncResult));
         }
 
         /// <summary>Provides a simple IAsyncResult that wraps a Task.</summary>

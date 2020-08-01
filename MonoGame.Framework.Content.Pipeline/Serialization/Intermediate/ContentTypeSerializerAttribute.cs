@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using MonoGame.Framework.Collections;
 
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 {
@@ -24,9 +25,9 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 
         private static readonly object _lock = new object();
 
-        private static ReadOnlyCollection<Type> _types;
+        private static ReadOnlyList<Type> _types;
 
-        internal static ReadOnlyCollection<Type> GetTypes()
+        internal static ReadOnlyList<Type> GetTypes()
         {
             lock (_lock)
             {
@@ -41,7 +42,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
                             var types = assembly.GetTypes();
                             foreach (var type in types)
                             {
-                                var attributes = type.GetCustomAttributes(typeof (ContentTypeSerializerAttribute), false);
+                                var attributes = type.GetCustomAttributes(typeof(ContentTypeSerializerAttribute), false);
                                 if (attributes.Length > 0)
                                     found.Add(type);
                             }
@@ -52,7 +53,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
                         }
                     }
 
-                    _types = new ReadOnlyCollection<Type>(found);
+                    _types = found.AsReadOnlyList();
                 }
             }
 

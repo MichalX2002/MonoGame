@@ -43,9 +43,9 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                 var directories = new List<string> { Path.GetDirectoryName(input.Identity.SourceFilename) };
 
                 // Add special per platform directories
-                if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+                if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
                     directories.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts"));
-                else if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
+                else if (PlatformInfo.CurrentOS == PlatformInfo.OS.MacOSX)
                 {
                     directories.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "Library", "Fonts"));
                     directories.Add("/Library/Fonts");
@@ -192,7 +192,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
         {
             // TODO: Add more platforms (MacOS?)
 
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
             {
                 var fontDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts");
                 foreach (var key in new RegistryKey[] { Registry.LocalMachine, Registry.CurrentUser })
@@ -215,7 +215,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                     }
                 }
             }
-            else if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Linux)
+            else if (PlatformInfo.CurrentOS == PlatformInfo.OS.Linux)
             {
                 ExternalTool.Run(
                     "/bin/bash", $"-c \"fc-match -f '%{{file}}:%{{family}}\\n' '{name}:style={style}'\"",

@@ -5,9 +5,9 @@ namespace MonoGame.Framework.Utilities
     {
         private static TaskbarList PlatformCreate(GameWindow window)
         {
-            switch(PlatformInfo.OS)
+            switch(PlatformInfo.CurrentOS)
             {
-                case PlatformInfo.OperatingSystem.Windows:
+                case PlatformInfo.OS.Windows:
                     return new WindowsTaskbarList(window);
 
                 default:

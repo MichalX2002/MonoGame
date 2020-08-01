@@ -43,7 +43,7 @@ namespace MonoGame.Framework
             IntPtr ret;
 
             // Try .NET Framework / Mono locations
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.MacOSX)
             {
                 ret = LoadLibrary(Path.Combine(assemblyLocation, libname));
 
@@ -81,10 +81,10 @@ namespace MonoGame.Framework
 
         public static IntPtr LoadLibrary(string libname)
         {
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
                 return Windows.LoadLibraryW(libname);
 
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.MacOSX)
                 return OSX.dlopen(libname, RTLD_LAZY);
 
             return Linux.dlopen(libname, RTLD_LAZY);
@@ -94,9 +94,9 @@ namespace MonoGame.Framework
         {
             var ret = IntPtr.Zero;
 
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
                 ret = Windows.GetProcAddress(library, function);
-            else if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
+            else if (PlatformInfo.CurrentOS == PlatformInfo.OS.MacOSX)
                 ret = OSX.dlsym(library, function);
             else
                 ret = Linux.dlsym(library, function);

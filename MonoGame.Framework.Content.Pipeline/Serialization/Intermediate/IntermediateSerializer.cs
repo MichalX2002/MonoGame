@@ -76,14 +76,19 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 
         public static T Deserialize<T>(XmlReader input, string referenceRelocationPath)
         {
+            if (input == null)
+                throw new ArgumentNullException(nameof(input));
+
             var serializer = new IntermediateSerializer();
             var reader = new IntermediateReader(serializer, input, referenceRelocationPath);
             T asset;
             try
             {
                 if (!reader.MoveToElement("XnaContent"))
-                    throw new InvalidContentException(string.Format("Could not find XnaContent element in '{0}'.",
-                                                                    referenceRelocationPath));
+                {
+                    throw new InvalidContentException(
+                        $"Could not find XnaContent element in '{referenceRelocationPath}'.");
+                }
 
                 // Initialize the namespace lookups from
                 // the attributes on the XnaContent element.
@@ -105,7 +110,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             }
             catch (XmlException xmlException)
             {
-                throw reader.NewInvalidContentException(xmlException, "An error occured parsing.");
+                throw reader.Exception_InvalidContent(xmlException, "An error occured parsing.");
             }
             return asset;
         }

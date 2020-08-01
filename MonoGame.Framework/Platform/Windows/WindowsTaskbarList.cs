@@ -8,7 +8,7 @@ namespace MonoGame.Framework.Utilities
         private ITaskbarList? _comObject;
         private IntPtr _windowHandle;
 
-        public override bool IsSupported => PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows;
+        public override bool IsSupported => PlatformInfo.CurrentOS == PlatformInfo.OS.Windows;
 
         public override bool IsAvailable => _windowHandle != IntPtr.Zero;
 

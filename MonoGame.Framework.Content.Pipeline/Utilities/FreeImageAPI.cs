@@ -117,7 +117,7 @@ namespace FreeImageAPI
 
         public static FREE_IMAGE_FORMAT GetFileType(string filename, int size)
         {
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
                 return GetFileTypeU(filename, size);
             else
                 return GetFileTypeS(filename, size);
@@ -131,7 +131,7 @@ namespace FreeImageAPI
 
         public static IntPtr Load(FREE_IMAGE_FORMAT fif, string filename, int flags)
         {
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
                 return LoadU(fif, filename, flags);
             else
                 return LoadS(fif, filename, flags);

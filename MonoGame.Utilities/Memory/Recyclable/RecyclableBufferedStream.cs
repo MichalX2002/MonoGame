@@ -543,7 +543,7 @@ namespace MonoGame.Framework.Memory
                     // So: If we could not read all bytes the user asked for from the buffer, 
                     // we will try once from the underlying stream thus ensuring the same 
                     // blocking behaviour as if the underlying stream was not wrapped in this BufferedStream.
-                    completeSynchronously = (bytesFromBuffer == count || error != null);
+                    completeSynchronously = bytesFromBuffer == count || error != null;
 
                     if (completeSynchronously)
                     {
@@ -830,7 +830,7 @@ namespace MonoGame.Framework.Memory
             checked
             {  // We do not expect buffer sizes big enough for an overflow, but if it happens, lets fail early:
                 totalUserbytes = _writePos + count;
-                useBuffer = (totalUserbytes + count < (BufferSize + BufferSize));
+                useBuffer = totalUserbytes + count < (BufferSize + BufferSize);
             }
 
             if (useBuffer)
@@ -890,7 +890,7 @@ namespace MonoGame.Framework.Memory
             {
                 // We do not expect buffer sizes big enough for an overflow, but if it happens, lets fail early:
                 totalUserbytes = _writePos + buffer.Length;
-                useBuffer = (totalUserbytes + buffer.Length < (BufferSize + BufferSize));
+                useBuffer = totalUserbytes + buffer.Length < (BufferSize + BufferSize);
             }
 
             if (useBuffer)
@@ -1029,7 +1029,7 @@ namespace MonoGame.Framework.Memory
                 {
                     // We do not expect buffer sizes big enough for an overflow, but if it happens, lets fail early:
                     totalUserBytes = _writePos + buffer.Length;
-                    useBuffer = (totalUserBytes + buffer.Length < (BufferSize + BufferSize));
+                    useBuffer = totalUserBytes + buffer.Length < (BufferSize + BufferSize);
                 }
 
                 if (useBuffer)
@@ -1134,7 +1134,7 @@ namespace MonoGame.Framework.Memory
                 // If we have bytes in the read buffer, 
                 // adjust the seek offset to account for the resulting difference
                 // between this stream's position and the underlying stream's position.
-                offset -= (_readLen - _readPos);
+                offset -= _readLen - _readPos;
             }
 
             long oldPos = Position;

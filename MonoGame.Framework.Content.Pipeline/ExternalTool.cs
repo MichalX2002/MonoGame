@@ -113,19 +113,17 @@ namespace MonoGame.Framework.Content.Pipeline
                 return command;
 
             // For Linux check specific subfolder
-            var lincom = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "linux", command);
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Linux && File.Exists(lincom))
+            var lincom = Path.Combine(AppContext.BaseDirectory, "linux", command);
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Linux && File.Exists(lincom))
                 return lincom;
 
             // For Mac check specific subfolder
-            var maccom = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "osx", command);
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX && File.Exists(maccom))
+            var maccom = Path.Combine(AppContext.BaseDirectory, "osx", command);
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.MacOSX && File.Exists(maccom))
                 return maccom;
 
             // We don't have a full path, so try running through the system path to find it.
-            var paths = AppDomain.CurrentDomain.BaseDirectory +
-                Path.PathSeparator +
-                Environment.GetEnvironmentVariable("PATH");
+            var paths = Path.Combine(AppContext.BaseDirectory, Environment.GetEnvironmentVariable("PATH"));
 
             var justTheName = Path.GetFileName(command);
             foreach (var path in paths.Split(Path.PathSeparator))
@@ -134,7 +132,7 @@ namespace MonoGame.Framework.Content.Pipeline
                 if (File.Exists(fullName))
                     return fullName;
 
-                if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+                if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
                 {
                     var fullExeName = string.Concat(fullName, ".exe");
                     if (File.Exists(fullExeName))

@@ -8,14 +8,14 @@ using MonoGame.Framework.Utilities;
 namespace MonoGame.Framework
 {
     /// <summary>
-    /// Utility class that returns information about the underlying platform.
+    /// Utility class that returns information about the underlying system and platform.
     /// </summary>
     public static partial class PlatformInfo
     {
         /// <summary>
         /// Gets the executing operating system type.
         /// </summary>
-        public static OperatingSystem OS => OperatingSystemProbe.Probe();
+        public static OS CurrentOS => OperatingSystemProbe.Probe();
 
         /// <summary>
         /// Gets the underlying game platform type.
@@ -73,13 +73,13 @@ namespace MonoGame.Framework
         {
             get
             {
-                if (OS == OperatingSystem.Windows && Environment.Is64BitProcess)
+                if (CurrentOS == OS.Windows && Environment.Is64BitProcess)
                     return "win-x64";
-                else if (OS == OperatingSystem.Windows && !Environment.Is64BitProcess)
+                else if (CurrentOS == OS.Windows && !Environment.Is64BitProcess)
                     return "win-x86";
-                else if (OS == OperatingSystem.Linux)
+                else if (CurrentOS == OS.Linux)
                     return "linux-x64";
-                else if (OS == OperatingSystem.MacOSX)
+                else if (CurrentOS == OS.MacOSX)
                     return "osx";
                 else
                     return "unknown";

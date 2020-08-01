@@ -6,11 +6,10 @@ using System;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using System.IO;
-using MonoGame.Framework.Utilities;
 
 namespace MonoGame.OpenAL
 {
-    using OS = PlatformInfo.OperatingSystem;
+    using OS = PlatformInfo.OS;
 
     internal class AL
     {
@@ -22,25 +21,25 @@ namespace MonoGame.OpenAL
 
 #if DESKTOPGL || DIRECTX
             // Load bundled library
-            string assemblyLocation = Path.GetDirectoryName(typeof(AL).Assembly.Location);
+            string assemblyLocation = Path.GetDirectoryName(typeof(AL).Assembly.Location) ?? string.Empty;
 
-            if (PlatformInfo.OS == OS.Windows && Environment.Is64BitProcess)
+            if (PlatformInfo.CurrentOS == OS.Windows && Environment.Is64BitProcess)
                 loaded = FuncLoader.LoadLibrary(Path.Combine(assemblyLocation, "x64/soft_oal.dll"));
-            else if (PlatformInfo.OS == OS.Windows && !Environment.Is64BitProcess)
+            else if (PlatformInfo.CurrentOS == OS.Windows && !Environment.Is64BitProcess)
                 loaded = FuncLoader.LoadLibrary(Path.Combine(assemblyLocation, "x86/soft_oal.dll"));
-            else if (PlatformInfo.OS == OS.Linux && Environment.Is64BitProcess)
+            else if (PlatformInfo.CurrentOS == OS.Linux && Environment.Is64BitProcess)
                 loaded = FuncLoader.LoadLibrary(Path.Combine(assemblyLocation, "x64/libopenal.so.1"));
-            else if (PlatformInfo.OS == OS.Linux && !Environment.Is64BitProcess)
+            else if (PlatformInfo.CurrentOS == OS.Linux && !Environment.Is64BitProcess)
                 loaded = FuncLoader.LoadLibrary(Path.Combine(assemblyLocation, "x86/libopenal.so.1"));
-            else if (PlatformInfo.OS == OS.MacOSX)
+            else if (PlatformInfo.CurrentOS == OS.MacOSX)
                 loaded = FuncLoader.LoadLibrary(Path.Combine(assemblyLocation, "libopenal.1.dylib"));
 
             // Load system library
             if (loaded == IntPtr.Zero)
             {
-                if (PlatformInfo.OS == OS.Windows)
+                if (PlatformInfo.CurrentOS == OS.Windows)
                     loaded = FuncLoader.LoadLibrary("soft_oal.dll");
-                else if (PlatformInfo.OS == OS.Linux)
+                else if (PlatformInfo.CurrentOS == OS.Linux)
                     loaded = FuncLoader.LoadLibrary("libopenal.so.1");
                 else
                     loaded = FuncLoader.LoadLibrary("libopenal.1.dylib");
@@ -302,7 +301,7 @@ namespace MonoGame.OpenAL
         private delegate IntPtr d_algetstring(int p);
         private static d_algetstring alGetString = FuncLoader.LoadFunction<d_algetstring>(NativeLibrary, "alGetString");
 
-        public static string GetString(int p) => Marshal.PtrToStringAnsi(alGetString(p));
+        public static string? GetString(int p) => Marshal.PtrToStringAnsi(alGetString(p));
 
         public static string GetErrorString(ALError errorCode) => errorCode.ToString();
 

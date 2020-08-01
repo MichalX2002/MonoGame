@@ -192,7 +192,7 @@ namespace MonoGame.Framework
             int winy = SDL.Window.PosCentered;
 
             // if we are on Linux, start on the current screen
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Linux)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Linux)
             {
                 winx |= GetMouseDisplay();
                 winy |= GetMouseDisplay();
@@ -292,7 +292,7 @@ namespace MonoGame.Framework
             }
 
             // If going to exclusive full-screen mode, force the window to minimize on focus loss (Windows only)
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Windows)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
                 SDL.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", _willBeFullScreen && _hardwareSwitch ? "1" : "0");
 
             if (!_willBeFullScreen || _game.GraphicsDeviceManager.HardwareModeSwitch)

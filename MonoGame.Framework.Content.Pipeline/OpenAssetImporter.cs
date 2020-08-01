@@ -255,7 +255,7 @@ namespace MonoGame.Framework.Content.Pipeline
             if (filename == null) throw new ArgumentNullException(nameof(filename));
             _context = context ?? throw new ArgumentNullException(nameof(context));
 
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.Linux)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Linux)
             {
                 var targetDir = new FileInfo(Assembly.GetExecutingAssembly().Location).Directory.FullName;
                 try

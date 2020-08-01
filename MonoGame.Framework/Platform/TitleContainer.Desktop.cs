@@ -14,13 +14,13 @@ namespace MonoGame.Framework
 #if WINDOWS || DESKTOPGL
 #if DESKTOPGL
             // Check for the package Resources Folder first. This is where the assets will be bundled.
-            if (PlatformInfo.OS == PlatformInfo.OperatingSystem.MacOSX)
-                Location = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "Resources");
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.MacOSX)
+                Location = Path.Combine(AppContext.BaseDirectory, "..", "Resources");
 
             if (!Directory.Exists(Location))
 #endif
             {
-                Location = AppDomain.CurrentDomain.BaseDirectory;
+                Location = AppContext.BaseDirectory;
             }
 #endif
         }

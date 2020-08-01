@@ -23,7 +23,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             }
             catch (Exception ex)
             {
-                throw input.NewInvalidContentException(ex, "Invalid enum value '{0}' for type '{1}'", str, TargetType.Name);
+                throw input.Exception_InvalidContent(ex, "Invalid enum value '{0}' for type '{1}'", str, TargetType.Name);
             }
         }
 

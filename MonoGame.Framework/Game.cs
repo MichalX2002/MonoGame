@@ -21,7 +21,7 @@ namespace MonoGame.Framework
 {
     public partial class Game : IDisposable
     {
-        private static PlatformInfo.OperatingSystem _currentOS = PlatformInfo.OS;
+        private static PlatformInfo.OS _currentOS = PlatformInfo.CurrentOS;
 
         private ContentManager _content;
 
@@ -420,7 +420,7 @@ namespace MonoGame.Framework
 
                     switch (_currentOS)
                     {
-                        case PlatformInfo.OperatingSystem.Windows:
+                        case PlatformInfo.OS.Windows:
                             if (PlatformInfo.Platform == MonoGamePlatform.WindowsUniversal)
                             {
                                 lock (Locker)

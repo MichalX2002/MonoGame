@@ -10,7 +10,10 @@ namespace MonoGame.Framework
 {
     public static partial class PlatformInfo
     {
-        public enum OperatingSystem
+        /// <summary>
+        /// Identifies an operating system.
+        /// </summary>
+        public enum OS
         {
             Windows,
             Linux,
@@ -25,9 +28,9 @@ namespace MonoGame.Framework
             static extern int uname(IntPtr buf);
 
             private static bool _probed;
-            private static OperatingSystem _cachedOS;
+            private static OS _cachedOS;
 
-            public static OperatingSystem Probe()
+            public static OS Probe()
             {
                 if (!_probed)
                 {
@@ -37,7 +40,7 @@ namespace MonoGame.Framework
                 return _cachedOS;
             }
 
-            private static OperatingSystem ProbeCore()
+            private static OS ProbeCore()
             {
                 switch (Environment.OSVersion.Platform)
                 {
@@ -45,10 +48,10 @@ namespace MonoGame.Framework
                     case PlatformID.Win32S:
                     case PlatformID.Win32Windows:
                     case PlatformID.WinCE:
-                        return OperatingSystem.Windows;
+                        return OS.Windows;
 
                     case PlatformID.MacOSX:
-                        return OperatingSystem.MacOSX;
+                        return OS.MacOSX;
 
                     case PlatformID.Unix:
                         // Mac can return a value of Unix sometimes, we need to double check it.
@@ -57,7 +60,7 @@ namespace MonoGame.Framework
                         {
                             if (uname(buffer) == 0)
                                 if (Marshal.PtrToStringAnsi(buffer) == "Darwin")
-                                    return OperatingSystem.MacOSX;
+                                    return OS.MacOSX;
                         }
                         catch
                         {
@@ -66,10 +69,10 @@ namespace MonoGame.Framework
                         {
                             Marshal.FreeHGlobal(buffer);
                         }
-                        return OperatingSystem.Linux;
+                        return OS.Linux;
 
                     default:
-                        return OperatingSystem.Unknown;
+                        return OS.Unknown;
                 }
             }
         }

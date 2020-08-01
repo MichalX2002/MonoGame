@@ -248,15 +248,6 @@ namespace MonoGame.Framework.Memory
             }
             else
             {
-#if !NETSTANDARD1_4
-                if (AppDomain.CurrentDomain.IsFinalizingForUnload())
-                {
-                    // If we're being finalized because of a shutdown, don't go any further.
-                    // We have no idea what's already been cleaned up. Triggering events may cause a crash.
-                    base.Dispose(disposing);
-                    return;
-                }
-#endif
                 _memoryManager.ReportStreamFinalized();
             }
 

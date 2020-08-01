@@ -14,17 +14,15 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
         private readonly string _filePath;
 
         private readonly Dictionary<string, Action<object>> _resourceFixups;
-
         private readonly Dictionary<string, List<Action<Type, string>>> _externalReferences;
 
         public XmlReader Xml { get; private set; }
-
         public IntermediateSerializer Serializer { get; private set; }
 
         internal IntermediateReader(IntermediateSerializer serializer, XmlReader xmlReader, string filePath)
         {
-            Serializer = serializer;
-            Xml = xmlReader;
+            Serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+            Xml = xmlReader ?? throw new ArgumentNullException(nameof(xmlReader)); ;
             _filePath = filePath;
             _resourceFixups = new Dictionary<string, Action<object>>();
             _externalReferences = new Dictionary<string, List<Action<Type, string>>>();
@@ -47,19 +45,20 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             return ReadObject(format, typeSerializer, default(T));
         }
 
-        public T ReadObject<T>(ContentSerializerAttribute format, ContentTypeSerializer typeSerializer, T existingInstance)
+        public T ReadObject<T>(
+            ContentSerializerAttribute format, ContentTypeSerializer typeSerializer, T existingInstance)
         {
             if (!format.FlattenContent)
             {
                 if (!MoveToElement(format.ElementName))
-                    throw NewInvalidContentException(null, "Element '{0}' was not found.", format.ElementName);
+                    throw Exception_InvalidContent(null, "Element '{0}' was not found.", format.ElementName);
 
                 // Is the object null?
                 var isNull = Xml.GetAttribute("Null");
                 if (isNull != null && XmlConvert.ToBoolean(isNull))
                 {
                     if (!format.AllowNull)
-                        throw NewInvalidContentException(null, "Element '{0}' cannot be null.", format.ElementName);
+                        throw Exception_InvalidContent(null, "Element '{0}' cannot be null.", format.ElementName);
 
                     Xml.Skip();
                     return default;
@@ -70,9 +69,13 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
                 {
                     var type = ReadTypeName();
                     if (type == null)
-                        throw NewInvalidContentException(null, "Could not resolve type '{0}'.", Xml.ReadContentAsString());
+                        throw Exception_InvalidContent(
+                            null, "Could not resolve type '{0}'.", Xml.ReadContentAsString());
+                    
                     if (!typeSerializer.TargetType.IsAssignableFrom(type))
-                        throw NewInvalidContentException(null, "Type '{0}' is not assignable to '{1}'.", type.FullName, typeSerializer.TargetType.FullName);
+                        throw Exception_InvalidContent(
+                            null, "Type '{0}' is not assignable to '{1}'.", 
+                            type.FullName, typeSerializer.TargetType.FullName);
 
                     typeSerializer = Serializer.GetTypeSerializer(type);
                     Xml.MoveToElement();
@@ -97,7 +100,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             return ReadRawObject(format, typeSerializer, default(T));         
         }
 
-        public T ReadRawObject<T>(ContentSerializerAttribute format, ContentTypeSerializer typeSerializer, T existingInstance)
+        public T ReadRawObject<T>(
+            ContentSerializerAttribute format, ContentTypeSerializer typeSerializer, T existingInstance)
         {
             if (format.FlattenContent)
             {
@@ -106,7 +110,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             }
 
             if (!MoveToElement(format.ElementName))
-                throw NewInvalidContentException(null, "Element '{0}' was not found.", format.ElementName);
+                throw Exception_InvalidContent(null, "Element '{0}' was not found.", format.ElementName);
 
             var isEmpty = Xml.IsEmptyElement;
             if (!isEmpty)
@@ -137,7 +141,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             else
             {
                 if (!MoveToElement(format.ElementName))
-                    throw NewInvalidContentException(null, "Element '{0}' was not found.", format.ElementName);
+                    throw Exception_InvalidContent(null, "Element '{0}' was not found.", format.ElementName);
 
                 str = Xml.ReadElementContentAsString();
             }
@@ -192,13 +196,13 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
 
             var str = Xml.ReadElementContentAsString();
 
-            if (!_externalReferences.TryGetValue(str, out List<Action<Type, string>> fixups))
+            if (!_externalReferences.TryGetValue(str, out var fixups))
                 _externalReferences.Add(str, fixups = new List<Action<Type, string>>());
 
             void Fixup(Type type, string filename)
             {
                 if (type != typeof(T))
-                    throw NewInvalidContentException(null, "Invalid external reference type");
+                    throw Exception_InvalidContent(null, "Invalid external reference type");
 
                 existingInstance.Filename = filename;
             }
@@ -217,13 +221,13 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             while (MoveToElement("ExternalReference"))
             {
                 var id = Xml.GetAttribute("ID");
-                if (!_externalReferences.TryGetValue(id, out List<Action<Type, string>> fixups))
-                    throw NewInvalidContentException(null, "Unknown external reference id '{0}'!", id);
+                if (!_externalReferences.TryGetValue(id, out var fixups))
+                    throw Exception_InvalidContent(null, "Unknown external reference id '{0}'!", id);
 
                 Xml.MoveToAttribute("TargetType");
                 var targetType = ReadTypeName();
                 if (targetType == null)
-                    throw NewInvalidContentException(null, "Could not resolve type '{0}'.", Xml.ReadContentAsString());
+                    throw Exception_InvalidContent(null, "Could not resolve type '{0}'.", Xml.ReadContentAsString());
 
                 Xml.MoveToElement();
                 var filename = Xml.ReadElementString();
@@ -236,7 +240,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             Xml.ReadEndElement();
         }
 
-        internal InvalidContentException NewInvalidContentException(Exception innerException, string message, params object[] args)
+        internal InvalidContentException Exception_InvalidContent(
+            Exception innerException, string message, params object[] args)
         {
             var xmlInfo = (IXmlLineInfo)Xml;
             var lineAndColumn = string.Format("{0},{1}", xmlInfo.LineNumber, xmlInfo.LinePosition);
