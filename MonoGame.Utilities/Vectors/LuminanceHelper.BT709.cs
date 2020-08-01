@@ -11,14 +11,16 @@ namespace MonoGame.Framework.Vectors
         /// </summary>
         public static class BT709
         {
+            public static Vector3 Factor => new Vector3(.2126f, .7152f, .0722f);
+
             /// <summary>
             /// Converts RGB to luminance using the the BT.709 formula.
             /// </summary>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static float ToGrayF(Vector3 rgb)
+            public static float ToGrayF(Vector3 vector)
             {
-                rgb *= new Vector3(.2126f, .7152f, .0722f);
-                return rgb.X + rgb.Y + rgb.Z;
+                vector *= Factor;
+                return vector.X + vector.Y + vector.Z;
             }
 
             /// <summary>
@@ -40,22 +42,13 @@ namespace MonoGame.Framework.Vectors
             }
 
             /// <summary>
-            /// Converts RGB to luminance using the the BT.709 formula.
-            /// </summary>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static byte ToGray8(Rgb24 rgb)
-            {
-                return ToGray8(rgb.R, rgb.G, rgb.B);
-            }
-
-            /// <summary>
             /// Converts RGBA to luminance and alpha using the the BT.709 formula.
             /// </summary>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static GrayAlpha16 ToGrayAlpha16(Color rgba)
+            public static GrayAlpha16 ToGrayAlpha16(byte r, byte g, byte b, byte a)
             {
-                byte l = ToGray8(rgba.Rgb);
-                return new GrayAlpha16(l, rgba.A);
+                byte l = ToGray8(r, g, b);
+                return new GrayAlpha16(l, a);
             }
 
             /// <summary>
@@ -73,9 +66,9 @@ namespace MonoGame.Framework.Vectors
             /// </summary>
             [CLSCompliant(false)]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static ushort ToGray16(Rgb48 rgb)
+            public static uint ToGray32(uint r, uint g, uint b)
             {
-                return ToGray16(rgb.R, rgb.G, rgb.B);
+                return MathHelper.ClampTruncate(ToGrayF(r, g, b) + 0.5f, uint.MinValue, uint.MaxValue);
             }
 
             /// <summary>
@@ -83,9 +76,9 @@ namespace MonoGame.Framework.Vectors
             /// </summary>
             [CLSCompliant(false)]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static uint ToGray32(uint r, uint g, uint b)
+            public static uint ToGray32(Vector3 vector)
             {
-                return (uint)(ToGrayF(r, g, b) + 0.5f);
+                return MathHelper.ClampTruncate(ToGrayF(vector) + 0.5f, uint.MinValue, uint.MaxValue);
             }
         }
     }

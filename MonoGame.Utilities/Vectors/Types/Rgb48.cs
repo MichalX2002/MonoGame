@@ -20,10 +20,10 @@ namespace MonoGame.Framework.Vectors
         public static Rgb48 Black => new Rgb48(ushort.MinValue, ushort.MinValue, ushort.MinValue);
         public static Rgb48 White => new Rgb48(ushort.MaxValue, ushort.MaxValue, ushort.MaxValue);
 
-        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
-            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
-            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Green),
-            new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Blue));
+        readonly VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+            new VectorComponent(VectorComponentType.UInt16, VectorComponentChannel.Red),
+            new VectorComponent(VectorComponentType.UInt16, VectorComponentChannel.Green),
+            new VectorComponent(VectorComponentType.UInt16, VectorComponentChannel.Blue));
 
         [CLSCompliant(false)]
         public ushort R;
@@ -55,69 +55,83 @@ namespace MonoGame.Framework.Vectors
 
         public void FromScaledVector(Vector3 scaledVector)
         {
+            scaledVector = VectorHelper.ScaledClamp(scaledVector);
             scaledVector *= ushort.MaxValue;
             scaledVector += new Vector3(0.5f);
-            scaledVector = VectorHelper.ZeroMax(scaledVector, ushort.MaxValue);
 
             R = (ushort)scaledVector.X;
             G = (ushort)scaledVector.Y;
             B = (ushort)scaledVector.Z;
         }
 
-        public readonly Vector3 ToScaledVector3()
-        {
-            return new Vector3(R, G, B) / ushort.MaxValue;
-        }
+        public void FromScaledVector(Vector4 scaledVector) => FromScaledVector(scaledVector.ToVector3());
 
-        public void FromScaledVector(Vector4 scaledVector)
-        {
-            FromScaledVector(scaledVector.ToVector3());
-        }
+        public readonly Vector3 ToScaledVector3() => new Vector3(R, G, B) / ushort.MaxValue;
+        public readonly Vector4 ToScaledVector4() => new Vector4(ToScaledVector3(), 1);
 
-        public readonly Vector4 ToScaledVector4()
-        {
-            return new Vector4(ToScaledVector3(), 1);
-        }
+        public readonly Vector3 ToVector3() => ToScaledVector3();
+        public readonly Vector4 ToVector4() => ToScaledVector4();
 
         #endregion
 
         #region IPixel.From
 
-        public void FromGray(Gray8 source)
-        {
-            R = G = B = ScalingHelper.ToUInt16(source.L);
-        }
+        public void FromAlpha(Alpha8 source) => R = G = B = byte.MaxValue;
+        public void FromAlpha(Alpha16 source) => R = G = B = byte.MaxValue;
+        public void FromAlpha(Alpha32 source) => R = G = B = byte.MaxValue;
+        public void FromAlpha(AlphaF source) => R = G = B = byte.MaxValue;
 
-        public void FromGray(Gray16 source)
-        {
-            R = G = B = source.L;
-        }
+        public void FromGray(Gray8 source) => R = G = B = ScalingHelper.ToUInt16(source.L);
+        public void FromGray(Gray16 source) => R = G = B = source.L;
+        public void FromGray(Gray32 source) => R = G = B = ScalingHelper.ToUInt16(source.L);
+        public void FromGray(GrayF source) => R = G = B = ScalingHelper.ToUInt16(source.L);
+        public void FromGray(GrayAlpha16 source) => R = G = B = ScalingHelper.ToUInt16(source.L);
 
-        public void FromGrayAlpha(GrayAlpha16 source)
-        {
-            R = G = B = ScalingHelper.ToUInt16(source.L);
-        }
-
-        public void FromRgb(Rgb24 source)
+        public void FromColor(Bgr24 source)
         {
             R = ScalingHelper.ToUInt16(source.R);
             G = ScalingHelper.ToUInt16(source.G);
             B = ScalingHelper.ToUInt16(source.B);
         }
 
-        public void FromRgba(Color source)
+        public void FromColor(Rgb24 source)
         {
             R = ScalingHelper.ToUInt16(source.R);
             G = ScalingHelper.ToUInt16(source.G);
             B = ScalingHelper.ToUInt16(source.B);
         }
 
-        public void FromRgb(Rgb48 source)
+        public void FromColor(Rgb48 source) => this = source;
+
+        public void FromColor(Abgr32 source)
         {
-            this = source;
+            R = ScalingHelper.ToUInt16(source.R);
+            G = ScalingHelper.ToUInt16(source.G);
+            B = ScalingHelper.ToUInt16(source.B);
         }
 
-        public void FromRgba(Rgba64 source)
+        public void FromColor(Argb32 source)
+        {
+            R = ScalingHelper.ToUInt16(source.R);
+            G = ScalingHelper.ToUInt16(source.G);
+            B = ScalingHelper.ToUInt16(source.B);
+        }
+
+        public void FromColor(Bgra32 source)
+        {
+            R = ScalingHelper.ToUInt16(source.R);
+            G = ScalingHelper.ToUInt16(source.G);
+            B = ScalingHelper.ToUInt16(source.B);
+        }
+
+        public void FromColor(Color source)
+        {
+            R = ScalingHelper.ToUInt16(source.R);
+            G = ScalingHelper.ToUInt16(source.G);
+            B = ScalingHelper.ToUInt16(source.B);
+        }
+
+        public void FromColor(Rgba64 source)
         {
             R = source.R;
             G = source.G;
@@ -128,6 +142,15 @@ namespace MonoGame.Framework.Vectors
 
         #region IPixel.To
 
+        public readonly Alpha8 ToAlpha8() => Alpha8.Opaque;
+        public readonly Alpha16 ToAlpha16() => Alpha16.Opaque;
+        public readonly AlphaF ToAlphaF() => AlphaF.Opaque;
+
+        public readonly Gray8 ToGray8() => PixelHelper.ToGray8(this);
+        public readonly Gray16 ToGray16() => PixelHelper.ToGray16(R, G, B);
+        public readonly GrayF ToGrayF() => PixelHelper.ToGrayF(this);
+        public readonly GrayAlpha16 ToGrayAlpha16() => PixelHelper.ToGrayAlpha16(this);
+
         public readonly Rgb24 ToRgb24()
         {
             return new Rgb24(
@@ -136,62 +159,42 @@ namespace MonoGame.Framework.Vectors
                 ScalingHelper.ToUInt8(B));
         }
 
-        public readonly Rgb48 ToRgb48()
-        {
-            return this;
-        }
+        public readonly Rgb48 ToRgb48() => this;
 
         public readonly Color ToRgba32()
         {
             return new Color(
                 ScalingHelper.ToUInt8(R),
                 ScalingHelper.ToUInt8(G),
-                ScalingHelper.ToUInt8(B),
-                byte.MaxValue);
+                ScalingHelper.ToUInt8(B));
         }
 
-        public readonly Rgba64 ToRgba64()
-        {
-            return new Rgba64(R, G, B);
-        }
+        public readonly Rgba64 ToRgba64() => new Rgba64(R, G, B);
 
         #endregion
 
         #region Equals
 
-        public readonly bool Equals(Rgb48 other)
-        {
-            return this == other;
-        }
+        public readonly bool Equals(Rgb48 other) => this == other;
 
-        public override readonly bool Equals(object obj)
-        {
-            return obj is Rgb48 other && Equals(other);
-        }
-
-        public static bool operator ==(in Rgb48 a, in Rgb48 b)
-        {
-            return a.R == b.R && a.G == b.G && a.B == b.B;
-        }
-
-        public static bool operator !=(in Rgb48 a, in Rgb48 b)
-        {
-            return !(a == b);
-        }
+        public static bool operator ==(Rgb48 a, Rgb48 b) => a.R == b.R && a.G == b.G && a.B == b.B;
+        public static bool operator !=(Rgb48 a, Rgb48 b) => !(a == b);
 
         #endregion
 
         #region Object overrides
 
-        /// <summary>
-        /// Gets a <see cref="string"/> representation of the packed vector.
-        /// </summary>
-        public override readonly string ToString() => nameof(Rgb48) + $"(R:{R}, G:{G}, B:{B})";
+        public override readonly bool Equals(object? obj) => obj is Rgb48 other && Equals(other);
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
         public override readonly int GetHashCode() => HashCode.Combine(R, G, B);
+
+        /// <summary>
+        /// Gets a <see cref="string"/> representation of the packed vector.
+        /// </summary>
+        public override readonly string ToString() => nameof(Rgb48) + $"(R:{R}, G:{G}, B:{B})";
 
         #endregion
     }

@@ -16,9 +16,9 @@ namespace MonoGame.Framework.Vectors
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Argb32 : IPackedPixel<Argb32, uint>
+    public struct Argb32 : IPixel<Argb32>, IPackedVector<uint>
     {
-        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+        readonly VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Alpha),
             new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Red),
             new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Green),
@@ -62,27 +62,27 @@ namespace MonoGame.Framework.Vectors
 
         public void FromScaledVector(Vector3 scaledVector)
         {
-            Rgb24 rgb = default; // TODO: Unsafe.SkipInit
-            rgb.FromScaledVector(scaledVector);
-            FromRgb(rgb);
+            scaledVector = ScaledVectorHelper.ToScaledUInt8(scaledVector);
+            A = byte.MaxValue;
+            R = (byte)scaledVector.X;
+            G = (byte)scaledVector.Y;
+            B = (byte)scaledVector.Z;
         }
 
         public void FromScaledVector(Vector4 scaledVector)
         {
-            Color rgba = default; // TODO: Unsafe.SkipInit
-            rgba.FromScaledVector(scaledVector);
-            FromRgba(rgba);
+            scaledVector = ScaledVectorHelper.ToScaledUInt8(scaledVector);
+            A = (byte)scaledVector.W;
+            R = (byte)scaledVector.X;
+            G = (byte)scaledVector.Y;
+            B = (byte)scaledVector.Z;
         }
 
-        public readonly Vector3 ToScaledVector3()
-        {
-            return new Vector3(R, G, B) / byte.MaxValue;
-        }
+        public readonly Vector3 ToScaledVector3() => new Vector3(R, G, B) / byte.MaxValue;
+        public readonly Vector4 ToScaledVector4() => new Vector4(R, G, B, A) / byte.MaxValue;
 
-        public readonly Vector4 ToScaledVector4()
-        {
-            return new Vector4(R, G, B, A) / byte.MaxValue;
-        }
+        public readonly Vector3 ToVector3() => ToScaledVector3();
+        public readonly Vector4 ToVector4() => ToScaledVector4();
 
         #endregion
 
@@ -95,6 +95,12 @@ namespace MonoGame.Framework.Vectors
         }
 
         public void FromAlpha(Alpha16 source)
+        {
+            A = ScalingHelper.ToUInt8(source.A);
+            R = G = B = byte.MinValue;
+        }
+
+        public void FromAlpha(Alpha32 source)
         {
             A = ScalingHelper.ToUInt8(source.A);
             R = G = B = byte.MinValue;
@@ -118,31 +124,49 @@ namespace MonoGame.Framework.Vectors
             R = G = B = ScalingHelper.ToUInt8(source.L);
         }
 
+        public void FromGray(Gray32 source)
+        {
+            A = byte.MaxValue;
+            R = G = B = ScalingHelper.ToUInt8(source.L);
+        }
+
         public void FromGray(GrayF source)
         {
             A = byte.MaxValue;
             R = G = B = ScalingHelper.ToUInt8(source.L);
         }
 
-        public void FromGrayAlpha(GrayAlpha16 source)
+        public void FromGray(GrayAlpha16 source)
         {
             A = source.A;
             R = G = B = source.L;
         }
 
-        public void FromRgb(Rgb24 source)
+        public void FromColor(Bgr24 source)
         {
             A = byte.MaxValue;
-            Rgb = source;
+            R = source.R;
+            G = source.G;
+            B = source.B;
         }
 
-        public void FromRgb(Rgb48 source)
+        public void FromColor(Rgb24 source)
+        {
+            A = byte.MaxValue;
+            R = source.R;
+            G = source.G;
+            B = source.B;
+        }
+
+        public void FromColor(Rgb48 source)
         {
             A = byte.MaxValue;
             Rgb = source.ToRgb24();
         }
 
-        public void FromRgba(Color source)
+        public void FromColor(Argb32 source) => this = source;
+
+        public void FromColor(Abgr32 source)
         {
             A = source.A;
             R = source.R;
@@ -150,7 +174,23 @@ namespace MonoGame.Framework.Vectors
             B = source.B;
         }
 
-        public void FromRgba(Rgba64 source)
+        public void FromColor(Bgra32 source)
+        {
+            A = source.A;
+            R = source.R;
+            G = source.G;
+            B = source.B;
+        }
+
+        public void FromColor(Color source)
+        {
+            A = source.A;
+            R = source.R;
+            G = source.G;
+            B = source.B;
+        }
+
+        public void FromColor(Rgba64 source)
         {
             A = ScalingHelper.ToUInt8(source.A);
             R = ScalingHelper.ToUInt8(source.R);
@@ -162,25 +202,16 @@ namespace MonoGame.Framework.Vectors
 
         #region IPixel.To
 
-        public readonly Alpha8 ToAlpha8()
-        {
-            return A;
-        }
+        public readonly Alpha8 ToAlpha8() => A;
+        public readonly Alpha16 ToAlpha16() => ScalingHelper.ToUInt16(A);
+        public readonly AlphaF ToAlphaF() => ScalingHelper.ToFloat32(A);
 
-        public readonly Alpha16 ToAlpha16()
-        {
-            return ScalingHelper.ToUInt16(A);
-        }
+        public readonly Gray8 ToGray8() => PixelHelper.ToGray8(R, G, B);
+        public readonly Gray16 ToGray16() => PixelHelper.ToGray16(this);
+        public readonly GrayF ToGrayF() => PixelHelper.ToGrayF(this);
+        public readonly GrayAlpha16 ToGrayAlpha16() => PixelHelper.ToGrayAlpha16(R, G, B, A);
 
-        public readonly AlphaF ToAlphaF()
-        {
-            return ScalingHelper.ToFloat32(A);
-        }
-
-        public readonly Rgb24 ToRgb24()
-        {
-            return new Rgb24(R, G, B);
-        }
+        public readonly Rgb24 ToRgb24() => new Rgb24(R, G, B);
 
         public readonly Rgb48 ToRgb48()
         {
@@ -190,10 +221,7 @@ namespace MonoGame.Framework.Vectors
                 ScalingHelper.ToUInt16(B));
         }
 
-        public readonly Color ToRgba32()
-        {
-            return new Color(R, G, B, A);
-        }
+        public readonly Color ToRgba32() => new Color(R, G, B, A);
 
         public readonly Rgba64 ToRgba64()
         {
@@ -208,27 +236,29 @@ namespace MonoGame.Framework.Vectors
 
         #region Equals
 
+        [CLSCompliant(false)]
+        public readonly bool Equals(uint other) => PackedValue == other;
+
         public readonly bool Equals(Argb32 other) => this == other;
 
-        public override readonly bool Equals(object obj) => obj is Argb32 other && Equals(other);
-
-        public static bool operator ==(in Argb32 a, in Argb32 b) => a.PackedValue == b.PackedValue;
-
-        public static bool operator !=(in Argb32 a, in Argb32 b) => a.PackedValue != b.PackedValue;
+        public static bool operator ==(Argb32 a, Argb32 b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(Argb32 a, Argb32 b) => a.PackedValue != b.PackedValue;
 
         #endregion
 
         #region Object overrides
 
-        /// <summary>
-        /// Gets a <see cref="string"/> representation of the packed vector.
-        /// </summary>
-        public override readonly string ToString() => nameof(Argb32) + $"(R:{R}, G:{G}, B:{B}, A:{A})";
+        public override readonly bool Equals(object? obj) => obj is Argb32 other && Equals(other);
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override readonly int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => HashCode.Combine(PackedValue);
+
+        /// <summary>
+        /// Gets a <see cref="string"/> representation of the packed vector.
+        /// </summary>
+        public override readonly string ToString() => nameof(Argb32) + $"(R:{R}, G:{G}, B:{B}, A:{A})";
 
         #endregion
     }

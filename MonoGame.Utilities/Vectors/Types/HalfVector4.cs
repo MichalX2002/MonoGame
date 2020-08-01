@@ -14,15 +14,16 @@ namespace MonoGame.Framework.Vectors
     /// <para>Ranges from [-1, -1, -1, 0] to [1, 1, 1, 1] in vector form.</para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct HalfVector4 : IPackedPixel<HalfVector4, ulong>
+    public struct HalfVector4 : IPixel<HalfVector4>, IPackedVector<ulong>
     {
-        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+        public static HalfVector4 Zero => default;
+        public static HalfVector4 One { get; } = new HalfVector4(HalfSingle.One);
+
+        readonly VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Float16, VectorComponentChannel.Red),
             new VectorComponent(VectorComponentType.Float16, VectorComponentChannel.Green),
             new VectorComponent(VectorComponentType.Float16, VectorComponentChannel.Blue),
             new VectorComponent(VectorComponentType.Float16, VectorComponentChannel.Alpha));
-
-        public static HalfVector4 One => new HalfVector4(HalfSingle.One);
 
         public HalfSingle X;
         public HalfSingle Y;
@@ -75,9 +76,9 @@ namespace MonoGame.Framework.Vectors
             scaledVector *= 2;
             scaledVector -= Vector3.One;
 
-            X = new HalfSingle(scaledVector.X);
-            Y = new HalfSingle(scaledVector.Y);
-            Z = new HalfSingle(scaledVector.Z);
+            X = (HalfSingle)scaledVector.X;
+            Y = (HalfSingle)scaledVector.Y;
+            Z = (HalfSingle)scaledVector.Z;
             W = HalfSingle.One;
         }
 
@@ -86,10 +87,26 @@ namespace MonoGame.Framework.Vectors
             scaledVector *= 2;
             scaledVector -= Vector4.One;
 
-            X = new HalfSingle(scaledVector.X);
-            Y = new HalfSingle(scaledVector.Y);
-            Z = new HalfSingle(scaledVector.Z);
-            W = new HalfSingle(scaledVector.W);
+            X = (HalfSingle)scaledVector.X;
+            Y = (HalfSingle)scaledVector.Y;
+            Z = (HalfSingle)scaledVector.Z;
+            W = (HalfSingle)scaledVector.W;
+        }
+
+        public void FromVector(Vector3 vector)
+        {
+            X = (HalfSingle)vector.X;
+            Y = (HalfSingle)vector.Y;
+            Z = (HalfSingle)vector.Z;
+            W = HalfSingle.One;
+        }
+
+        public void FromVector(Vector4 vector)
+        {
+            X = (HalfSingle)vector.X;
+            Y = (HalfSingle)vector.Y;
+            Z = (HalfSingle)vector.Z;
+            W = (HalfSingle)vector.W;
         }
 
         public readonly Vector3 ToScaledVector3()
@@ -108,94 +125,93 @@ namespace MonoGame.Framework.Vectors
             return vector;
         }
 
-        public void FromVector(Vector3 vector)
+        public readonly Vector3 ToVector3() => new Vector3(X, Y, Z);
+        public readonly Vector4 ToVector4() => new Vector4(ToVector3(), W);
+
+        #endregion
+
+        #region IPixel.From
+
+        public void FromAlpha(Alpha8 source)
         {
-            X = new HalfSingle(vector.X);
-            Y = new HalfSingle(vector.Y);
-            Z = new HalfSingle(vector.Z);
-            W = HalfSingle.One;
+            X = Y = Z = HalfSingle.One;
+            W = HalfSingle.FromScaled(ScalingHelper.ToFloat32(source.A));
         }
 
-        public void FromVector(Vector4 vector)
+        public void FromAlpha(Alpha16 source)
         {
-            X = new HalfSingle(vector.X);
-            Y = new HalfSingle(vector.Y);
-            Z = new HalfSingle(vector.Z);
-            W = new HalfSingle(vector.W);
+            X = Y = Z = HalfSingle.One;
+            W = HalfSingle.FromScaled(ScalingHelper.ToFloat32(source.A));
         }
 
-        public readonly Vector3 ToVector3()
+        public void FromAlpha(Alpha32 source)
         {
-            return new Vector3(X, Y, Z);
+            X = Y = Z = HalfSingle.One;
+            W = HalfSingle.FromScaled(ScalingHelper.ToFloat32(source.A));
         }
 
-        public readonly Vector4 ToVector4()
+        public void FromAlpha(AlphaF source)
         {
-            return new Vector4(ToVector3(), W);
+            X = Y = Z = HalfSingle.One;
+            W = HalfSingle.FromScaled(source.A);
         }
 
         #endregion
 
-        #region IPixel
+        #region IPixel.To
 
-        public void FromAlpha(Alpha8 source) => this = One;
+        public readonly Alpha8 ToAlpha8() => ScalingHelper.ToUInt8(W.ToScaledSingle());
+        public readonly Alpha16 ToAlpha16() => ScalingHelper.ToUInt16(W.ToScaledSingle());
+        public readonly AlphaF ToAlphaF() => W.ToScaledSingle();
 
-        public void FromAlpha(Alpha16 source) => this = One;
+        public readonly Gray8 ToGray8() => PixelHelper.ToGray8(this);
+        public readonly Gray16 ToGray16() => PixelHelper.ToGray16(this);
+        public readonly GrayF ToGrayF() => PixelHelper.ToGrayF(this);
+        public readonly GrayAlpha16 ToGrayAlpha16() => PixelHelper.ToGrayAlpha16(this);
 
-        public void FromAlpha(AlphaF source) => this = One;
+        public readonly Rgb24 ToRgb24() => ScaledVectorHelper.ToRgb24(this);
+        public readonly Rgb48 ToRgb48() => ScaledVectorHelper.ToRgb48(this);
 
-        public Alpha8 ToAlpha8() => Alpha8.Opaque;
-
-        public Alpha16 ToAlpha16() => Alpha16.Opaque;
-
-        public AlphaF ToAlphaF() => AlphaF.Opaque;
+        public readonly Color ToRgba32() => ScaledVectorHelper.ToRgba32(this);
+        public readonly Rgba64 ToRgba64() => ScaledVectorHelper.ToRgba64(this);
 
         #endregion
 
         #region Equals
 
-        public readonly bool Equals(HalfVector4 other)
-        {
-            return this == other;
-        }
+        [CLSCompliant(false)]
+        public readonly bool Equals(ulong other) => PackedValue == other;
 
-        /// <summary>
-        /// Returns a value that indicates whether the current instance is equal to a specified object.
-        /// </summary>
-        public override readonly bool Equals(object obj)
-        {
-            return obj is HalfVector4 other && Equals(other);
-        }
+        public readonly bool Equals(HalfVector4 other) => this == other;
 
         /// <summary>
         /// Compares the current instance to another to determine whether they are the same.
         /// </summary>
-        public static bool operator ==(in HalfVector4 a, in HalfVector4 b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
+        public static bool operator ==(HalfVector4 a, HalfVector4 b) => a.PackedValue == b.PackedValue;
 
         /// <summary>
         /// Compares the current instance to another to determine whether they are different.
         /// </summary>
-        public static bool operator !=(in HalfVector4 a, in HalfVector4 b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
+        public static bool operator !=(HalfVector4 a, HalfVector4 b) => a.PackedValue != b.PackedValue;
 
         #endregion
 
         #region Object overrides
 
         /// <summary>
-        /// Returns a <see cref="string"/> representation of the packed vector.
+        /// Returns a value that indicates whether the current instance is equal to a specified object.
         /// </summary>
-        public override readonly string ToString() => nameof(HalfVector4) + $"({ToVector4()})";
+        public override readonly bool Equals(object? obj) => obj is HalfVector4 other && Equals(other);
 
         /// <summary>
         /// Gets the hash code for the current instance.
         /// </summary>
-        public override readonly int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => HashCode.Combine(PackedValue);
+
+        /// <summary>
+        /// Returns a <see cref="string"/> representation of the packed vector.
+        /// </summary>
+        public override readonly string ToString() => nameof(HalfVector4) + $"({ToVector4()})";
 
         #endregion
     }

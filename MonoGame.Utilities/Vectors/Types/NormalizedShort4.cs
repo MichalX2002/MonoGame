@@ -16,11 +16,12 @@ namespace MonoGame.Framework.Vectors
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct NormalizedShort4 : IPackedPixel<NormalizedShort4, ulong>
+    public struct NormalizedShort4 : IPixel<NormalizedShort4>, IPackedVector<ulong>
     {
-        internal static Vector4 Offset => new Vector4(-short.MinValue);
+        internal static Vector3 Offset3 => new Vector3(-short.MinValue);
+        internal static Vector4 Offset4 => new Vector4(-short.MinValue);
 
-        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+        readonly VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
             new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Green),
             new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Blue),
@@ -44,6 +45,7 @@ namespace MonoGame.Framework.Vectors
         [CLSCompliant(false)]
         public NormalizedShort4(ulong packed) : this()
         {
+            // TODO: Unsafe.SkipInit(out this);
             PackedValue = packed;
         }
 
@@ -58,40 +60,11 @@ namespace MonoGame.Framework.Vectors
             set => Unsafe.As<NormalizedShort4, ulong>(ref this) = value;
         }
 
-        public readonly Vector3 ToScaledVector3()
-        {
-            var scaled = new Vector3(X, Y, Z);
-            scaled += Offset.ToVector3();
-            scaled /= ushort.MaxValue;
-
-            return scaled;
-        }
-
-        public readonly Vector4 ToScaledVector4()
-        {
-            var scaled = new Vector4(X, Y, Z, W);
-            scaled += Offset;
-            scaled /= ushort.MaxValue;
-
-            return scaled;
-        }
-
-        public void FromScaledVector(Vector3 scaledVector)
-        {
-            scaledVector *= ushort.MaxValue;
-            scaledVector -= Offset.ToVector3();
-            scaledVector = VectorHelper.Clamp(scaledVector, short.MinValue, short.MaxValue);
-
-            X = (short)scaledVector.X;
-            Y = (short)scaledVector.Y;
-            Z = (short)scaledVector.Z;
-        }
-
         public void FromScaledVector(Vector4 scaledVector)
         {
+            scaledVector = VectorHelper.ScaledClamp(scaledVector);
             scaledVector *= ushort.MaxValue;
-            scaledVector -= Offset;
-            scaledVector = VectorHelper.Clamp(scaledVector, short.MinValue, short.MaxValue);
+            scaledVector -= Offset4;
 
             X = (short)scaledVector.X;
             Y = (short)scaledVector.Y;
@@ -99,14 +72,27 @@ namespace MonoGame.Framework.Vectors
             W = (short)scaledVector.W;
         }
 
-        public readonly Vector4 ToVector4()
+        public void FromScaledVector(Vector3 scaledVector)
         {
-            var vector = new Vector4(X, Y, Z, W);
-            vector += Offset;
-            vector *= 2f / ushort.MaxValue;
-            vector -= Vector4.One;
+            scaledVector = VectorHelper.ScaledClamp(scaledVector);
+            scaledVector *= ushort.MaxValue;
+            scaledVector -= Offset3;
 
-            return vector;
+            X = (short)scaledVector.X;
+            Y = (short)scaledVector.Y;
+            Z = (short)scaledVector.Z;
+        }
+
+        public void FromVector(Vector3 vector)
+        {
+            vector *= ushort.MaxValue / 2f;
+            vector -= new Vector3(0.5f);
+            vector = VectorHelper.Clamp(vector, short.MinValue, short.MaxValue);
+
+            X = (short)vector.X;
+            Y = (short)vector.Y;
+            Z = (short)vector.Z;
+            W = short.MaxValue;
         }
 
         public void FromVector(Vector4 vector)
@@ -121,37 +107,112 @@ namespace MonoGame.Framework.Vectors
             W = (short)vector.W;
         }
 
+        public readonly Vector3 ToScaledVector3()
+        {
+            var scaled = new Vector3(X, Y, Z);
+            scaled += Offset3;
+            scaled /= ushort.MaxValue;
+
+            return scaled;
+        }
+
+        public readonly Vector4 ToScaledVector4()
+        {
+            var scaled = new Vector4(X, Y, Z, W);
+            scaled += Offset4;
+            scaled /= ushort.MaxValue;
+
+            return scaled;
+        }
+
+        public readonly Vector3 ToVector3()
+        {
+            var vector = new Vector3(X, Y, Z);
+            vector += Offset3;
+            vector *= 2f / ushort.MaxValue;
+            vector -= Vector3.One;
+
+            return vector;
+        }
+
+        public readonly Vector4 ToVector4()
+        {
+            var vector = new Vector4(X, Y, Z, W);
+            vector += Offset4;
+            vector *= 2f / ushort.MaxValue;
+            vector -= Vector4.One;
+
+            return vector;
+        }
+
+        #endregion
+
+        #region IPixel.From
+
+        public void FromAlpha(Alpha8 source)
+        {
+            X = Y = Z = short.MaxValue;
+            W = ScalingHelper.ToInt16(source.A);
+        }
+
+        public void FromAlpha(Alpha16 source)
+        {
+            X = Y = Z = short.MaxValue;
+            W = ScalingHelper.ToInt16(source.A);
+        }
+
+        public void FromAlpha(Alpha32 source)
+        {
+            X = Y = Z = short.MaxValue;
+            W = ScalingHelper.ToInt16(source.A);
+        }
+
+        public void FromAlpha(AlphaF source)
+        {
+            X = Y = Z = short.MaxValue;
+            W = ScalingHelper.ToInt16(source.A);
+        }
+
+        #endregion
+
+        #region IPixel.To
+
+        public readonly Alpha8 ToAlpha8() => ScalingHelper.ToUInt8(W);
+        public readonly Alpha16 ToAlpha16() => ScalingHelper.ToUInt16(W);
+        public readonly AlphaF ToAlphaF() => ScalingHelper.ToFloat32(W);
+
+        public readonly Gray8 ToGray8() => PixelHelper.ToGray8(this);
+        public readonly Gray16 ToGray16() => PixelHelper.ToGray16(this);
+        public readonly GrayF ToGrayF() => PixelHelper.ToGrayF(this);
+        public readonly GrayAlpha16 ToGrayAlpha16() => PixelHelper.ToGrayAlpha16(this);
+
+        public readonly Rgb24 ToRgb24() => ScaledVectorHelper.ToRgb24(this);
+        public readonly Rgb48 ToRgb48() => ScaledVectorHelper.ToRgb48(this);
+
+        public readonly Color ToRgba32() => ScaledVectorHelper.ToRgba32(this);
+        public readonly Rgba64 ToRgba64() => ScaledVectorHelper.ToRgba64(this);
+
         #endregion
 
         #region Equals
 
-        public readonly bool Equals(NormalizedShort4 other)
-        {
-            return this == other;
-        }
+        [CLSCompliant(false)]
+        public readonly bool Equals(ulong other) => PackedValue == other;
 
-        public override readonly bool Equals(object? obj)
-        {
-            return obj is NormalizedShort4 other && Equals(other);
-        }
+        public readonly bool Equals(NormalizedShort4 other) => this == other;
 
-        public static bool operator ==(in NormalizedShort4 a, in NormalizedShort4 b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
-
-        public static bool operator !=(in NormalizedShort4 a, in NormalizedShort4 b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
+        public static bool operator ==(NormalizedShort4 a, NormalizedShort4 b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(NormalizedShort4 a, NormalizedShort4 b) => a.PackedValue != b.PackedValue;
 
         #endregion
 
         #region Object overrides
 
-        public override readonly string ToString() => nameof(NormalizedShort4) + $"({X}, {Y}, {Z}, {W})";
+        public override readonly bool Equals(object? obj) => obj is NormalizedShort4 other && Equals(other);
 
-        public override readonly int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => HashCode.Combine(PackedValue);
+
+        public override readonly string ToString() => nameof(NormalizedShort4) + $"({X}, {Y}, {Z}, {W})";
 
         #endregion
     }

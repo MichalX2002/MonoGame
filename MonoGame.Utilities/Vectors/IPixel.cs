@@ -1,4 +1,7 @@
 
+using System;
+using System.Numerics;
+
 namespace MonoGame.Framework.Vectors
 {
     /// <summary>
@@ -14,6 +17,9 @@ namespace MonoGame.Framework.Vectors
         /// <summary>Sets the pixel value from <see cref="Alpha16"/>.</summary>
         void FromAlpha(Alpha16 source);
 
+        /// <summary>Sets the pixel value from <see cref="Alpha32"/>.</summary>
+        void FromAlpha(Alpha32 source);
+
         /// <summary>Sets the pixel value from <see cref="AlphaF"/>.</summary>
         void FromAlpha(AlphaF source);
 
@@ -22,54 +28,63 @@ namespace MonoGame.Framework.Vectors
         #region From Gray
 
         /// <summary>Sets the pixel value from <see cref="Gray8"/>.</summary>
-        void FromGray(Gray8 source) => FromRgb(source.ToRgb24());
+        void FromGray(Gray8 source) => FromColor(source.ToRgb24());
+
+        /// <summary>Sets the pixel value from <see cref="GrayAlpha16"/>.</summary>
+        void FromGray(GrayAlpha16 source) => FromColor(source.ToRgba32());
 
         /// <summary>Sets the pixel value from <see cref="Gray16"/>.</summary>
-        void FromGray(Gray16 source) => FromRgb(source.ToRgb48());
+        void FromGray(Gray16 source) => FromColor(source.ToRgb48());
+
+        /// <summary>Sets the pixel value from <see cref="Gray32"/>.</summary>
+        void FromGray(Gray32 source) => FromScaledVector(source.ToScaledVector3());
 
         /// <summary>Sets the pixel value from <see cref="GrayF"/>.</summary>
         void FromGray(GrayF source) => FromScaledVector(source.ToScaledVector3());
-
-        /// <summary>Sets the pixel value from <see cref="GrayAlpha16"/>.</summary>
-        void FromGrayAlpha(GrayAlpha16 source) => FromRgba(source.ToRgba32());
 
         #endregion
 
         #region From Color
 
         /// <summary>Sets the pixel value from <see cref="Rgb24"/>.</summary>
-        void FromRgb(Rgb24 source) => FromScaledVector(source.ToScaledVector3());
+        void FromColor(Rgb24 source) => FromScaledVector(source.ToScaledVector3());
 
         /// <summary>Sets the pixel value from <see cref="Rgb48"/>.</summary>
-        void FromRgb(Rgb48 source) => FromScaledVector(source.ToScaledVector3());
+        void FromColor(Rgb48 source) => FromScaledVector(source.ToScaledVector3());
 
         /// <summary>Sets the pixel value from <see cref="Color"/>.</summary>
-        void FromRgba(Color source) => FromScaledVector(source.ToScaledVector4());
+        void FromColor(Color source) => FromScaledVector(source.ToScaledVector4());
+
+        /// <summary>Sets the pixel value from <see cref="Rgba1010102"/>.</summary>
+        void FromColor(Rgba1010102 source) => FromScaledVector(source.ToScaledVector4());
 
         /// <summary>Sets the pixel value from an <see cref="Rgba64"/>.</summary>
-        void FromRgba(Rgba64 source) => FromScaledVector(source.ToScaledVector4());
+        void FromColor(Rgba64 source) => FromScaledVector(source.ToScaledVector4());
 
         #endregion
 
         #region From Arbitrary Color
 
-        /// <summary>Sets the pixel value from an <see cref="Abgr32"/>.</summary>
-        void FromAbgr(Abgr32 source) => FromRgba(source.ToRgba32());
-
-        /// <summary>Sets the pixel value from an <see cref="Argb32"/>.</summary>
-        void FromArgb(Argb32 source) => FromRgba(source.ToRgba32());
-
         /// <summary>Sets the pixel value from an <see cref="Bgr565"/>.</summary>
-        void FromBgr(Bgr565 source) => FromBgr(source.ToBgr24());
+        void FromColor(Bgr565 source) => FromColor(source.ToRgb24());
 
         /// <summary>Sets the pixel value from an <see cref="Bgr24"/>.</summary>
-        void FromBgr(Bgr24 source) => FromRgb(source.ToRgb24());
+        void FromColor(Bgr24 source) => FromColor(source.ToRgb24());
+
+        /// <summary>Sets the pixel value from an <see cref="Bgra4444"/>.</summary>
+        void FromColor(Bgra4444 source) => FromColor(source.ToRgba32());
 
         /// <summary>Sets the pixel value from an <see cref="Bgra5551"/>.</summary>
-        void FromBgra(Bgra5551 source) => FromRgba(source.ToRgba32());
+        void FromColor(Bgra5551 source) => FromColor(source.ToRgba32());
 
         /// <summary>Sets the pixel value from an <see cref="Bgra32"/>.</summary>
-        void FromBgra(Bgra32 source) => FromRgba(source.ToRgba32());
+        void FromColor(Bgra32 source) => FromColor(source.ToRgba32());
+
+        /// <summary>Sets the pixel value from an <see cref="Abgr32"/>.</summary>
+        void FromColor(Abgr32 source) => FromColor(source.ToRgba32());
+
+        /// <summary>Sets the pixel value from an <see cref="Argb32"/>.</summary>
+        void FromColor(Argb32 source) => FromColor(source.ToRgba32());
 
         #endregion
 
@@ -121,47 +136,39 @@ namespace MonoGame.Framework.Vectors
         /// <summary>
         /// Gets the pixel as a representation of red, green, and blue 8-bit integer values.
         /// </summary>
+        /// <remarks>
+        /// <see cref="ScaledVectorHelper.ToRgb24"/> is the default scaled vector implementation.
+        /// </remarks>
         Rgb24 ToRgb24();
-        //{
-        //    Rgb24 rgb = default; // TODO: Unsafe.SkipInit
-        //    rgb.FromScaledVector(ToScaledVector3());
-        //    return rgb;
-        //}
 
         /// <summary>
         /// Gets the pixel as a representation of red, green, and blue 16-bit integer values.
         /// </summary>
+        /// <remarks>
+        /// <see cref="ScaledVectorHelper.ToRgb48"/> is the default scaled vector implementation.
+        /// </remarks>
         Rgb48 ToRgb48();
-        //{
-        //    Rgb48 rgb = default; // TODO: Unsafe.SkipInit
-        //    rgb.FromScaledVector(ToScaledVector3());
-        //    return rgb;
-        //}
 
         /// <summary>
         /// Gets the pixel as a representation of red, green, blue, and alpha 8-bit integer values.
         /// </summary>
+        /// <remarks>
+        /// <see cref="ScaledVectorHelper.ToRgba32"/> is the default scaled vector implementation.
+        /// </remarks>
         Color ToRgba32();
-        //{
-        //    Color rgba = default; // TODO: Unsafe.SkipInit
-        //    rgba.FromScaledVector(ToScaledVector4());
-        //    return rgba;
-        //}
 
         /// <summary>
         /// Gets the pixel as a representation of red, green, blue, and alpha 16-bit integer values.
         /// </summary>
+        /// <remarks>
+        /// <see cref="ScaledVectorHelper.ToRgba64"/> is the default scaled vector implementation.
+        /// </remarks>
         Rgba64 ToRgba64();
-        //{
-        //    Rgba64 rgba = default; // TODO: Unsafe.SkipInit
-        //    rgba.FromScaledVector(ToScaledVector4());
-        //    return rgba;
-        //}
 
         #endregion
     }
 
-    public interface IPixel<TSelf> : IPixel, IVector<TSelf>
+    public interface IPixel<TSelf> : IPixel, IEquatable<TSelf>
         where TSelf : IPixel<TSelf>
     {
     }

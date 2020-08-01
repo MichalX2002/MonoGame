@@ -16,11 +16,12 @@ namespace MonoGame.Framework.Vectors
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Short4 : IPackedPixel<Short4, ulong>
+    public struct Short4 : IPixel<Short4>, IPackedVector<ulong>
     {
-        private static Vector4 Offset => new Vector4(32768);
+        private static Vector3 Offset3 => new Vector3(32768);
+        private static Vector4 Offset4 => new Vector4(32768);
 
-        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+        readonly VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
             new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Green),
             new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Blue),
@@ -64,7 +65,7 @@ namespace MonoGame.Framework.Vectors
         public void FromScaledVector(Vector3 scaledVector)
         {
             scaledVector *= ushort.MaxValue;
-            scaledVector -= Offset.ToVector3();
+            scaledVector -= Offset3;
 
             FromVector(scaledVector);
         }
@@ -72,27 +73,9 @@ namespace MonoGame.Framework.Vectors
         public void FromScaledVector(Vector4 scaledVector)
         {
             scaledVector *= ushort.MaxValue;
-            scaledVector -= Offset;
+            scaledVector -= Offset4;
 
             FromVector(scaledVector);
-        }
-
-        public readonly Vector3 ToScaledVector3()
-        {
-            var scaledVector = ToVector3();
-            scaledVector += Offset.ToVector3();
-            scaledVector /= ushort.MaxValue;
-
-            return scaledVector;
-        }
-
-        public readonly Vector4 ToScaledVector4()
-        {
-            var scaledVector = ToVector4();
-            scaledVector += Offset;
-            scaledVector /= ushort.MaxValue;
-
-            return scaledVector;
         }
 
         public void FromVector(Vector3 vector)
@@ -116,15 +99,26 @@ namespace MonoGame.Framework.Vectors
             W = (short)vector.W;
         }
 
-        public readonly Vector3 ToVector3()
+        public readonly Vector3 ToScaledVector3()
         {
-            return new Vector3(X, Y, Z);
+            var scaledVector = ToVector3();
+            scaledVector += Offset3;
+            scaledVector /= ushort.MaxValue;
+
+            return scaledVector;
         }
 
-        public readonly Vector4 ToVector4()
+        public readonly Vector4 ToScaledVector4()
         {
-            return new Vector4(ToVector3(), W);
+            var scaledVector = ToVector4();
+            scaledVector += Offset4;
+            scaledVector /= ushort.MaxValue;
+
+            return scaledVector;
         }
+
+        public readonly Vector3 ToVector3() => new Vector3(X, Y, Z);
+        public readonly Vector4 ToVector4() => new Vector4(X, Y, Z, W);
 
         #endregion
 
@@ -133,67 +127,67 @@ namespace MonoGame.Framework.Vectors
         public void FromAlpha(Alpha8 source)
         {
             X = Y = Z = short.MaxValue;
-            W = ScalingHelper.ToInt16(source);
+            W = ScalingHelper.ToInt16(source.A);
         }
 
         public void FromAlpha(Alpha16 source)
         {
             X = Y = Z = short.MaxValue;
-            W = ScalingHelper.ToInt16(source);
+            W = ScalingHelper.ToInt16(source.A);
+        }
+
+        public void FromAlpha(Alpha32 source)
+        {
+            X = Y = Z = short.MaxValue;
+            W = ScalingHelper.ToInt16(source.A);
         }
 
         public void FromAlpha(AlphaF source)
         {
             X = Y = Z = short.MaxValue;
-            W = ScalingHelper.ToInt16(source);
+            W = ScalingHelper.ToInt16(source.A);
         }
 
-        public Alpha8 ToAlpha8()
-        {
-            return ScalingHelper.ToUInt8(W);
-        }
+        #endregion
 
-        public Alpha16 ToAlpha16()
-        {
-            return ScalingHelper.ToUInt16(W);
-        }
+        #region IPixel.To
 
-        public AlphaF ToAlphaF()
-        {
-            return ScalingHelper.ToFloat32(W);
-        }
+        public readonly Alpha8 ToAlpha8() => ScalingHelper.ToUInt8(W);
+        public readonly Alpha16 ToAlpha16() => ScalingHelper.ToUInt16(W);
+        public readonly AlphaF ToAlphaF() => ScalingHelper.ToFloat32(W);
+
+        public readonly Gray8 ToGray8() => PixelHelper.ToGray8(this);
+        public readonly Gray16 ToGray16() => PixelHelper.ToGray16(this);
+        public readonly GrayF ToGrayF() => PixelHelper.ToGrayF(this);
+        public readonly GrayAlpha16 ToGrayAlpha16() => PixelHelper.ToGrayAlpha16(this);
+
+        public readonly Rgb24 ToRgb24() => ScaledVectorHelper.ToRgb24(this);
+        public readonly Rgb48 ToRgb48() => ScaledVectorHelper.ToRgb48(this);
+
+        public readonly Color ToRgba32() => ScaledVectorHelper.ToRgba32(this);
+        public readonly Rgba64 ToRgba64() => ScaledVectorHelper.ToRgba64(this);
 
         #endregion
 
         #region Equals
 
-        public readonly bool Equals(Short4 other)
-        {
-            return this == other;
-        }
+        [CLSCompliant(false)]
+        public readonly bool Equals(ulong other) => PackedValue == other;
 
-        public override readonly bool Equals(object? obj)
-        {
-            return obj is Short4 other && Equals(other);
-        }
+        public readonly bool Equals(Short4 other) => this == other;
 
-        public static bool operator ==(in Short4 a, in Short4 b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
-
-        public static bool operator !=(in Short4 a, in Short4 b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
+        public static bool operator ==(Short4 a, Short4 b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(Short4 a, Short4 b) => a.PackedValue != b.PackedValue;
 
         #endregion
 
         #region Object overrides
 
-        public override readonly string ToString() => nameof(Short4) + $"({X}, {Y}, {Z}, {W})";
+        public override readonly bool Equals(object? obj) => obj is Short4 other && Equals(other);
 
-        public override readonly int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => HashCode.Combine(PackedValue);
+
+        public override readonly string ToString() => nameof(Short4) + $"({X}, {Y}, {Z}, {W})";
 
         #endregion
     }

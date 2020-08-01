@@ -5,39 +5,41 @@
 using System;
 using System.Globalization;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vectors
 {
+    // TODO: make use of Net5 "Half" type 
+
     /// <summary>
     /// Packed vector type containing a 16-bit floating-point X component.
     /// <para>Ranges from [-1, 0, 0, 1] to [1, 0, 0, 1] in vector form.</para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct HalfSingle : IPackedPixel<HalfSingle, ushort>, IPixel
+    public struct HalfSingle : IPixel<HalfSingle>, IPackedVector<ushort>
     {
-        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+        readonly VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Float16, VectorComponentChannel.Red));
 
         public static HalfSingle Zero => default;
         public static HalfSingle One { get; } = new HalfSingle(1);
 
-        [CLSCompliant(false)]
-        public ushort X;
+        private ushort _packed;
 
         #region Constructors
 
         /// <summary>
-        /// Constructs the packed vector with raw values.
+        /// Constructs the vector with a packed value.
         /// </summary>
         [CLSCompliant(false)]
-        public HalfSingle(ushort x)
+        public HalfSingle(ushort packed) : this()
         {
-            X = x;
+            _packed = packed;
         }
 
         /// <summary>
-        /// Constructs the packed vector with a vector form value.
+        /// Constructs the vector with a vector form value.
         /// </summary>
         public HalfSingle(float single) : this(HalfTypeHelper.Pack(single))
         {
@@ -45,26 +47,26 @@ namespace MonoGame.Framework.Vectors
 
         #endregion
 
+        public static HalfSingle FromScaled(float scaledSingle) => new HalfSingle(scaledSingle * 2f - 1f);
+
         /// <summary>
-        /// Gets the packed vector as a <see cref="float"/>.
+        /// Gets the vector as a <see cref="float"/>.
         /// </summary>
-        public readonly float ToSingle()
-        {
-            return HalfTypeHelper.Unpack(PackedValue);
-        }
+        public readonly float ToSingle() => HalfTypeHelper.Unpack(PackedValue);
 
         /// <summary>
         /// Gets the packed vector as a <see cref="float"/>.
         /// </summary>
-        public readonly float ToScaledSingle()
-        {
-            return (ToSingle() + 1) / 2f;
-        }
+        public readonly float ToScaledSingle() => (ToSingle() + 1) / 2f;
 
         #region IPackedVector
 
         [CLSCompliant(false)]
-        public ushort PackedValue { readonly get => X; set => X = value; }
+        public ushort PackedValue
+        {
+            readonly get => UnsafeR.As<HalfSingle, ushort>(this);
+            set => Unsafe.As<HalfSingle, ushort>(ref this) = value;
+        }
 
         public void FromScaledVector(Vector3 scaledVector)
         {
@@ -75,96 +77,66 @@ namespace MonoGame.Framework.Vectors
             PackedValue = HalfTypeHelper.Pack(scaled);
         }
 
-        public Vector3 ToScaledVector3()
-        {
-            return new Vector3(ToScaledSingle(), 0, 0);
-        }
+        public void FromScaledVector(Vector4 scaledVector) => FromScaledVector(scaledVector.ToVector3());
 
-        public void FromScaledVector(Vector4 scaledVector)
-        {
-            float scaled = scaledVector.X;
-            scaled *= 2;
-            scaled -= 1;
+        public readonly Vector3 ToScaledVector3() => new Vector3(ToScaledSingle(), 0, 0);
+        public readonly Vector4 ToScaledVector4() => new Vector4(ToScaledVector3(), 1);
 
-            PackedValue = HalfTypeHelper.Pack(scaled);
-        }
-
-        public readonly Vector4 ToScaledVector4()
-        {
-            return new Vector4(ToScaledSingle(), 0, 0, 1);
-        }
+        public readonly Vector3 ToVector3() => ToScaledVector3();
+        public readonly Vector4 ToVector4() => ToScaledVector4();
 
         #endregion
 
-        #region IPixel
+        #region IPixel.From
 
-        public readonly Color ToColor()
-        {
-            return new Color(ToScaledSingle(), 0, 0, 1);
-        }
+        public void FromAlpha(Alpha8 source) => this = One;
+        public void FromAlpha(Alpha16 source) => this = One;
+        public void FromAlpha(Alpha32 source) => this = One;
+        public void FromAlpha(AlphaF source) => this = One;
 
-        public void FromAlpha(Alpha8 source)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void FromAlpha(Alpha16 source)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void FromAlpha(AlphaF source)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Alpha8 ToAlpha8()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Alpha16 ToAlpha16()
-        {
-            throw new NotImplementedException();
-        }
-
-        public AlphaF ToAlphaF()
-        {
-            throw new NotImplementedException();
-        }
+        // TODO: implement more IPixel.From methods
 
         #endregion
 
-        public static implicit operator float(HalfSingle value)
-        {
-            return value.ToSingle();
-        }
+        #region IPixel.To
+
+        public Alpha8 ToAlpha8() => Alpha8.Opaque;
+        public Alpha16 ToAlpha16() => Alpha16.Opaque;
+        public AlphaF ToAlphaF() => AlphaF.Opaque;
+
+        public Gray8 ToGray8() => ScalingHelper.ToUInt8(ToScaledSingle() * PixelHelper.GrayFactor.X);
+        public Gray16 ToGray16() => ScalingHelper.ToUInt16(ToScaledSingle() * PixelHelper.GrayFactor.X);
+        public GrayF ToGrayF() => ToScaledSingle() * PixelHelper.GrayFactor.X;
+        public GrayAlpha16 ToGrayAlpha16() => new GrayAlpha16(ToGray8(), byte.MaxValue);
+
+        public readonly Rgb24 ToRgb24() => new Rgb24(ScalingHelper.ToUInt8(ToScaledSingle()), 0, 0);
+        public readonly Rgb48 ToRgb48() => new Rgb48(ScalingHelper.ToUInt16(ToScaledSingle()), 0, 0);
+
+        public readonly Color ToRgba32() => Color.FromBytes(ScalingHelper.ToUInt8(ToScaledSingle()), 0, 0);
+        public readonly Rgba64 ToRgba64() => new Rgba64(ScalingHelper.ToUInt16(ToScaledSingle()), 0, 0);
+
+        #endregion
 
         #region Equals
 
-        public readonly bool Equals(HalfSingle other)
-        {
-            return this == other;
-        }
+        [CLSCompliant(false)]
+        public readonly bool Equals(ushort other) => PackedValue == other;
 
-        public override readonly bool Equals(object? obj)
-        {
-            return obj is HalfSingle other && Equals(other);
-        }
+        public readonly bool Equals(HalfSingle other) => this == other;
 
-        public static bool operator ==(HalfSingle a, HalfSingle b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
-
-        public static bool operator !=(HalfSingle a, HalfSingle b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
+        public static bool operator ==(HalfSingle a, HalfSingle b) => a._packed == b._packed;
+        public static bool operator !=(HalfSingle a, HalfSingle b) => a._packed != b._packed;
 
         #endregion
 
         #region Object overrides
+
+        public override readonly bool Equals(object? obj) => obj is HalfSingle other && Equals(other);
+
+        /// <summary>
+        /// Gets a hash code of the packed vector.
+        /// </summary>
+        public override readonly int GetHashCode() => HashCode.Combine(PackedValue);
 
         public readonly string ToString(IFormatProvider? provider) => ToSingle().ToString(provider);
 
@@ -173,11 +145,9 @@ namespace MonoGame.Framework.Vectors
         /// </summary>
         public override readonly string ToString() => ToString(CultureInfo.CurrentCulture);
 
-        /// <summary>
-        /// Gets a hash code of the packed vector.
-        /// </summary>
-        public override readonly int GetHashCode() => PackedValue.GetHashCode();
-
         #endregion
+
+        public static explicit operator HalfSingle(float value) => new HalfSingle(value);
+        public static implicit operator float(HalfSingle value) => value.ToSingle();
     }
 }

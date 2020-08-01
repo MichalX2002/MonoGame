@@ -4,6 +4,7 @@
 
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Vectors
@@ -15,13 +16,11 @@ namespace MonoGame.Framework.Vectors
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Bgra4444 : IPackedPixel<Bgra4444, ushort>
+    public struct Bgra4444 : IPixel<Bgra4444>, IPackedVector<ushort>
     {
-        private const int MaxXYZW = 0x0F;
+        public const int MaxXYZW = 0x0F;
 
-        private const float MaxValue = MaxXYZW;
-
-        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+        readonly VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Blue, 4),
             new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Green, 4),
             new VectorComponent(VectorComponentType.BitField, VectorComponentChannel.Red, 4),
@@ -64,22 +63,22 @@ namespace MonoGame.Framework.Vectors
 
         public void FromScaledVector(Vector3 scaledVector)
         {
-            scaledVector *= MaxValue;
+            scaledVector = VectorHelper.ScaledClamp(scaledVector);
+            scaledVector *= MaxXYZW;
             scaledVector += new Vector3(0.5f);
-            scaledVector = VectorHelper.ZeroMax(scaledVector, MaxValue);
 
             PackedValue = (ushort)(
                 (MaxXYZW << 12) |
-                (((int)scaledVector.X & MaxXYZW) << 8) |
-                (((int)scaledVector.Y & MaxXYZW) << 4) |
-                ((int)scaledVector.Z & MaxXYZW));
+                (((int)scaledVector.X) << 8) |
+                (((int)scaledVector.Y) << 4) |
+                ((int)scaledVector.Z));
         }
 
         public void FromScaledVector(Vector4 scaledVector)
         {
-            scaledVector *= MaxValue;
+            scaledVector = VectorHelper.ScaledClamp(scaledVector);
+            scaledVector *= MaxXYZW;
             scaledVector += new Vector4(0.5f);
-            scaledVector = VectorHelper.ZeroMax(scaledVector, MaxValue);
 
             PackedValue = (ushort)(
                 (((int)scaledVector.W) << 12) |
@@ -93,7 +92,7 @@ namespace MonoGame.Framework.Vectors
             return new Vector3(
                 (PackedValue >> 8) & MaxXYZW,
                 (PackedValue >> 4) & MaxXYZW,
-                PackedValue & MaxXYZW) / MaxValue;
+                PackedValue & MaxXYZW) / MaxXYZW;
         }
 
         public readonly Vector4 ToScaledVector4()
@@ -102,78 +101,72 @@ namespace MonoGame.Framework.Vectors
                 (PackedValue >> 8) & MaxXYZW,
                 (PackedValue >> 4) & MaxXYZW,
                 PackedValue & MaxXYZW,
-                PackedValue >> 12) / MaxValue;
+                PackedValue >> 12) / MaxXYZW;
         }
 
-        #endregion
-
-        #region Equals
-
-        public readonly bool Equals(Bgra4444 other) => this == other;
-
-        public override readonly bool Equals(object obj) => obj is Bgra4444 other && Equals(other);
-
-        public static bool operator ==(Bgra4444 a, Bgra4444 b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
-
-        public static bool operator !=(Bgra4444 a, Bgra4444 b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
+        public readonly Vector3 ToVector3() => ToScaledVector3();
+        public readonly Vector4 ToVector4() => ToScaledVector4();
 
         #endregion
 
         #region IPixel.From
 
-        public void FromAlpha(Alpha8 source)
-        {
-            PackedValue &= (ushort)((ScalingHelper.ToUInt4(source.A)) << 12);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void FromAlphaUInt4(byte value) => PackedValue = (ushort)(ushort.MaxValue & (value << 12));
 
-        public void FromAlpha(Alpha16 source)
-        {
-            PackedValue &= (ushort)((ScalingHelper.ToUInt4(source.A)) << 12);
-        }
+        public void FromAlpha(Alpha8 source) => FromAlphaUInt4(ScalingHelper.ToUInt4(source.A));
+        public void FromAlpha(Alpha16 source) => FromAlphaUInt4(ScalingHelper.ToUInt4(source.A));
+        public void FromAlpha(Alpha32 source) => FromAlphaUInt4(ScalingHelper.ToUInt4(source.A));
+        public void FromAlpha(AlphaF source) => FromAlphaUInt4(ScalingHelper.ToUInt4(source.A));
 
-        public void FromAlpha(AlphaF source)
-        {
-            PackedValue &= (ushort)((ScalingHelper.ToUInt4(source.A)) << 12);
-        }
+        public void FromColor(Bgra4444 source) => this = source;
 
         #endregion
 
         #region IPixel.To
 
-        public readonly Alpha8 ToAlpha8()
-        {
-            return ScalingHelper.ToUInt8From4((byte)(PackedValue >> 12));
-        }
+        public readonly Alpha8 ToAlpha8() => ScalingHelper.ToUInt8From4((byte)(PackedValue >> 12));
+        public readonly Alpha16 ToAlpha16() => ScalingHelper.ToUInt16From4((byte)(PackedValue >> 12));
+        public readonly AlphaF ToAlphaF() => ScalingHelper.ToFloat32FromUInt4((byte)(PackedValue >> 12));
 
-        public readonly Alpha16 ToAlpha16()
-        {
-            return ScalingHelper.ToUInt16From4((byte)(PackedValue >> 12));
-        }
+        public readonly Gray8 ToGray8() => PixelHelper.ToGray8(this);
+        public readonly Gray16 ToGray16() => PixelHelper.ToGray16(this);
+        public readonly GrayF ToGrayF() => PixelHelper.ToGrayF(this);
+        public readonly GrayAlpha16 ToGrayAlpha16() => PixelHelper.ToGrayAlpha16(this);
 
-        public readonly AlphaF ToAlphaF()
-        {
-            return ScalingHelper.ToFloat32FromUInt4((byte)(PackedValue >> 12));
-        }
+        public readonly Rgb24 ToRgb24() => ScaledVectorHelper.ToRgb24(this);
+        public readonly Rgb48 ToRgb48() => ScaledVectorHelper.ToRgb48(this);
+
+        public readonly Color ToRgba32() => ScaledVectorHelper.ToRgba32(this);
+        public readonly Rgba64 ToRgba64() => ScaledVectorHelper.ToRgba64(this);
+
+        #endregion
+
+        #region Equals
+
+        [CLSCompliant(false)]
+        public readonly bool Equals(ushort other) => PackedValue == other;
+
+        public readonly bool Equals(Bgra4444 other) => this == other;
+
+        public static bool operator ==(Bgra4444 a, Bgra4444 b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(Bgra4444 a, Bgra4444 b) => a.PackedValue != b.PackedValue;
 
         #endregion
 
         #region Object overrides
 
-        /// <summary>
-        /// Gets a string representation of the packed vector.
-        /// </summary>
-        public override readonly string ToString() => nameof(Bgra4444) + $"({ToScaledVector4()})";
+        public override readonly bool Equals(object? obj) => obj is Bgra4444 other && Equals(other);
 
         /// <summary>
         /// Gets a hash code of the packed vector.
         /// </summary>
-        public override readonly int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => HashCode.Combine(PackedValue);
+
+        /// <summary>
+        /// Gets a string representation of the packed vector.
+        /// </summary>
+        public override readonly string ToString() => nameof(Bgra4444) + $"({ToScaledVector4()})";
 
         #endregion
     }

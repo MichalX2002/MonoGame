@@ -90,7 +90,10 @@ namespace MonoGame.Framework.Vectors
             }
             else
             {
-                result = (((uint)value & 0x8000) << 16) | (((((uint)value >> 10) & 0x1f) - 15 + 127) << 23) | (mantissa << 13);
+                result = 
+                    (((uint)value & 0x8000) << 16) |
+                    (((((uint)value >> 10) & 0x1f) - 15 + 127) << 23) | 
+                    (mantissa << 13);
             }
 
             var uif = new FloatIntUnion { U = result };

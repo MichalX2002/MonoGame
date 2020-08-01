@@ -15,9 +15,9 @@ namespace MonoGame.Framework.Vectors
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Gray32 : IPackedPixel<Gray32, uint>
+    public struct Gray32 : IPixel<Gray32>, IPackedVector<uint>
     {
-        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+        readonly VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.UInt32, VectorComponentChannel.Luminance));
 
         [CLSCompliant(false)]
@@ -32,139 +32,93 @@ namespace MonoGame.Framework.Vectors
         #region IPackedVector
 
         [CLSCompliant(false)]
-        public uint PackedValue { readonly get => L; set => L = value; }
+        public uint PackedValue
+        {
+            readonly get => L;
+            set => L = value;
+        }
 
         public void FromScaledVector(Vector3 scaledVector)
         {
+            scaledVector = VectorHelper.ScaledClamp(scaledVector);
             scaledVector *= uint.MaxValue;
             scaledVector += new Vector3(0.5f);
-            scaledVector = VectorHelper.ZeroMax(scaledVector, uint.MaxValue);
-
-            L = (uint)(LuminanceHelper.BT709.ToGrayF(scaledVector) + 0.5f);
+            
+            L = PixelHelper.ToGray32(scaledVector);
         }
 
-        public void FromScaledVector(Vector4 scaledVector)
-        {
-            FromScaledVector(scaledVector.ToVector3());
-        }
+        public void FromScaledVector(Vector4 scaledVector) => FromScaledVector(scaledVector.ToVector3());
 
-        public readonly Vector3 ToScaledVector3()
-        {
-            return new Vector3((float)(L / (double)uint.MaxValue));
-        }
+        public readonly Vector3 ToScaledVector3() => new Vector3(ScalingHelper.ToFloat32(L));
+        public readonly Vector4 ToScaledVector4() => new Vector4(ToScaledVector3(), 1);
 
-        public readonly Vector4 ToScaledVector4()
-        {
-            return new Vector4(ToScaledVector3(), 1);
-        }
+        public readonly Vector3 ToVector3() => ToScaledVector3();
+        public readonly Vector4 ToVector4() => ToScaledVector4();
 
         #endregion
 
-        #region IPixel
+        #region IPixel.From
 
-        public void FromAlpha(Alpha8 source)
-        {
-            L = uint.MaxValue;
-        }
+        public void FromAlpha(Alpha8 source) => L = uint.MaxValue;
+        public void FromAlpha(Alpha16 source) => L = uint.MaxValue;
+        public void FromAlpha(Alpha32 source) => L = uint.MaxValue;
+        public void FromAlpha(AlphaF source) => L = uint.MaxValue;
 
-        public void FromAlpha(Alpha16 source)
-        {
-            L = uint.MaxValue;
-        }
+        public void FromGray(Gray8 source) => L = ScalingHelper.ToUInt32(source.L);
+        public void FromGray(Gray16 source) => L = ScalingHelper.ToUInt32(source.L);
+        public void FromGray(Gray32 source) => this = source;
+        public void FromGray(GrayAlpha16 source) => L = ScalingHelper.ToUInt32(source.L);
 
-        public void FromAlpha(AlphaF source)
-        {
-            L = uint.MaxValue;
-        }
+        public void FromColor(Bgr24 source) => L = PixelHelper.ToGray32(source);
+        public void FromColor(Rgb24 source) => L = PixelHelper.ToGray32(source);
+        public void FromColor(Rgb48 source) => L = PixelHelper.ToGray32(source);
 
-        public void FromGray(Gray8 source)
-        {
-            L = ScalingHelper.ToUInt32(source.L);
-        }
+        public void FromColor(Argb32 source) => L = PixelHelper.ToGray32(source);
+        public void FromColor(Abgr32 source) => L = PixelHelper.ToGray32(source);
+        public void FromColor(Bgra32 source) => L = PixelHelper.ToGray32(source);
+        public void FromColor(Color source) => L = PixelHelper.ToGray32(source);
+        public void FromColor(Rgba64 source) => L = PixelHelper.ToGray32(source);
 
-        public void FromGrayAlpha(GrayAlpha16 source)
-        {
-            L = ScalingHelper.ToUInt32(source.L);
-        }
+        #endregion
 
-        public void FromGray(Gray16 source)
-        {
-            L = ScalingHelper.ToUInt32(source.L);
-        }
+        #region IPixel.To
 
-        public void FromRgb(Rgb24 source)
-        {
-            L = ScalingHelper.ToUInt32(
-                LuminanceHelper.BT709.ToGray8(source.R, source.G, source.B));
-        }
+        public readonly Alpha8 ToAlpha8() => Alpha8.Opaque;
+        public readonly Alpha16 ToAlpha16() => Alpha16.Opaque;
+        public readonly AlphaF ToAlphaF() => AlphaF.Opaque;
 
-        public void FromRgba(Color source)
-        {
-            L = ScalingHelper.ToUInt32(
-                LuminanceHelper.BT709.ToGray8(source.R, source.G, source.B));
-        }
+        public readonly Gray8 ToGray8() => ScalingHelper.ToUInt8(L);
+        public readonly Gray16 ToGray16() => ScalingHelper.ToUInt16(L);
+        public readonly GrayAlpha16 ToGrayAlpha16() => new GrayAlpha16(ScalingHelper.ToUInt8(L), byte.MaxValue);
+        public readonly GrayF ToGrayF() => ScalingHelper.ToFloat32(L);
 
-        public void FromRgb(Rgb48 source)
-        {
-            L = LuminanceHelper.BT709.ToGray32(source.R, source.G, source.B);
-        }
+        public readonly Rgb24 ToRgb24() => new Rgb24(ScalingHelper.ToUInt8(L));
+        public readonly Rgb48 ToRgb48() => new Rgb48(ScalingHelper.ToUInt16(L));
 
-        public void FromRgba(Rgba64 source)
-        {
-            L = LuminanceHelper.BT709.ToGray32(source.R, source.G, source.B);
-        }
-
-        public readonly Alpha8 ToAlpha8()
-        {
-            return Alpha8.Opaque;
-        }
-        
-        public readonly Alpha16 ToAlpha16()
-        {
-            return Alpha16.Opaque;
-        }
-        
-        public readonly AlphaF ToAlphaF()
-        {
-            return AlphaF.Opaque;
-        }
-
-        public readonly Color ToColor()
-        {
-            return new Color(ScalingHelper.ToUInt8(L), byte.MaxValue);
-        }
+        public readonly Color ToRgba32() => new Color(ScalingHelper.ToUInt8(L), byte.MaxValue);
+        public readonly Rgba64 ToRgba64() => new Rgba64(ScalingHelper.ToUInt16(L), ushort.MaxValue);
 
         #endregion
 
         #region Equals
 
-        public readonly bool Equals(Gray32 other)
-        {
-            return this == other;
-        }
+        [CLSCompliant(false)]
+        public readonly bool Equals(uint other) => PackedValue == other;
 
-        public override readonly bool Equals(object? obj)
-        {
-            return obj is Gray32 other && Equals(other);
-        }
+        public readonly bool Equals(Gray32 other) => this == other;
 
-        public static bool operator ==(Gray32 a, Gray32 b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
-
-        public static bool operator !=(Gray32 a, Gray32 b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
+        public static bool operator ==(Gray32 a, Gray32 b) => a.L == b.L;
+        public static bool operator !=(Gray32 a, Gray32 b) => a.L != b.L;
 
         #endregion
 
         #region Object Overrides
 
-        public override readonly string ToString() => nameof(Gray32) + $"({L})";
+        public override readonly bool Equals(object? obj) => obj is Gray32 other && Equals(other);
 
-        public override readonly int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => HashCode.Combine(L);
+
+        public override readonly string ToString() => nameof(Gray32) + $"({L})";
 
         #endregion
 

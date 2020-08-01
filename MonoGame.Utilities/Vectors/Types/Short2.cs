@@ -16,11 +16,11 @@ namespace MonoGame.Framework.Vectors
     /// </para>
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Short2 : IPackedPixel<Short2, uint>
+    public struct Short2 : IPixel<Short2>, IPackedVector<uint>
     {
-        private static Vector2 Offset => new Vector2(32768);
+        private static Vector2 Offset2 => new Vector2(32768);
 
-        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+        readonly VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Red),
             new VectorComponent(VectorComponentType.Int16, VectorComponentChannel.Green));
 
@@ -45,6 +45,7 @@ namespace MonoGame.Framework.Vectors
         [CLSCompliant(false)]
         public Short2(uint packed) : this()
         {
+            // TODO: Unsafe.SkipInit(out this);
             PackedValue = packed;
         }
 
@@ -78,115 +79,79 @@ namespace MonoGame.Framework.Vectors
         {
             var vector = scaledVector.ToVector2();
             vector *= ushort.MaxValue;
-            vector -= Offset;
+            vector -= Offset2;
 
             Pack(vector, out this);
         }
 
-        public void FromScaledVector(Vector4 scaledVector)
-        {
-            FromScaledVector(scaledVector.ToVector3());
-        }
+        public void FromScaledVector(Vector4 scaledVector) => FromScaledVector(scaledVector.ToVector3());
+
+        public void FromVector(Vector3 vector) => Pack(vector.ToVector2(), out this);
+        public void FromVector(Vector4 vector) => FromVector(vector.ToVector3());
 
         public readonly Vector3 ToScaledVector3()
         {
             var scaledVector = ToVector2();
-            scaledVector += Offset;
+            scaledVector += Offset2;
             scaledVector /= ushort.MaxValue;
 
             return new Vector3(scaledVector, 0);
         }
 
-        public readonly Vector4 ToScaledVector4()
-        {
-            return new Vector4(ToScaledVector3(), 1);
-        }
+        public readonly Vector4 ToScaledVector4() => new Vector4(ToScaledVector3(), 1);
 
-        public void FromVector(Vector3 vector)
-        {
-            Pack(vector.ToVector2(), out this);
-        }
-
-        public void FromVector(Vector4 vector)
-        {
-            FromVector(vector.ToVector3());
-        }
-
-        public readonly Vector3 ToVector3()
-        {
-            return new Vector3(ToVector2(), 0);
-        }
-
-        public readonly Vector4 ToVector4()
-        {
-            return new Vector4(ToVector3(), 1);
-        }
+        public readonly Vector3 ToVector3() => new Vector3(ToVector2(), 0);
+        public readonly Vector4 ToVector4() => new Vector4(ToVector3(), 1);
 
         #endregion
 
-        #region IPixel
+        #region IPixel.From
 
-        public void FromAlpha(Alpha8 source)
-        {
-            X = Y = short.MaxValue;
-        }
+        public void FromAlpha(Alpha8 source) => X = Y = short.MaxValue;
+        public void FromAlpha(Alpha16 source) => X = Y = short.MaxValue;
+        public void FromAlpha(Alpha32 source) => X = Y = short.MaxValue;
+        public void FromAlpha(AlphaF source) => X = Y = short.MaxValue;
 
-        public void FromAlpha(Alpha16 source)
-        {
-            X = Y = short.MaxValue;
-        }
+        #endregion
 
-        public void FromAlpha(AlphaF source)
-        {
-            X = Y = short.MaxValue;
-        }
+        #region IPixel.To
 
-        public Alpha8 ToAlpha8()
-        {
-            return Alpha8.Opaque;
-        }
+        public readonly Alpha8 ToAlpha8() => Alpha8.Opaque;
+        public readonly Alpha16 ToAlpha16() => Alpha16.Opaque;
+        public readonly AlphaF ToAlphaF() => AlphaF.Opaque;
 
-        public Alpha16 ToAlpha16()
-        {
-            return Alpha16.Opaque;
-        }
+        public readonly Gray8 ToGray8() => PixelHelper.ToGray8(this);
+        public readonly Gray16 ToGray16() => PixelHelper.ToGray16(this);
+        public readonly GrayF ToGrayF() => PixelHelper.ToGrayF(this);
+        public readonly GrayAlpha16 ToGrayAlpha16() => PixelHelper.ToGrayAlpha16(this);
 
-        public AlphaF ToAlphaF()
-        {
-            return AlphaF.Opaque;
-        }
+        public readonly Rgb24 ToRgb24() => ScaledVectorHelper.ToRgb24(this);
+        public readonly Rgb48 ToRgb48() => ScaledVectorHelper.ToRgb48(this);
+
+        public readonly Color ToRgba32() => ScaledVectorHelper.ToRgba32(this);
+        public readonly Rgba64 ToRgba64() => ScaledVectorHelper.ToRgba64(this);
 
         #endregion
 
         #region Equals
 
-        public readonly bool Equals(Short2 other)
-        {
-            return this == other;
-        }
+        [CLSCompliant(false)]
+        public readonly bool Equals(uint other) => PackedValue == other;
 
-        public override readonly bool Equals(object obj)
-        {
-            return obj is Short2 other && Equals(other);
-        }
+        public readonly bool Equals(Short2 other) => this == other;
 
-        public static bool operator ==(in Short2 a, in Short2 b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
-
-        public static bool operator !=(in Short2 a, in Short2 b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
+        public static bool operator ==(Short2 a, Short2 b) => a.PackedValue == b.PackedValue;
+        public static bool operator !=(Short2 a, Short2 b) => a.PackedValue != b.PackedValue;
 
         #endregion
 
         #region Object overrides
 
-        public override readonly string ToString() => nameof(Short2) + $"({X}, {Y})";
+        public override readonly bool Equals(object? obj) => obj is Short2 other && Equals(other);
 
-        public override readonly int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => HashCode.Combine(PackedValue);
+
+        public override readonly string ToString() => nameof(Short2) + $"({X}, {Y})";
 
         #endregion
     }

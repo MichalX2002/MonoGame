@@ -8,6 +8,8 @@ namespace MonoGame.Framework.Vectors
         private const MethodImplOptions ImplOptions = 
             MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization;
 
+        private const float UInt1Max = 0b1;
+        private const float UInt2Max = 0b11;
         private const float UInt4Max = 0b1111;
         private const float UInt5Max = 0b1_1111;
         private const float UInt6Max = 0b11_1111;
@@ -19,9 +21,24 @@ namespace MonoGame.Framework.Vectors
         private const string ErrorMessage = 
             "This method does nothing with the passed value. Did you mean to use the value directly?";
 
+        [CLSCompliant(false)]
+        [Obsolete(ErrorMessage)]
+        [MethodImpl(ImplOptions)]
+        public static sbyte ToInt8(sbyte value)
+        {
+            return value;
+        }
+
         [Obsolete(ErrorMessage)]
         [MethodImpl(ImplOptions)]
         public static byte ToUInt8(byte value)
+        {
+            return value;
+        }
+
+        [Obsolete(ErrorMessage)]
+        [MethodImpl(ImplOptions)]
+        public static short ToInt16(short value)
         {
             return value;
         }
@@ -30,6 +47,13 @@ namespace MonoGame.Framework.Vectors
         [Obsolete(ErrorMessage)]
         [MethodImpl(ImplOptions)]
         public static ushort ToUInt16(ushort value)
+        {
+            return value;
+        }
+
+        [Obsolete(ErrorMessage)]
+        [MethodImpl(ImplOptions)]
+        public static int ToInt32(int value)
         {
             return value;
         }
@@ -62,6 +86,20 @@ namespace MonoGame.Framework.Vectors
 
         [CLSCompliant(false)]
         [MethodImpl(ImplOptions)]
+        public static float ToFloat32FromUInt1(byte value)
+        {
+            return value / UInt1Max;
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static float ToFloat32FromUInt2(byte value)
+        {
+            return value / UInt2Max;
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
         public static float ToFloat32FromUInt4(byte value)
         {
             return value / UInt4Max;
@@ -79,6 +117,13 @@ namespace MonoGame.Framework.Vectors
         public static float ToFloat32FromUInt6(byte value)
         {
             return value / UInt6Max;
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static float ToFloat32(sbyte value)
+        {
+            return ToFloat32(ToUInt8(value));
         }
 
         [CLSCompliant(false)]
@@ -121,6 +166,18 @@ namespace MonoGame.Framework.Vectors
         #region Float to Integer scaling
 
         [MethodImpl(ImplOptions)]
+        public static byte ToUInt1(float value)
+        {
+            return (byte)(value * UInt1Max + 0.5f);
+        }
+
+        [MethodImpl(ImplOptions)]
+        public static byte ToUInt2(float value)
+        {
+            return (byte)(value * UInt2Max + 0.5f);
+        }
+
+        [MethodImpl(ImplOptions)]
         public static byte ToUInt4(float value)
         {
             return (byte)(value * UInt4Max + 0.5f);
@@ -136,6 +193,16 @@ namespace MonoGame.Framework.Vectors
         public static byte ToUInt6(float value)
         {
             return (byte)(value * UInt6Max + 0.5f);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static sbyte ToInt8(float value)
+        {
+            value = MathHelper.Clamp(value, 0, 1);
+            value *= byte.MaxValue;
+            value += sbyte.MinValue;
+            return (sbyte)MathF.Round(value);
         }
 
         [MethodImpl(ImplOptions)]
@@ -178,19 +245,74 @@ namespace MonoGame.Framework.Vectors
 
         #region Integer scaling
 
+        #region UInt1
+
+        [MethodImpl(ImplOptions)]
+        public static byte ToUInt1(byte value)
+        {
+            return (byte)(ToFloat32(value) * UInt1Max + 0.5f);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static byte ToUInt1(ushort value)
+        {
+            return (byte)(ToFloat32(value) * UInt1Max + 0.5f);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static byte ToUInt1(uint value)
+        {
+            return (byte)(ToFloat64(value) * UInt1Max + 0.5f);
+        }
+
+        #endregion
+
+        #region UInt2
+
+        [MethodImpl(ImplOptions)]
+        public static byte ToUInt2(byte value)
+        {
+            return (byte)(ToFloat32(value) * UInt2Max + 0.5f);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static byte ToUInt2(ushort value)
+        {
+            return (byte)(ToFloat32(value) * UInt2Max + 0.5f);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static byte ToUInt2(uint value)
+        {
+            return (byte)(ToFloat64(value) * UInt2Max + 0.5f);
+        }
+
+        #endregion
+
         #region UInt4
 
         [MethodImpl(ImplOptions)]
         public static byte ToUInt4(byte value)
         {
-            return (byte)(value / 16);
+            return (byte)(ToFloat32(value) * UInt4Max + 0.5f);
         }
 
         [CLSCompliant(false)]
         [MethodImpl(ImplOptions)]
         public static byte ToUInt4(ushort value)
         {
-            return (byte)(value / 4096);
+            return (byte)(ToFloat32(value) * UInt4Max + 0.5f);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static byte ToUInt4(uint value)
+        {
+            return (byte)(ToFloat64(value) * UInt4Max + 0.5f);
         }
 
         #endregion
@@ -200,14 +322,14 @@ namespace MonoGame.Framework.Vectors
         [MethodImpl(ImplOptions)]
         public static byte ToUInt5(byte value)
         {
-            return (byte)(value / 8);
+            return (byte)(ToFloat32(value) * UInt5Max + 0.5f);
         }
 
         [CLSCompliant(false)]
         [MethodImpl(ImplOptions)]
         public static byte ToUInt5(ushort value)
         {
-            return (byte)(value / 2048);
+            return (byte)(ToFloat32(value) * UInt5Max + 0.5f);
         }
 
         #endregion
@@ -217,25 +339,75 @@ namespace MonoGame.Framework.Vectors
         [MethodImpl(ImplOptions)]
         public static byte ToUInt6(byte value)
         {
-            return (byte)(value / 4);
+            return (byte)Math.Round(value / 4f);
         }
 
         [CLSCompliant(false)]
         [MethodImpl(ImplOptions)]
         public static byte ToUInt6(ushort value)
         {
-            return (byte)(value / 1040);
+            return (byte)Math.Round(value / 1040f);
+        }
+
+        #endregion
+
+        #region Int8
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static sbyte ToInt8(byte value)
+        {
+            return (sbyte)(value + sbyte.MinValue);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static sbyte ToInt8(ushort value)
+        {
+            return ToInt8(ToUInt8(value));
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static sbyte ToInt8(short value)
+        {
+            return ToInt8(ToUInt8(value));
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static sbyte ToInt8(uint value)
+        {
+            return ToInt8(ToUInt8(value));
         }
 
         #endregion
 
         #region UInt8
 
-        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static byte ToUInt8From1(byte value)
+        {
+            return (byte)(value * byte.MaxValue);
+        }
+
+        [MethodImpl(ImplOptions)]
+        public static byte ToUInt8From2(byte value)
+        {
+            return (byte)(value * 85);
+        }
+
         [MethodImpl(ImplOptions)]
         public static byte ToUInt8From4(byte value)
         {
             return (byte)(value * 17);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static byte ToUInt8(sbyte value)
+        {
+            return (byte)(value - sbyte.MinValue);
         }
 
         /// <summary>
@@ -261,13 +433,52 @@ namespace MonoGame.Framework.Vectors
         [MethodImpl(ImplOptions)]
         public static byte ToUInt8(uint value)
         {
-            return (byte)(value / 16843009);
+            return (byte)Math.Round(value / 16843009d);
+        }
+
+        #endregion
+
+        #region Int16
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static short ToInt16(byte value)
+        {
+            return ToInt16(ToUInt16(value));
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static short ToInt16(ushort value)
+        {
+            return (short)(value + short.MinValue);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static short ToInt16(uint value)
+        {
+            return ToInt16(ToUInt16(value));
         }
 
         #endregion
 
         #region UInt16
-        
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static ushort ToUInt16From1(byte value)
+        {
+            return (ushort)(value * ushort.MaxValue);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static ushort ToUInt16From2(byte value)
+        {
+            return (ushort)(value * 21845);
+        }
+
         [CLSCompliant(false)]
         [MethodImpl(ImplOptions)]
         public static ushort ToUInt16From4(byte value)
@@ -275,9 +486,13 @@ namespace MonoGame.Framework.Vectors
             return (ushort)(value * 4369);
         }
 
-        /// <summary>
-        /// Scales a value from an 8-bit <see cref="byte"/> to it's 16-bit <see cref="ushort"/> equivalent.
-        /// </summary>
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static ushort ToUInt16(sbyte value)
+        {
+            return ToUInt16(ToUInt8(value));
+        }
+
         [CLSCompliant(false)]
         [MethodImpl(ImplOptions)]
         public static ushort ToUInt16(byte value)
@@ -290,6 +505,13 @@ namespace MonoGame.Framework.Vectors
         public static ushort ToUInt16(short value)
         {
             return (ushort)(value - short.MinValue);
+        }
+
+        [CLSCompliant(false)]
+        [MethodImpl(ImplOptions)]
+        public static ushort ToUInt16(uint value)
+        {
+            return (ushort)Math.Round(value / 65537d);
         }
 
         #endregion

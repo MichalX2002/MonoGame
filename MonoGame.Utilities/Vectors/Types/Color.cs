@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -20,9 +21,9 @@ namespace MonoGame.Framework
     [DataContract]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     [StructLayout(LayoutKind.Sequential)]
-    public partial struct Color : IPackedPixel<Color, uint>
+    public partial struct Color : IPixel<Color>, IPackedVector<uint>
     {
-        VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
+        readonly VectorComponentInfo IVector.ComponentInfo => new VectorComponentInfo(
             new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Red),
             new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Green),
             new VectorComponent(VectorComponentType.UInt8, VectorComponentChannel.Blue),
@@ -77,11 +78,7 @@ namespace MonoGame.Framework
             }
         }
 
-        internal string DebuggerDisplay => string.Concat(
-            R.ToString(), "  ",
-            G.ToString(), "  ",
-            B.ToString(), "  ",
-            A.ToString());
+        internal string DebuggerDisplay => ToString();
 
         #endregion
 
@@ -92,7 +89,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <remarks>
         /// This overload sets the values directly without clamping and 
-        /// may therefore be faster than the other overloads.
+        /// may therefore be faster than other overloads.
         /// </remarks>
         public Color(byte r, byte g, byte b, byte a)
         {
@@ -107,7 +104,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <remarks>
         /// This overload sets the values directly without clamping and 
-        /// may therefore be faster than the other overloads.
+        /// may therefore be faster than other overloads.
         /// </remarks>
         public Color(byte r, byte g, byte b) : this(r, g, b, byte.MaxValue)
         {
@@ -118,7 +115,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <remarks>
         /// This overload sets the values directly without clamping and 
-        /// may therefore be faster than the other overloads.
+        /// may therefore be faster than other overloads.
         /// </remarks>
         public Color(byte luminance, byte alpha) : this(luminance, luminance, luminance, alpha)
         {
@@ -130,7 +127,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <remarks>
         /// This overload sets the values directly without clamping and 
-        /// may therefore be faster than the other overloads.
+        /// may therefore be faster than other overloads.
         /// </remarks>
         [CLSCompliant(false)]
         public Color(uint packed) : this()
@@ -205,9 +202,9 @@ namespace MonoGame.Framework
         /// <param name="color"><see cref="Vector3"/> containing the components.</param>
         public Color(Vector3 color)
         {
+            color = VectorHelper.ScaledClamp(color);
             color *= byte.MaxValue;
-            color = VectorHelper.ZeroMax(color, byte.MaxValue);
-
+            
             R = (byte)color.X;
             G = (byte)color.Y;
             B = (byte)color.Z;
@@ -315,16 +312,11 @@ namespace MonoGame.Framework
             set => Unsafe.As<Color, uint>(ref this) = value;
         }
 
-        public readonly Vector3 ToScaledVector3()
-        {
-            return new Vector3(R, G, B) / byte.MaxValue;
-        }
-
         public void FromScaledVector(Vector3 scaledVector)
         {
+            scaledVector = VectorHelper.ScaledClamp(scaledVector);
             scaledVector *= byte.MaxValue;
             scaledVector += new Vector3(0.5f);
-            scaledVector = VectorHelper.ZeroMax(scaledVector, byte.MaxValue);
 
             R = (byte)scaledVector.X;
             G = (byte)scaledVector.Y;
@@ -332,16 +324,11 @@ namespace MonoGame.Framework
             A = byte.MaxValue;
         }
 
-        public readonly Vector4 ToScaledVector4()
-        {
-            return new Vector4(R, G, B, A) / byte.MaxValue;
-        }
-
         public void FromScaledVector(Vector4 scaledVector)
         {
+            scaledVector = VectorHelper.ScaledClamp(scaledVector);
             scaledVector *= byte.MaxValue;
             scaledVector += new Vector4(0.5f);
-            scaledVector = VectorHelper.ZeroMax(scaledVector, byte.MaxValue);
 
             R = (byte)scaledVector.X;
             G = (byte)scaledVector.Y;
@@ -349,11 +336,15 @@ namespace MonoGame.Framework
             A = (byte)scaledVector.W;
         }
 
+        public readonly Vector3 ToScaledVector3() => new Vector3(R, G, B) / byte.MaxValue;
+        public readonly Vector4 ToScaledVector4() => new Vector4(R, G, B, A) / byte.MaxValue;
+
+        public readonly Vector3 ToVector3() => ToScaledVector3();
+        public readonly Vector4 ToVector4() => ToScaledVector4();
+
         #endregion
 
-        #region IPixel
-
-        #region From
+        #region IPixel.From
 
         public void FromAlpha(Alpha8 source)
         {
@@ -367,6 +358,12 @@ namespace MonoGame.Framework
             A = ScalingHelper.ToUInt8(source);
         }
 
+        public void FromAlpha(Alpha32 source)
+        {
+            R = G = B = byte.MaxValue;
+            A = ScalingHelper.ToUInt8(source.A);
+        }
+
         public void FromAlpha(AlphaF source)
         {
             R = G = B = byte.MaxValue;
@@ -375,31 +372,51 @@ namespace MonoGame.Framework
 
         public void FromGray(Gray8 source)
         {
-            R = G = B = source.PackedValue;
+            R = G = B = source.L;
             A = byte.MaxValue;
         }
 
         public void FromGray(Gray16 source)
         {
-            R = G = B = ScalingHelper.ToUInt8(source.PackedValue);
+            R = G = B = ScalingHelper.ToUInt8(source.L);
             A = byte.MaxValue;
         }
 
-        public void FromGrayAlpha(GrayAlpha16 source)
+        public void FromGray(Gray32 source)
+        {
+            R = G = B = ScalingHelper.ToUInt8(source.L);
+            A = byte.MaxValue;
+        }
+
+        public void FromGray(GrayF source)
+        {
+            R = G = B = ScalingHelper.ToUInt8(source.L);
+            A = byte.MaxValue;
+        }
+
+        public void FromGray(GrayAlpha16 source)
         {
             R = G = B = source.L;
             A = source.A;
         }
 
-        public void FromRgba(Color color) => this = color;
-
-        public void FromRgb(Rgb24 source)
+        public void FromColor(Bgr24 source)
         {
-            Rgb = source;
+            R = source.R;
+            G = source.G;
+            B = source.B;
             A = byte.MaxValue;
         }
 
-        public void FromRgb(Rgb48 source)
+        public void FromColor(Rgb24 source)
+        {
+            R = source.R;
+            G = source.G;
+            B = source.B;
+            A = byte.MaxValue;
+        }
+
+        public void FromColor(Rgb48 source)
         {
             R = ScalingHelper.ToUInt8(source.R);
             G = ScalingHelper.ToUInt8(source.G);
@@ -407,7 +424,33 @@ namespace MonoGame.Framework
             A = byte.MaxValue;
         }
 
-        public void FromRgba(Rgba64 source)
+        public void FromColor(Argb32 source)
+        {
+            R = source.R;
+            G = source.G;
+            B = source.B;
+            A = source.A;
+        }
+
+        public void FromColor(Bgra32 source)
+        {
+            R = source.R;
+            G = source.G;
+            B = source.B;
+            A = source.A;
+        }
+
+        public void FromColor(Abgr32 source)
+        {
+            R = source.R;
+            G = source.G;
+            B = source.B;
+            A = source.A;
+        }
+
+        public void FromColor(Color source) => this = source;
+
+        public void FromColor(Rgba64 source)
         {
             R = ScalingHelper.ToUInt8(source.R);
             G = ScalingHelper.ToUInt8(source.G);
@@ -415,79 +458,34 @@ namespace MonoGame.Framework
             A = ScalingHelper.ToUInt8(source.A);
         }
 
-        public void FromBgr(Bgr24 source)
-        {
-            Bgr = source;
-            A = byte.MaxValue;
-        }
-
-        public void FromArgb(Argb32 source)
-        {
-            R = source.R;
-            G = source.G;
-            B = source.B;
-            A = source.A;
-        }
-
-        public void FromBgra(Bgra32 source)
-        {
-            R = source.R;
-            G = source.G;
-            B = source.B;
-            A = source.A;
-        }
-
         #endregion
 
-        #region To
+        #region IPixel.To
 
-        public readonly Alpha8 ToAlpha8()
+        public readonly Alpha8 ToAlpha8() => A;
+        public readonly Alpha16 ToAlpha16() => ScalingHelper.ToUInt16(A);
+        public readonly AlphaF ToAlphaF() => ScalingHelper.ToFloat32(A);
+
+        public readonly Gray8 ToGray8() => PixelHelper.ToGray8(R, G, B);
+        public readonly Gray16 ToGray16() => PixelHelper.ToGray16(this);
+        public readonly GrayF ToGrayF() => PixelHelper.ToGrayF(this);
+        public readonly GrayAlpha16 ToGrayAlpha16() => PixelHelper.ToGrayAlpha16(R, G, B, A);
+
+        public readonly Bgr24 ToBgr24() => new Bgr24(R, G, B);
+        public readonly Rgb24 ToRgb24() => Rgb;
+
+        public readonly Rgb48 ToRgb48()
         {
-            return A;
+            return new Rgb48(
+                ScalingHelper.ToUInt16(R),
+                ScalingHelper.ToUInt16(G),
+                ScalingHelper.ToUInt16(B));
         }
 
-        public readonly Alpha16 ToAlpha16()
-        {
-            return ScalingHelper.ToUInt16(A);
-        }
-
-        public readonly AlphaF ToAlphaF()
-        {
-            return ScalingHelper.ToFloat32(A);
-        }
-
-        public readonly Gray8 ToGray8()
-        {
-            return new Gray8(A);
-        }
-
-        public readonly GrayAlpha16 ToGrayAlpha16()
-        {
-            return new GrayAlpha16(LuminanceHelper.BT709.ToGray8(R, G, B), A);
-        }
-
-        public readonly Rgb24 ToRgb24()
-        {
-            return Rgb;
-        }
-
-        public readonly Bgr24 ToBgr24()
-        {
-            return new Bgr24(R, G, B);
-        }
-
-        public readonly Bgra32 ToBgra32()
-        {
-            return new Bgra32(R, G, B, A);
-        }
-
-        /// <summary>
-        /// Gets the <see cref="Argb32"/> representation of this <see cref="Color"/>.
-        /// </summary>
-        public readonly Argb32 ToArgb32()
-        {
-            return new Argb32(R, G, B, A);
-        }
+        public readonly Abgr32 ToAbgr32() => new Abgr32(R, G, B, A);
+        public readonly Argb32 ToArgb32() => new Argb32(R, G, B, A);
+        public readonly Bgra32 ToBgra32() => new Bgra32(R, G, B, A);
+        public readonly Color ToRgba32() => this;
 
         public readonly Rgba64 ToRgba64()
         {
@@ -500,20 +498,12 @@ namespace MonoGame.Framework
 
         #endregion
 
-        #endregion
-
         /// <summary>
         /// Used to hint that the <see cref="Color(byte, byte, byte, byte)"/> constructor should be used.
         /// </summary>
-        public static Color FromBytes(byte r, byte g, byte b, byte a)
-        {
-            return new Color(r, g, b, a);
-        }
+        public static Color FromBytes(byte r, byte g, byte b, byte a = 255) => new Color(r, g, b, a);
 
-        public static Color FromBytes(ReadOnlySpan<byte> source)
-        {
-            return MemoryMarshal.Read<Color>(source);
-        }
+        public static Color FromBytes(ReadOnlySpan<byte> source) => MemoryMarshal.Read<Color>(source);
 
         /// <summary>
         /// Translate a non-premultipled alpha <see cref="Vector4"/> color to a
@@ -539,7 +529,8 @@ namespace MonoGame.Framework
         /// <returns>A <see cref="Color"/> which contains premultiplied alpha data.</returns>
         public static Color FromNonPremultiplied(int r, int g, int b, int a)
         {
-            return new Color(r * a / 255, g * a / 255, b * a / 255, a);
+            int aFac = a / 255;
+            return new Color(r * aFac, g * aFac, b * aFac, a);
         }
 
         /// <summary>
@@ -566,10 +557,7 @@ namespace MonoGame.Framework
         /// <param name="value">Source <see cref="Color"/>.</param>
         /// <param name="scale">Factor.</param>
         /// <returns>Multiplication result.</returns>
-        public static Color Multiply(Color value, float scale)
-        {
-            return value * scale;
-        }
+        public static Color Multiply(Color value, float scale) => value * scale;
 
         /// <summary>
         /// Multiply <see cref="Color"/> by a scalar.
@@ -589,11 +577,12 @@ namespace MonoGame.Framework
         /// <summary>
         /// Gets the hexadecimal <see cref="string"/> representation of this <see cref="Color"/>.
         /// </summary>
-        public string ToHex()
-        {
-            uint hexOrder = (uint)(A << 0 | B << 8 | G << 16 | R << 24);
-            return hexOrder.ToString("x8");
-        }
+        public readonly string ToHex(IFormatProvider? provider) => PackedValue.ToString("x8", provider);
+
+        /// <summary>
+        /// Gets the hexadecimal <see cref="string"/> representation of this <see cref="Color"/>.
+        /// </summary>
+        public readonly string ToHex() => ToHex(CultureInfo.CurrentCulture);
 
         #region Deconstruct
 
@@ -618,9 +607,10 @@ namespace MonoGame.Framework
         /// <param name="b">Blue component value from 0.0f to 1.0f.</param>
         public readonly void Deconstruct(out float r, out float g, out float b)
         {
-            r = R / 255f;
-            g = G / 255f;
-            b = B / 255f;
+            var vector = ToScaledVector3();
+            r = vector.X;
+            g = vector.Y;
+            b = vector.Z;
         }
 
         /// <summary>
@@ -647,55 +637,48 @@ namespace MonoGame.Framework
         /// <param name="a">Alpha component value from 0.0f to 1.0f.</param>
         public readonly void Deconstruct(out float r, out float g, out float b, out float a)
         {
-            r = R / 255f;
-            g = G / 255f;
-            b = B / 255f;
-            a = A / 255f;
+            var vector = ToScaledVector4();
+            r = vector.X;
+            g = vector.Y;
+            b = vector.Z;
+            a = vector.W;
         }
 
         #endregion
 
         #region Equals
 
+        [CLSCompliant(false)]
+        public readonly bool Equals(uint other) => PackedValue == other;
+
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="Color"/>.
         /// </summary>
-        public readonly bool Equals(Color other)
-        {
-            return this == other;
-        }
-
-        /// <summary>
-        /// Compares whether current instance is equal to specified object.
-        /// </summary>
-        public override readonly bool Equals(object? obj)
-        {
-            return obj is Color other && Equals(other);
-        }
+        public readonly bool Equals(Color other) => this == other;
 
         /// <summary>
         /// Compares whether two <see cref="Color"/> instances are equal.
         /// </summary>
-        public static bool operator ==(in Color a, in Color b)
-        {
-            return a.PackedValue == b.PackedValue;
-        }
+        public static bool operator ==(Color a, Color b) => a.PackedValue == b.PackedValue;
 
         /// <summary>
         /// Compares whether two <see cref="Color"/> instances are not equal.
         /// </summary>
-        public static bool operator !=(in Color a, in Color b)
-        {
-            return a.PackedValue != b.PackedValue;
-        }
+        public static bool operator !=(Color a, Color b) => a.PackedValue != b.PackedValue;
+
         #endregion
 
         #region Object overrides
 
         /// <summary>
+        /// Compares whether current instance is equal to specified object.
+        /// </summary>
+        public override readonly bool Equals(object? obj) => obj is Color other && Equals(other);
+
+        /// <summary>
         /// Gets a hash code of the <see cref="Color"/>.
         /// </summary>
-        public override readonly int GetHashCode() => PackedValue.GetHashCode();
+        public override readonly int GetHashCode() => HashCode.Combine(PackedValue);
 
         /// <summary>
         /// Returns a <see cref="string"/> representation of this <see cref="Color"/>.
