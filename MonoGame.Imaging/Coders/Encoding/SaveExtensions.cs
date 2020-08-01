@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Imaging.Attributes.Format;
 using MonoGame.Imaging.Coders;
@@ -23,12 +21,14 @@ namespace MonoGame.Imaging
             EncodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
         {
+            if (images == null) 
+                throw new ArgumentNullException(nameof(images));
+            if (imagingConfig == null)
+                throw new ArgumentNullException(nameof(imagingConfig));
+
             AssertValidOutput(output);
 
             var encoder = AssertValidArguments(imagingConfig, format);
-            if (encoder == null) throw new ArgumentNullException(nameof(encoder));
-            if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
-            if (images == null) throw new ArgumentNullException(nameof(images));
 
             var state = encoder.CreateState(
                 imagingConfig, output, leaveOpen: true, cancellationToken);
@@ -186,8 +186,10 @@ namespace MonoGame.Imaging
         private static IImageEncoder AssertValidArguments(
             IImagingConfig imagingConfig, ImageFormat format)
         {
-            if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
-            if (format == null) throw new ArgumentNullException(nameof(format));
+            if (imagingConfig == null)
+                throw new ArgumentNullException(nameof(imagingConfig));
+            if (format == null) 
+                throw new ArgumentNullException(nameof(format));
 
             return imagingConfig.GetEncoder(format);
         }

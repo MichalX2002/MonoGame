@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
@@ -9,6 +10,7 @@ namespace MonoGame.Imaging
     {
         // TODO: move to PixelOperations class
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static void ConvertPixels<TPixelFrom, TPixelTo>(
             ReadOnlySpan<TPixelFrom> source, Span<TPixelTo> destination)
             where TPixelFrom : unmanaged, IPixel
