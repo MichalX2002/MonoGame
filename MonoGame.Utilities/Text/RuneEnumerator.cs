@@ -12,6 +12,11 @@ namespace MonoGame.Framework
     {
         private delegate bool MoveNextDelegate(ref RuneEnumerator enumerator);
 
+        private static MoveNextDelegate CachedSpanMoveNext { get; } = SpanMoveNext;
+        private static MoveNextDelegate CachedStringMoveNext { get; } = StringMoveNext;
+        private static MoveNextDelegate CachedBuilderMoveNext { get; } = BuilderMoveNext;
+        private static MoveNextDelegate CachedInterfaceMoveNext { get; } = InterfaceMoveNext;
+
         private MoveNextDelegate _moveNext;
 
         private SpanRuneEnumerator _spanEnumerator;
@@ -23,25 +28,25 @@ namespace MonoGame.Framework
 
         public RuneEnumerator(SpanRuneEnumerator spanEnumerator) : this()
         {
-            _moveNext = SpanMoveNext;
+            _moveNext = CachedSpanMoveNext;
             _spanEnumerator = spanEnumerator;
         }
 
         public RuneEnumerator(StringRuneEnumerator stringEnumerator) : this()
         {
-            _moveNext = StringMoveNext;
+            _moveNext = CachedStringMoveNext;
             _stringEnumerator = stringEnumerator;
         }
 
         public RuneEnumerator(StringBuilder.ChunkEnumerator builderEnumerator) : this()
         {
-            _moveNext = BuilderMoveNext;
+            _moveNext = CachedBuilderMoveNext;
             _builderEnumerator = builderEnumerator;
         }
 
         public RuneEnumerator(IEnumerator<Rune> interfaceEnumerator) : this()
         {
-            _moveNext = InterfaceMoveNext;
+            _moveNext = CachedInterfaceMoveNext;
             _interfaceEnumerator = interfaceEnumerator;
         }
 

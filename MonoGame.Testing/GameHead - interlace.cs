@@ -23,6 +23,8 @@ namespace MonoGame.Testing
 
         private SpriteFont _font;
 
+        private StringBuilder _debugBuilder = new StringBuilder();
+
         private Image _image;
         private Texture2D _tex;
 
@@ -84,9 +86,12 @@ namespace MonoGame.Testing
 
                             Console.WriteLine(x.Width + "x" + x.Height);
 
-                            Console.WriteLine("saving png...");
-                            x.Save("very big recoded.png", ImageFormat.Png);
-                            Console.WriteLine("saved");
+                            if (false)
+                            {
+                                Console.WriteLine("saving png...");
+                                x.Save("very big recoded.png", ImageFormat.Png);
+                                Console.WriteLine("saved");
+                            }
                         }
                     }
                 }
@@ -153,6 +158,7 @@ namespace MonoGame.Testing
                     var rowSpan = image.GetPixelByteSpan().Slice(
                         image.ByteStride * _lastRowFilled, 
                         image.ByteStride * rect.Height);
+
                     tex.SetData(rowSpan, rect);
                 }
                 _lastRowFilled = lastRow;
@@ -161,9 +167,9 @@ namespace MonoGame.Testing
             _spriteBatch.Begin(samplerState: SamplerState.LinearClamp);
             if (tex != null)
             {
-                float rot = 0; // -MathF.PI / 2;
-                float scale = 1 ; // 5.5f
-                var pos = new Vector2(0, 0); // tex.Width * scale);
+                float rot =  -MathF.PI / 2;
+                float scale = 1 / 5.5f;
+                var pos = new Vector2(0, tex.Width * scale);
 
                 _spriteBatch.Draw(
                     tex, pos, null, Color.White, rot, Vector2.Zero, scale, SpriteFlip.None, 0);
@@ -182,14 +188,24 @@ namespace MonoGame.Testing
 
                 int totalMbDecimals = (int)Math.Max(0, 4 - Math.Log10(totalMb));
                 int gcMbDecimals = (int)Math.Max(0, 4 - Math.Log10(gcMb));
-                var str =
-                    $"Memory: {Math.Round(totalMb, totalMbDecimals).ToString("0." + new string('0', totalMbDecimals))}M \n" +
-                    $"GC Heap: {Math.Round(gcMb, gcMbDecimals).ToString("0." + new string('0', gcMbDecimals))}M \n" +
-                    $"GC Counts: 0>{gc0} 1>{gc1} 2>{gc2}";
 
-                _spriteBatch.DrawString(_font, str, new Vector2(-1, -1), Color.White);
-                _spriteBatch.DrawString(_font, str, new Vector2(1, 1), Color.Black);
-                _spriteBatch.DrawString(_font, str, new Vector2(0, 0), Color.Cyan);
+                _debugBuilder.Append("Memory: ").Append(Math.Round(totalMb, totalMbDecimals)).AppendLine();
+                _debugBuilder.Append("GC Heap: ").Append(Math.Round(gcMb, gcMbDecimals)).AppendLine();
+                _debugBuilder.Append("GC Counts: [")
+                    .Append(gc0).Append(',')
+                    .Append(gc1).Append(',')
+                    .Append(gc2).Append(']').AppendLine();
+
+                //var str =
+                //    $"Memory: {Math.Round(totalMb, totalMbDecimals).ToString("0." + new string('0', totalMbDecimals))}M \n" +
+                //    $"GC Heap: {Math.Round(gcMb, gcMbDecimals).ToString("0." + new string('0', gcMbDecimals))}M \n" +
+                //    $"GC Counts: [{gc0}, {gc1}, {gc2}]";
+
+                RuneEnumerator e = _debugBuilder;
+                _spriteBatch.DrawString(_font, e, new Vector2(-1, -1), Color.White);
+                _spriteBatch.DrawString(_font, e, new Vector2(1, 1), Color.Black);
+                _spriteBatch.DrawString(_font, e, new Vector2(0, 0), Color.Cyan);
+                _debugBuilder.Clear();
             }
 
             _spriteBatch.End();
