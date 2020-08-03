@@ -426,7 +426,7 @@ namespace MonoGame.OpenGL
         [SuppressUnmanagedCodeSecurity()]
         [UnmanagedFunctionPointer(callingConvention)]
         [MonoNativeFunctionWrapper]
-        internal unsafe delegate void ShaderSourceDelegate(int shaderId, int count, IntPtr code, int length);
+        internal unsafe delegate void ShaderSourceDelegate(int shaderId, int count, IntPtr code, IntPtr length);
         internal static ShaderSourceDelegate ShaderSourceInternal;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -743,7 +743,8 @@ namespace MonoGame.OpenGL
 
 #if DEBUG
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void DebugMessageCallbackProc(int source, int type, int id, int severity, int length, IntPtr message, IntPtr userParam);
+        delegate void DebugMessageCallbackProc(
+            int source, int type, int id, int severity, int length, IntPtr message, IntPtr userParam);
         static DebugMessageCallbackProc DebugProc;
 
         [SuppressUnmanagedCodeSecurity()]
@@ -751,13 +752,14 @@ namespace MonoGame.OpenGL
         delegate void DebugMessageCallbackDelegate(DebugMessageCallbackProc callback, IntPtr userParam);
         static DebugMessageCallbackDelegate DebugMessageCallback;
 
-        internal delegate void ErrorDelegate(string message);
+        internal delegate void ErrorDelegate(string? message);
         internal static event ErrorDelegate OnError;
 
-        static void DebugMessageCallbackHandler(int source, int type, int id, int severity, int length, IntPtr message, IntPtr userParam)
+        static void DebugMessageCallbackHandler(
+            int source, int type, int id, int severity, int length, IntPtr message, IntPtr userParam)
         {
             var errorMessage = Marshal.PtrToStringAnsi(message);
-            Debug.WriteLine(errorMessage);
+            System.Diagnostics.Debug.WriteLine(errorMessage);
             OnError?.Invoke(errorMessage);
         }
 #endif
@@ -1050,11 +1052,11 @@ namespace MonoGame.OpenGL
 
         protected static IntPtr MarshalStringArrayToPtr(string[] strings)
         {
-            IntPtr intPtr = IntPtr.Zero;
+            var array = IntPtr.Zero;
             if (strings != null && strings.Length != 0)
             {
-                intPtr = Marshal.AllocHGlobal(strings.Length * IntPtr.Size);
-                if (intPtr == IntPtr.Zero)
+                array = Marshal.AllocHGlobal(strings.Length * IntPtr.Size);
+                if (array == IntPtr.Zero)
                     throw new OutOfMemoryException();
 
                 int i = 0;
@@ -1063,18 +1065,18 @@ namespace MonoGame.OpenGL
                     for (i = 0; i < strings.Length; i++)
                     {
                         IntPtr val = MarshalStringToPtr(strings[i]);
-                        Marshal.WriteIntPtr(intPtr, i * IntPtr.Size, val);
+                        Marshal.WriteIntPtr(array, i * IntPtr.Size, val);
                     }
                 }
                 catch (OutOfMemoryException)
                 {
                     for (i--; i >= 0; i--)
-                        Marshal.FreeHGlobal(Marshal.ReadIntPtr(intPtr, i * IntPtr.Size));
-                    Marshal.FreeHGlobal(intPtr);
+                        Marshal.FreeHGlobal(Marshal.ReadIntPtr(array, i * IntPtr.Size));
+                    Marshal.FreeHGlobal(array);
                     throw;
                 }
             }
-            return intPtr;
+            return array;
         }
 
         protected static unsafe IntPtr MarshalStringToPtr(string str)
@@ -1084,12 +1086,10 @@ namespace MonoGame.OpenGL
 
             int num = Encoding.ASCII.GetMaxByteCount(str.Length) + 1;
             IntPtr intPtr = Marshal.AllocHGlobal(num);
-            if (intPtr == IntPtr.Zero)
-                throw new OutOfMemoryException();
 
-            fixed (char* chars = str + RuntimeHelpers.OffsetToStringData / 2)
+            fixed (char* chars = str)
             {
-                int bytes = Encoding.ASCII.GetBytes(chars, str.Length, (byte*)(void*)intPtr, num);
+                int bytes = Encoding.ASCII.GetBytes(chars, str.Length, (byte*)intPtr, num);
                 Marshal.WriteByte(intPtr, bytes, 0);
                 return intPtr;
             }
@@ -1118,11 +1118,11 @@ namespace MonoGame.OpenGL
             return sb;
         }
 
-        internal static unsafe void ShaderSource(int shaderId, string code)
+        internal static void ShaderSource(int shaderId, string code)
         {
-            IntPtr intPtr = MarshalStringArrayToPtr(new string[] { code });
-            ShaderSourceInternal(shaderId, 1, intPtr, code.Length);
-            FreeStringArrayPtr(intPtr, 1);
+            IntPtr strArray = MarshalStringArrayToPtr(new string[] { code });
+            ShaderSourceInternal(shaderId, 1, strArray, IntPtr.Zero);
+            FreeStringArrayPtr(strArray, 1);
         }
 
         internal static unsafe void GetShader(int shaderId, ShaderParameter name, out int result)

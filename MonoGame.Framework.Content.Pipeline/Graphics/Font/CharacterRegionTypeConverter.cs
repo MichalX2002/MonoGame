@@ -19,9 +19,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             string source = value as string;
 
             if (string.IsNullOrEmpty(source))
-            {
-                throw new ArgumentException();
-            }
+                throw new ArgumentException(nameof(source));
 
             // Supported input formats:
             //  A
@@ -45,7 +43,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                     return new CharacterRegion(split[0], split[1]);
 
                 default:
-                    throw new ArgumentException();
+                    throw new ArgumentException(nameof(source));
             }
         }
 

@@ -84,9 +84,9 @@ namespace MonoGame.Testing
 
                             Console.WriteLine(x.Width + "x" + x.Height);
 
-                            Thread.Sleep(100);
-
-                            //x.Save("very big recoded.png", ImageFormat.Png);
+                            Console.WriteLine("saving png...");
+                            x.Save("very big recoded.png", ImageFormat.Png);
+                            Console.WriteLine("saved");
                         }
                     }
                 }
@@ -102,7 +102,7 @@ namespace MonoGame.Testing
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             _font = Content.Load<SpriteFont>("arial");
-
+            
             base.LoadContent();
         }
 
@@ -150,7 +150,9 @@ namespace MonoGame.Testing
                 var rect = new Rectangle(0, _lastRowFilled, image.Width, lastRow - _lastRowFilled);
                 if (rect.Height > 0)
                 {
-                    var rowSpan = image.GetPixelByteRowSpan(_lastRowFilled);
+                    var rowSpan = image.GetPixelByteSpan().Slice(
+                        image.ByteStride * _lastRowFilled, 
+                        image.ByteStride * rect.Height);
                     tex.SetData(rowSpan, rect);
                 }
                 _lastRowFilled = lastRow;
@@ -160,7 +162,7 @@ namespace MonoGame.Testing
             if (tex != null)
             {
                 float rot = 0; // -MathF.PI / 2;
-                float scale = 1 / 5.5f; // 5.5f
+                float scale = 1 ; // 5.5f
                 var pos = new Vector2(0, 0); // tex.Width * scale);
 
                 _spriteBatch.Draw(

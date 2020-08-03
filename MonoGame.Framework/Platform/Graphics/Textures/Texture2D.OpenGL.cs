@@ -236,7 +236,7 @@ namespace MonoGame.Framework.Graphics
 
         private void GenerateGLTextureIfRequired()
         {
-            if (_glTexture >= 0)
+            if (!_glTexture.IsNull)
                 return;
 
             _glTexture = GL.GenTexture();

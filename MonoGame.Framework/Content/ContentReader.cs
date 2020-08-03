@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
 using MonoGame.Framework.Utilities;
@@ -48,7 +49,7 @@ namespace MonoGame.Framework.Content
             return result;
         }
 
-        internal T ReadAsset<T>(T existingInstance)
+        internal T ReadAsset<T>([MaybeNull] T existingInstance)
         {
             InitializeTypeReaders();
 
@@ -74,13 +75,16 @@ namespace MonoGame.Framework.Content
             if (SharedResourceCount <= 0)
                 return;
 
-            var sharedResources = new object[SharedResourceCount];
+            var sharedResources = new object?[SharedResourceCount];
             for (var i = 0; i < SharedResourceCount; ++i)
-                sharedResources[i] = ReadObject<object>(null);
+                sharedResources[i] = ReadObject(default(object));
 
             // Fixup shared resources by calling each registered action
             foreach (var fixup in _sharedResourceFixups)
-                fixup.Value.Invoke(sharedResources[fixup.Key]);
+            {
+                if (fixup.Key != null)
+                    fixup.Value.Invoke(sharedResources[fixup.Key]);
+            }
         }
 
         public T ReadExternalReference<T>()
@@ -110,7 +114,7 @@ namespace MonoGame.Framework.Content
             return ReadObject(default(T));
         }
 
-        public T ReadObject<T>(T existingInstance)
+        public T ReadObject<T>([MaybeNull] T existingInstance)
         {
             int typeReaderIndex = Read7BitEncodedInt();
             if (typeReaderIndex == 0)

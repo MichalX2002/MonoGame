@@ -35,15 +35,27 @@ namespace MonoGame.Imaging.Tests
             {
                 Directory.CreateDirectory("savetest");
 
-                for (int i = 10; i < 100; i++)
+                void JpegAtQuality(int q)
                 {
                     using (var fs = new FileStream(
-                        $"savetest/test_q{i}.jpeg", FileMode.Create, FileAccess.Write, FileShare.None, 4096))
+                        $"savetest/test_q{q}.jpeg", FileMode.Create, FileAccess.Write, FileShare.None, 4096))
                     {
-                        imagee.Save(fs, ImageFormat.Jpeg, new JpegEncoderOptions(i));
+                        imagee.Save(fs, ImageFormat.Jpeg, new JpegEncoderOptions(q));
                     }
                 }
 
+                JpegAtQuality(1);
+                JpegAtQuality(5);
+                JpegAtQuality(10);
+                JpegAtQuality(20);
+                JpegAtQuality(30);
+                JpegAtQuality(50);
+                JpegAtQuality(70);
+                JpegAtQuality(90);
+                JpegAtQuality(95);
+                JpegAtQuality(100);
+
+                return;
                 imagee.Save("savetest/test.png");
                 imagee.Save("savetest/test_rle.tga", null, TgaEncoderOptions.Default);
                 imagee.Save("savetest/test_norle.tga", null, TgaEncoderOptions.NoRLE);

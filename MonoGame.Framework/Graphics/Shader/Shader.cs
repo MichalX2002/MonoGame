@@ -39,7 +39,7 @@ namespace MonoGame.Framework.Graphics
                 int textureSlot = reader.ReadByte();
                 int samplerSlot = reader.ReadByte();
 
-                SamplerState state = null;
+                SamplerState? state = null;
                 if (reader.ReadBoolean())
                 {
                     state = new SamplerState

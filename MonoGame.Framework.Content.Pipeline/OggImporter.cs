@@ -15,7 +15,9 @@ namespace MonoGame.Framework.Content.Pipeline
     public class OggImporter : ContentImporter<AudioContent>
     {
         /// <summary>
-        /// Called by the XNA Framework when importing an ogg audio file to be used as a game asset. This is the method called by the XNA Framework when an asset is to be imported into an object that can be recognized by the Content Pipeline.
+        /// Called by the XNA Framework when importing an ogg audio file to be used as a game asset. 
+        /// This is the method called by the XNA Framework when an asset is to be imported into 
+        /// an object that can be recognized by the Content Pipeline.
         /// </summary>
         /// <param name="filename">Name of a game asset file.</param>
         /// <param name="context">Contains information for importing a game asset, such as a logger interface.</param>

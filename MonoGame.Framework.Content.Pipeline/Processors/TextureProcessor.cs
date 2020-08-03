@@ -57,7 +57,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                 catch (Exception ex)
                 {
                     context.Logger.LogImportantMessage("Could not convert input texture for processing. " + ex.ToString());
-                    throw ex; 
+                    throw;
                 }
 
                 if (GenerateMipmaps)

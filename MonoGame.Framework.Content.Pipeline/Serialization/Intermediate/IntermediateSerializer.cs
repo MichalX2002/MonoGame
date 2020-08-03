@@ -245,7 +245,6 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
         /// </summary>
         internal Type FindType(string typeName)
         {
-
             typeName = typeName.Trim();
 
             // Shortcut for friendly C# names

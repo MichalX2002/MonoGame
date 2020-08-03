@@ -4,7 +4,7 @@ namespace MonoGame.Framework.Graphics
 {
     public class EffectTechniqueCollection : IReadOnlyList<EffectTechnique>
     {
-		private readonly EffectTechnique[] _techniques;
+        private readonly EffectTechnique[] _techniques;
 
         public int Count => _techniques.Length;
 
@@ -21,25 +21,21 @@ namespace MonoGame.Framework.Graphics
 
             return new EffectTechniqueCollection(techniques);
         }
-        
-        public EffectTechnique this[int index]
-        {
-            get { return _techniques [index]; }
-        }
 
-        public EffectTechnique this[string name]
+        public EffectTechnique this[int index] => _techniques[index];
+
+        public EffectTechnique? this[string name]
         {
-            get 
+            get
             {
                 // TODO: Add a name to technique lookup table.
-				foreach (var technique in _techniques) 
+                foreach (var technique in _techniques)
                 {
-					if (technique.Name == name)
-						return technique;
-			    }
-
-			    return null;
-		    }
+                    if (technique.Name == name)
+                        return technique;
+                }
+                return null;
+            }
         }
 
         public IEnumerator<EffectTechnique> GetEnumerator()

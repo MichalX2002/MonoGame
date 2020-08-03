@@ -20,13 +20,13 @@ namespace MonoGame.Framework.Graphics
         public int TextureSlot { get; }
         public int SamplerSlot { get; }
         public string Name { get; }
-        public SamplerState State { get; }
+        public SamplerState? State { get; }
 
         // TODO: This should be moved to EffectPass.
         public int Parameter { get; }
 
         public SamplerInfo(
-            SamplerType type, int textureSlot, int samplerSlot, string name, SamplerState state, int parameter)
+            SamplerType type, int textureSlot, int samplerSlot, string name, SamplerState? state, int parameter)
         {
             Type = type;
             TextureSlot = textureSlot;

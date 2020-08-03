@@ -108,9 +108,18 @@ namespace MonoGame.Framework.Content.Pipeline
             // Expand any environment variables.
             command = Environment.ExpandEnvironmentVariables(command);
 
-            // If we have a full path just pass it through.
-            if (File.Exists(command))
-                return command;
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
+            {
+                var exeName = string.Concat(AppContext.BaseDirectory, command, ".exe");
+                if (File.Exists(exeName))
+                    return exeName;
+            }
+            else
+            {
+                // If we have a full path just pass it through.
+                if (File.Exists(command))
+                    return command;
+            }
 
             // For Linux check specific subfolder
             var lincom = Path.Combine(AppContext.BaseDirectory, "linux", command);

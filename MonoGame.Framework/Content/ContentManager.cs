@@ -6,6 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq.Expressions;
@@ -75,8 +76,8 @@ namespace MonoGame.Framework.Content
         /// <summary>
         /// Allows a custom <see cref="ContentManager"/> to have it's assets reloaded.
         /// </summary>
-        protected Dictionary<string, object> LoadedAssets { get; } =
-            new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+        protected Dictionary<string, object?> LoadedAssets { get; } =
+            new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
 
         public string RootDirectory { get; set; } = string.Empty;
         public IServiceProvider ServiceProvider { get; }
@@ -155,33 +156,6 @@ namespace MonoGame.Framework.Content
             AddContentManager(this);
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-
-            // Once disposed, content manager wont be used again
-            RemoveContentManager(this);
-        }
-
-        // If disposing is true, it was called explicitly and we should dispose managed objects.
-        // If disposing is false, it was called by the finalizer and managed objects should not be disposed.
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                    Unload();
-
-                _disposed = true;
-            }
-        }
-
-        ~ContentManager()
-        {
-            Dispose(false);
-        }
-
         public string GetAssetPath(string assetName)
         {
             return Path.Combine(RootDirectory, assetName).Replace('\\', '/') + ".xnb";
@@ -204,10 +178,8 @@ namespace MonoGame.Framework.Content
                     string localizedAssetName = assetName + '.' + cultureName;
                     return Load<T>(localizedAssetName);
                 }
-                catch (ContentLoadException exception)
+                catch (ContentLoadException exception) when (exception.InnerException is FileNotFoundException)
                 {
-                    if (!(exception.InnerException is FileNotFoundException))
-                        throw exception;
                 }
             }
 
@@ -232,7 +204,7 @@ namespace MonoGame.Framework.Content
             var key = assetName.Replace('\\', '/');
 
             // Check for a previously loaded asset first
-            if (LoadedAssets.TryGetValue(key, out object asset))
+            if (LoadedAssets.TryGetValue(key, out var asset))
             {
                 if (asset is T typedAsset)
                     return typedAsset;
@@ -286,9 +258,9 @@ namespace MonoGame.Framework.Content
             }
         }
 
-        protected T ReadAsset<T>(string assetName, Action<IDisposable> recordDisposableObject)
+        protected T ReadAsset<T>(string assetName, Action<IDisposable>? recordDisposableObject)
         {
-            T asset = ReadAssetCore(assetName, default(T), recordDisposableObject);
+            T asset = ReadAssetCore<T>(assetName, default, recordDisposableObject);
 
             if (asset is GraphicsResource graphicsResult)
                 graphicsResult.Name = assetName;
@@ -324,7 +296,7 @@ namespace MonoGame.Framework.Content
             // The next int32 is the length of the XNB file
             int xnbLength = xnbReader.ReadInt32();
 
-            Stream decompressedStream = null;
+            Stream decompressedStream;
             if (compressedLzx || compressedLz4)
             {
                 // Decompress the xnb
@@ -335,7 +307,7 @@ namespace MonoGame.Framework.Content
                     int compressedSize = xnbLength - 14;
                     decompressedStream = new LzxDecoderStream(stream, decompressedSize, compressedSize);
                 }
-                else if (compressedLz4)
+                else //if (compressedLz4)
                 {
                     decompressedStream = new Lz4DecoderStream(stream);
                 }
@@ -401,7 +373,7 @@ namespace MonoGame.Framework.Content
         }
 
         protected virtual T ReadAssetCore<T>(
-            string assetName, T currentAsset, Action<IDisposable> recordDisposableObject)
+            string assetName, [MaybeNull] T currentAsset, Action<IDisposable>? recordDisposableObject)
         {
             if (string.IsNullOrEmpty(assetName))
                 throw new ArgumentNullException(nameof(assetName));
@@ -440,6 +412,33 @@ namespace MonoGame.Framework.Content
         internal RecyclableBuffer GetScratchBuffer(int size)
         {
             return RecyclableMemoryManager.Default.GetBuffer(size, nameof(ContentManager));
+        }
+
+        // If disposing is true, it was called explicitly and we should dispose managed objects.
+        // If disposing is false, it was called by the finalizer and managed objects should not be disposed.
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                    Unload();
+
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+
+            // Once disposed, content manager wont be used again
+            RemoveContentManager(this);
+        }
+
+        ~ContentManager()
+        {
+            Dispose(false);
         }
     }
 }

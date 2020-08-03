@@ -6,15 +6,35 @@ using StbSharp;
 
 namespace MonoGame.Imaging.Coders.Formats
 {
+    public enum JpegSubsampling
+    {
+        Allow,
+        Disallow,
+        Force,
+    }
+
     [Serializable]
     public class JpegEncoderOptions : EncoderOptions
     {
         public static new JpegEncoderOptions Default { get; } = new JpegEncoderOptions(90);
 
         public int Quality { get; }
-
-        public JpegEncoderOptions(int quality)
+        public JpegSubsampling Subsampling { get; }
+        
+        public JpegEncoderOptions(int quality, JpegSubsampling subsampling = JpegSubsampling.Allow)
         {
+            switch (subsampling)
+            {
+                case JpegSubsampling.Allow:
+                case JpegSubsampling.Disallow:
+                case JpegSubsampling.Force:
+                    Subsampling = subsampling;
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(subsampling));
+            }
+
             Quality = quality;
         }
     }
@@ -38,8 +58,11 @@ namespace MonoGame.Imaging.Coders.Formats
                 var options = encoderState.GetCoderOptionsOrDefault<JpegEncoderOptions>();
 
                 bool useFloatPixels = writeState.Depth > 8;
+                bool allowSubsample = options.Subsampling == JpegSubsampling.Allow;
+                bool forceSubsample = options.Subsampling == JpegSubsampling.Force;
 
-                ImageWrite.Jpeg.WriteCore(writeState, options.Quality, useFloatPixels);
+                ImageWrite.Jpeg.WriteCore(
+                    writeState, useFloatPixels, options.Quality, allowSubsample, forceSubsample);
             }
         }
     }

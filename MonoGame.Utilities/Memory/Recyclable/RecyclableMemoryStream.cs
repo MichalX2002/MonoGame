@@ -231,12 +231,7 @@ namespace MonoGame.Framework.Memory
         protected override void Dispose(bool disposing)
         {
             if (Interlocked.CompareExchange(ref _disposedState, 1, 0) != 0)
-            {
-                string doubleDisposeStack = null;
-                if (_memoryManager.GenerateCallStacks)
-                    doubleDisposeStack = Environment.StackTrace;
                 return;
-            }
 
             if (_memoryManager.GenerateCallStacks)
                 DisposeStack = Environment.StackTrace;

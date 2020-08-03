@@ -37,7 +37,8 @@ namespace MonoGame.Framework.Content.Pipeline
 	        using (var input = XmlReader.Create(filename))
 	            fontDescription = IntermediateSerializer.Deserialize<FontDescription>(input, filename);
 
-	        fontDescription.Identity = new ContentIdentity(new FileInfo(filename).FullName, "FontDescriptionImporter");
+	        fontDescription.Identity = new ContentIdentity(
+				new FileInfo(filename).FullName, nameof(FontDescriptionImporter));
 
 	        return fontDescription;
 	    }

@@ -77,17 +77,17 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             catch (EntryPointNotFoundException ex)
             {
                 context.Logger.LogImportantMessage("Could not find the entry point to compress the texture. " + ex.ToString());
-                throw ex;
+                throw;
             }
             catch (DllNotFoundException ex)
             {
                 context.Logger.LogImportantMessage("Could not compress texture. Required shared lib is missing. " + ex.ToString());
-                throw ex;
+                throw;
             }
             catch (Exception ex)
             {
                 context.Logger.LogImportantMessage("Could not convert texture. " + ex.ToString());
-                throw ex;
+                throw;
             }
         }
 

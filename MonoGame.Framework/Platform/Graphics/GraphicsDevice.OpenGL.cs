@@ -780,23 +780,47 @@ namespace MonoGame.Framework.Graphics
                 _shaderProgram = shaderProgram;
             }
 
-            var yFixupLoc = shaderProgram.GetUniformLocation("yFixup");
-            if (yFixupLoc == -1)
+            var posFixupLoc = shaderProgram.GetUniformLocation("posFixup");
+            if (posFixupLoc == -1)
                 return;
 
             // Apply vertex shader fix:
-            // The following line is appended to the end of vertex shaders
+            // The following two lines are appended to the end of vertex shaders
             // to account for rendering differences between OpenGL and DirectX:
             //
             // gl_Position.y = gl_Position.y * posFixup.y;
+            // gl_Position.xy += posFixup.zw * gl_Position.ww;
             //
             // (the following paraphrased from wine, wined3d/state.c and wined3d/glsl_shader.c)
+            //
             // - We need to flip along the y-axis in case of offscreen rendering.
+            // - D3D coordinates refer to pixel centers while GL coordinates refer
+            //   to pixel corners.
+            // - D3D has a top-left filling convention. We need to maintain this
+            //   even after the y-flip mentioned above.
+            // In order to handle the last two points, we translate by
+            // (63.0 / 128.0) / VPw and (63.0 / 128.0) / VPh. This is equivalent to
+            // translating slightly less than half a pixel. We want the difference to
+            // be large enough that it doesn't get lost due to rounding inside the
+            // driver, but small enough to prevent it from interfering with any
+            // anti-aliasing.
+            //
+            // OpenGL coordinates specify the center of the pixel while d3d coords specify
+            // the corner. The offsets are stored in z and w in posFixup. posFixup.y contains
+            // 1.0 or -1.0 to turn the rendering upside down for offscreen rendering. PosFixup.x
+            // contains 1.0 to allow a mad.
 
-            //If we have a render target bound (rendering offscreen), flip vertically
-            float yFixup = IsRenderTargetBound ? -1 : 1;
+            Span<float> posFixup = stackalloc float[4] { 1, 1, 0, 0 };
 
-            GL.Uniform1(yFixupLoc, yFixup);
+            //If we have a render target bound (rendering offscreen)
+            if (IsRenderTargetBound)
+            {
+                //flip vertically
+                posFixup[1] *= -1f;
+                posFixup[3] *= -1f;
+            }
+
+            GL.Uniform4(posFixupLoc, 1, posFixup);
             GL.CheckError();
         }
 
@@ -843,7 +867,6 @@ namespace MonoGame.Framework.Graphics
             if (!applyShaders)
                 return;
 
-            Debug.Assert(_shaderProgram != null);
 
             if (_indexBufferDirty && _indexBuffer != null)
             {
@@ -874,6 +897,7 @@ namespace MonoGame.Framework.Graphics
                 PixelShaderDirty = false;
             }
 
+            Debug.Assert(_shaderProgram != null);
             _vertexConstantBuffers.SetConstantBuffers(this, _shaderProgram);
             _pixelConstantBuffers.SetConstantBuffers(this, _shaderProgram);
 

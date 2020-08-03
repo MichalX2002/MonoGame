@@ -23,7 +23,7 @@ namespace MonoGame.Framework.Content
             // Do nothing. Are we supposed to add ourselves to the manager?
         }
 
-        protected internal abstract object Read(ContentReader input, object existingInstance);
+        protected internal abstract object? Read(ContentReader input, object? existingInstance);
     }
 
     public abstract class ContentTypeReader<T> : ContentTypeReader
@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Content
         {
         }
 
-        protected internal override object Read(ContentReader input, object existingInstance)
+        protected internal override object? Read(ContentReader input, object? existingInstance)
         {
             // as per the documentation 
             // http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.content.contenttypereader.read.aspx

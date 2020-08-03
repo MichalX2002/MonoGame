@@ -8,15 +8,15 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
     /// Describes a range of consecutive characters that should be included in the font.
     /// </summary>
     [TypeConverter(typeof(CharacterRegionTypeConverter))]
-    public readonly struct CharacterRegion
+    public struct CharacterRegion
     {
         /// <summary>
         /// The default character region, spanning the base ASCII character set.
         /// </summary>
         public static CharacterRegion Default { get; } = new CharacterRegion((Rune)' ', (Rune)'~');
 
-        public Rune Start { get; }
-        public Rune End { get; }
+        public Rune Start { get; set; }
+        public Rune End { get; set; }
 
         // Constructor.
         public CharacterRegion(Rune start, Rune end)

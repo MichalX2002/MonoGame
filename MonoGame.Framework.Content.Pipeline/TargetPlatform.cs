@@ -133,7 +133,7 @@ namespace MonoGame.Framework.Content.Pipeline
                 // convert legacy Platforms
                 if (value.Equals("Linux") || value.Equals("WindowsGL"))
                     return TargetPlatform.DesktopGL;
-                else throw fex;
+                else throw;
             }
         }
     }
