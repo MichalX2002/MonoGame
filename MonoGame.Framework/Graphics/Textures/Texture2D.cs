@@ -16,6 +16,16 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class Texture2D : Texture
     {
+        /// <summary>
+        /// Gets the default surface format preferred for most cases.
+        /// </summary>
+        public const SurfaceFormat DefaultSurfaceFormat = SurfaceFormat.Rgba32;
+
+        /// <summary>
+        /// Gets the default vector format based on <see cref="DefaultSurfaceFormat"/>.
+        /// </summary>
+        public static VectorFormat DefaultVectorFormat { get; }
+
         internal int ArraySize { get; private set; }
 
         #region Properties
@@ -47,36 +57,24 @@ namespace MonoGame.Framework.Graphics
         static Texture2D()
         {
             InitializeVectorFormats();
-        }
 
-        /// <summary>
-        /// Creates a new texture of the given size
-        /// </summary>
-        public Texture2D(GraphicsDevice graphicsDevice, int width, int height)
-            : this(graphicsDevice, width, height, false, SurfaceFormat.Rgba32, SurfaceType.Texture, false, 1)
-        {
+            DefaultVectorFormat = GetVectorFormat(DefaultSurfaceFormat) ??
+                throw new TypeLoadException("Failed to load default vector type.");
         }
 
         /// <summary>
         /// Creates a new texture of a given size with a surface format and optional mipmaps 
         /// </summary>
         public Texture2D(
-            GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format)
-            : this(graphicsDevice, width, height, mipmap, format, SurfaceType.Texture, false, 1)
+            GraphicsDevice graphicsDevice,
+            int width,
+            int height,
+            bool mipmap = false,
+            SurfaceFormat format = DefaultSurfaceFormat,
+            int arraySize = 1) :
+            this(
+                graphicsDevice, width, height, mipmap, format, SurfaceType.Texture, false, arraySize)
         {
-        }
-
-        /// <summary>
-        /// Creates a new texture array of a given size with a surface format and optional mipmaps.
-        /// </summary>
-        /// <exception cref="ArgumentException">
-        /// Given <see cref="GraphicsDevice"/> can't work with texture arrays.
-        /// </exception>
-        public Texture2D(
-            GraphicsDevice graphicsDevice, int width, int height, bool mipmap, SurfaceFormat format, int arraySize)
-            : this(graphicsDevice, width, height, mipmap, format, SurfaceType.Texture, false, arraySize)
-        {
-
         }
 
         /// <summary>
@@ -248,6 +246,9 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Changes the pixels of the texture.
         /// </summary>
+        /// <remarks>
+        /// Pixel data is converted to the texture format.
+        /// </remarks>
         /// <param name="image">New data for the texture.</param>
         /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
         /// <param name="level">Layer of the texture to modify.</param>
@@ -255,21 +256,75 @@ namespace MonoGame.Framework.Graphics
         /// <exception cref="ArgumentException">
         ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
-        [CLSCompliant(false)]
         public void SetData(
             Image image, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
         {
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
 
-            var pixelType = image.PixelType;
+            var srcVectorType = image.PixelType;
 
             ValidateParams(
-                pixelType.ElementSize, pixelType.Type.Name, level, arraySlice, rectangle,
+                Format.GetSize(), srcVectorType.Type.Name, level, arraySlice, rectangle,
                 image.Width * image.Height, out Rectangle checkedRect);
 
-            // TODO: finish this magical function
-            throw new NotImplementedException();
+            var dstVectorFormat = GetVectorFormat(Format);
+            var dstVectorTypes = dstVectorFormat.VectorTypes.Span;
+            foreach (var vectorType in dstVectorTypes)
+            {
+                if (srcVectorType == vectorType)
+                {
+                    int rowStride = checkedRect.Width * vectorType.ElementSize;
+                    if (image.ByteStride == rowStride)
+                    {
+                        SetData(image.GetPixelByteSpan(), checkedRect, level, arraySlice);
+                    }
+                    else
+                    {
+                        for (int y = 0; y < checkedRect.Height; y++)
+                        {
+                            var row = image.GetPixelByteRowSpan(y).Slice(0, rowStride);
+
+                            var textureRect = checkedRect;
+                            textureRect.Y += y;
+                            textureRect.Height = 1;
+
+                            SetData(row, textureRect, level, arraySlice);
+                        }
+                    }
+                    return;
+                }
+            }
+
+            Span<byte> buffer = stackalloc byte[4096];
+            var dstVectorType = dstVectorTypes[0];
+            int bufferCapacity = buffer.Length / dstVectorType.ElementSize;
+            int srcRowStride = checkedRect.Width * srcVectorType.ElementSize;
+            var convertPixels = Image.GetConvertPixelsDelegate(srcVectorType, dstVectorType);
+
+            for (int y = 0; y < checkedRect.Height; y++)
+            {
+                Span<byte> vectorRow = image.GetPixelByteRowSpan(y).Slice(0, srcRowStride);
+                int offset = 0;
+                do
+                {
+                    int count = checkedRect.Width > bufferCapacity ? bufferCapacity : checkedRect.Width;
+                    var slice = vectorRow.Slice(0, count * srcVectorType.ElementSize);
+
+                    convertPixels.Invoke(slice, buffer);
+
+                    var textureRect = new Rectangle(
+                        checkedRect.X + offset,
+                        checkedRect.Y + y,
+                        width: count,
+                        height: 1);
+                    SetData(buffer, textureRect, level, arraySlice);
+
+                    vectorRow = vectorRow.Slice(slice.Length);
+                    offset += count;
+
+                } while (!vectorRow.IsEmpty);
+            }
         }
 
         #endregion
@@ -354,17 +409,28 @@ namespace MonoGame.Framework.Graphics
 
         #region FromImage
 
-        [CLSCompliant(false)]
+        /// <summary>
+        /// Creates a 2D texture from an image.
+        /// </summary>
+        /// <param name="image">The image to load pixels from.</param>
+        /// <param name="graphicsDevice">The graphics device where the texture will be created.</param>
+        /// <param name="mipmap"><see langword="true"/> to generate mipmaps.</param>
+        /// <param name="format">The desired surface format to use for the texture.</param>
+        /// <returns>The texture created from the image.</returns>
         public static Texture2D FromImage(
-            Image image, GraphicsDevice graphicsDevice, bool mipmap, SurfaceFormat format)
+            Image image,
+            GraphicsDevice graphicsDevice,
+            bool mipmap = false,
+            SurfaceFormat? format = DefaultSurfaceFormat)
         {
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
+            if (graphicsDevice == null)
+                throw new ArgumentNullException(nameof(graphicsDevice));
 
-            ValidateFromImageParams(graphicsDevice, nameof(graphicsDevice), format, nameof(format));
-
-            var texture = new Texture2D(graphicsDevice, image.Width, image.Height, mipmap, format);
-            texture.SetData(image);
+            var checkedFormat = format ?? GetVectorFormat(image.PixelType.Type)?.SurfaceFormat ?? DefaultSurfaceFormat;
+            var texture = new Texture2D(graphicsDevice, image.Width, image.Height, mipmap, checkedFormat);
+            texture.SetData(image, new Rectangle(image.Width / 2, image.Height / 2, image.Width / 2, image.Height / 2));
             return texture;
         }
 
@@ -383,18 +449,18 @@ namespace MonoGame.Framework.Graphics
         /// <returns>The texture created from the image stream.</returns>
         /// <remarks>
         ///  Different image decoders may generate slight differences between platforms,
-        ///  but the images should be identical perceptually. 
+        ///  but the images should be perceptually identical. 
         ///  This call does not premultiply the image alpha.
         /// </remarks>
-        [CLSCompliant(false)]
         public static Texture2D FromStream(
             ImagingConfig imagingConfig,
             Stream stream,
             GraphicsDevice graphicsDevice,
-            bool mipmap,
-            SurfaceFormat format)
+            bool mipmap = false,
+            SurfaceFormat? format = DefaultSurfaceFormat)
         {
-            ValidateFromImageParams(graphicsDevice, nameof(graphicsDevice), format, nameof(format));
+            if (graphicsDevice == null)
+                throw new ArgumentNullException(nameof(graphicsDevice));
 
             using (var image = Image.Load(imagingConfig, stream))
                 return FromImage(image, graphicsDevice, mipmap, format);
@@ -409,36 +475,12 @@ namespace MonoGame.Framework.Graphics
         /// <param name="format">The desired surface format to use for the texture.</param>
         /// <returns>The texture created from the image stream.</returns>
         public static Texture2D FromStream(
-            Stream stream, GraphicsDevice graphicsDevice, bool mipmap, SurfaceFormat format)
+            Stream stream,
+            GraphicsDevice graphicsDevice,
+            bool mipmap = false,
+            SurfaceFormat? format = DefaultSurfaceFormat)
         {
             return FromStream(ImagingConfig.Default, stream, graphicsDevice, mipmap, format);
-        }
-
-        /// <summary>
-        /// Creates a 2D texture from a stream.
-        /// </summary>
-        /// <param name="stream">The stream from which to read the image data.</param>
-        /// <param name="graphicsDevice">The graphics device where the texture will be created.</param>
-        /// <param name="config">The configuration used to load the image.</param>
-        /// <returns>The <see cref="SurfaceFormat.Rgba32"/> texture created from the image stream.</returns>
-        [CLSCompliant(false)]
-        public static Texture2D FromStream(
-            ImagingConfig config, Stream stream, GraphicsDevice graphicsDevice)
-        {
-            return FromStream(config, stream, graphicsDevice, mipmap: false, SurfaceFormat.Rgba32);
-        }
-
-        /// <summary>
-        /// Creates a 2D texture from a stream.
-        /// </summary>
-        /// <param name="stream">The stream from which to read the image data.</param>
-        /// <param name="graphicsDevice">The graphics device where the texture will be created.</param>
-        /// <returns>The <see cref="SurfaceFormat.Rgba32"/> texture created from the image stream.</returns>
-        [CLSCompliant(false)]
-        public static Texture2D FromStream(Stream stream, GraphicsDevice graphicsDevice)
-        {
-            return FromStream(
-                ImagingConfig.Default, stream, graphicsDevice, mipmap: false, SurfaceFormat.Rgba32);
         }
 
         #endregion
@@ -450,13 +492,12 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="config">The configuration used to load the image.</param>
         /// <param name="stream">The image data with the same dimensions as this texture.</param>
-        [CLSCompliant(false)]
         public void Reload(ImagingConfig config, Stream stream)
         {
-            static Exception GetSizeException(string fieldName)
+            static Exception GetSizeException(string subject)
             {
                 throw new InvalidOperationException(
-                    $"The decoded image has a different {fieldName}. " +
+                    $"The decoded image has a different {subject}. " +
                     $"Texture dimensions may not be changed after construction.");
             }
 
@@ -465,8 +506,13 @@ namespace MonoGame.Framework.Graphics
                 if (image == null)
                     throw new InvalidDataException("No image in stream.");
 
-                if (image.Width != Width) throw GetSizeException("width");
-                if (image.Height != Height) throw GetSizeException("height");
+                if (image.Width != Width && image.Height != Height)
+                    throw GetSizeException("size");
+                if (image.Width != Width)
+                    throw GetSizeException("width");
+                if (image.Height != Height)
+                    throw GetSizeException("height");
+
                 SetData(image);
             }
         }
@@ -489,7 +535,6 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Retrieves the contents of the texture and puts them into an <see cref="Image"/>.
         /// </summary>
-        [CLSCompliant(false)]
         public Image ToImage(Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
         {
             CheckRect(level, rectangle, out Rectangle checkedRect);
@@ -512,9 +557,7 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <remarks>
         /// The surface format is converted into the specified <typeparamref name="TPixel"/> type.
-        /// 
         /// </remarks>
-        [CLSCompliant(false)]
         public Image<TPixel> ToImage<TPixel>(
             Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
             where TPixel : unmanaged, IPixel<TPixel>
@@ -533,7 +576,7 @@ namespace MonoGame.Framework.Graphics
                 using (data)
                 {
                     return Image.LoadPixelData<TPixel>(
-                        types[0], data.ByteSpan, checkedRect.Size.ToRect(), null);
+                        types[0], data.ByteSpan, checkedRect.Size.ToRect(), byteStride: null);
                 }
             }
             catch
@@ -557,7 +600,6 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">The cutout of the texture to save.</param>
         /// <param name="level">The texture level to save.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
-        [CLSCompliant(false)]
         public void Save(
             ImagingConfig imagingConfig,
             Stream stream,
@@ -567,9 +609,12 @@ namespace MonoGame.Framework.Graphics
             int level = 0,
             int arraySlice = 0)
         {
-            if (imagingConfig == null) throw new ArgumentNullException(nameof(imagingConfig));
-            if (stream == null) throw new ArgumentNullException(nameof(stream));
-            if (format == null) throw new ArgumentNullException(nameof(format));
+            if (imagingConfig == null)
+                throw new ArgumentNullException(nameof(imagingConfig));
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+            if (format == null)
+                throw new ArgumentNullException(nameof(format));
 
             using (var image = ToImage(rectangle, level, arraySlice))
                 image.Save(imagingConfig, stream, format, encoderOptions);
@@ -584,7 +629,6 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">The cutout of the texture to save.</param>
         /// <param name="level">The texture level to save.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
-        [CLSCompliant(false)]
         public void Save(
             Stream stream,
             ImageFormat format,
@@ -611,7 +655,6 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">The cutout of the texture to save.</param>
         /// <param name="level">The texture level to save.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
-        [CLSCompliant(false)]
         public void Save(
             ImagingConfig imagingConfig,
             string filePath,
@@ -644,7 +687,6 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">The cutout of the texture to save.</param>
         /// <param name="level">The texture level to save.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
-        [CLSCompliant(false)]
         public void Save(
             string filePath,
             ImageFormat? format = null,
@@ -660,17 +702,6 @@ namespace MonoGame.Framework.Graphics
         #endregion
 
         #region Parameter Validation
-
-        private static void ValidateFromImageParams(
-            GraphicsDevice graphicsDevice, string deviceParamName,
-            SurfaceFormat format, string formatParamName)
-        {
-            if (graphicsDevice == null)
-                throw new ArgumentNullException(deviceParamName);
-
-            if (!VectorFormatsBySurfaceRO.TryGetValue(format, out _))
-                throw UnsupportedSurfaceFormatForImagingException(format, formatParamName);
-        }
 
         private void ValidateParams(
             int typeSize, string typeName, int level, int arraySlice, Rectangle? rect,
