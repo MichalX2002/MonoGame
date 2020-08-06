@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
 
@@ -6,6 +7,33 @@ namespace MonoGame.Imaging
 {
     public partial class Image
     {
+        #region LoadPixelData<TFrom, TTo>(ReadOnlySpan<byte>)
+
+        public static void LoadPixelData<TPixelFrom, TPixelTo>(
+            ReadOnlySpan<byte> pixelData, Rectangle sourceRectangle, Image<TPixelTo> destination, int? byteStride)
+            where TPixelFrom : unmanaged, IPixel
+            where TPixelTo : unmanaged, IPixel<TPixelTo>
+        {
+            if (destination == null)
+                throw new ArgumentNullException(nameof(destination));
+
+            int srcOffsetX = sourceRectangle.X * Unsafe.SizeOf<TPixelFrom>();
+            int srcByteStride = byteStride ?? (sourceRectangle.Width * Unsafe.SizeOf<TPixelFrom>());
+
+            int dstByteStride = destination.ByteStride;
+            var dstBytes = destination.GetPixelByteSpan();
+
+            for (int y = 0; y < sourceRectangle.Height; y++)
+            {
+                var srcByteRow = pixelData.Slice(srcOffsetX + (sourceRectangle.Y + y) * srcByteStride, srcByteStride);
+                var dstByteRow = dstBytes.Slice(y * dstByteStride, dstByteStride);
+
+                ConvertPixelData<TPixelFrom, TPixelTo>(srcByteRow, dstByteRow);
+            }
+        }
+
+        #endregion
+
         #region LoadPixelData(FromType, ToType, ReadOnlySpan<byte>)
 
         public static Image LoadPixelData(
@@ -13,13 +41,13 @@ namespace MonoGame.Imaging
             VectorType destinationType,
             ReadOnlySpan<byte> pixelData,
             Rectangle sourceRectangle,
-            int? byteStride = null)
+            int? byteStride)
         {
-            var loadDelegate = GetLoadPixelSpanDelegate(sourceType, destinationType);
+            var loadDelegate = GetLoadPixelDataDelegate(sourceType, destinationType);
             var image = Create(destinationType, sourceRectangle.Size);
             try
             {
-                loadDelegate.Invoke(pixelData, sourceRectangle, byteStride, image);
+                loadDelegate.Invoke(pixelData, sourceRectangle, image, byteStride);
             }
             catch
             {
@@ -27,17 +55,6 @@ namespace MonoGame.Imaging
                 throw;
             }
             return image;
-        }
-
-        public static Image LoadPixelData(
-            VectorType sourceType,
-            VectorType destinationType,
-            ReadOnlySpan<byte> pixelData,
-            Size size,
-            int? byteStride = null)
-        {
-            return LoadPixelData(
-                sourceType, destinationType, pixelData, new Rectangle(size), byteStride);
         }
 
         #endregion
@@ -48,36 +65,9 @@ namespace MonoGame.Imaging
             VectorType pixelType,
             ReadOnlySpan<byte> pixelData,
             Rectangle sourceRectangle,
-            int? byteStride = null)
+            int? byteStride)
         {
             return LoadPixelData(pixelType, pixelType, pixelData, sourceRectangle, byteStride);
-        }
-
-        public static Image LoadPixelData(
-            VectorType pixelType, ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
-        {
-            return LoadPixelData(pixelType, pixelData, new Rectangle(size), byteStride);
-        }
-
-        #endregion
-
-        #region LoadPixelData<TFrom, TTo>(ReadOnlySpan<byte>)
-
-        public static Image<TPixelTo> LoadPixelData<TPixelFrom, TPixelTo>(
-            ReadOnlySpan<byte> pixelData, Rectangle sourceRectangle, int? byteStride = null)
-            where TPixelFrom : unmanaged, IPixel
-            where TPixelTo : unmanaged, IPixel<TPixelTo>
-        {
-            var fromType = VectorType.Get<TPixelFrom>();
-            return LoadPixelData<TPixelTo>(fromType, pixelData, sourceRectangle, byteStride);
-        }
-
-        public static Image<TPixelTo> LoadPixelData<TPixelFrom, TPixelTo>(
-            ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
-            where TPixelFrom : unmanaged, IPixel
-            where TPixelTo : unmanaged, IPixel<TPixelTo>
-        {
-            return LoadPixelData<TPixelFrom, TPixelTo>(pixelData, new Rectangle(size), byteStride);
         }
 
         #endregion
@@ -88,7 +78,7 @@ namespace MonoGame.Imaging
             VectorType sourceType,
             ReadOnlySpan<byte> pixelData,
             Rectangle sourceRectangle,
-            int? byteStride = null)
+            int? byteStride)
             where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
             var toType = VectorType.Get<TPixelTo>();
@@ -96,29 +86,17 @@ namespace MonoGame.Imaging
             return (Image<TPixelTo>)image;
         }
 
-        public static Image<TPixelTo> LoadPixelData<TPixelTo>(
-            VectorType sourceType, ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
-            where TPixelTo : unmanaged, IPixel<TPixelTo>
-        {
-            return LoadPixelData<TPixelTo>(sourceType, pixelData, new Rectangle(size), byteStride);
-        }
-
         #endregion
 
         #region LoadPixelData<T>(ReadOnlySpan<byte>)
 
         public static Image<TPixel> LoadPixelData<TPixel>(
-            ReadOnlySpan<byte> pixelData, Rectangle sourceRectangle, int? byteStride = null)
+            ReadOnlySpan<byte> pixelData, Rectangle sourceRectangle, int? byteStride)
             where TPixel : unmanaged, IPixel<TPixel>
         {
-            return LoadPixelData<TPixel, TPixel>(pixelData, sourceRectangle, byteStride);
-        }
-
-        public static Image<TPixel> LoadPixelData<TPixel>(
-            ReadOnlySpan<byte> pixelData, Size size, int? byteStride = null)
-            where TPixel : unmanaged, IPixel<TPixel>
-        {
-            return LoadPixelData<TPixel, TPixel>(pixelData, new Rectangle(size), byteStride);
+            var type = VectorType.Get<TPixel>();
+            var image = LoadPixelData(type, type, pixelData, sourceRectangle, byteStride);
+            return (Image<TPixel>)image;
         }
 
         #endregion

@@ -55,9 +55,6 @@ namespace MonoGame.Framework.Vectors
         /// <summary>Sets the pixel value from <see cref="Color"/>.</summary>
         void FromColor(Color source) => FromScaledVector(source.ToScaledVector4());
 
-        /// <summary>Sets the pixel value from <see cref="Rgba1010102"/>.</summary>
-        void FromColor(Rgba1010102 source) => FromScaledVector(source.ToScaledVector4());
-
         /// <summary>Sets the pixel value from an <see cref="Rgba64"/>.</summary>
         void FromColor(Rgba64 source) => FromScaledVector(source.ToScaledVector4());
 
@@ -85,6 +82,9 @@ namespace MonoGame.Framework.Vectors
 
         /// <summary>Sets the pixel value from an <see cref="Argb32"/>.</summary>
         void FromColor(Argb32 source) => FromColor(source.ToRgba32());
+
+        /// <summary>Sets the pixel value from <see cref="Rgba1010102"/>.</summary>
+        void FromColor(Rgba1010102 source) => FromScaledVector(source.ToScaledVector4());
 
         #endregion
 

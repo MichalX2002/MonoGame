@@ -20,9 +20,9 @@ using MonoGame.Framework.Input;
 using MonoGame.Framework.Vectors;
 using MonoGame.Imaging;
 
-namespace MonoGame.TestingC
+namespace MonoGame.Testing
 {
-    public class GameHead : Game
+    public class GameImageScroll : Game
     {
         private GraphicsDeviceManager _graphicsManager;
         private SpriteBatch _spriteBatch;
@@ -39,8 +39,23 @@ namespace MonoGame.TestingC
         private CancellationTokenSource _previewLoadCancellation = new CancellationTokenSource();
 
 
-        public GameHead()
+        public GameImageScroll()
         {
+            _ = new Size() / 2;
+            _ = new Size() / 2f;
+            _ = new Size() * 2;
+            _ = new Size() * 2f;
+
+            _ = new SizeF() + new Size();
+            _ = new SizeF() + new Point();
+            _ = new SizeF() + new Vector2();
+            _ = new SizeF() / 2f;
+            _ = new SizeF() * 2f;
+
+            _ = new PointF() + new Size();
+            _ = new PointF() + new Point();
+            _ = new PointF() + new Vector2();
+
             _graphicsManager = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
         }
@@ -84,7 +99,13 @@ namespace MonoGame.TestingC
                     {
                         ShouldIncludePredicate = (ref FileSystemEntry x) =>
                         {
-                            return !x.IsDirectory && (x.FileName.EndsWith(".bmp") || x.FileName.EndsWith(".png"));
+                            return !x.IsDirectory && 
+                                (x.FileName.EndsWith(".bmp") || 
+                                x.FileName.EndsWith(".png") ||
+                                x.FileName.EndsWith(".jpg") ||
+                                x.FileName.EndsWith(".jpeg") ||
+                                x.FileName.EndsWith(".jfif") ||
+                                x.FileName.EndsWith(".tga"));
                         }
                     })
                     {
@@ -210,9 +231,13 @@ namespace MonoGame.TestingC
         {
             GraphicsDevice.Clear(Color.Black);
 
+            viewY -= 2f;
+
             if (_moved)
             {
-                UpdateFrames((_lastViewport.Bounds.Size.ToSizeF() * 1f / renderscale).ToSize());
+                var size = (_lastViewport.Bounds.Size.ToSizeF() * 1f / renderscale).ToSize();
+                size.Height = 100000;
+                UpdateFrames(size);
                 _moved = false;
             }
 
@@ -222,6 +247,9 @@ namespace MonoGame.TestingC
 
             base.Draw(gameTime);
         }
+
+        private float viewY = 0;
+
 
         // make these into dynamic variables
         const int frameTextHeight = 40;
@@ -237,8 +265,9 @@ namespace MonoGame.TestingC
         private ConcurrentQueue<FrameLayout> _previewLoadQueue = new ConcurrentQueue<FrameLayout>();
         const int uploadsPerFrame = 10;
 
-        static float renderscale = 0.5f;
-        static Matrix4x4 transformation => Matrix4x4.CreateScale(renderscale);
+        float renderscale = 0.66f;
+        Matrix4x4 transformation => 
+            Matrix4x4.CreateScale(renderscale) * Matrix4x4.CreateTranslation(0, viewY, 0);
 
         private void ClearFrames()
         {
@@ -307,21 +336,6 @@ namespace MonoGame.TestingC
                     {
                         var boundsRect = frame.BoundsRect;
                         var center = boundsRect.Position + boundsRect.Size / 2;
-
-                        _ = new Size() / 2;
-                        _ = new Size() / 2f;
-                        _ = new Size() * 2;
-                        _ = new Size() * 2f;
-
-                        _ = new SizeF() + new Size();
-                        _ = new SizeF() + new Point();
-                        _ = new SizeF() + new Vector2();
-                        _ = new SizeF() / 2f;
-                        _ = new SizeF() * 2f;
-
-                        _ = new PointF() + new Size();
-                        _ = new PointF() + new Point();
-                        _ = new PointF() + new Vector2();
 
                         float radius1 = MathF.Sin(animX) * 10 + 15;
                         float radius2 = MathF.Cos(animX + MathF.PI / 2) * 10 + 15;

@@ -27,7 +27,7 @@ namespace MonoGame.Framework.Vectors
         public static VectorType Get<TVector>()
             where TVector : unmanaged, IVector
         {
-            // Using a static generic class should allow the JIT to devirtualize the getter,
+            // Using a static generic class should allow the JIT to devirtualize this getter,
             // granting performance equal to accessing a static field 
             // instead of a (expensive in comparison) dictionary lookup when using a Type.
             return VectorType<TVector>.Instance;
@@ -50,6 +50,11 @@ namespace MonoGame.Framework.Vectors
         }
     }
 
+    /// <summary>
+    /// </summary>
+    /// <remarks>
+    /// Marked as sealed to allow for JIT devirtualization.
+    /// </remarks>
     internal sealed class VectorType<TVector> : VectorType
         where TVector : unmanaged, IVector
     {

@@ -96,6 +96,11 @@ namespace MonoGame.Framework
             return new Vector2(Width, Height);
         }
 
+        public readonly Rectangle ToRect()
+        {
+            return new Rectangle(0, 0, Width, Height);
+        }
+
         /// <summary>
         /// Calculates the <see cref="Size" /> representing the vector addition of two <see cref="Size" /> structures.
         /// </summary>
@@ -181,7 +186,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns a value indicating whether this <see cref="Size" /> is equal to a specified object.
         /// </summary>
-        public override readonly bool Equals(object obj) => obj is Size size && Equals(size);
+        public override readonly bool Equals(object? obj) => obj is Size size && Equals(size);
 
         /// <summary>
         /// Compares two <see cref="Size" /> structures. The result specifies

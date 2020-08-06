@@ -4,16 +4,16 @@ using MonoGame.Framework;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 
-namespace MonoGame.TestingD
+namespace MonoGame.Testing
 {
-    public class GameHead : Game
+    public class GameDropOnWindow : Game
     {
         private GraphicsDeviceManager _graphicsManager;
         private SpriteBatch _spriteBatch;
 
         private SpriteFont _font;
 
-        public GameHead()
+        public GameDropOnWindow()
         {
             _graphicsManager = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";

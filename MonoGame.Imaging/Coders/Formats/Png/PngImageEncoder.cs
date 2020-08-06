@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Compression;
+using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Attributes.Coder;
 using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Pixels;
@@ -11,7 +12,7 @@ namespace MonoGame.Imaging.Coders.Formats
     public class PngEncoderOptions : EncoderOptions
     {
         public static new PngEncoderOptions Default { get; } =
-            new PngEncoderOptions(CompressionLevel.Optimal);
+            new PngEncoderOptions(CompressionLevel.Fastest);
 
         public CompressionLevel CompressionLevel { get; }
 
@@ -40,7 +41,7 @@ namespace MonoGame.Imaging.Coders.Formats
                 var options = encoderState.GetCoderOptionsOrDefault<PngEncoderOptions>();
                 
                 // TODO: add forcedFilter option
-                ImageWrite.Png.Write(writeState, options.CompressionLevel, null);
+                ImageWrite.Png.Write(writeState, options.CompressionLevel, null, RecyclableArrayPool.Shared);
             }
         }
     }

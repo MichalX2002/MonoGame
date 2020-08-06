@@ -7,7 +7,7 @@ namespace MonoGame.Testing
         [STAThread]
         static void Main()
         {
-            using (var game = new GameHead())
+            using (var game = new GameImageInterlace())
                 game.Run();
         }
     }

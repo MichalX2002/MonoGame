@@ -44,6 +44,12 @@ namespace MonoGame.Imaging
                 for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromAlpha(typedSource[x]);
             }
+            else if (typeof(TPixelFrom) == typeof(Alpha32))
+            {
+                var typedSource = MemoryMarshal.Cast<TPixelFrom, Alpha32>(source);
+                for (int x = 0; x < typedSource.Length; x++)
+                    destination[x].FromAlpha(typedSource[x]);
+            }
             else if (typeof(TPixelFrom) == typeof(AlphaF))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, AlphaF>(source);
@@ -65,15 +71,21 @@ namespace MonoGame.Imaging
                 for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromGray(typedSource[x]);
             }
-            else if (typeof(TPixelFrom) == typeof(GrayAlpha16))
+            else if (typeof(TPixelFrom) == typeof(Gray32))
             {
-                var typedSource = MemoryMarshal.Cast<TPixelFrom, GrayAlpha16>(source);
+                var typedSource = MemoryMarshal.Cast<TPixelFrom, Gray32>(source);
                 for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromGray(typedSource[x]);
             }
             else if (typeof(TPixelFrom) == typeof(GrayF))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, GrayF>(source);
+                for (int x = 0; x < typedSource.Length; x++)
+                    destination[x].FromGray(typedSource[x]);
+            }
+            else if (typeof(TPixelFrom) == typeof(GrayAlpha16))
+            {
+                var typedSource = MemoryMarshal.Cast<TPixelFrom, GrayAlpha16>(source);
                 for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromGray(typedSource[x]);
             }
@@ -86,15 +98,15 @@ namespace MonoGame.Imaging
                 for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromColor(typedSource[x]);
             }
-            else if (typeof(TPixelFrom) == typeof(Color))
-            {
-                var typedSource = MemoryMarshal.Cast<TPixelFrom, Color>(source);
-                for (int x = 0; x < typedSource.Length; x++)
-                    destination[x].FromColor(typedSource[x]);
-            }
             else if (typeof(TPixelFrom) == typeof(Rgb48))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, Rgb48>(source);
+                for (int x = 0; x < typedSource.Length; x++)
+                    destination[x].FromColor(typedSource[x]);
+            }
+            else if (typeof(TPixelFrom) == typeof(Color))
+            {
+                var typedSource = MemoryMarshal.Cast<TPixelFrom, Color>(source);
                 for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromColor(typedSource[x]);
             }
@@ -107,18 +119,6 @@ namespace MonoGame.Imaging
             #endregion
 
             #region Arbitrary Color
-            else if (typeof(TPixelFrom) == typeof(Abgr32))
-            {
-                var typedSource = MemoryMarshal.Cast<TPixelFrom, Abgr32>(source);
-                for (int x = 0; x < typedSource.Length; x++)
-                    destination[x].FromColor(typedSource[x]);
-            }
-            else if (typeof(TPixelFrom) == typeof(Argb32))
-            {
-                var typedSource = MemoryMarshal.Cast<TPixelFrom, Argb32>(source);
-                for (int x = 0; x < typedSource.Length; x++)
-                    destination[x].FromColor(typedSource[x]);
-            }
             else if (typeof(TPixelFrom) == typeof(Bgr565))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, Bgr565>(source);
@@ -131,15 +131,39 @@ namespace MonoGame.Imaging
                 for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromColor(typedSource[x]);
             }
+            else if (typeof(TPixelFrom) == typeof(Bgra4444))
+            {
+                var typedSource = MemoryMarshal.Cast<TPixelFrom, Bgra4444>(source);
+                for (int x = 0; x < typedSource.Length; x++)
+                    destination[x].FromColor(typedSource[x]);
+            }
             else if (typeof(TPixelFrom) == typeof(Bgra5551))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, Bgra5551>(source);
                 for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromColor(typedSource[x]);
             }
+            else if (typeof(TPixelFrom) == typeof(Abgr32))
+            {
+                var typedSource = MemoryMarshal.Cast<TPixelFrom, Abgr32>(source);
+                for (int x = 0; x < typedSource.Length; x++)
+                    destination[x].FromColor(typedSource[x]);
+            }
+            else if (typeof(TPixelFrom) == typeof(Argb32))
+            {
+                var typedSource = MemoryMarshal.Cast<TPixelFrom, Argb32>(source);
+                for (int x = 0; x < typedSource.Length; x++)
+                    destination[x].FromColor(typedSource[x]);
+            }
             else if (typeof(TPixelFrom) == typeof(Bgra32))
             {
                 var typedSource = MemoryMarshal.Cast<TPixelFrom, Bgra32>(source);
+                for (int x = 0; x < typedSource.Length; x++)
+                    destination[x].FromColor(typedSource[x]);
+            }
+            else if (typeof(TPixelFrom) == typeof(Rgba1010102))
+            {
+                var typedSource = MemoryMarshal.Cast<TPixelFrom, Rgba1010102>(source);
                 for (int x = 0; x < typedSource.Length; x++)
                     destination[x].FromColor(typedSource[x]);
             }
@@ -273,8 +297,8 @@ namespace MonoGame.Imaging
         {
             ConvertPixels((ReadOnlySpan<TPixelFrom>)source, destination);
         }
-
-        public static void ConvertPixelBytes<TPixelFrom, TPixelTo>(
+        
+        public static void ConvertPixelData<TPixelFrom, TPixelTo>(
             ReadOnlySpan<byte> source, Span<byte> destination)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel
@@ -284,7 +308,7 @@ namespace MonoGame.Imaging
             ConvertPixels(src, dst);
         }
 
-        public static void ConvertPixelBytes(
+        public static void ConvertPixelData(
             VectorType sourceType, VectorType destinationType,
             ReadOnlySpan<byte> source, Span<byte> destination)
         {

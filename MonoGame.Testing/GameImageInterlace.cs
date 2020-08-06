@@ -5,18 +5,22 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Numerics;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
+using MonoGame.Framework.Vectors;
 using MonoGame.Imaging;
 using MonoGame.Imaging.Coders.Decoding;
+using MonoGame.Imaging.Coders.Formats;
 
 namespace MonoGame.Testing
 {
-    public class GameHead : Game
+    public class GameImageInterlace : Game
     {
         private GraphicsDeviceManager _graphicsManager;
         private SpriteBatch _spriteBatch;
@@ -32,8 +36,14 @@ namespace MonoGame.Testing
         private int _lastRow = 0;
         private bool _finished = false;
 
-        public GameHead()
+        public GameImageInterlace()
         {
+            var int1 = Vector128.Create(1, 2, 3, 4);
+            var int2 = Vector128.Create(5, 6, 7, 8);
+            var xd = Sse2.UnpackLow(int1, int2);
+
+            Console.WriteLine(xd);
+
             _graphicsManager = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
         }
@@ -61,36 +71,58 @@ namespace MonoGame.Testing
             {
                 try
                 {
-                    Thread.Sleep(500);
-
                     var ww = new Stopwatch();
 
                     var http = new HttpClient();
-                    
+
                     for (int i = 0; i < 1; i++)
                     {
                         using (var fs = new FileStream(
-                            //@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg",
+                            @"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg",
                             //"../../very big interlace.png",
-                            "../../very_big_interlace pog.jpg",
-                            FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 4))
+                            //"../../very_big_interlace pog.jpg",
+                            FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 8))
                         //using(var fs = await http.GetStreamAsync(
                         //    "https://upload.wikimedia.org/wikipedia/commons/3/3d/LARGE_elevation.jpg"))
                         {
+                            Thread.Sleep(1000);
+
                             ww.Restart();
-                            var x = Image.Load<Color>(fs, onProgress: OnProgress);
+                            var x = Image.Load<Bgra4444>(fs, onProgress: OnProgress);
 
                             _finished = true;
                             ww.Stop();
                             Console.WriteLine("Time: " + ww.Elapsed.TotalMilliseconds + "ms");
 
+                            Thread.Sleep(1000);
+
                             Console.WriteLine(x.Width + "x" + x.Height);
 
-                            if (false)
+                            var lastRow = x.GetPixelRowSpan(x.Height - 1);
+                            Console.WriteLine(lastRow[0]);
+
+                            if (true)
                             {
                                 Console.WriteLine("saving png...");
+                                ww.Restart();
                                 x.Save("very big recoded.png", ImageFormat.Png);
-                                Console.WriteLine("saved");
+                                ww.Stop();
+                                Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
+
+                                Thread.Sleep(1000);
+
+                                Console.WriteLine("Reloading saved png...");
+                                var xd = Image.Load<Color>(File.OpenRead("very big recoded.png"));
+                                Console.WriteLine("Reloaded");
+                                //
+                                //var reLastRow = xd.GetPixelRowSpan(xd.Height - 1);
+                                //Console.WriteLine(reLastRow[0]);
+
+                                //Console.WriteLine("saving reloaded png...");
+                                //ww.Restart();
+                                //x.Save("very big reloaded.png", ImageFormat.Png);
+                                //ww.Stop();
+                                //Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
                             }
                         }
                     }
@@ -107,7 +139,7 @@ namespace MonoGame.Testing
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             _font = Content.Load<SpriteFont>("arial");
-            
+
             base.LoadContent();
         }
 
@@ -156,7 +188,7 @@ namespace MonoGame.Testing
                 if (rect.Height > 0)
                 {
                     var rowSpan = image.GetPixelByteSpan().Slice(
-                        image.ByteStride * _lastRowFilled, 
+                        image.ByteStride * _lastRowFilled,
                         image.ByteStride * rect.Height);
 
                     tex.SetData(rowSpan, rect);
@@ -167,7 +199,7 @@ namespace MonoGame.Testing
             _spriteBatch.Begin(samplerState: SamplerState.LinearClamp);
             if (tex != null)
             {
-                float rot =  -MathF.PI / 2;
+                float rot = -MathF.PI / 2;
                 float scale = 1 / 5.5f;
                 var pos = new Vector2(0, tex.Width * scale);
 

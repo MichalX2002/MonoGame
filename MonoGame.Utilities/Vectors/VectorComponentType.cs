@@ -6,9 +6,14 @@ namespace MonoGame.Framework.Vectors
         Undefined,
 
         /// <summary>
-        /// Represents a bit field component that has a specialized encoding.
+        /// Represents a unsigned bit field component that has a specialized encoding.
         /// </summary>
         BitField,
+
+        /// <summary>
+        /// Represents a signed bit field component that has a specialized encoding.
+        /// </summary>
+        SignedBitField,
 
         Int8,
         UInt8,

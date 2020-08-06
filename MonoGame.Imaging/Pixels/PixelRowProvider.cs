@@ -10,7 +10,7 @@ namespace MonoGame.Imaging.Pixels
         private readonly IReadOnlyPixelRows _pixelRows;
         private readonly IReadOnlyPixelBuffer? _pixelBuffer;
         private readonly byte[]? _rowBuffer;
-        private readonly Image.ConvertPixelsDelegate _convertPixels;
+        private readonly Image.ConvertPixelDataDelegate _convertPixels;
 
         public int Components { get; }
         public int Depth { get; }

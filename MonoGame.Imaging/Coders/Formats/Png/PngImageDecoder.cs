@@ -13,7 +13,7 @@ namespace MonoGame.Imaging.Coders.Formats.Png
             StbImageDecoderState decoderState, ImageRead.ReadState readState)
         {
             ImageRead.Png.Load(
-                decoderState.Reader, readState, ImageRead.ScanMode.Load, RecyclableArrayPool.Default);
+                decoderState.Reader, readState, ImageRead.ScanMode.Load, RecyclableArrayPool.Shared);
         }
     }
 }

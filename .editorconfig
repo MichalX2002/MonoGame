@@ -59,3 +59,6 @@ dotnet_diagnostic.CA2225.severity = none
 
 # CS8604: Possible null reference argument.
 dotnet_diagnostic.CS8604.severity = none
+
+# CA2213: Disposable fields should be disposed
+dotnet_diagnostic.CA2213.severity = none

@@ -15,7 +15,7 @@ namespace MonoGame.Imaging.Coders.Decoding
         private OutputPixelLineDelegate _onOutputPixelLine;
         private OutputPixelDelegate _onOutputPixel;
 
-        private Image.ConvertPixelsDelegate? _convertPixelSpan;
+        private Image.ConvertPixelDataDelegate? _convertPixels;
         private byte[]? Buffer { get; set; }
 
         public VectorType? SourcePixelType { get; private set; }
@@ -74,7 +74,7 @@ namespace MonoGame.Imaging.Coders.Decoding
             else
                 CurrentImage = Image.CreateUninitialized(dstType, size);
 
-            _convertPixelSpan = Image.GetConvertPixelsDelegate(SourcePixelType, dstType);
+            _convertPixels = Image.GetConvertPixelsDelegate(SourcePixelType, dstType);
 
             InvokeProgress(0, null);
         }
@@ -105,7 +105,7 @@ namespace MonoGame.Imaging.Coders.Decoding
                 if (addressing == AddressingMajor.Row)
                 {
                     var dstSpan = CurrentImage.GetPixelByteRowSpan(line);
-                    _convertPixelSpan!.Invoke(pixels, dstSpan);
+                    _convertPixels!.Invoke(pixels, dstSpan);
                 }
                 else if (addressing == AddressingMajor.Column)
                 {
@@ -121,7 +121,7 @@ namespace MonoGame.Imaging.Coders.Decoding
 
         private void OnOutputPixelLine(
             ReadState state, AddressingMajor addressing,
-            int line, int start, int spacing, ReadOnlySpan<byte> pixels)
+            int line, int start, int spacing, ReadOnlySpan<byte> pixelData)
         {
             if (spacing == 0)
                 throw new ArgumentOutOfRangeException(nameof(spacing));
@@ -129,27 +129,25 @@ namespace MonoGame.Imaging.Coders.Decoding
             AssertValidStateForOutput();
 
             if (HasProgressListener)
-            {
                 InvokeProgress(0, new Rectangle(new Point(start, line), CurrentImage!.Size));
-            }
 
             if (spacing == 1)
             {
-                OnOutputPixelLineContiguous(addressing, line, start, pixels);
+                OnOutputPixelLineContiguous(addressing, line, start, pixelData);
                 return;
             }
 
-            int elementSize = CurrentImage!.PixelType.ElementSize;
+            int dstElementSize = CurrentImage!.PixelType.ElementSize;
 
             if (SourcePixelType == CurrentImage.PixelType)
             {
                 if (addressing == AddressingMajor.Row)
                 {
-                    var imageRow = CurrentImage.GetPixelByteRowSpan(line).Slice(start * elementSize);
-                    for (int x = 0; x < pixels.Length; x += elementSize)
+                    var imageRow = CurrentImage.GetPixelByteRowSpan(line).Slice(start * dstElementSize);
+                    for (int x = 0; x < pixelData.Length; x += dstElementSize)
                     {
-                        var src = pixels.Slice(x, elementSize);
-                        var dst = imageRow.Slice(x * spacing, elementSize);
+                        var src = pixelData.Slice(x, dstElementSize);
+                        var dst = imageRow.Slice(x * spacing, dstElementSize);
                         src.CopyTo(dst);
                     }
                 }
@@ -164,35 +162,38 @@ namespace MonoGame.Imaging.Coders.Decoding
             }
             else
             {
+
                 if (addressing == AddressingMajor.Row)
                 {
-                    // Create buffer with size aligned to element size.
-                    Span<byte> buffer = stackalloc byte[4096 / elementSize * elementSize];
-                    var imageRow = CurrentImage.GetPixelByteRowSpan(line).Slice(start * elementSize);
+                    Span<byte> imageRow = CurrentImage.GetPixelByteRowSpan(line).Slice(start * dstElementSize);
+                    Span<byte> buffer = stackalloc byte[4096];
                     int srcElementSize = SourcePixelType!.ElementSize;
+                    int bufferCapacity = buffer.Length / dstElementSize;
+                    int pixelCount = pixelData.Length / srcElementSize;
+                    int dstOffset = 0;
 
-                    while (!pixels.IsEmpty)
+                    do
                     {
-                        var pixelSlice = pixels.Length > buffer.Length
-                            ? pixels.Slice(0, buffer.Length)
-                            : pixels;
+                        int count = pixelCount > bufferCapacity ? bufferCapacity : pixelCount;
+                        var slice = pixelData.Slice(0, count * srcElementSize);
 
-                        Image.ConvertPixelBytes(
-                            SourcePixelType!, CurrentImage.PixelType, pixelSlice, buffer);
+                        _convertPixels!.Invoke(slice, buffer);
 
-                        int dstOffset = 0;
-                        for (int x = 0; x < pixelSlice.Length; x += srcElementSize)
+                        int bufOffset = 0;
+                        for (int x = 0; x < slice.Length; x += srcElementSize)
                         {
-                            var src = buffer.Slice(dstOffset, elementSize);
-                            var dst = imageRow.Slice(dstOffset * spacing, elementSize);
+                            var src = buffer.Slice(bufOffset, dstElementSize);
+                            var dst = imageRow.Slice(dstOffset, dstElementSize);
                             src.CopyTo(dst);
 
-                            dstOffset += elementSize;
+                            bufOffset += dstElementSize;
+                            dstOffset += dstElementSize * spacing;
                         }
 
-                        pixels = pixels.Slice(pixelSlice.Length);
-                        imageRow = imageRow.Slice(dstOffset);
-                    }
+                        pixelData = pixelData.Slice(slice.Length);
+                        pixelCount -= count;
+
+                    } while (!pixelData.IsEmpty);
                 }
                 else if (addressing == AddressingMajor.Column)
                 {

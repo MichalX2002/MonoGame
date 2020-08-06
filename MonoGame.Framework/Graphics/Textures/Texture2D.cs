@@ -462,6 +462,9 @@ namespace MonoGame.Framework.Graphics
 
             using (var image = Image.Load(config, stream))
             {
+                if (image == null)
+                    throw new InvalidDataException("No image in stream.");
+
                 if (image.Width != Width) throw GetSizeException("width");
                 if (image.Height != Height) throw GetSizeException("height");
                 SetData(image);
@@ -528,8 +531,10 @@ namespace MonoGame.Framework.Graphics
                         return Image.WrapMemory<TPixel>(data, checkedRect.Size, leaveOpen: false);
 
                 using (data)
+                {
                     return Image.LoadPixelData<TPixel>(
-                        types[0], data.ByteSpan, checkedRect.Size);
+                        types[0], data.ByteSpan, checkedRect.Size.ToRect(), null);
+                }
             }
             catch
             {
@@ -557,7 +562,7 @@ namespace MonoGame.Framework.Graphics
             ImagingConfig imagingConfig,
             Stream stream,
             ImageFormat format,
-            EncoderOptions encoderOptions = null,
+            EncoderOptions? encoderOptions = null,
             Rectangle? rectangle = null,
             int level = 0,
             int arraySlice = 0)
@@ -583,7 +588,7 @@ namespace MonoGame.Framework.Graphics
         public void Save(
             Stream stream,
             ImageFormat format,
-            EncoderOptions encoderOptions = null,
+            EncoderOptions? encoderOptions = null,
             Rectangle? rectangle = null,
             int level = 0,
             int arraySlice = 0)
@@ -610,8 +615,8 @@ namespace MonoGame.Framework.Graphics
         public void Save(
             ImagingConfig imagingConfig,
             string filePath,
-            ImageFormat format = null,
-            EncoderOptions encoderOptions = null,
+            ImageFormat? format = null,
+            EncoderOptions? encoderOptions = null,
             Rectangle? rectangle = null,
             int level = 0,
             int arraySlice = 0)
@@ -642,8 +647,8 @@ namespace MonoGame.Framework.Graphics
         [CLSCompliant(false)]
         public void Save(
             string filePath,
-            ImageFormat format = null,
-            EncoderOptions encoderOptions = null,
+            ImageFormat? format = null,
+            EncoderOptions? encoderOptions = null,
             Rectangle? rectangle = null,
             int level = 0,
             int arraySlice = 0)
@@ -733,7 +738,7 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        private void ValidateSizes(int elementSize, int elementCount, int minimumByteSize)
+        private static void ValidateSizes(int elementSize, int elementCount, int minimumByteSize)
         {
             if (elementCount * elementSize < minimumByteSize)
                 throw new ArgumentException(

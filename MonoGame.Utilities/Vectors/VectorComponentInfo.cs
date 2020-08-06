@@ -124,7 +124,7 @@ namespace MonoGame.Framework.Vectors
             int bitDepth = 0;
 
             var builder = new StringBuilder();
-            builder.Append('{');
+            builder.Append('[');
             for (int i = 0; i < components.Length; i++)
             {
                 var component = components[i];
@@ -133,14 +133,16 @@ namespace MonoGame.Framework.Vectors
                 builder.Append(component.Channel).Append(':');
 
                 if (component.Type == VectorComponentType.BitField)
-                    builder.Append(component.Bits).Append("bit");
+                    builder.Append(component.Bits).Append('u');
+                else if(component.Type == VectorComponentType.SignedBitField)
+                    builder.Append(component.Bits).Append('i');
                 else
                     builder.Append(component.Type.ToShortString());
 
                 if (i < components.Length - 1)
                     builder.Append(", ");
             }
-            builder.Append('}');
+            builder.Append("]: ");
             builder.Append(bitDepth).Append("bit");
             return builder.ToString();
         }

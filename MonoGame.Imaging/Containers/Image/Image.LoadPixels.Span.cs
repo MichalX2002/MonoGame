@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
 
@@ -6,64 +8,29 @@ namespace MonoGame.Imaging
 {
     public partial class Image
     {
-        public static unsafe void LoadPixels<TPixelFrom, TPixelTo>(
+        public static void LoadPixels<TPixelFrom, TPixelTo>(
             ReadOnlySpan<TPixelFrom> pixels,
             Rectangle sourceRectangle,
-            int? byteStride,
-            Image<TPixelTo> destination)
+            Image<TPixelTo> destination,
+            int? pixelStride = null)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
             if (destination == null)
                 throw new ArgumentNullException(nameof(destination));
 
-            // TODO: check if the pixel span isn't padded and copy everything at once
-            // TODO: use Image.ConvertPixels
+            int srcStride = pixelStride ?? sourceRectangle.Width;
 
-            int srcRowBytes = sizeof(TPixelFrom) * sourceRectangle.Width;
-            int srcStride = byteStride ?? srcRowBytes;
-            int dstStride = destination.ByteStride;
+            int dstByteStride = destination.ByteStride;
+            var dstBytes = destination.GetPixelByteSpan();
 
-            fixed (TPixelFrom* srcPixelPtr = pixels)
-            fixed (TPixelTo* dstPixelPtr = destination.GetPixelSpan())
+            for (int y = 0; y < sourceRectangle.Height; y++)
             {
-                byte* srcPtr = (byte*)(srcPixelPtr + sourceRectangle.X);
-                byte* dstPtr = (byte*)(dstPixelPtr + sourceRectangle.X);
+                var srcRow = pixels.Slice(sourceRectangle.X + (sourceRectangle.Y + y) * srcStride, srcStride);
+                var dstByteRow = dstBytes.Slice(y * dstByteStride, dstByteStride);
 
-                if (typeof(TPixelFrom) == typeof(TPixelTo))
-                {
-                    for (int y = 0; y < sourceRectangle.Height; y++)
-                    {
-                        byte* srcRow = srcPtr + (sourceRectangle.Y + y) * srcStride;
-                        byte* dstRow = dstPtr + (sourceRectangle.Y + y) * dstStride;
-                        Buffer.MemoryCopy(srcRow, dstRow, dstStride, srcRowBytes);
-                    }
-                }
-                else
-                {
-                    if (typeof(TPixelFrom) == typeof(Color))
-                    {
-                        for (int y = 0; y < sourceRectangle.Height; y++)
-                        {
-                            var srcRow = (Color*)(srcPtr + (sourceRectangle.Y + y) * srcStride);
-                            var dstRow = (TPixelTo*)(dstPtr + (sourceRectangle.Y + y) * dstStride);
-
-                            for (int x = 0; x < sourceRectangle.Width; x++)
-                                dstRow[x].FromColor(srcRow[x]);
-                        }
-                    }
-                    else
-                    {
-                        for (int y = 0; y < sourceRectangle.Height; y++)
-                        {
-                            var srcRow = (TPixelFrom*)(srcPtr + (sourceRectangle.Y + y) * srcStride);
-                            var dstRow = (TPixelTo*)(dstPtr + (sourceRectangle.Y + y) * dstStride);
-
-                            for (int x = 0; x < sourceRectangle.Width; x++)
-                                dstRow[x].FromScaledVector(srcRow[x].ToScaledVector4());
-                        }
-                    }
-                }
+                var dstRow = MemoryMarshal.Cast<byte, TPixelTo>(dstByteRow);
+                ConvertPixels(srcRow, dstRow);
             }
         }
 
@@ -72,17 +39,18 @@ namespace MonoGame.Imaging
         public static Image<TPixelTo> LoadPixels<TPixelFrom, TPixelTo>(
             ReadOnlySpan<TPixelFrom> pixels,
             Rectangle sourceRectangle,
-            int? byteStride = null)
+            int? pixelStride = null)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
-            if (pixels.IsEmpty) throw new ArgumentEmptyException(nameof(pixels));
+            if (pixels.IsEmpty) 
+                throw new ArgumentEmptyException(nameof(pixels));
             ImagingArgumentGuard.AssertNonEmptyRectangle(sourceRectangle, nameof(sourceRectangle));
 
             var image = new Image<TPixelTo>(sourceRectangle.Size);
             try
             {
-                LoadPixels(pixels, sourceRectangle, byteStride, image);
+                LoadPixels(pixels, sourceRectangle, image, pixelStride);
             }
             catch
             {
@@ -92,26 +60,11 @@ namespace MonoGame.Imaging
             return image;
         }
 
-        public static Image<TPixelTo> LoadPixels<TPixelFrom, TPixelTo>(
-            ReadOnlySpan<TPixelFrom> pixels, Size size, int? byteStride = null)
-            where TPixelFrom : unmanaged, IPixel
-            where TPixelTo : unmanaged, IPixel<TPixelTo>
-        {
-            return LoadPixels<TPixelFrom, TPixelTo>(pixels, new Rectangle(size), byteStride);
-        }
-
         public static Image<TPixel> LoadPixels<TPixel>(
-           ReadOnlySpan<TPixel> pixels, Rectangle sourceRectangle, int? byteStride = null)
+           ReadOnlySpan<TPixel> pixels, Rectangle sourceRectangle, int? pixelStride = null)
            where TPixel : unmanaged, IPixel<TPixel>
         {
-            return LoadPixels<TPixel, TPixel>(pixels, sourceRectangle, byteStride);
-        }
-
-        public static Image<TPixel> LoadPixels<TPixel>(
-            ReadOnlySpan<TPixel> pixels, Size size, int? byteStride = null)
-            where TPixel : unmanaged, IPixel<TPixel>
-        {
-            return LoadPixels<TPixel, TPixel>(pixels, new Rectangle(size), byteStride);
+            return LoadPixels<TPixel, TPixel>(pixels, sourceRectangle, pixelStride);
         }
 
         #endregion
@@ -119,33 +72,18 @@ namespace MonoGame.Imaging
         #region LoadPixels(Span)
 
         public static Image<TPixelTo> LoadPixels<TPixelFrom, TPixelTo>(
-            Span<TPixelFrom> pixels, Rectangle sourceRectangle, int? byteStride)
+            Span<TPixelFrom> pixels, Rectangle sourceRectangle, int? pixelStride)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
-            return LoadPixels<TPixelFrom, TPixelTo>((ReadOnlySpan<TPixelFrom>)pixels, sourceRectangle, byteStride);
-        }
-
-        public static Image<TPixelTo> LoadPixels<TPixelFrom, TPixelTo>(
-            Span<TPixelFrom> pixels, Size size, int? byteStride = null)
-            where TPixelFrom : unmanaged, IPixel
-            where TPixelTo : unmanaged, IPixel<TPixelTo>
-        {
-            return LoadPixels<TPixelFrom, TPixelTo>((ReadOnlySpan<TPixelFrom>)pixels, size, byteStride);
+            return LoadPixels<TPixelFrom, TPixelTo>((ReadOnlySpan<TPixelFrom>)pixels, sourceRectangle, pixelStride);
         }
 
         public static Image<TPixel> LoadPixels<TPixel>(
-            Span<TPixel> pixels, Rectangle sourceRectangle, int? byteStride)
+            Span<TPixel> pixels, Rectangle sourceRectangle, int? pixelStride)
             where TPixel : unmanaged, IPixel<TPixel>
         {
-            return LoadPixels<TPixel, TPixel>((ReadOnlySpan<TPixel>)pixels, sourceRectangle, byteStride);
-        }
-
-        public static Image<TPixel> LoadPixels<TPixel>(
-            Span<TPixel> pixels, Size size, int? byteStride = null)
-            where TPixel : unmanaged, IPixel<TPixel>
-        {
-            return LoadPixels<TPixel, TPixel>((ReadOnlySpan<TPixel>)pixels, size, byteStride);
+            return LoadPixels<TPixel, TPixel>((ReadOnlySpan<TPixel>)pixels, sourceRectangle, pixelStride);
         }
 
         #endregion

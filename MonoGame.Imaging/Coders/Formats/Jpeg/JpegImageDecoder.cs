@@ -13,7 +13,7 @@ namespace MonoGame.Imaging.Coders.Formats.Jpeg
             StbImageDecoderState decoderState, ImageRead.ReadState readState)
         {
             ImageRead.Jpeg.Load(
-                decoderState.Reader, readState, RecyclableArrayPool.Default);
+                decoderState.Reader, readState, RecyclableArrayPool.Shared);
         }
     }
 }

@@ -18,9 +18,9 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MonoGame.TestingA
+namespace MonoGame.Testing
 {
-    public class GameHead : Game
+    public class GameMusicTest : Game
     {
         private GraphicsDeviceManager _graphicsManager;
         private SpriteBatch _spriteBatch;
@@ -36,7 +36,7 @@ namespace MonoGame.TestingA
 
         private Song[] _songs;
 
-        public GameHead()
+        public GameMusicTest()
         {
             SoundEffect.Initialize();
 

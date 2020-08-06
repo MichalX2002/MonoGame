@@ -5,7 +5,7 @@ namespace MonoGame.Framework.Memory
 {
     public class RecyclableArrayPool : ArrayPool<byte>
     {
-        public static RecyclableArrayPool Default { get; } =
+        public static new RecyclableArrayPool Shared { get; } =
             new RecyclableArrayPool(RecyclableMemoryManager.Default);
 
         public RecyclableMemoryManager MemoryManager { get; }

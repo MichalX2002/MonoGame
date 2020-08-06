@@ -13,7 +13,7 @@ namespace MonoGame.Imaging.Coders.Formats.Bmp
             StbImageDecoderState decoderState, ImageRead.ReadState readState)
         {
             var bmpInfo = ImageRead.Bmp.Load(
-                decoderState.Reader, readState, RecyclableArrayPool.Default);
+                decoderState.Reader, readState, RecyclableArrayPool.Shared);
         }
     }
 }

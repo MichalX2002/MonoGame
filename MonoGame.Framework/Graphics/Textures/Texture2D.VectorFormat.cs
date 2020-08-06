@@ -31,7 +31,7 @@ namespace MonoGame.Framework.Graphics
             // TODO: implement SRgb
 
             AddVectorFormat(SurfaceFormat.Alpha8, typeof(Alpha8));
-            AddVectorFormat(SurfaceFormat.Single, typeof(GrayF));
+            AddVectorFormat(SurfaceFormat.Single, typeof(RedF), typeof(GrayF));
             AddVectorFormat(SurfaceFormat.Rgb24, typeof(Rgb24));
             //AddVectorFormat(SurfaceFormat.Rgba32SRgb, typeof(Rgba32SRgb));
             AddVectorFormat(SurfaceFormat.Rgba32, typeof(Color), typeof(Byte4));

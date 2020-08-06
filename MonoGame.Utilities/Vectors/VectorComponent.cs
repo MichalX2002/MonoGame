@@ -45,7 +45,7 @@ namespace MonoGame.Framework.Vectors
             }
             else
             {
-                if (type == VectorComponentType.BitField || 
+                if (type == VectorComponentType.BitField ||
                     type == VectorComponentType.Undefined)
                     throw new ArgumentException(
                         "The bit size could not be inferred from the given component type.");
@@ -74,19 +74,19 @@ namespace MonoGame.Framework.Vectors
 
         public override string ToString()
         {
-            return Type == VectorComponentType.BitField 
+            return Type == VectorComponentType.BitField || Type == VectorComponentType.SignedBitField
                 ? $"{Channel} {Type}[{Bits}]"
-                : $"{Channel} {Type}"; 
+                : $"{Channel} {Type}";
         }
 
-        public static bool operator ==(in VectorComponent a, in VectorComponent b)
+        public static bool operator ==(VectorComponent a, VectorComponent b)
         {
             return a.Type == b.Type
                 && a.Channel == b.Channel
                 && a.Bits == b.Bits;
         }
 
-        public static bool operator !=(in VectorComponent a, in VectorComponent b)
+        public static bool operator !=(VectorComponent a, VectorComponent b)
         {
             return !(a == b);
         }

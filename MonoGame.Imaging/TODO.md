@@ -1,7 +1,7 @@
 
 Redo/fix up `IImageDecoder` *again*:
 
-Remove the `ImageReadStream` class (currently required by `IImageDecoder` and add a simple `Decode(Stream)` as a replacement. Move the `CancellationToken` disposal behavior from `ImageReadStream` into a new type: `CancellableStream` (which could then be put in `MonoGame.Utilities`).
+Remove the `ImageReadStream` class (currently required by `IImageDecoder` and add a simple `Decode(Stream)` as a replacement. 
 
 `Decode(ImageReadStream)` currently returns a state object, which should be moved to a new function: `CreateState()` which should be then be used to (in the given order); 
 
@@ -18,9 +18,9 @@ Extension methods for `IImageDecoder` could also be made, for example `Decode()`
 
 The best selling point of this will be the `ImageDecoderEnumerator`, both `IEnumerator` and `IEnumerable` so image frames can be read by a simple `foreach` loop.
 *Implementation details*: `GetEnumerator()` returns `this`, breaking the `IEnumerable` pattern of being able to create multiple independent enumerators from one enumerable.
-`Reset()` should throw `NotSupportedException` if the underlying stream can not seek.
+`Reset()` should throw `NotSupportedException` if the underlying stream can not seek. Breaking the pattern should not affect typical usage.
 
 The state object could be an interface which would give a bit more freedom. Decoders with special needs will of course be able to return special state objects that contain more than the base API exposes.
 
 A problem that may happen with this API design is that there may be formats that can't be read in the specified order (Header -> Info -> Image), though it should really be rare occurrence.
-That order does not cause trouble for any of the existing `stb` decoders.
+That order does not cause trouble for any of the existing `stb` decoders and most widespread image formats.
