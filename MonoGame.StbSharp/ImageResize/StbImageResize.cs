@@ -8,7 +8,7 @@ namespace StbSharp
         public delegate float FilterKernelFunction(float x, float scale);
         public delegate float FilterSupportFunction(float scale);
 
-        public class Filter
+        public sealed class Filter
         {
             public static Filter Box { get; } = new Filter(FilterTrapezoid, SupportTrapezoid);
             public static Filter Triangle { get; } = new Filter(FilterTriangle, SupportOne);
@@ -46,7 +46,7 @@ namespace StbSharp
             public float vertical_scale;
             public int channels;
             public int alpha_channel;
-            public uint flags;
+            public int flags;
             public DataType datatype;
             public Filter horizontal_filter;
             public Filter vertical_filter;
@@ -90,8 +90,12 @@ namespace StbSharp
         [StructLayout(LayoutKind.Explicit)]
         public struct FloatIntUnion
         {
-            [FieldOffset(0)] public uint u;
-            [FieldOffset(0)] public float f;
+            [CLSCompliant(false)]
+            [FieldOffset(0)] 
+            public uint u;
+            
+            [FieldOffset(0)] 
+            public float f;
         }
 
         public static byte LinearToSrgbByte(float value)
