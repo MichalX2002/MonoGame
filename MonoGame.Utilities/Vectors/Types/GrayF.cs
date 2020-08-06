@@ -51,6 +51,9 @@ namespace MonoGame.Framework.Vectors
 
         public void FromScaledVector(Vector4 scaledVector) => FromScaledVector(scaledVector.ToVector3());
 
+        public void FromVector(Vector3 vector) => FromScaledVector(vector);
+        public void FromVector(Vector4 vector) => FromScaledVector(vector);
+
         public readonly Vector3 ToScaledVector3() => new Vector3(L);
         public readonly Vector4 ToScaledVector4() => new Vector4(ToScaledVector3(), 1);
 
@@ -72,13 +75,17 @@ namespace MonoGame.Framework.Vectors
         public void FromGray(GrayF source) => this = source;
         public void FromGray(GrayAlpha16 source) => L = ScalingHelper.ToFloat32(source.L);
 
+        public void FromColor(Bgr565 source) => L = PixelHelper.ToGrayF(source);
         public void FromColor(Bgr24 source) => L = PixelHelper.ToGrayF(source);
         public void FromColor(Rgb24 source) => L = PixelHelper.ToGrayF(source);
         public void FromColor(Rgb48 source) => L = PixelHelper.ToGrayF(source);
 
+        public void FromColor(Bgra4444 source) => L = PixelHelper.ToGrayF(source);
+        public void FromColor(Bgra5551 source) => L = PixelHelper.ToGrayF(source);
         public void FromColor(Abgr32 source) => L = PixelHelper.ToGrayF(source);
         public void FromColor(Argb32 source) => L = PixelHelper.ToGrayF(source);
         public void FromColor(Bgra32 source) => L = PixelHelper.ToGrayF(source);
+        public void FromColor(Rgba1010102 source) => L = PixelHelper.ToGrayF(source);
         public void FromColor(Color source) => L = PixelHelper.ToGrayF(source);
         public void FromColor(Rgba64 source) => L = PixelHelper.ToGrayF(source);
 

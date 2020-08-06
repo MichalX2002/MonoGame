@@ -67,6 +67,9 @@ namespace MonoGame.Framework.Vectors
             A = (byte)scaledVector.W;
         }
 
+        public void FromVector(Vector3 vector) => FromScaledVector(vector);
+        public void FromVector(Vector4 vector) => FromScaledVector(vector);
+
         public readonly Vector3 ToScaledVector3() => new Vector3(L) / byte.MaxValue;
         public readonly Vector4 ToScaledVector4() => new Vector4(L, L, L, A) / byte.MaxValue;
 
@@ -131,6 +134,8 @@ namespace MonoGame.Framework.Vectors
             A = source.A;
         }
 
+        public void FromColor(Bgr565 source) => FromColor(source.ToRgb24());
+
         public void FromColor(Bgr24 source)
         {
             L = PixelHelper.ToGray8(source.R, source.G, source.B);
@@ -149,6 +154,9 @@ namespace MonoGame.Framework.Vectors
             A = byte.MaxValue;
         }
 
+        public void FromColor(Bgra4444 source) => FromColor(source.ToRgba32());
+        public void FromColor(Bgra5551 source) => FromColor(source.ToRgba32());
+
         public void FromColor(Abgr32 source)
         {
             L = PixelHelper.ToGray8(source.R, source.G, source.B);
@@ -166,6 +174,8 @@ namespace MonoGame.Framework.Vectors
             L = PixelHelper.ToGray8(source.R, source.G, source.B);
             A = source.A;
         }
+
+        public void FromColor(Rgba1010102 source) => FromScaledVector(source.ToScaledVector4());
 
         public void FromColor(Color source)
         {

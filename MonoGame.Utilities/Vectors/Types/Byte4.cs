@@ -186,6 +186,8 @@ namespace MonoGame.Framework.Vectors
             W = source.A;
         }
 
+        public void FromColor(Bgr565 source) => FromColor(source.ToRgb24());
+
         public void FromColor(Bgr24 source)
         {
             X = source.R;
@@ -210,6 +212,17 @@ namespace MonoGame.Framework.Vectors
             W = byte.MaxValue;
         }
 
+        public void FromColor(Bgra4444 source) => FromColor(source.ToRgba32());
+        public void FromColor(Bgra5551 source) => FromColor(source.ToRgba32());
+
+        public void FromColor(Abgr32 source)
+        {
+            X = source.R;
+            Y = source.G;
+            Z = source.B;
+            W = source.A;
+        }
+
         public void FromColor(Argb32 source)
         {
             X = source.R;
@@ -226,13 +239,7 @@ namespace MonoGame.Framework.Vectors
             W = source.A;
         }
 
-        public void FromColor(Abgr32 source)
-        {
-            X = source.R;
-            Y = source.G;
-            Z = source.B;
-            W = source.A;
-        }
+        public void FromColor(Rgba1010102 source) => FromScaledVector(source.ToScaledVector4());
 
         public void FromColor(Color source) => Rgba = source;
 

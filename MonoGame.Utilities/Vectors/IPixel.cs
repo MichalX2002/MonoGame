@@ -1,6 +1,4 @@
-
 using System;
-using System.Numerics;
 
 namespace MonoGame.Framework.Vectors
 {
@@ -28,63 +26,63 @@ namespace MonoGame.Framework.Vectors
         #region From Gray
 
         /// <summary>Sets the pixel value from <see cref="Gray8"/>.</summary>
-        void FromGray(Gray8 source) => FromColor(source.ToRgb24());
-
-        /// <summary>Sets the pixel value from <see cref="GrayAlpha16"/>.</summary>
-        void FromGray(GrayAlpha16 source) => FromColor(source.ToRgba32());
+        void FromGray(Gray8 source); // => FromColor(source.ToRgb24());
 
         /// <summary>Sets the pixel value from <see cref="Gray16"/>.</summary>
-        void FromGray(Gray16 source) => FromColor(source.ToRgb48());
+        void FromGray(Gray16 source); // => FromColor(source.ToRgb48());
 
         /// <summary>Sets the pixel value from <see cref="Gray32"/>.</summary>
-        void FromGray(Gray32 source) => FromScaledVector(source.ToScaledVector3());
+        void FromGray(Gray32 source); // => FromScaledVector(source.ToScaledVector3());
 
         /// <summary>Sets the pixel value from <see cref="GrayF"/>.</summary>
-        void FromGray(GrayF source) => FromScaledVector(source.ToScaledVector3());
+        void FromGray(GrayF source); // => FromScaledVector(source.ToScaledVector3());
+
+        /// <summary>Sets the pixel value from <see cref="GrayAlpha16"/>.</summary>
+        void FromGray(GrayAlpha16 source); // => FromColor(source.ToRgba32());
 
         #endregion
 
         #region From Color
 
         /// <summary>Sets the pixel value from <see cref="Rgb24"/>.</summary>
-        void FromColor(Rgb24 source) => FromScaledVector(source.ToScaledVector3());
+        void FromColor(Rgb24 source); //=> FromScaledVector(source.ToScaledVector3());
 
         /// <summary>Sets the pixel value from <see cref="Rgb48"/>.</summary>
-        void FromColor(Rgb48 source) => FromScaledVector(source.ToScaledVector3());
+        void FromColor(Rgb48 source); // => FromScaledVector(source.ToScaledVector3());
 
         /// <summary>Sets the pixel value from <see cref="Color"/>.</summary>
-        void FromColor(Color source) => FromScaledVector(source.ToScaledVector4());
+        void FromColor(Color source); // => FromScaledVector(source.ToScaledVector4());
 
         /// <summary>Sets the pixel value from an <see cref="Rgba64"/>.</summary>
-        void FromColor(Rgba64 source) => FromScaledVector(source.ToScaledVector4());
+        void FromColor(Rgba64 source); // => FromScaledVector(source.ToScaledVector4());
 
         #endregion
 
         #region From Arbitrary Color
 
         /// <summary>Sets the pixel value from an <see cref="Bgr565"/>.</summary>
-        void FromColor(Bgr565 source) => FromColor(source.ToRgb24());
+        void FromColor(Bgr565 source); // => FromColor(source.ToRgb24());
 
         /// <summary>Sets the pixel value from an <see cref="Bgr24"/>.</summary>
-        void FromColor(Bgr24 source) => FromColor(source.ToRgb24());
+        void FromColor(Bgr24 source); // => FromColor(source.ToRgb24());
 
         /// <summary>Sets the pixel value from an <see cref="Bgra4444"/>.</summary>
-        void FromColor(Bgra4444 source) => FromColor(source.ToRgba32());
+        void FromColor(Bgra4444 source); // => FromColor(source.ToRgba32());
 
         /// <summary>Sets the pixel value from an <see cref="Bgra5551"/>.</summary>
-        void FromColor(Bgra5551 source) => FromColor(source.ToRgba32());
-
-        /// <summary>Sets the pixel value from an <see cref="Bgra32"/>.</summary>
-        void FromColor(Bgra32 source) => FromColor(source.ToRgba32());
+        void FromColor(Bgra5551 source); // => FromColor(source.ToRgba32());
 
         /// <summary>Sets the pixel value from an <see cref="Abgr32"/>.</summary>
-        void FromColor(Abgr32 source) => FromColor(source.ToRgba32());
+        void FromColor(Abgr32 source); // => FromColor(source.ToRgba32());
 
         /// <summary>Sets the pixel value from an <see cref="Argb32"/>.</summary>
-        void FromColor(Argb32 source) => FromColor(source.ToRgba32());
+        void FromColor(Argb32 source); // => FromColor(source.ToRgba32());
+
+        /// <summary>Sets the pixel value from an <see cref="Bgra32"/>.</summary>
+        void FromColor(Bgra32 source); // => FromColor(source.ToRgba32());
 
         /// <summary>Sets the pixel value from <see cref="Rgba1010102"/>.</summary>
-        void FromColor(Rgba1010102 source) => FromScaledVector(source.ToScaledVector4());
+        void FromColor(Rgba1010102 source); // => FromScaledVector(source.ToScaledVector4());
 
         #endregion
 

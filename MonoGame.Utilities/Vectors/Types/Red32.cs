@@ -49,6 +49,9 @@ namespace MonoGame.Framework.Vectors
         public void FromScaledVector(Vector3 scaledVector) => R = ScalingHelper.ToUInt32(scaledVector.X);
         public void FromScaledVector(Vector4 scaledVector) => R = ScalingHelper.ToUInt32(scaledVector.X);
 
+        public void FromVector(Vector3 vector) => FromScaledVector(vector);
+        public void FromVector(Vector4 vector) => FromScaledVector(vector);
+
         public readonly Vector3 ToScaledVector3() => new Vector3(ScalingHelper.ToFloat32(R), 0, 0);
         public readonly Vector4 ToScaledVector4() => new Vector4(ToScaledVector3(), 1);
 
@@ -70,13 +73,18 @@ namespace MonoGame.Framework.Vectors
         public void FromGray(GrayF source) => R = ScalingHelper.ToUInt32(source.L);
         public void FromGray(GrayAlpha16 source) => R = ScalingHelper.ToUInt32(source.L);
 
+        public void FromColor(Bgr565 source) => FromColor(source.ToRgb24());
         public void FromColor(Bgr24 source) => R = ScalingHelper.ToUInt32(source.R);
         public void FromColor(Rgb24 source) => R = ScalingHelper.ToUInt32(source.R);
         public void FromColor(Rgb48 source) => R = ScalingHelper.ToUInt32(source.R);
 
+
+        public void FromColor(Bgra4444 source) => FromColor(source.ToRgba32());
+        public void FromColor(Bgra5551 source) => FromColor(source.ToRgba32());
         public void FromColor(Abgr32 source) => R = ScalingHelper.ToUInt32(source.R);
         public void FromColor(Argb32 source) => R = ScalingHelper.ToUInt32(source.R);
         public void FromColor(Bgra32 source) => R = ScalingHelper.ToUInt32(source.R);
+        public void FromColor(Rgba1010102 source) => FromScaledVector(source.ToScaledVector4());
         public void FromColor(Color source) => R = ScalingHelper.ToUInt32(source.R);
         public void FromColor(Rgba64 source) => R = ScalingHelper.ToUInt32(source.R);
 

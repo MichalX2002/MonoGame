@@ -75,6 +75,9 @@ namespace MonoGame.Framework.Vectors
                 ((int)scaledVector.W) << 15);
         }
 
+        public void FromVector(Vector3 vector) => FromScaledVector(vector);
+        public void FromVector(Vector4 vector) => FromScaledVector(vector);
+
         public readonly Vector3 ToScaledVector3()
         {
             return new Vector3(
@@ -107,6 +110,12 @@ namespace MonoGame.Framework.Vectors
         public void FromAlpha(Alpha32 source) => FromAlphaUInt1(ScalingHelper.ToUInt1(source.A));
         public void FromAlpha(AlphaF source) => FromAlphaUInt1(ScalingHelper.ToUInt1(source.A));
 
+        public void FromGray(Gray8 source) => FromColor(source.ToRgb24());
+        public void FromGray(Gray16 source) => FromColor(source.ToRgb48());
+        public void FromGray(Gray32 source) => FromScaledVector(source.ToScaledVector3());
+        public void FromGray(GrayF source) => FromScaledVector(source.ToScaledVector3());
+        public void FromGray(GrayAlpha16 source) => FromColor(source.ToRgba32());
+
         public void FromColor(Bgr565 source)
         {
             ushort packedSource = source.PackedValue;
@@ -116,6 +125,10 @@ namespace MonoGame.Framework.Vectors
                 (((packedSource >> 11) & Bgr565.MaxXZ) << 10) |
                 (MaxW << 15));
         }
+
+        public void FromColor(Bgr24 source) => FromColor(source.ToRgb24());
+        public void FromColor(Rgb24 source) => FromScaledVector(source.ToScaledVector3());
+        public void FromColor(Rgb48 source) => FromScaledVector(source.ToScaledVector3());
 
         public void FromColor(Bgra4444 source)
         {
@@ -128,6 +141,12 @@ namespace MonoGame.Framework.Vectors
         }
 
         public void FromColor(Bgra5551 source) => this = source;
+        public void FromColor(Abgr32 source) => FromColor(source.ToRgba32());
+        public void FromColor(Argb32 source) => FromColor(source.ToRgba32());
+        public void FromColor(Bgra32 source) => FromColor(source.ToRgba32());
+        public void FromColor(Rgba1010102 source) => FromScaledVector(source.ToScaledVector4());
+        public void FromColor(Color source) => FromScaledVector(source.ToScaledVector4());
+        public void FromColor(Rgba64 source) => FromScaledVector(source.ToScaledVector4());
 
         #endregion
 

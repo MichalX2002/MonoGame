@@ -88,7 +88,7 @@ namespace MonoGame.Testing
                             Thread.Sleep(1000);
 
                             ww.Restart();
-                            var x = Image.Load<Bgra4444>(fs, onProgress: OnProgress);
+                            var x = Image.Load<Color>(fs, onProgress: OnProgress);
 
                             _finished = true;
                             ww.Stop();
@@ -199,9 +199,10 @@ namespace MonoGame.Testing
             _spriteBatch.Begin(samplerState: SamplerState.LinearClamp);
             if (tex != null)
             {
-                float rot = -MathF.PI / 2;
-                float scale = 1 / 5.5f;
-                var pos = new Vector2(0, tex.Width * scale);
+                float rot = 0;// -MathF.PI / 2;
+                float scale = 1;// / 5.5f;
+                float y = 0;// tex.Width * scale;
+                var pos = new Vector2(0, y);
 
                 _spriteBatch.Draw(
                     tex, pos, null, Color.White, rot, Vector2.Zero, scale, SpriteFlip.None, 0);
