@@ -152,7 +152,7 @@ namespace MonoGame.Framework.Media
             if (disposing)
             {
                 _stream?.Dispose();
-                _stream = null;
+                _stream = null!;
             }
         }
     }

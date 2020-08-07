@@ -345,7 +345,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="flip">Sprite mirroring flags. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this sprite.</param>
         public void Draw(
-            Texture2D texture, Vector2 position, in RectangleF? sourceRectangle, Color color,
+            Texture2D texture, Vector2 position, RectangleF? sourceRectangle, Color color,
             float rotation, Vector2 origin, Vector2 scale, SpriteFlip flip, float layerDepth)
         {
             AssertValidArguments(texture, nameof(Draw));
@@ -411,7 +411,7 @@ namespace MonoGame.Framework.Graphics
         public void Draw(
             Texture2D texture,
             Vector2 position,
-            in RectangleF? sourceRectangle,
+            RectangleF? sourceRectangle,
             Color color,
             float rotation,
             Vector2 origin,
@@ -439,8 +439,8 @@ namespace MonoGame.Framework.Graphics
         /// <param name="layerDepth">A depth of the layer of this sprite.</param>
         public void Draw(
             Texture2D texture,
-            in RectangleF destinationRectangle,
-            in RectangleF? sourceRectangle,
+            RectangleF destinationRectangle,
+            RectangleF? sourceRectangle,
             Color color,
             float rotation,
             Vector2 origin,
@@ -507,7 +507,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="position">The drawing location on screen.</param>
         /// <param name="sourceRectangle">An optional region on the texture which will be rendered. If null - draws full texture.</param>
         /// <param name="color">A color mask.</param>
-        public void Draw(Texture2D texture, Vector2 position, in RectangleF? sourceRectangle, Color color)
+        public void Draw(Texture2D texture, Vector2 position, RectangleF? sourceRectangle, Color color)
         {
             AssertValidArguments(texture, nameof(Draw));
 
@@ -546,7 +546,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="destinationRectangle">The drawing bounds on screen.</param>
         /// <param name="sourceRectangle">An optional region on the texture which will be rendered. If null - draws full texture.</param>
         /// <param name="color">A color mask.</param>
-        public void Draw(Texture2D texture, in RectangleF destinationRectangle, in RectangleF? sourceRectangle, Color color)
+        public void Draw(Texture2D texture, RectangleF destinationRectangle, RectangleF? sourceRectangle, Color color)
         {
             AssertValidArguments(texture, nameof(Draw));
 
@@ -603,7 +603,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="texture">A texture.</param>
         /// <param name="destinationRectangle">The drawing bounds on screen.</param>
         /// <param name="color">A color mask.</param>
-        public void Draw(Texture2D texture, in RectangleF destinationRectangle, Color color)
+        public void Draw(Texture2D texture, RectangleF destinationRectangle, Color color)
         {
             AssertValidArguments(texture, nameof(Draw));
 

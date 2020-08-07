@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
@@ -68,12 +69,12 @@ namespace MonoGame.Framework.Graphics
         #region SetData
 
         public void SetData<T>(
-            CubeMapFace face, int level, Rectangle? rect, ReadOnlySpan<T> data)
+            CubeMapFace face, int level, Rectangle? rectangle, ReadOnlySpan<T> data)
             where T : unmanaged
         {
             AssertMainThread(true);
 
-            ValidateParams<T>(level, rect, data.Length, out Rectangle checkedRect);
+            ValidateParams<T>(level, rectangle, data.Length, out Rectangle checkedRect);
 
             PlatformSetData(face, level, checkedRect, data);
         }
@@ -85,10 +86,10 @@ namespace MonoGame.Framework.Graphics
         }
 
         public void SetData<T>(
-            CubeMapFace face, int level, Rectangle? rect, Span<T> data)
+            CubeMapFace face, int level, Rectangle? rectangle, Span<T> data)
             where T : unmanaged
         {
-            SetData(face, 0, rect, (ReadOnlySpan<T>)data);
+            SetData(face, level, rectangle, (ReadOnlySpan<T>)data);
         }
 
         public void SetData<T>(CubeMapFace face, Span<T> data)
@@ -99,7 +100,7 @@ namespace MonoGame.Framework.Graphics
 
         #endregion
 
-        private unsafe void ValidateParams<T>(
+        private void ValidateParams<T>(
             int level, Rectangle? rect, int dataLength, out Rectangle checkedRect)
             where T : unmanaged
         {
@@ -113,11 +114,8 @@ namespace MonoGame.Framework.Graphics
             if (!textureBounds.Contains(checkedRect) || checkedRect.Width <= 0 || checkedRect.Height <= 0)
                 throw new ArgumentException("Rectangle must be inside the texture bounds", nameof(rect));
 
-            var fSize = Format.GetSize();
-            if (sizeof(T) > fSize || fSize % sizeof(T) != 0)
-                throw new ArgumentException(
-                    $"Type {nameof(T)} is of an invalid size for the format of this texture.", nameof(T));
-
+            var formatSize = Format.GetSize();
+            
             int dataByteSize;
             if (Format.IsCompressedFormat())
             {
@@ -134,17 +132,14 @@ namespace MonoGame.Framework.Graphics
 #else
                     roundedWidth, roundedHeight);
 #endif
-                dataByteSize = roundedWidth * roundedHeight * fSize / 16;
+                dataByteSize = roundedWidth * roundedHeight * formatSize / 16;
             }
             else
             {
-                dataByteSize = checkedRect.Width * checkedRect.Height * fSize;
+                dataByteSize = checkedRect.Width * checkedRect.Height * formatSize;
             }
 
-            if (dataLength * sizeof(T) != dataByteSize)
-                throw new ArgumentException(
-                    $"Buffer length is not the right size, " +
-                    $"expected {dataLength * sizeof(T)} bytes, but is {dataByteSize}.");
+            ValidateSizes(dataLength, Unsafe.SizeOf<T>(), dataByteSize);
         }
     }
 }

@@ -47,7 +47,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// This event is triggered when the AudioEngine is disposed.
         /// </summary>
-        public event Event<AudioEngine> Disposing;
+        public event Event<AudioEngine>? Disposed;
 
         /// <summary>
         /// Is true if the AudioEngine has been disposed.
@@ -388,7 +388,7 @@ namespace MonoGame.Framework.Audio
             // audio cues to stop here?
 
             if (disposing)
-                Disposing?.Invoke(this);
+                Disposed?.Invoke(this);
         }
     }
 }

@@ -98,10 +98,6 @@ namespace MonoGame.Framework.Graphics
             MaxTextureSlots = 16;
             MaxVertexTextureSlots = 16;
 
-            MaxTexture2DSize = DXResource.MaximumTexture2DSize;
-            MaxTexture3DSize = DXResource.MaximumTexture3DSize;
-            MaxTextureCubeSize = DXResource.MaximumTextureCubeSize;
-
 #if WINDOWS_UAP
             CreateDeviceIndependentResources();
             CreateDeviceResources();
@@ -110,9 +106,10 @@ namespace MonoGame.Framework.Graphics
 #if WINDOWS
             CreateDeviceResources();
 #endif
-            _maxVertexBufferSlots = _d3dDevice.FeatureLevel >= FeatureLevel.Level_11_0
-                ? InputAssemblerStage.VertexInputResourceSlotCount
-                : 16;
+            if (_d3dDevice.FeatureLevel >= FeatureLevel.Level_11_0)
+                _maxVertexBufferSlots = InputAssemblerStage.VertexInputResourceSlotCount;
+            else
+                _maxVertexBufferSlots = 16;
         }
 
         private void PlatformInitialize()

@@ -65,6 +65,7 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
     <Compile Include="Platform\TitleContainer.Desktop.cs" />
     <Compile Include="Platform\Utilities\AssemblyHelper.cs" />
     <Compile Include="Platform\Utilities\FuncLoader.Desktop.cs" />
+    <Compile Include="Platform\Utilities\ImageExtensions.cs" />
     <Compile Include="Platform\Utilities\TaskbarList.Desktop.cs" />
     <Compile Include="Platform\Utilities\Threading.cs" />
     <Compile Include="Platform\Windows\HorizontalMouseWheelEvent.cs" />
@@ -73,13 +74,20 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
     <Compile Include="Platform\Windows\WinFormsGameForm.ImeState.cs" />
     <Compile Include="Platform\Windows\WinFormsGamePlatform.cs" />
     <Compile Include="Platform\Windows\WinFormsGameWindow.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Remove="Audio\AudioUtil.cs" />
     <Compile Remove="Media\SongCollection.cs" />
     <Compile Remove="Media\SongPart.cs" />
   </ItemGroup>
 
   <Import Project="Platform\DirectX.targets" />
-  <Import Project="Platform\XAudio.targets" />
+  <Import Project="Platform\XAudio.targets" /> 
+  
+  <ItemGroup>
+    <EmbeddedResource Include="MonoGame.bmp">
+      <LogicalName>MonoGame.bmp</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Version="4.0.1" Include="SharpDX" />

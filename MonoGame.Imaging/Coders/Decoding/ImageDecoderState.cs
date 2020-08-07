@@ -18,6 +18,7 @@ namespace MonoGame.Imaging.Coders.Decoding
         public event DecodeProgressCallback? Progress;
 
         public Image? CurrentImage { get; protected set; }
+
         public VectorType? PreferredPixelType { get; set; }
 
         /// <summary>

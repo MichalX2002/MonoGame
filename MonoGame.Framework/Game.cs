@@ -260,14 +260,14 @@ namespace MonoGame.Framework
         // Currently Game.Initialized is used by the Mac game window class to
         // determine whether to raise DeviceResetting and DeviceReset on
         // GraphicsDeviceManager.
-        internal bool Initialized { get; private set; } = false;
+        internal bool Initialized { get; private set; }
 
         #region Events
 
-        public event Event<Game> Activated;
-        public event Event<Game> Deactivated;
-        public event Event<Game> Disposed;
-        public event Event<Game> Exiting;
+        public event Event<Game>? Activated;
+        public event Event<Game>? Deactivated;
+        public event Event<Game>? Disposed;
+        public event Event<Game>? Exiting;
 
 #if WINDOWS_UAP
         [CLSCompliant(false)]

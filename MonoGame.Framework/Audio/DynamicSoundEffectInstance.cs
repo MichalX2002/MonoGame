@@ -22,6 +22,14 @@ namespace MonoGame.Framework.Audio
         #region Properties
 
         /// <summary>
+        /// The event that occurs when the number of queued audio buffers is low.
+        /// </summary>
+        /// <remarks>
+        /// This event may occur when <see cref="Play()"/> is called or during playback when a buffer is completed.
+        /// </remarks>
+        public event Event<DynamicSoundEffectInstance>? BufferNeeded;
+
+        /// <summary>
         /// This value has no effect on <see cref="DynamicSoundEffectInstance"/>.
         /// Trying to set it will throw <see cref="InvalidOperationException"/>.
         /// </summary>
@@ -37,6 +45,9 @@ namespace MonoGame.Framework.Audio
             }
         }
 
+        /// <summary>
+        /// Gets the current state of the sound instacne.
+        /// </summary>
         public override SoundState State
         {
             get
@@ -70,14 +81,6 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        /// <summary>
-        /// The event that occurs when the number of queued audio buffers is low.
-        /// </summary>
-        /// <remarks>
-        /// This event may occur when <see cref="Play()"/> is called or during playback when a buffer is completed.
-        /// </remarks>
-        public event Event<DynamicSoundEffectInstance> BufferNeeded;
-
         #endregion
 
         #region Constructors
@@ -87,8 +90,11 @@ namespace MonoGame.Framework.Audio
         public DynamicSoundEffectInstance(int sampleRate, AudioChannels channels)
         {
             SoundEffect.Initialize();
+
             if (SoundEffect._systemState != SoundEffect.SoundSystemState.Initialized)
-                throw new AudioHardwareException("Audio has failed to initialize. Call SoundEffect.Initialize() before sound operation to get more specific errors.");
+                throw new AudioHardwareException(
+                    "Audio has failed to initialize. " +
+                    "Call SoundEffect.Initialize() before sound operation to get more specific errors.");
 
             if ((sampleRate < 8000) || (sampleRate > 48000))
                 throw new ArgumentOutOfRangeException(nameof(sampleRate));
@@ -144,7 +150,7 @@ namespace MonoGame.Framework.Audio
             if (_state != SoundState.Playing)
             {
                 // Ensure that the volume reflects master volume, which is done by the setter.
-                Volume = Volume;
+                UpdateVolume();
 
                 // Add the instance to the pool
                 if (!SoundEffectInstancePool.SlotsAvailable)
@@ -185,7 +191,8 @@ namespace MonoGame.Framework.Audio
 
             if (_state != SoundState.Playing)
             {
-                Volume = Volume;
+                // Ensure that the volume reflects master volume, which is done by the setter.
+                UpdateVolume();
 
                 // Add the instance to the pool
                 if (!SoundEffectInstancePool.SlotsAvailable)
@@ -254,6 +261,15 @@ namespace MonoGame.Framework.Audio
             PlatformSubmitBuffer(data, depth);
         }
 
+        /// <summary>
+        /// Queues audio data for playback.
+        /// </summary>
+        /// <remarks>
+        /// The span length must conform to alignment requirements for the audio format.
+        /// </remarks>
+        /// <typeparam name="T">The audio data type which will be converted to bytes.</typeparam>
+        /// <param name="data">The span containing audio data.</param>
+        /// <param name="depth">The depth of the audio data.</param>
         public void SubmitBuffer<T>(Span<T> data, AudioDepth depth)
             where T : unmanaged
         {

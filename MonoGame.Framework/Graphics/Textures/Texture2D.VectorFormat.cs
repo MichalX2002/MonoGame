@@ -52,7 +52,7 @@ namespace MonoGame.Framework.Graphics
             AddVectorFormat(SurfaceFormat.HalfVector4, typeof(HalfVector4));
             AddVectorFormat(SurfaceFormat.Vector2, typeof(RgVector));
             AddVectorFormat(SurfaceFormat.Vector4, typeof(RgbaVector));
-            AddVectorFormat(SurfaceFormat.HdrBlendable, typeof(RgbaVector));
+            AddVectorFormat(SurfaceFormat.HdrBlendable, typeof(HalfVector4));
 
             AddVectorFormat(SurfaceFormat.NormalizedByte2, typeof(NormalizedByte2));
             AddVectorFormat(SurfaceFormat.NormalizedByte4, typeof(NormalizedByte4));

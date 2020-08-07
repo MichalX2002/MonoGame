@@ -39,8 +39,11 @@
     </When>
   </Choose>
 
+  <PropertyGroup>
+    <OutputPath>bin/$(Configuration)/$(MonoGamePlatform)</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.$(MonoGamePlatform).csproj" />
     <MonoGameContentReference Include="Content\Content.$(MonoGamePlatform).mgcb" />
   </ItemGroup>
 
@@ -96,6 +99,20 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <Choose>
+    <When Condition="'$(SolutionName)' == 'MonoGame.Framework.DesktopGL'">
+      <ItemGroup>
+        <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj" />
+      </ItemGroup>
+    </When>
+
+    <When Condition="'$(SolutionName)' == 'MonoGame.Framework.Windows'">
+      <ItemGroup>
+        <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.Windows.csproj" />
+      </ItemGroup>
+    </When>
+  </Choose>
 
   <ItemGroup>
     <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj" />

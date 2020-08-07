@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
@@ -45,6 +44,7 @@ namespace MonoGame.Imaging
         {
             if (pixels.IsEmpty) 
                 throw new ArgumentEmptyException(nameof(pixels));
+
             ImagingArgumentGuard.AssertNonEmptyRectangle(sourceRectangle, nameof(sourceRectangle));
 
             var image = new Image<TPixelTo>(sourceRectangle.Size);
@@ -61,8 +61,8 @@ namespace MonoGame.Imaging
         }
 
         public static Image<TPixel> LoadPixels<TPixel>(
-           ReadOnlySpan<TPixel> pixels, Rectangle sourceRectangle, int? pixelStride = null)
-           where TPixel : unmanaged, IPixel<TPixel>
+            ReadOnlySpan<TPixel> pixels, Rectangle sourceRectangle, int? pixelStride = null)
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             return LoadPixels<TPixel, TPixel>(pixels, sourceRectangle, pixelStride);
         }

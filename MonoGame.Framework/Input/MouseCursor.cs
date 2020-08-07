@@ -85,7 +85,7 @@ namespace MonoGame.Framework.Input
         public bool IsDisposed { get; private set; }
 
         /// <summary>
-        /// Gets the platform handle to the cursor.
+        /// Gets a platform handle to the cursor.
         /// </summary>
         public IntPtr Handle { get; private set; }
 
@@ -124,8 +124,7 @@ namespace MonoGame.Framework.Input
         /// <param name="pixels">Pixels to use as the cursor image.</param>
         /// <param name="origin">A point in the pixels that is used as the cursor position.</param>
         /// <param name="sourceRectangle">Optional part of the image to use as the cursor.</param>
-        [CLSCompliant(false)]
-        public static unsafe MouseCursor FromPixels(
+        public static MouseCursor FromPixels(
             IReadOnlyPixelRows pixels, Point origin, Rectangle? sourceRectangle = null)
         {
             if (pixels == null)

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.Vectors;
@@ -49,6 +50,8 @@ namespace MonoGame.Imaging
         private static ConcurrentDictionary<SrcDstTypePair, ConvertPixelDataDelegate> ConvertPixelDataDelegateCache { get; } =
             new ConcurrentDictionary<SrcDstTypePair, ConvertPixelDataDelegate>();
 
+        [DebuggerHidden]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ReflectionConvertPixelData<TPixelFrom, TPixelTo>(
            ReadOnlySpan<byte> source, Span<byte> destination)
            where TPixelFrom : unmanaged, IPixel
@@ -69,8 +72,10 @@ namespace MonoGame.Imaging
         public static ConvertPixelDataDelegate GetConvertPixelsDelegate(
             VectorType sourceType, VectorType destinationType)
         {
-            if (sourceType == null) throw new ArgumentNullException(nameof(sourceType));
-            if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
+            if (sourceType == null)
+                throw new ArgumentNullException(nameof(sourceType));
+            if (destinationType == null)
+                throw new ArgumentNullException(nameof(destinationType));
 
             var delegateKey = (sourceType, destinationType);
             if (!ConvertPixelDataDelegateCache.TryGetValue(delegateKey, out var convertDelegate))
@@ -93,6 +98,8 @@ namespace MonoGame.Imaging
         private static ConcurrentDictionary<SrcDstTypePair, LoadPixelDataDelegate> LoadPixelDataDelegateCache { get; } =
             new ConcurrentDictionary<SrcDstTypePair, LoadPixelDataDelegate>();
 
+        [DebuggerHidden]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ReflectionLoadPixelData<TPixelFrom, TPixelTo>(
             ReadOnlySpan<byte> pixelData,
             Rectangle sourceRectangle,
@@ -116,8 +123,10 @@ namespace MonoGame.Imaging
         private static LoadPixelDataDelegate GetLoadPixelDataDelegate(
             VectorType sourceType, VectorType destinationType)
         {
-            if (sourceType == null) throw new ArgumentNullException(nameof(sourceType));
-            if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
+            if (sourceType == null)
+                throw new ArgumentNullException(nameof(sourceType));
+            if (destinationType == null)
+                throw new ArgumentNullException(nameof(destinationType));
 
             var delegateKey = (sourceType, destinationType);
             if (!LoadPixelDataDelegateCache!.TryGetValue(delegateKey, out var loadDelegate))
@@ -148,6 +157,8 @@ namespace MonoGame.Imaging
         private static ConcurrentDictionary<SrcDstTypePair, LoadPixelRowsDelegate> LoadPixelsDelegateCache { get; } =
             new ConcurrentDictionary<SrcDstTypePair, LoadPixelRowsDelegate>();
 
+        [DebuggerHidden]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ReflectionLoadPixelRows<TPixelFrom, TPixelTo>(
             IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image destination)
             where TPixelFrom : unmanaged, IPixel
@@ -168,8 +179,10 @@ namespace MonoGame.Imaging
         private static LoadPixelRowsDelegate GetLoadPixelRowsDelegate(
             VectorType sourceType, VectorType destinationType)
         {
-            if (sourceType == null) throw new ArgumentNullException(nameof(sourceType));
-            if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
+            if (sourceType == null)
+                throw new ArgumentNullException(nameof(sourceType));
+            if (destinationType == null)
+                throw new ArgumentNullException(nameof(destinationType));
 
             var delegateKey = (sourceType, destinationType);
             if (!LoadPixelsDelegateCache!.TryGetValue(delegateKey, out var loadDelegate))
@@ -192,6 +205,8 @@ namespace MonoGame.Imaging
         private static ConcurrentDictionary<VectorType, WrapMemoryDelegate>? WrapMemoryDelegateCache { get; } =
             new ConcurrentDictionary<VectorType, WrapMemoryDelegate>();
 
+        [DebuggerHidden]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static Image ReflectionWrapMemory<TPixel>(
             IMemory memory, Size size, bool leaveOpen = false, int? byteStride = null)
             where TPixel : unmanaged, IPixel<TPixel>
@@ -232,7 +247,9 @@ namespace MonoGame.Imaging
         private static ConcurrentDictionary<VectorType, CreateDelegate> _createDelegateCache =
             new ConcurrentDictionary<VectorType, CreateDelegate>();
 
-        internal static Image ReflectionCreate<TPixel>(Size size, bool zeroFill)
+        [DebuggerHidden]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Image ReflectionCreate<TPixel>(Size size, bool zeroFill)
            where TPixel : unmanaged, IPixel<TPixel>
         {
             return Image<TPixel>.CreateCore(size, zeroFill);

@@ -125,32 +125,25 @@ namespace MonoGame.Framework.Graphics
             if (data.IsEmpty)
                 throw new ArgumentEmptyException(nameof(data));
 
-            var texWidth = Math.Max(Width >> level, 1);
-            var texHeight = Math.Max(Height >> level, 1);
-            var texDepth = Math.Max(Depth >> level, 1);
-            var width = right - left;
-            var height = bottom - top;
-            var depth = back - front;
+            int texWidth = Math.Max(Width >> level, 1);
+            int texHeight = Math.Max(Height >> level, 1);
+            int texDepth = Math.Max(Depth >> level, 1);
+            int width = right - left;
+            int height = bottom - top;
+            int depth = back - front;
 
             if (left < 0 || top < 0 || back < 0 || right > texWidth || bottom > texHeight || front > texDepth)
                 throw new ArgumentException("Area must be within texture bounds.");
+
             if (left >= right || top >= bottom || front >= back)
                 throw new ArgumentException("Box size and box position must be greater than zero.");
+
             if (level < 0 || level >= LevelCount)
                 throw new ArgumentException(
                     $"Level must be less than the number of levels in this texture.", nameof(level));
 
-            var formatSize = Format.GetSize();
-            if (Unsafe.SizeOf<T>() > formatSize || formatSize % Unsafe.SizeOf<T>() != 0)
-                throw new ArgumentException(
-                    $"{nameof(T)} is of an invalid size for the format of this texture.", nameof(T));
-
-            int bytes = width * height * depth * formatSize;
-            if (data.Length * Unsafe.SizeOf<T>() < bytes)
-                throw new ArgumentException(
-                    $"{nameof(data.Length)} is not the right size, " +
-                    $"{nameof(data.Length)} * sizeof({nameof(T)}) is {data.Length * Unsafe.SizeOf<T>()}, " +
-                    $"but data size is {bytes}.", nameof(data.Length));
+            int minByteSize = width * height * depth * Format.GetSize();
+            ValidateSizes(data.Length, Unsafe.SizeOf<T>(), minByteSize);
         }
     }
 }

@@ -3,6 +3,8 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace MonoGame.Framework.Audio
 {
@@ -23,6 +25,9 @@ namespace MonoGame.Framework.Audio
         private float _volume;
         private float _pitch;
 
+        /// <summary>
+        /// Gets whether this sound instance is disposed.
+        /// </summary>
         public bool IsDisposed { get; private set; }
 
         /// <summary>Gets the current playback state.</summary>
@@ -84,12 +89,7 @@ namespace MonoGame.Framework.Audio
                     throw new ArgumentOutOfRangeException(nameof(value));
 
                 _volume = value;
-
-                // XAct sound effects are not tied to the SoundEffect master volume.
-                if (_isXAct)
-                    PlatformSetVolume(value);
-                else
-                    PlatformSetVolume(value * SoundEffect.MasterVolume);
+                UpdateVolume();
             }
         }
 
@@ -105,6 +105,11 @@ namespace MonoGame.Framework.Audio
         /// <param name="emitter">Data about the source of emission.</param>
         public void Apply3D(AudioListener listener, AudioEmitter emitter)
         {
+            if (listener == null)
+                throw new ArgumentNullException(nameof(listener));
+            if (emitter == null)
+                throw new ArgumentNullException(nameof(emitter));
+
             PlatformApply3D(listener, emitter);
         }
 
@@ -113,8 +118,16 @@ namespace MonoGame.Framework.Audio
         /// <param name="emitter">Data about the source of emission.</param>
         public void Apply3D(ReadOnlySpan<AudioListener> listeners, AudioEmitter emitter)
         {
+            if (emitter == null)
+                throw new ArgumentNullException(nameof(emitter));
+
             foreach (var listener in listeners)
+            {
+                if (listener == null)
+                    continue;
+
                 PlatformApply3D(listener, emitter);
+            }
         }
 
         /// <summary>Pauses playback of the instance.</summary>
@@ -149,17 +162,11 @@ namespace MonoGame.Framework.Audio
                     throw new InstancePlayLimitException();
             }
 
+            // For non-XAct sounds we need to be sure the latest
+            // master volume level is applied before playback.
             UpdateMasterVolume();
             PlatformPlay();
             SoundEffectInstancePool.Register(this);
-        }
-
-        internal void UpdateMasterVolume()
-        {
-            // For non-XAct sounds we need to be sure the latest
-            // master volume level is applied before playback.
-            if (!_isXAct)
-                PlatformSetVolume(Volume * SoundEffect.MasterVolume);
         }
 
         /// <summary>Resumes playback for the instance.</summary>
@@ -185,6 +192,20 @@ namespace MonoGame.Framework.Audio
             PlatformStop(immediate);
         }
 
+        internal void UpdateMasterVolume()
+        {
+            PlatformSetVolume(_volume * SoundEffect.MasterVolume);
+        }
+
+        internal void UpdateVolume()
+        {
+            // XAct sound effects are not tied to the SoundEffect master volume.
+            if (_isXAct)
+                PlatformSetVolume(_volume);
+            else
+                UpdateMasterVolume();
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!IsDisposed)
@@ -196,6 +217,7 @@ namespace MonoGame.Framework.Audio
             }
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);

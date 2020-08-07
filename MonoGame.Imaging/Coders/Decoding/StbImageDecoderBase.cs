@@ -23,6 +23,9 @@ namespace MonoGame.Imaging.Coders.Decoding
 
         public void Decode(ImageDecoderState decoderState)
         {
+            if (decoderState == null)
+                throw new ArgumentNullException(nameof(decoderState));
+
             var state = (StbImageDecoderState)decoderState;
             if (state.FrameIndex < 0)
                 throw new InvalidOperationException("The decoder state is invalid.");

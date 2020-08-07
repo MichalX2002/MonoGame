@@ -41,7 +41,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Event that fires when there is audio data available.
         /// </summary>
-        public event BufferReadyDelegate BufferReady;
+        public event BufferReadyDelegate? BufferReady;
 
         /// <summary>
         /// Returns the friendly name of the microphone.

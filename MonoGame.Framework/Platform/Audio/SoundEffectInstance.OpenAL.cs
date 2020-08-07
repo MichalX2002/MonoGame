@@ -11,14 +11,14 @@ namespace MonoGame.Framework.Audio
     public partial class SoundEffectInstance : IDisposable
     {
         private SoundState SoundState = SoundState.Stopped;
-        private bool _looped = false;
+        private bool _looped;
         private float _alVolume = 1f;
 
-        private float _reverb = 0f;
-        private bool _needsFilterUpdate = false;
+        private float _reverb;
+        private bool _needsFilterUpdate;
         private EfxFilterType _filterType;
-        private float _filterQ; // unused?
         private float _frequency;
+        private float _filterQ; // unused?
 
         internal ALController Controller { get; private set; }
         internal uint? SourceId { get; set; }
@@ -27,7 +27,7 @@ namespace MonoGame.Framework.Audio
         /// Gets the OpenAL sound controller, constructs the sound buffer, 
         /// and sets up the event delegates for the reserved and recycled events.
         /// </summary>
-        internal void InitializeSound()
+        internal void PlatformInitialize()
         {
             Controller = ALController.Instance;
         }
@@ -79,7 +79,7 @@ namespace MonoGame.Framework.Audio
             if (!SourceId.HasValue)
                 SourceId = Controller.ReserveSource();
 
-            AL.Source(SourceId.Value, ALSourcei.Buffer, _effect!.SoundBuffer.BufferId);
+            AL.Source(SourceId.Value, ALSourcei.Buffer, _effect!.SoundBuffer!.BufferId);
             ALHelper.CheckError("Failed to bind buffer to source.");
 
             // update the position, gain, looping, pitch, and distance model
@@ -243,7 +243,7 @@ namespace MonoGame.Framework.Audio
         {
             if (_reverb <= 0f || SoundEffect.ReverbSlot == 0)
                 return;
-            
+
             Controller.Efx.BindSourceToAuxiliarySlot(SourceId!.Value, (int)SoundEffect.ReverbSlot, 0, 0);
             ALHelper.CheckError("Failed to set reverb.");
         }

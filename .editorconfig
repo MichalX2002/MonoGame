@@ -62,3 +62,6 @@ dotnet_diagnostic.CS8604.severity = none
 
 # CA2213: Disposable fields should be disposed
 dotnet_diagnostic.CA2213.severity = none
+
+# CA1065: Do not raise exceptions in unexpected locations
+dotnet_diagnostic.CA1065.severity = none

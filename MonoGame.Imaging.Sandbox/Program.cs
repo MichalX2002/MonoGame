@@ -55,7 +55,6 @@ namespace MonoGame.Imaging.Tests
                 JpegAtQuality(95);
                 JpegAtQuality(100);
 
-                return;
                 imagee.Save("savetest/test.png");
                 imagee.Save("savetest/test_rle.tga", null, TgaEncoderOptions.Default);
                 imagee.Save("savetest/test_norle.tga", null, TgaEncoderOptions.NoRLE);
@@ -178,7 +177,7 @@ namespace MonoGame.Imaging.Tests
                     StbImageResize.Resize(
                         image.GetPixelByteSpan(), image.Width, image.Height, image.ByteStride,
                         resizeDst.GetPixelByteSpan(), resizeDst.Width, resizeDst.Height, resizeDst.ByteStride,
-                        num_channels: 4);
+                        numChannels: 4);
                 }
 
                 watch.Stop();

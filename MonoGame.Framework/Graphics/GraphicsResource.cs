@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Diagnostics;
 
 namespace MonoGame.Framework.Graphics
 {
@@ -20,7 +19,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Occurs when the <see cref="GraphicsResource"/> is disposed.
         /// </summary>
-        public event Event<GraphicsResource> Disposing;
+        public event Event<GraphicsResource>? Disposing;
 
         /// <summary>
         /// Gets whether the <see cref="GraphicsResource"/> is disposed.
@@ -38,7 +37,7 @@ namespace MonoGame.Framework.Graphics
         public object Tag { get; set; }
 
         /// <summary>
-        /// Gets whether various operations are accessible outside the main thread.
+        /// Gets whether various operations are supported outside the main thread.
         /// </summary>
         public virtual bool SupportsAsync => GraphicsDevice.Capabilities.SupportsAsync;
 
@@ -46,8 +45,7 @@ namespace MonoGame.Framework.Graphics
         /// Gets whether the caller is on the main thread or whether operations 
         /// are supported outside the main thread and are therefore always in a valid context.
         /// </summary>
-        protected bool IsValidThreadContext =>
-            Threading.IsOnMainThread || (!Threading.IsOnMainThread && SupportsAsync);
+        protected bool IsValidThreadContext => Threading.IsOnMainThread || SupportsAsync;
 
         /// <summary>
         /// Gets the <see cref="Graphics.GraphicsDevice"/> assigned to this <see cref="GraphicsResource"/>.
@@ -68,7 +66,7 @@ namespace MonoGame.Framework.Graphics
                 if (_graphicsDevice != null)
                 {
                     _graphicsDevice.RemoveResourceReference(_selfReference);
-                    _selfReference = null;
+                    _selfReference = null!;
                 }
                 _graphicsDevice = value;
 
@@ -148,8 +146,8 @@ namespace MonoGame.Framework.Graphics
                 // Remove from the global list of graphics resources
                 _graphicsDevice?.RemoveResourceReference(_selfReference);
 
-                _graphicsDevice = null;
-                _selfReference = null;
+                _graphicsDevice = null!;
+                _selfReference = null!;
                 IsDisposed = true;
             }
         }

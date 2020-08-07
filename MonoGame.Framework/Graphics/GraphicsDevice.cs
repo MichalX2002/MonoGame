@@ -102,11 +102,7 @@ namespace MonoGame.Framework.Graphics
 
         #region Auto Properties
 
-        public int MaxTexture2DSize { get; private set; }
-        public int MaxTexture3DSize { get; private set; }
-        public int MaxTextureCubeSize { get; private set; }
-
-        internal GraphicsCapabilities Capabilities { get; private set; }
+        public GraphicsCapabilities Capabilities { get; private set; }
         public TextureCollection VertexTextures { get; private set; }
         public SamplerStateCollection VertexSamplerStates { get; private set; }
         public TextureCollection Textures { get; private set; }

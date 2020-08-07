@@ -53,8 +53,8 @@ namespace MonoGame.Framework.Graphics
 
             public Glyph(
                 Rune character, 
-                in Rectangle boundsInTexture,
-                in Rectangle cropping,
+                Rectangle boundsInTexture,
+                Rectangle cropping,
                 float leftSideBearing, 
                 float rightSideBearing, 
                 float width)

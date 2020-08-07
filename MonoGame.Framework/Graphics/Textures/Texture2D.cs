@@ -305,23 +305,24 @@ namespace MonoGame.Framework.Graphics
             for (int y = 0; y < checkedRect.Height; y++)
             {
                 Span<byte> vectorRow = image.GetPixelByteRowSpan(y).Slice(0, srcRowStride);
-                int offset = 0;
+                int offsetX = 0;
                 do
                 {
-                    int count = checkedRect.Width > bufferCapacity ? bufferCapacity : checkedRect.Width;
+                    int sliceWidth = checkedRect.Width - offsetX;
+                    int count = sliceWidth > bufferCapacity ? bufferCapacity : sliceWidth;
                     var slice = vectorRow.Slice(0, count * srcVectorType.ElementSize);
 
                     convertPixels.Invoke(slice, buffer);
 
                     var textureRect = new Rectangle(
-                        checkedRect.X + offset,
+                        checkedRect.X + offsetX,
                         checkedRect.Y + y,
                         width: count,
                         height: 1);
                     SetData(buffer, textureRect, level, arraySlice);
 
                     vectorRow = vectorRow.Slice(slice.Length);
-                    offset += count;
+                    offsetX += count;
 
                 } while (!vectorRow.IsEmpty);
             }
@@ -396,7 +397,7 @@ namespace MonoGame.Framework.Graphics
             ValidateParams<T>(level, arraySlice, rectangle, out int byteSize, out Rectangle checkedRect);
 
             int elementCount = checkedRect.Width * checkedRect.Height;
-            ValidateSizes(Unsafe.SizeOf<T>(), elementCount, byteSize);
+            ValidateSizes(elementCount, Unsafe.SizeOf<T>(), byteSize);
 
             var ptr = new UnmanagedMemory<T>(elementCount);
             PlatformGetData(level, arraySlice, checkedRect, ptr.ByteSpan);
@@ -423,6 +424,8 @@ namespace MonoGame.Framework.Graphics
             bool mipmap = false,
             SurfaceFormat? format = DefaultSurfaceFormat)
         {
+            // TODO: premultiply alpha option?
+
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
             if (graphicsDevice == null)
@@ -430,7 +433,7 @@ namespace MonoGame.Framework.Graphics
 
             var checkedFormat = format ?? GetVectorFormat(image.PixelType.Type)?.SurfaceFormat ?? DefaultSurfaceFormat;
             var texture = new Texture2D(graphicsDevice, image.Width, image.Height, mipmap, checkedFormat);
-            texture.SetData(image, new Rectangle(image.Width / 2, image.Height / 2, image.Width / 2, image.Height / 2));
+            texture.SetData(image, new Rectangle(0, 0, image.Width, image.Height));
             return texture;
         }
 
@@ -459,10 +462,15 @@ namespace MonoGame.Framework.Graphics
             bool mipmap = false,
             SurfaceFormat? format = DefaultSurfaceFormat)
         {
+            // TODO: premultiply alpha option?
+
             if (graphicsDevice == null)
                 throw new ArgumentNullException(nameof(graphicsDevice));
 
-            using (var image = Image.Load(imagingConfig, stream))
+            var vectorFormat = GetVectorFormat(format ?? DefaultSurfaceFormat);
+            var vectorType = vectorFormat.VectorTypes.Span[0];
+
+            using (var image = Image.Load(imagingConfig, stream, vectorType))
                 return FromImage(image, graphicsDevice, mipmap, format);
         }
 
@@ -704,7 +712,7 @@ namespace MonoGame.Framework.Graphics
         #region Parameter Validation
 
         private void ValidateParams(
-            int typeSize, string typeName, int level, int arraySlice, Rectangle? rect,
+            string typeName, int level, int arraySlice, Rectangle? rect,
             out int byteSize, out Rectangle checkedRect)
         {
             if (level < 0 || level >= LevelCount)
@@ -720,12 +728,8 @@ namespace MonoGame.Framework.Graphics
                     $"{nameof(arraySlice)} must be smaller than the " +
                     $"{nameof(ArraySize)} of this texture and larger than 0.", nameof(arraySlice));
 
-            var fSize = Format.GetSize();
-            if (typeSize > fSize || fSize % typeSize != 0)
-                throw new ArgumentException(
-                    $"Type {typeName} is of an invalid size for the format of this texture.", typeName);
-
             Rectangle texBounds = CheckRect(level, rect, out checkedRect);
+            int formatSize = Format.GetSize();
 
             if (Format.IsCompressedFormat())
             {
@@ -759,36 +763,29 @@ namespace MonoGame.Framework.Graphics
                         break;
 
                     default:
-                        byteSize = roundedWidth * roundedHeight * fSize / (blockWidth * blockHeight);
+                        byteSize = roundedWidth * roundedHeight * formatSize / (blockWidth * blockHeight);
                         break;
                 }
             }
             else
             {
-                byteSize = checkedRect.Width * checkedRect.Height * fSize;
+                byteSize = checkedRect.Width * checkedRect.Height * formatSize;
             }
-        }
-
-        private static void ValidateSizes(int elementSize, int elementCount, int minimumByteSize)
-        {
-            if (elementCount * elementSize < minimumByteSize)
-                throw new ArgumentException(
-                    "The given memory is not enough for the current texture format.", nameof(elementCount));
         }
 
         private void ValidateParams<T>(
             int level, int arraySlice, Rectangle? rect,
             out int byteSize, out Rectangle checkedRect)
         {
-            ValidateParams(Unsafe.SizeOf<T>(), typeof(T).Name, level, arraySlice, rect, out byteSize, out checkedRect);
+            ValidateParams(typeof(T).Name, level, arraySlice, rect, out byteSize, out checkedRect);
         }
 
         private void ValidateParams(
             int typeSize, string typeName, int level, int arraySlice, Rectangle? rect, int elementCount,
             out Rectangle checkedRect)
         {
-            ValidateParams(typeSize, typeName, level, arraySlice, rect, out int byteSize, out checkedRect);
-            ValidateSizes(typeSize, elementCount, byteSize);
+            ValidateParams(typeName, level, arraySlice, rect, out int byteSize, out checkedRect);
+            ValidateSizes(elementCount, typeSize, byteSize);
         }
 
         private void ValidateParams<T>(
@@ -796,7 +793,7 @@ namespace MonoGame.Framework.Graphics
             where T : unmanaged
         {
             ValidateParams<T>(level, arraySlice, rect, out int minByteSize, out checkedRect);
-            ValidateSizes(Unsafe.SizeOf<T>(), elementCount, minByteSize);
+            ValidateSizes(elementCount, Unsafe.SizeOf<T>(), minByteSize);
         }
 
         private Rectangle CheckRect(int level, Rectangle? rect, out Rectangle checkedRect)

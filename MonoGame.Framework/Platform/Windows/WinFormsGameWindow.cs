@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -13,8 +14,9 @@ using System.Windows.Forms;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 using MonoGame.Framework.Input.Touch;
+using MonoGame.Framework.Vectors;
 using MonoGame.Framework.Windows;
-
+using MonoGame.Imaging;
 using ButtonState = MonoGame.Framework.Input.ButtonState;
 using DrawingPoint = System.Drawing.Point;
 using DrawingSize = System.Drawing.Size;
@@ -23,7 +25,7 @@ namespace MonoGame.Framework
 {
     internal class WinFormsGameWindow : GameWindow
     {
-        private static ReaderWriterLockSlim _allWindowsReaderWriterLockSlim = 
+        private static ReaderWriterLockSlim _allWindowsReaderWriterLockSlim =
             new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
         private static List<WinFormsGameWindow> _allWindows =
@@ -176,13 +178,13 @@ namespace MonoGame.Framework
         public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
         {
         }
-        
+
         /// <inheritdoc/>
         public override IntPtr GetPlatformWindowHandle()
         {
             return Form.Handle;
         }
-        
+
         /// <inheritdoc/>
         public override IntPtr GetSubsystemWindowHandle()
         {
@@ -267,9 +269,6 @@ namespace MonoGame.Framework
             public int Y;
         }
 
-        [DllImport("shell32.dll", CharSet = CharSet.Auto, BestFitMapping = false)]
-        private static extern IntPtr ExtractIcon(IntPtr hInst, string exeFileName, int iconIndex);
-
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool GetCursorPos(out POINTSTRUCT pt);
@@ -280,13 +279,17 @@ namespace MonoGame.Framework
 
         private void SetIcon()
         {
-            // When running unit tests this can return null.
-            var assembly = Assembly.GetEntryAssembly();
-            if (assembly != null)
+            var iconStream = GetEmbeddedIconStream();
+            if (iconStream == null)
+                return;
+
+            using (var image = Imaging.Image.Load<Bgra32>(iconStream))
             {
-                var handle = ExtractIcon(IntPtr.Zero, assembly.Location, 0);
-                if (handle != IntPtr.Zero)
-                    Form.Icon = Icon.FromHandle(handle);
+                if (image != null)
+                {
+                    using (var bmp = image.ToBitmap())
+                        Form.Icon = Icon.FromHandle(bmp.GetHicon());
+                }
             }
         }
 

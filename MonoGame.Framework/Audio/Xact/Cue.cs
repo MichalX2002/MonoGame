@@ -31,7 +31,7 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// This event is triggered when the <see cref="Cue"/> is disposed.
         /// </summary>
-        public event Event<Cue> Disposing;
+        public event Event<Cue>? Disposed;
 
         /// <summary>
         /// Gets the friendly name of the cue.
@@ -392,7 +392,7 @@ namespace MonoGame.Framework.Audio
             {
                 IsCreated = false;
                 IsPrepared = false;
-                Disposing?.Invoke(this);
+                Disposed?.Invoke(this);
             }
         }
     }

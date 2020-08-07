@@ -6,18 +6,29 @@ namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Provides information about the capabilities of the
-    /// current graphics device. A very useful thread for investigating GL extenion names
-    /// http://stackoverflow.com/questions/3881197/opengl-es-2-0-extensions-on-android-devices
+    /// current graphics device.
     /// </summary>
-    internal partial class GraphicsCapabilities
+    /// <remarks>
+    ///  A very useful thread for investigating GL extenion names:
+    /// http://stackoverflow.com/questions/3881197/opengl-es-2-0-extensions-on-android-devices
+    /// </remarks>
+    public partial class GraphicsCapabilities
     {
-        // The highest possible MSCount
+        /// <summary>
+        /// The highest possible MSCount.
+        /// </summary>
         public const int MultiSampleCountLimit = 32;
 
-        public void Initialize(GraphicsDevice device)
+        internal void Initialize(GraphicsDevice device)
         {
             PlatformInitialize(device);
         }
+
+        public int MaxTexture2DSize { get; private set; }
+
+        public int MaxTexture3DSize { get; private set; }
+        
+        public int MaxTextureCubeSize { get; private set; }
 
         /// <summary>
         /// Whether the device fully supports non power-of-two textures, including

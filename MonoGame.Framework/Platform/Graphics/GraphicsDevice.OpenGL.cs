@@ -196,18 +196,6 @@ namespace MonoGame.Framework.Graphics
             GL.GetInteger(GetPName.MaxCombinedTextureImageUnits, out MaxTextureSlots);
             GL.CheckError();
 
-            GL.GetInteger(GetPName.MaxTextureSize, out int maxTexture2DSize);
-            GL.CheckError();
-            MaxTexture2DSize = maxTexture2DSize;
-
-            GL.GetInteger(GetPName.MaxTextureSize, out int maxTexture3DSize);
-            GL.CheckError();
-            MaxTexture3DSize = maxTexture2DSize;
-
-            GL.GetInteger(GetPName.MaxTextureSize, out int maxTextureCubeSize);
-            GL.CheckError();
-            MaxTextureCubeSize = maxTextureCubeSize;
-
             GL.GetInteger(GetPName.MaxVertexAttribs, out MaxVertexAttributes);
             GL.CheckError();
 

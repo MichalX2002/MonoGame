@@ -210,38 +210,6 @@ namespace MonoGame.Framework
             SetCursorVisible(_mouseVisible);
         }
 
-        private static RecyclableBuffer? ReadEmbeddedIconBytes(string arrayTag)
-        {
-            // when running NUnit tests entry assembly can be null
-            var entryAssembly = Assembly.GetEntryAssembly();
-            if (entryAssembly == null)
-                return null;
-
-            var declaringType = entryAssembly.EntryPoint?.DeclaringType;
-            if (declaringType == null)
-                return null;
-
-            using (var stream =
-                entryAssembly.GetManifestResourceStream(declaringType.Namespace + ".Icon.bmp") ??
-                entryAssembly.GetManifestResourceStream("Icon.bmp") ??
-                Assembly.GetExecutingAssembly().GetManifestResourceStream("MonoGame.bmp"))
-            {
-                if (stream != null)
-                {
-                    try
-                    {
-                        return RecyclableBuffer.ReadBytes(stream, (int)stream.Length, arrayTag);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine("Failed to load icon from embedded resources: {0}", ex);
-                    }
-                }
-            }
-
-            return null;
-        }
-
         private static int GetMouseDisplay()
         {
             SDL.Mouse.GetGlobalState(out int x, out int y);

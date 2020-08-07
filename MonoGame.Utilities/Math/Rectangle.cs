@@ -163,7 +163,7 @@ namespace MonoGame.Framework
 
         #region Operators
 
-        public static Rectangle operator +(in Rectangle a, in Rectangle b)
+        public static Rectangle operator +(Rectangle a, Rectangle b)
         {
             return new Rectangle(
                 a.X + b.X,
@@ -172,7 +172,7 @@ namespace MonoGame.Framework
                 a.Height + b.Height);
         }
 
-        public static Rectangle operator -(in Rectangle a, in Rectangle b)
+        public static Rectangle operator -(Rectangle a, Rectangle b)
         {
             return new Rectangle(
                 a.X - b.X,
@@ -240,7 +240,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">The <see cref="Rectangle"/> to check for inclusion in this <see cref="Rectangle"/>.</param>
         /// <returns><see langword="true"/> if the provided <see cref="Rectangle"/>'s bounds lie entirely inside this <see cref="Rectangle"/>; <see langword="false"/> otherwise.</returns>
-        public readonly bool Contains(in Rectangle value)
+        public readonly bool Contains(Rectangle value)
         {
             return (X <= value.X) && ((value.X + value.Width) <= (X + Width)) 
                 && (Y <= value.Y) && ((value.Y + value.Height) <= (Y + Height));
@@ -277,7 +277,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="value">The other rectangle for testing.</param>
         /// <returns><see langword="true"/> if other <see cref="Rectangle"/> intersects with this rectangle; <see langword="false"/> otherwise.</returns>
-        public readonly bool Intersects(in Rectangle value)
+        public readonly bool Intersects(Rectangle value)
         {
             return value.Left < Right
                 && Left < value.Right 
@@ -291,7 +291,7 @@ namespace MonoGame.Framework
         /// <param name="first">The first <see cref="Rectangle"/>.</param>
         /// <param name="second">The second <see cref="Rectangle"/>.</param>
         /// <returns>Overlapping region of the two rectangles.</returns>
-        public static Rectangle Intersect(in Rectangle first, in Rectangle second)
+        public static Rectangle Intersect(Rectangle first, Rectangle second)
         {
             if (first.Intersects(second))
             {
@@ -401,7 +401,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Rectangle"/> instance on the left of the equal sign.</param>
         /// <param name="b"><see cref="Rectangle"/> instance on the right of the equal sign.</param>
         /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
-        public static bool operator ==(in Rectangle a, in Rectangle b)
+        public static bool operator ==(Rectangle a, Rectangle b)
         {
             return (a.X == b.X)
                 && (a.Y == b.Y)
@@ -415,7 +415,7 @@ namespace MonoGame.Framework
         /// <param name="a"><see cref="Rectangle"/> instance on the left of the not equal sign.</param>
         /// <param name="b"><see cref="Rectangle"/> instance on the right of the not equal sign.</param>
         /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>
-        public static bool operator !=(in Rectangle a, in Rectangle b)
+        public static bool operator !=(Rectangle a, Rectangle b)
         {
             return !(a == b);
         }

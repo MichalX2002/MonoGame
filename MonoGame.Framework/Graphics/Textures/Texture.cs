@@ -31,6 +31,14 @@ namespace MonoGame.Framework.Graphics
         {
         }
 
+        internal static void ValidateSizes(int elementCount, int elementSize, int minimumByteSize)
+        {
+            if (elementCount * elementSize < minimumByteSize)
+                throw new ArgumentException(
+                    $"Given amount in bytes is {elementCount * elementSize}, " +
+                    $"but at least {minimumByteSize} bytes are required.");
+        }
+
         internal static int CalculateMipLevels(int width, int height = 0, int depth = 0)
         {
             int levels = 1;

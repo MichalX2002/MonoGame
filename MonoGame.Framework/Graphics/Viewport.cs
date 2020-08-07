@@ -125,7 +125,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="bounds">
         /// A <see cref="Rectangle"/> that defines the location and size of the <see cref="Viewport"/> in a render target.
         /// </param>
-        public Viewport(in Rectangle bounds) : this(bounds.X, bounds.Y, bounds.Width, bounds.Height)
+        public Viewport(Rectangle bounds) : this(bounds.X, bounds.Y, bounds.Width, bounds.Height)
         {
         }
 
@@ -212,20 +212,26 @@ namespace MonoGame.Framework.Graphics
             return (-1.401298E-45f <= num) && (num <= float.Epsilon);
         }
 
-        public readonly bool Equals(Viewport other)
+        public static bool operator ==(in Viewport a, in Viewport b)
         {
-            return this == other;
+            return a.X == b.X
+                && a.Y == b.Y
+                && a.Width == b.Width
+                && a.Height == b.Height
+                && a.MinDepth == b.MinDepth
+                && a.MaxDepth == b.MaxDepth;
         }
 
-        public override readonly bool Equals(object obj)
+        public static bool operator !=(in Viewport a, in Viewport b)
         {
-            return obj is Viewport other && this == other;
+            return !(a == b);
         }
 
-        public override readonly int GetHashCode()
-        {
-            return HashCode.Combine(X, Y, Width, Height, MinDepth, MaxDepth);
-        }
+        public readonly bool Equals(Viewport other) => this == other;
+
+        public override readonly bool Equals(object? obj) => obj is Viewport other && this == other;
+
+        public override readonly int GetHashCode() => HashCode.Combine(X, Y, Width, Height, MinDepth, MaxDepth);
 
         /// <summary>
         /// Returns a <see cref="string"/> representation of this <see cref="Viewport"/> in the format:
@@ -240,21 +246,6 @@ namespace MonoGame.Framework.Graphics
                 "{X:" + X + " Y:" + Y +
                 " Width:" + Width + " Height:" + Height +
                 " MinDepth:" + MinDepth + " MaxDepth:" + MaxDepth + "}";
-        }
-
-        public static bool operator ==(in Viewport a, in Viewport b)
-        {
-            return a.X == b.X
-                && a.Y == b.Y
-                && a.Width == b.Width
-                && a.Height == b.Height
-                && a.MinDepth == b.MinDepth
-                && a.MaxDepth == b.MaxDepth;
-        }
-
-        public static bool operator !=(in Viewport a, in Viewport b)
-        {
-            return !(a == b);
         }
     }
 }

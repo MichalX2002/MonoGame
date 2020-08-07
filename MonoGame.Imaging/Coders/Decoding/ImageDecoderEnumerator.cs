@@ -9,6 +9,8 @@ namespace MonoGame.Imaging.Coders.Decoding
     public class ImageDecoderEnumerator : IEnumerator<Image>, IImagingConfigurable
     {
         public ImageDecoderState State { get; }
+        public bool IsDisposed { get; private set; }
+        
         public IImagingConfig Config => State.Config;
 
         public Image Current => State.CurrentImage!;
@@ -23,7 +25,7 @@ namespace MonoGame.Imaging.Coders.Decoding
             bool leaveOpen,
             CancellationToken cancellationToken = default)
         {
-            if (decoder == null) 
+            if (decoder == null)
                 throw new ArgumentNullException(nameof(decoder));
 
             State = decoder.CreateState(config, stream, leaveOpen, cancellationToken);
@@ -35,10 +37,7 @@ namespace MonoGame.Imaging.Coders.Decoding
         {
             State.Decoder.Decode(State);
 
-            if (State.CurrentImage == null)
-                throw new Exception("The decoder did not output an image.");
-
-            return true;
+            return State.CurrentImage != null;
         }
 
         public void Reset()
@@ -47,9 +46,22 @@ namespace MonoGame.Imaging.Coders.Decoding
             throw new NotSupportedException();
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
+                if (disposing)
+                {
+                    State.Dispose();
+                }
+                IsDisposed = true;
+            }
+        }
+
         public void Dispose()
         {
-            State.Dispose();
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

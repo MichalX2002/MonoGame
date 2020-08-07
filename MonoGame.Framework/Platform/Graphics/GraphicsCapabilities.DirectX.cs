@@ -2,12 +2,27 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using SharpDX.DXGI;
+
 namespace MonoGame.Framework.Graphics
 {
-    internal partial class GraphicsCapabilities
+    public partial class GraphicsCapabilities
     {
         private void PlatformInitialize(GraphicsDevice device)
         {
+            if (device.GraphicsProfile == GraphicsProfile.HiDef)
+            {
+                MaxTexture2DSize = SharpDX.Direct3D11.Resource.MaximumTexture2DSize;
+                MaxTexture3DSize = SharpDX.Direct3D11.Resource.MaximumTexture3DSize;
+                MaxTextureCubeSize = SharpDX.Direct3D11.Resource.MaximumTextureCubeSize;
+            }
+            else
+            {
+                MaxTexture2DSize = 4096;
+                MaxTexture3DSize = 256;
+                MaxTextureCubeSize = 1024;
+            }
+
             SupportsNonPowerOfTwo = device.GraphicsProfile == GraphicsProfile.HiDef;
             SupportsTextureFilterAnisotropic = true;
 
@@ -37,6 +52,7 @@ namespace MonoGame.Framework.Graphics
 
             MaxMultiSampleCount = GetMaxMultiSampleCount(device);
 
+            // TODO: device._d3dDevice.CheckThreadingSupport()?
             SupportsAsync = true;
         }
 

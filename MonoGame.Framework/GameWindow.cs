@@ -3,8 +3,13 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Data;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using MonoGame.Framework.Input;
 using MonoGame.Framework.Input.Touch;
+using MonoGame.Framework.Memory;
 using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework
@@ -293,6 +298,36 @@ namespace MonoGame.Framework
 #else
             throw new PlatformNotSupportedException();
 #endif
+        }
+
+        // TODO: expose and add SetIcon method
+        internal static RecyclableBuffer? ReadEmbeddedIconBytes(string arrayTag)
+        {
+            try
+            {
+                var stream = GetEmbeddedIconStream();
+                if (stream != null)
+                    return RecyclableBuffer.ReadBytes(stream, (int)stream.Length, arrayTag);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Failed to load icon from embedded resources: {0}", ex);
+            }
+            return null;
+        }
+
+        public static Stream? GetEmbeddedIconStream()
+        {
+            // when running NUnit tests entry assembly can be null
+            var assembly = Assembly.GetEntryAssembly();
+            if (assembly == null)
+                return null;
+
+            var declareSpace = assembly.EntryPoint?.DeclaringType?.Namespace;
+
+            return (declareSpace == null ? null : assembly.GetManifestResourceStream(declareSpace + ".Icon.bmp"))
+                ?? assembly.GetManifestResourceStream("Icon.bmp")
+                ?? Assembly.GetExecutingAssembly().GetManifestResourceStream("MonoGame.bmp");
         }
 
         protected void OnDisposing()

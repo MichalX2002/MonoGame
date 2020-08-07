@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +14,7 @@ namespace MonoGame.Framework.IO
 
         private long _position;
         private int _readAheadPosition;
-        private byte[] _readAheadBuffer;
+        private byte[]? _readAheadBuffer;
 
         public int ReadAheadLength { get; }
 
@@ -33,12 +34,12 @@ namespace MonoGame.Framework.IO
 
         public PrefixedStream(Memory<byte> prefix, Stream stream, bool leaveOpen)
         {
+            _prefix = prefix;
+            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+            _leaveOpen = leaveOpen;
+
             if (!stream.CanRead)
                 throw new IOException("The stream is not readable.");
-
-            _prefix = prefix;
-            _stream = stream;
-            _leaveOpen = leaveOpen;
 
             ReadAheadLength = 0;
             _readAheadPosition = 0;
@@ -46,14 +47,14 @@ namespace MonoGame.Framework.IO
 
         public PrefixedStream(Stream stream, int readAhead, bool leaveOpen)
         {
-            if (!stream.CanRead)
-                throw new IOException("The stream is not readable.");
+            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+            _leaveOpen = leaveOpen;
 
             if (readAhead < 0)
-                throw new ArgumentOutOfRangeException("Value may not be negative.", nameof(readAhead));
+                throw new ArgumentOutOfRangeException(nameof(readAhead), "Value may not be negative.");
 
-            _stream = stream;
-            _leaveOpen = leaveOpen;
+            if (!stream.CanRead)
+                throw new IOException("The stream is not readable.");
 
             ReadAheadLength = readAhead;
             if (ReadAheadLength > 0)
@@ -72,7 +73,7 @@ namespace MonoGame.Framework.IO
 
         public async ValueTask<Memory<byte>> GetPrefixAsync(CancellationToken cancellationToken = default)
         {
-            await FillReadAheadBufferAsync(cancellationToken);
+            await FillReadAheadBufferAsync(cancellationToken).ConfigureAwait(false);
             return _prefix;
         }
 
@@ -115,7 +116,7 @@ namespace MonoGame.Framework.IO
                 return 0;
 
             if (_prefix.IsEmpty)
-                await FillReadAheadBufferAsync(cancellationToken);
+                await FillReadAheadBufferAsync(cancellationToken).ConfigureAwait(false);
 
             int left = buffer.Length;
             int totalRead = 0;
@@ -124,7 +125,7 @@ namespace MonoGame.Framework.IO
             {
                 int read = _position < _prefix.Length
                     ? ReadBufferedPrefix(buffer.Slice(totalRead).Span)
-                    : await _stream.ReadAsync(buffer.Slice(totalRead));
+                    : await _stream.ReadAsync(buffer.Slice(totalRead), cancellationToken).ConfigureAwait(false);
 
                 if (read == 0)
                     break;
@@ -167,7 +168,7 @@ namespace MonoGame.Framework.IO
                 int read;
                 while ((read = await _stream.ReadAsync(
                     _readAheadBuffer.AsMemory(_readAheadPosition, ReadAheadLength - _readAheadPosition),
-                    cancellationToken)) > 0)
+                    cancellationToken).ConfigureAwait(false)) > 0)
                 {
                     _readAheadPosition += read;
                 }

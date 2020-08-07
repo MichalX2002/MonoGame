@@ -447,17 +447,20 @@ namespace MonoGame.Framework.Audio
         #region Static Members
 
         private static float _masterVolume = 1f;
+
         /// <summary>
-        /// Gets or sets the master volume scale applied to all SoundEffectInstances.
+        /// Gets or sets the master volume scale applied to all <see cref="SoundEffectInstance"/>s.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Each SoundEffectInstance has its own Volume property that is independent to SoundEffect.MasterVolume. 
-        /// During playback SoundEffectInstance.Volume is multiplied by SoundEffect.MasterVolume.
+        /// Each <see cref="SoundEffectInstance"/> has its own Volume property 
+        /// that is independent to <see cref="MasterVolume"/>. 
+        /// During playback <see cref="SoundEffectInstance.Volume"/>
+        /// is multiplied by <see cref="MasterVolume"/>.
         /// </para>
         /// <para>
-        /// This property is used to adjust the volume on all current and newly created SoundEffectInstances. 
-        /// The volume of an individual SoundEffectInstance can be adjusted on its own.
+        /// This property is used to adjust the volume on all current and newly created <see cref="SoundEffectInstance"/>s. 
+        /// The volume of an individual <see cref="SoundEffectInstance"/> can be adjusted on its own.
         /// </para>
         /// </remarks>
         public static float MasterVolume
@@ -477,6 +480,7 @@ namespace MonoGame.Framework.Audio
         }
 
         private static float _distanceScale = 1f;
+
         /// <summary>
         /// Gets or sets the scale of distance calculations.
         /// </summary>
@@ -497,6 +501,7 @@ namespace MonoGame.Framework.Audio
         }
 
         private static float _dopplerScale = 1f;
+
         /// <summary>
         /// Gets or sets the scale of Doppler calculations applied to sounds.
         /// </summary>
@@ -524,7 +529,8 @@ namespace MonoGame.Framework.Audio
         }
 
         private static float speedOfSound = 343.5f;
-        /// <summary>Returns the speed of sound used when calculating the Doppler effect..</summary>
+
+        /// <summary>Returns the speed of sound used when calculating the Doppler effect.</summary>
         /// <remarks>
         /// <para>Defaults to 343.5. Value is measured in meters per second.</para>
         /// <para>Has no effect on distance attenuation.</para>
@@ -546,19 +552,9 @@ namespace MonoGame.Framework.Audio
         #region IDisposable
 
         /// <summary>
-        /// Gets whether the object is disposed.
+        /// Gets whether the sound effect is disposed.
         /// </summary>
         public bool IsDisposed { get; private set; }
-
-        /// <summary>
-        /// Releases resources held by the <see cref="SoundEffect"/>.
-        /// Instances currently playing will immediately stop and become invalid.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
 
         private void Dispose(bool disposing)
         {
@@ -571,6 +567,16 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
+        /// Releases resources held by the <see cref="SoundEffect"/>.
+        /// Instances currently playing will immediately stop and become invalid.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
         /// Disposes the <see cref="SoundEffect"/>.
         /// </summary>
         ~SoundEffect()
@@ -579,6 +585,5 @@ namespace MonoGame.Framework.Audio
         }
 
         #endregion
-
     }
 }

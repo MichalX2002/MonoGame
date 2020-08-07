@@ -51,7 +51,7 @@ namespace MonoGame.Framework.Graphics
             }
 
 #if WINDOWS || DESKTOPGL
-            if (FillMode == FillMode.Solid) 
+            if (FillMode == FillMode.Solid)
                 GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             else
                 GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
@@ -70,7 +70,7 @@ namespace MonoGame.Framework.Graphics
                 device._lastRasterizerState.ScissorTestEnable = ScissorTestEnable;
             }
 
-            if (force || 
+            if (force ||
                 DepthBias != device._lastRasterizerState.DepthBias ||
                 SlopeScaleDepthBias != device._lastRasterizerState.SlopeScaleDepthBias)
             {
@@ -93,8 +93,10 @@ namespace MonoGame.Framework.Graphics
                             depthMul = 1 << 24 - 1;
                             break;
                         default:
-                            throw new ArgumentOutOfRangeException();
-    }
+                            throw new ArgumentException(
+                                "The active depth format is not supported.", nameof(device));
+                    }
+
                     GL.Enable(EnableCap.PolygonOffsetFill);
                     GL.PolygonOffset(SlopeScaleDepthBias, DepthBias * depthMul);
                 }
@@ -109,9 +111,9 @@ namespace MonoGame.Framework.Graphics
                 (force || DepthClipEnable != device._lastRasterizerState.DepthClipEnable))
             {
                 if (!DepthClipEnable)
-                    GL.Enable((EnableCap) 0x864F); // should be EnableCap.DepthClamp, but not available in OpenTK.Graphics.ES20.EnableCap
+                    GL.Enable((EnableCap)0x864F); // should be EnableCap.DepthClamp, but not available in OpenTK.Graphics.ES20.EnableCap
                 else
-                    GL.Disable((EnableCap) 0x864F);
+                    GL.Disable((EnableCap)0x864F);
                 GL.CheckError();
                 device._lastRasterizerState.DepthClipEnable = DepthClipEnable;
             }

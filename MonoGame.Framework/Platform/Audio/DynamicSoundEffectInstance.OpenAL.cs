@@ -10,19 +10,17 @@ namespace MonoGame.Framework.Audio
 {
     public sealed partial class DynamicSoundEffectInstance : SoundEffectInstance
     {
-        private Queue<ALBuffer> _queuedBuffers;
+        private Queue<ALBuffer> _queuedBuffers = new Queue<ALBuffer>();
 
         private void PlatformCreate()
         {
-            InitializeSound();
+            PlatformInitialize();
 
             SourceId = Controller.ReserveSource();
 
             // Ensure that the source is not looped (due to source recycling)
             AL.Source(SourceId.Value, ALSourceb.Looping, false);
             ALHelper.CheckError("Failed to set source loop state.");
-
-            _queuedBuffers = new Queue<ALBuffer>();
         }
 
         private int PlatformGetBufferedSamples()

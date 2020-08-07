@@ -3,8 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.IO;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -102,17 +100,19 @@ namespace MonoGame.Framework.Graphics
 
             if (_cachedStagingTexture == null)
             {
-                var desc = new Texture2DDescription();
-                desc.Width = levelWidth;
-                desc.Height = levelHeight;
-                desc.MipLevels = 1;
-                desc.ArraySize = 1;
-                desc.Format = SharpDXHelper.ToFormat(Format);
-                desc.BindFlags = BindFlags.None;
-                desc.CpuAccessFlags = CpuAccessFlags.Read;
-                desc.SampleDescription = SampleDescription;
-                desc.Usage = ResourceUsage.Staging;
-                desc.OptionFlags = ResourceOptionFlags.None;
+                var desc = new Texture2DDescription
+                {
+                    Width = levelWidth,
+                    Height = levelHeight,
+                    MipLevels = 1,
+                    ArraySize = 1,
+                    Format = SharpDXHelper.ToFormat(Format),
+                    BindFlags = BindFlags.None,
+                    CpuAccessFlags = CpuAccessFlags.Read,
+                    SampleDescription = SampleDescription,
+                    Usage = ResourceUsage.Staging,
+                    OptionFlags = ResourceOptionFlags.None
+                };
 
                 _cachedStagingTexture = new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
             }
@@ -191,11 +191,6 @@ namespace MonoGame.Framework.Graphics
             // TODO: Move this to SetData() if we want to make Immutable textures!
             var desc = GetTexture2DDescription();
             return new SharpDX.Direct3D11.Texture2D(GraphicsDevice._d3dDevice, desc);
-        }
-
-        private void PlatformReload(Stream stream)
-        {
-            // TODO
         }
     }
 }

@@ -753,7 +753,7 @@ namespace MonoGame.OpenGL
         static DebugMessageCallbackDelegate DebugMessageCallback;
 
         internal delegate void ErrorDelegate(string? message);
-        internal static event ErrorDelegate OnError;
+        internal static event ErrorDelegate? OnError;
 
         static void DebugMessageCallbackHandler(
             int source, int type, int id, int severity, int length, IntPtr message, IntPtr userParam)

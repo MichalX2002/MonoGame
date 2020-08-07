@@ -43,6 +43,8 @@ namespace MonoGame.Framework.Input
         private static unsafe MouseCursor PlatformFromPixels(
             IReadOnlyPixelMemory<Color> data, int width, int height, Point origin)
         {
+            var iconInfo = new IconInfo();
+
             // bitmaps can not be constructed from Rgba directly
             using (var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb))
             {
@@ -57,9 +59,9 @@ namespace MonoGame.Framework.Input
                     {
                         var srcRow = source.Slice(y * pixelStride, width);
                         var dstRow = new Span<Bgra32>((byte*)bmpData.Scan0 + y * bmpData.Stride, bmpData.Width);
-                        
+
                         for (int x = 0; x < srcRow.Length; x++)
-                            dstRow[x].FromRgba(srcRow[x]);
+                            dstRow[x].FromColor(srcRow[x]);
                     }
                 }
                 finally
@@ -67,16 +69,15 @@ namespace MonoGame.Framework.Input
                     bitmap.UnlockBits(bmpData);
                 }
 
-                var iconInfo = new IconInfo();
                 GetIconInfo(bitmap.GetHicon(), ref iconInfo);
-
-                iconInfo.xHotspot = origin.X;
-                iconInfo.yHotspot = origin.Y;
-                iconInfo.fIcon = false;
-
-                var cursor = new Cursor(CreateIconIndirect(iconInfo));
-                return new MouseCursor(cursor, needsDisposing: true);
             }
+
+            iconInfo.xHotspot = origin.X;
+            iconInfo.yHotspot = origin.Y;
+            iconInfo.fIcon = false;
+
+            var cursor = new Cursor(CreateIconIndirect(iconInfo));
+            return new MouseCursor(cursor, needsDisposing: true);
         }
 
         private void PlatformDispose()

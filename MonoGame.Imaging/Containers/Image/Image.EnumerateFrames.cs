@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using MonoGame.Imaging.Coders.Decoding;
 
 namespace MonoGame.Imaging
@@ -21,7 +20,7 @@ namespace MonoGame.Imaging
 
             using (var prefixStream = config.CreateStreamWithHeaderPrefix(stream, leaveOpen))
             {
-                var prefix = prefixStream.GetPrefix();
+                var prefix = prefixStream.GetPrefix(cancellationToken);
 
                 var format = DetectFormat(config, prefix.Span);
                 if (format == null)

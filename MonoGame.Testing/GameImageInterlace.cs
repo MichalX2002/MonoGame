@@ -38,13 +38,9 @@ namespace MonoGame.Testing
 
         public GameImageInterlace()
         {
-            var int1 = Vector128.Create(1, 2, 3, 4);
-            var int2 = Vector128.Create(5, 6, 7, 8);
-            var xd = Sse2.UnpackLow(int1, int2);
-
-            Console.WriteLine(xd);
-
             _graphicsManager = new GraphicsDeviceManager(this);
+            _graphicsManager.GraphicsProfile = GraphicsProfile.HiDef;
+
             Content.RootDirectory = "Content";
         }
 
@@ -67,8 +63,14 @@ namespace MonoGame.Testing
                 _lastRow = rect?.Y ?? 0;
             }
 
+            _tex = Texture2D.FromStream(
+                //File.OpenRead(@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg"),
+                File.OpenRead("../../../very big interlace.bmp"),
+                GraphicsDevice);
+
             Task.Run(() =>
             {
+                return;
                 try
                 {
                     var ww = new Stopwatch();
@@ -79,8 +81,8 @@ namespace MonoGame.Testing
                     {
                         using (var fs = new FileStream(
                             @"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg",
-                            //"../../very big interlace.png",
-                            //"../../very_big_interlace pog.jpg",
+                            //"../../../very big interlace.png",
+                            //"../../../very_big_interlace pog.jpg",
                             FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 8))
                         //using(var fs = await http.GetStreamAsync(
                         //    "https://upload.wikimedia.org/wikipedia/commons/3/3d/LARGE_elevation.jpg"))

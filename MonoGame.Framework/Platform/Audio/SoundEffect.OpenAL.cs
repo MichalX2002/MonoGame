@@ -211,7 +211,7 @@ namespace MonoGame.Framework.Audio
 
         private void PlatformSetupInstance(SoundEffectInstance inst)
         {
-            inst.InitializeSound();
+            inst.PlatformInitialize();
         }
 
         internal static void PlatformSetReverbSettings(ReverbSettings reverbSettings)
