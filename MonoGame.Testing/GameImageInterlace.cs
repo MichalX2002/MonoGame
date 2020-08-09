@@ -65,7 +65,8 @@ namespace MonoGame.Testing
 
             _tex = Texture2D.FromStream(
                 //File.OpenRead(@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg"),
-                File.OpenRead("../../../very big interlace.bmp"),
+                //File.OpenRead("../../../very big interlace.bmp"),
+                File.OpenRead("../../../very big interlace.png"),
                 GraphicsDevice);
 
             Task.Run(() =>
