@@ -17,6 +17,7 @@ using MonoGame.Framework.Vectors;
 using MonoGame.Imaging;
 using MonoGame.Imaging.Coders.Decoding;
 using MonoGame.Imaging.Coders.Formats;
+using MonoGame.Imaging.Processing;
 
 namespace MonoGame.Testing
 {
@@ -63,16 +64,15 @@ namespace MonoGame.Testing
                 _lastRow = rect?.Y ?? 0;
             }
 
-            _tex = Texture2D.FromStream(
-                //File.OpenRead(@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg"),
-                //File.OpenRead("../../../very big interlace.bmp"),
-                File.OpenRead("../../../very big interlace.png"),
-                GraphicsDevice);
+            //_tex = Texture2D.FromStream(
+            //    //File.OpenRead(@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg"),
+            //    //File.OpenRead("../../../very big interlace.bmp"),
+            //    File.OpenRead("../../../very big interlace.png"),
+            //    GraphicsDevice);
 
-            Task.Run(() =>
-            {
-                return;
-                try
+            //Task.Run(() =>
+            //{
+            //    try
                 {
                     var ww = new Stopwatch();
 
@@ -91,7 +91,7 @@ namespace MonoGame.Testing
                             Thread.Sleep(1000);
 
                             ww.Restart();
-                            var x = Image.Load<Color>(fs, onProgress: OnProgress);
+                            var img = Image.Load<Color>(fs);
 
                             _finished = true;
                             ww.Stop();
@@ -99,16 +99,20 @@ namespace MonoGame.Testing
 
                             Thread.Sleep(1000);
 
-                            Console.WriteLine(x.Width + "x" + x.Height);
+                            Console.WriteLine(img.Width + "x" + img.Height);
 
-                            var lastRow = x.GetPixelRowSpan(x.Height - 1);
+                            var lastRow = img.GetPixelRowSpan(img.Height - 1);
                             Console.WriteLine(lastRow[0]);
 
-                            if (true)
+                            var procsed = img.Process(c => c.Resize(new Size(img.Width / 2, img.Height / 2)));
+
+                            _tex = Texture2D.FromImage(procsed, GraphicsDevice);
+
+                            if (false)
                             {
                                 Console.WriteLine("saving png...");
                                 ww.Restart();
-                                x.Save("very big recoded.png", ImageFormat.Png);
+                                img.Save("very big recoded.png", ImageFormat.Png);
                                 ww.Stop();
                                 Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
 
@@ -130,11 +134,11 @@ namespace MonoGame.Testing
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
-            });
+            //    catch (Exception ex)
+            //    {
+            //        Console.WriteLine(ex);
+            //    }
+            //});
         }
 
         protected override void LoadContent()

@@ -1,7 +1,7 @@
 ﻿
 namespace MonoGame.Framework.Graphics
 {
-    internal partial class GraphicsCapabilities
+    public partial class GraphicsCapabilities
     {
         internal void PlatformInitialize(GraphicsDevice device)
         {

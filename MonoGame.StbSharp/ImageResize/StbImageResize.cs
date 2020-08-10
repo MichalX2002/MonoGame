@@ -224,14 +224,14 @@ namespace StbSharp
             return ratio > 1;
         }
 
-        public static bool UseWidthUpsampling(in ResizeContext s)
+        public static bool UseWidthUpsampling(in ResizeContext context)
         {
-            return UseUpsampling(s.horizontal_scale);
+            return UseUpsampling(context.horizontal_scale);
         }
 
-        public static bool UseHeightUpsampling(in ResizeContext s)
+        public static bool UseHeightUpsampling(in ResizeContext context)
         {
-            return UseUpsampling(s.vertical_scale);
+            return UseUpsampling(context.vertical_scale);
         }
 
         public static int GetFilterPixelWidth(Filter filter, float scale)
@@ -279,7 +279,8 @@ namespace StbSharp
                  GetCoefficientWidth(info.vertical_filter, info.vertical_scale);
         }
 
-        public static Span<float> GetCoefficients(Span<float> coefficients, Filter filter, float scale, int y, int x)
+        public static Span<float> GetCoefficients(
+            Span<float> coefficients, Filter filter, float scale, int y, int x)
         {
             int width = GetCoefficientWidth(filter, (float)scale);
             return coefficients.Slice(width * y + x);
@@ -554,30 +555,30 @@ namespace StbSharp
             }
         }
 
-        public static int GetDecodeBufferOffset(in ResizeContext s)
+        public static int GetDecodeBufferOffset(in ResizeContext context)
         {
-            return s.horizontal_filter_pixel_margin * s.channels;
+            return context.horizontal_filter_pixel_margin * context.channels;
         }
 
-        public static void DecodeScanline(in ResizeContext s, int y)
+        public static void DecodeScanline(in ResizeContext context, int y)
         {
-            int in_buffer_row_offset = EdgeWrap(s.wrap_vertical, y, s.input_h) * s.input_stride_bytes;
-            var input_data = s.input_data.Slice(in_buffer_row_offset);
-            int max_x = s.input_w + s.horizontal_filter_pixel_margin;
-            int decode = (int)s.datatype * MAX_COLORSPACES + (int)s.colorspace;
-            int x = -s.horizontal_filter_pixel_margin;
+            int in_buffer_row_offset = EdgeWrap(context.wrap_vertical, y, context.input_h) * context.input_stride_bytes;
+            var input_data = context.input_data.Slice(in_buffer_row_offset);
+            int max_x = context.input_w + context.horizontal_filter_pixel_margin;
+            int decode = (int)context.datatype * MAX_COLORSPACES + (int)context.colorspace;
+            int x = -context.horizontal_filter_pixel_margin;
             int c = 0;
 
-            fixed (float* decode_buffer_ptr = s.decode_buffer)
+            fixed (float* decode_buffer_ptr = context.decode_buffer)
             {
-                var dst = decode_buffer_ptr + GetDecodeBufferOffset(s);
+                var dst = decode_buffer_ptr + GetDecodeBufferOffset(context);
 
-                if ((s.wrap_vertical == WrapMode.Zero) && ((y < 0) || (y >= s.input_h)))
+                if ((context.wrap_vertical == WrapMode.Zero) && ((y < 0) || (y >= context.input_h)))
                 {
                     for (; x < max_x; x++)
                     {
-                        for (c = 0; c < s.channels; c++)
-                            dst[x * s.channels + c] = 0;
+                        for (c = 0; c < context.channels; c++)
+                            dst[x * context.channels + c] = 0;
                     }
                     return;
                 }
@@ -588,15 +589,15 @@ namespace StbSharp
                     var src32 = (uint*)src8;
                     var srcF = (float*)src8;
 
-                    bool srgbAlpha = (s.flags & (1 << 1)) == 0;
+                    bool srgbAlpha = (context.flags & (1 << 1)) == 0;
                     switch (decode)
                     {
                         case ((int)DataType.UInt8) * MAX_COLORSPACES + (int)ColorSpace.Linear:
                             for (; x < max_x; x++)
                             {
-                                int dst_pixel_index = x * s.channels;
-                                int src_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
-                                for (c = 0; c < s.channels; c++)
+                                int dst_pixel_index = x * context.channels;
+                                int src_pixel_index = EdgeWrap(context.wrap_horizontal, x, context.input_w) * context.channels;
+                                for (c = 0; c < context.channels; c++)
                                     dst[dst_pixel_index + c] = src8[src_pixel_index + c] / 255f;
                             }
                             break;
@@ -606,14 +607,14 @@ namespace StbSharp
                             {
                                 for (; x < max_x; x++)
                                 {
-                                    int dst_pixel_index = x * s.channels;
-                                    int src_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
-                                    for (c = 0; c < s.channels; c++)
+                                    int dst_pixel_index = x * context.channels;
+                                    int src_pixel_index = EdgeWrap(context.wrap_horizontal, x, context.input_w) * context.channels;
+                                    for (c = 0; c < context.channels; c++)
                                         dst[dst_pixel_index + c] = srgbToFloat[src8[src_pixel_index + c]];
 
                                     if (srgbAlpha)
-                                        dst[dst_pixel_index + s.alpha_channel] =
-                                            src8[src_pixel_index + s.alpha_channel] / 255f;
+                                        dst[dst_pixel_index + context.alpha_channel] =
+                                            src8[src_pixel_index + context.alpha_channel] / 255f;
                                 }
                             }
                             break;
@@ -622,9 +623,9 @@ namespace StbSharp
                         {
                             for (; x < max_x; x++)
                             {
-                                int dst_pixel_index = x * s.channels;
-                                int src_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
-                                for (c = 0; c < s.channels; c++)
+                                int dst_pixel_index = x * context.channels;
+                                int src_pixel_index = EdgeWrap(context.wrap_horizontal, x, context.input_w) * context.channels;
+                                for (c = 0; c < context.channels; c++)
                                     dst[dst_pixel_index + c] = src16[src_pixel_index + c] / 65535f;
                             }
                             break;
@@ -634,14 +635,14 @@ namespace StbSharp
                         {
                             for (; x < max_x; x++)
                             {
-                                int dst_pixel_index = x * s.channels;
-                                int src_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
-                                for (c = 0; c < s.channels; c++)
+                                int dst_pixel_index = x * context.channels;
+                                int src_pixel_index = EdgeWrap(context.wrap_horizontal, x, context.input_w) * context.channels;
+                                for (c = 0; c < context.channels; c++)
                                     dst[dst_pixel_index + c] = SrgbToLinear(src16[src_pixel_index + c] / 65535f);
 
                                 if (srgbAlpha)
-                                    dst[dst_pixel_index + s.alpha_channel] =
-                                        src16[src_pixel_index + s.alpha_channel] / 65535f;
+                                    dst[dst_pixel_index + context.alpha_channel] =
+                                        src16[src_pixel_index + context.alpha_channel] / 65535f;
                             }
                             break;
                         }
@@ -650,9 +651,9 @@ namespace StbSharp
                         {
                             for (; x < max_x; x++)
                             {
-                                int dst_pixel_index = x * s.channels;
-                                int src_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
-                                for (c = 0; c < s.channels; c++)
+                                int dst_pixel_index = x * context.channels;
+                                int src_pixel_index = EdgeWrap(context.wrap_horizontal, x, context.input_w) * context.channels;
+                                for (c = 0; c < context.channels; c++)
                                     dst[dst_pixel_index + c] = (float)(src32[src_pixel_index + c] / 4294967295d);
                             }
                             break;
@@ -662,15 +663,15 @@ namespace StbSharp
                         {
                             for (; x < max_x; x++)
                             {
-                                int dst_pixel_index = x * s.channels;
-                                int src_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
-                                for (c = 0; c < s.channels; c++)
+                                int dst_pixel_index = x * context.channels;
+                                int src_pixel_index = EdgeWrap(context.wrap_horizontal, x, context.input_w) * context.channels;
+                                for (c = 0; c < context.channels; c++)
                                     dst[dst_pixel_index + c] = SrgbToLinear(
                                         (float)(src32[src_pixel_index + c] / 4294967295d));
 
                                 if (srgbAlpha)
-                                    dst[dst_pixel_index + s.alpha_channel] =
-                                        (float)(src32[src_pixel_index + s.alpha_channel] / 4294967295d);
+                                    dst[dst_pixel_index + context.alpha_channel] =
+                                        (float)(src32[src_pixel_index + context.alpha_channel] / 4294967295d);
                             }
                             break;
                         }
@@ -679,9 +680,9 @@ namespace StbSharp
                         {
                             for (; x < max_x; x++)
                             {
-                                int dst_pixel_index = x * s.channels;
-                                int src_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
-                                for (c = 0; c < s.channels; c++)
+                                int dst_pixel_index = x * context.channels;
+                                int src_pixel_index = EdgeWrap(context.wrap_horizontal, x, context.input_w) * context.channels;
+                                for (c = 0; c < context.channels; c++)
                                     dst[dst_pixel_index + c] = srcF[src_pixel_index + c];
                             }
                             break;
@@ -691,49 +692,49 @@ namespace StbSharp
                         {
                             for (; x < max_x; x++)
                             {
-                                int dst_pixel_index = x * s.channels;
-                                int src_pixel_index = EdgeWrap(s.wrap_horizontal, x, s.input_w) * s.channels;
-                                for (c = 0; c < s.channels; c++)
+                                int dst_pixel_index = x * context.channels;
+                                int src_pixel_index = EdgeWrap(context.wrap_horizontal, x, context.input_w) * context.channels;
+                                for (c = 0; c < context.channels; c++)
                                     dst[dst_pixel_index + c] = SrgbToLinear(srcF[src_pixel_index + c]);
 
                                 if (srgbAlpha)
-                                    dst[dst_pixel_index + s.alpha_channel] = srcF[src_pixel_index + s.alpha_channel];
+                                    dst[dst_pixel_index + context.alpha_channel] = srcF[src_pixel_index + context.alpha_channel];
                             }
                             break;
                         }
                     }
                 }
 
-                if ((s.flags & (1 << 0)) == 0)
+                if ((context.flags & (1 << 0)) == 0)
                 {
-                    for (x = -s.horizontal_filter_pixel_margin; x < max_x; x++)
+                    for (x = -context.horizontal_filter_pixel_margin; x < max_x; x++)
                     {
-                        int dst_pixel_index = x * s.channels;
-                        float alpha = dst[dst_pixel_index + s.alpha_channel];
-                        if (s.datatype != DataType.Float32)
+                        int dst_pixel_index = x * context.channels;
+                        float alpha = dst[dst_pixel_index + context.alpha_channel];
+                        if (context.datatype != DataType.Float32)
                         {
                             alpha += 1f / (1 << 20) / (1 << 20) / (1 << 20) / (1 << 20);
-                            dst[dst_pixel_index + s.alpha_channel] = alpha;
+                            dst[dst_pixel_index + context.alpha_channel] = alpha;
                         }
 
-                        for (c = 0; c < s.channels; c++)
+                        for (c = 0; c < context.channels; c++)
                         {
-                            if (c == s.alpha_channel)
+                            if (c == context.alpha_channel)
                                 continue;
                             dst[dst_pixel_index + c] *= alpha;
                         }
                     }
                 }
 
-                if (s.wrap_horizontal == WrapMode.Zero)
+                if (context.wrap_horizontal == WrapMode.Zero)
                 {
-                    for (x = -s.horizontal_filter_pixel_margin; x < 0; x++)
-                        for (c = 0; c < s.channels; c++)
-                            dst[x * s.channels + c] = 0;
+                    for (x = -context.horizontal_filter_pixel_margin; x < 0; x++)
+                        for (c = 0; c < context.channels; c++)
+                            dst[x * context.channels + c] = 0;
 
-                    for (x = s.input_w; x < max_x; x++)
-                        for (c = 0; c < s.channels; c++)
-                            dst[x * s.channels + c] = 0;
+                    for (x = context.input_w; x < max_x; x++)
+                        for (c = 0; c < context.channels; c++)
+                            dst[x * context.channels + c] = 0;
                 }
             }
         }
@@ -743,47 +744,49 @@ namespace StbSharp
             return ringBuffer.Slice(index * length, length);
         }
 
-        public static Span<float> AddEmptyRingBufferEntry(ref ResizeContext s, int n)
+        public static Span<float> AddEmptyRingBufferEntry(ref ResizeContext context, int n)
         {
             int ring_buffer_index;
-            s.ring_buffer_last_scanline = n;
-            if (s.ring_buffer_begin_index < 0)
+            context.ring_buffer_last_scanline = n;
+            if (context.ring_buffer_begin_index < 0)
             {
-                ring_buffer_index = s.ring_buffer_begin_index = 0;
-                s.ring_buffer_first_scanline = n;
+                ring_buffer_index = context.ring_buffer_begin_index = 0;
+                context.ring_buffer_first_scanline = n;
             }
             else
             {
                 ring_buffer_index =
-                    (s.ring_buffer_begin_index +
-                    s.ring_buffer_last_scanline -
-                    s.ring_buffer_first_scanline) %
-                    s.ring_buffer_num_entries;
+                    (context.ring_buffer_begin_index +
+                    context.ring_buffer_last_scanline -
+                    context.ring_buffer_first_scanline) %
+                    context.ring_buffer_num_entries;
             }
 
-            Span<float> ring_buffer = GetRingBufferEntry(s.ring_buffer, ring_buffer_index, s.RingBufferLength);
-            ring_buffer.Fill(0);
+            Span<float> ring_buffer = GetRingBufferEntry(
+                context.ring_buffer, ring_buffer_index, context.RingBufferLength);
+            
+            ring_buffer.Clear();
 
             return ring_buffer;
         }
 
-        public static void ResampleHorizontalUpsample(in ResizeContext s, Span<float> destination)
+        public static void ResampleHorizontalUpsample(in ResizeContext context, Span<float> destination)
         {
-            int output_w = s.output_w;
-            int kernel_pixel_width = s.horizontal_filter_pixel_width;
-            int channels = s.channels;
-            int coefficient_width = s.horizontal_coefficient_width;
+            int output_w = context.output_w;
+            int kernel_pixel_width = context.horizontal_filter_pixel_width;
+            int channels = context.channels;
+            int coefficient_width = context.horizontal_coefficient_width;
 
             fixed (float* dst = destination)
-            fixed (float* horizontal_coefficients_ptr = s.horizontal_coefficients)
-            fixed (float* decode_buffer_ptr = s.decode_buffer)
+            fixed (float* horizontal_coefficients_ptr = context.horizontal_coefficients)
+            fixed (float* decode_buffer_ptr = context.decode_buffer)
             {
-                float* src = decode_buffer_ptr + GetDecodeBufferOffset(s);
+                float* src = decode_buffer_ptr + GetDecodeBufferOffset(context);
 
                 int k;
                 for (int x = 0; x < output_w; x++)
                 {
-                    ref var contrib = ref s.horizontal_contributors[x];
+                    ref var contrib = ref context.horizontal_contributors[x];
                     int n0 = contrib.n0;
                     int n1 = contrib.n1;
 
@@ -850,25 +853,25 @@ namespace StbSharp
             }
         }
 
-        public static void ResampleHorizontalDownsample(in ResizeContext s, Span<float> destination)
+        public static void ResampleHorizontalDownsample(in ResizeContext context, Span<float> destination)
         {
             int x;
             int k;
             int c;
-            int input_w = s.input_w;
-            int output_w = s.output_w;
-            int kernel_pixel_width = s.horizontal_filter_pixel_width;
-            int channels = s.channels;
-            var horizontal_contributors = s.horizontal_contributors;
-            int coefficient_width = s.horizontal_coefficient_width;
-            int filter_pixel_margin = s.horizontal_filter_pixel_margin;
+            int input_w = context.input_w;
+            int output_w = context.output_w;
+            int kernel_pixel_width = context.horizontal_filter_pixel_width;
+            int channels = context.channels;
+            var horizontal_contributors = context.horizontal_contributors;
+            int coefficient_width = context.horizontal_coefficient_width;
+            int filter_pixel_margin = context.horizontal_filter_pixel_margin;
             int max_x = input_w + filter_pixel_margin * 2;
 
-            fixed (float* horizontal_coefficients_ptr = s.horizontal_coefficients)
-            fixed (float* decode_buffer_ptr = s.decode_buffer)
+            fixed (float* horizontal_coefficients_ptr = context.horizontal_coefficients)
+            fixed (float* decode_buffer_ptr = context.decode_buffer)
             fixed (float* dst = destination)
             {
-                float* src = decode_buffer_ptr + GetDecodeBufferOffset(s);
+                float* src = decode_buffer_ptr + GetDecodeBufferOffset(context);
 
                 switch (channels)
                 {
@@ -992,24 +995,25 @@ namespace StbSharp
             }
         }
 
-        public static void DecodeAndResampleUpsample(ref ResizeContext s, int n)
+        public static void DecodeAndResampleUpsample(ref ResizeContext context, int n)
         {
-            DecodeScanline(s, n);
-            if (UseWidthUpsampling(s))
-                ResampleHorizontalUpsample(s, AddEmptyRingBufferEntry(ref s, n));
+            DecodeScanline(context, n);
+
+            if (UseWidthUpsampling(context))
+                ResampleHorizontalUpsample(context, AddEmptyRingBufferEntry(ref context, n));
             else
-                ResampleHorizontalDownsample(s, AddEmptyRingBufferEntry(ref s, n));
+                ResampleHorizontalDownsample(context, AddEmptyRingBufferEntry(ref context, n));
         }
 
-        public static void DecodeAndResampleDownsample(in ResizeContext s, int y)
+        public static void DecodeAndResampleDownsample(in ResizeContext context, int y)
         {
-            DecodeScanline(s, y);
-            s.horizontal_buffer.Fill(0);
+            DecodeScanline(context, y);
+            context.horizontal_buffer.Clear();
 
-            if (UseWidthUpsampling(s))
-                ResampleHorizontalUpsample(s, s.horizontal_buffer);
+            if (UseWidthUpsampling(context))
+                ResampleHorizontalUpsample(context, context.horizontal_buffer);
             else
-                ResampleHorizontalDownsample(s, s.horizontal_buffer);
+                ResampleHorizontalDownsample(context, context.horizontal_buffer);
         }
 
         public static Span<float> GetRingBufferScanline(
@@ -1021,7 +1025,7 @@ namespace StbSharp
         }
 
         public static void EncodeScanline(
-            in ResizeContext s, int numPixels,
+            in ResizeContext context, int numPixels,
             Span<byte> outputBuffer, Span<float> encodeBuffer,
             int channels, int alphaChannel, int decode)
         {
@@ -1030,7 +1034,7 @@ namespace StbSharp
 
             fixed (float* src = encodeBuffer)
             {
-                if ((s.flags & (1 << 0)) == 0)
+                if ((context.flags & (1 << 0)) == 0)
                 {
                     for (x = 0; x < numPixels; ++x)
                     {
@@ -1048,7 +1052,7 @@ namespace StbSharp
                 ushort* nonalpha = stackalloc ushort[64];
                 for (x = 0, num_nonalpha = 0; x < channels; ++x)
                 {
-                    if ((x != alphaChannel) || ((s.flags & (1 << 1)) != 0))
+                    if ((x != alphaChannel) || ((context.flags & (1 << 1)) != 0))
                         nonalpha[num_nonalpha++] = (ushort)x;
                 }
 
@@ -1058,7 +1062,7 @@ namespace StbSharp
                     var dst32 = (uint*)dst8;
                     var dstF = (float*)dst8;
 
-                    bool srgbAlpha = (s.flags & (1 << 1)) == 0;
+                    bool srgbAlpha = (context.flags & (1 << 1)) == 0;
                     switch (decode)
                     {
                         case ((int)DataType.UInt8) * MAX_COLORSPACES + (int)ColorSpace.Linear:
@@ -1192,31 +1196,31 @@ namespace StbSharp
         }
 
         public static void ResampleVerticalUpsample(
-            in ResizeContext s, int n, int inFirstScanline, int inLastScanline, float inCenterOfOut)
+            in ResizeContext context, int n, int inFirstScanline, int inLastScanline, float inCenterOfOut)
         {
             int x;
             int k;
             int c;
-            int output_w = s.output_w;
-            int channels = s.channels;
-            int alpha_channel = s.alpha_channel;
-            int ring_buffer_entries = s.ring_buffer_num_entries;
-            int decode = (int)s.datatype * MAX_COLORSPACES + (int)s.colorspace;
-            int ring_buffer_begin_index = s.ring_buffer_begin_index;
-            int ring_buffer_first_scanline = s.ring_buffer_first_scanline;
-            int ring_buffer_last_scanline = s.ring_buffer_last_scanline;
-            int ring_buffer_length = s.RingBufferLength;
-            int output_row_start = n * s.output_stride_bytes;
+            int output_w = context.output_w;
+            int channels = context.channels;
+            int alpha_channel = context.alpha_channel;
+            int ring_buffer_entries = context.ring_buffer_num_entries;
+            int decode = (int)context.datatype * MAX_COLORSPACES + (int)context.colorspace;
+            int ring_buffer_begin_index = context.ring_buffer_begin_index;
+            int ring_buffer_first_scanline = context.ring_buffer_first_scanline;
+            int ring_buffer_last_scanline = context.ring_buffer_last_scanline;
+            int ring_buffer_length = context.RingBufferLength;
+            int output_row_start = n * context.output_stride_bytes;
 
-            int coefficient_width = s.vertical_coefficient_width;
+            int coefficient_width = context.vertical_coefficient_width;
             int contributor = n;
-            int n0 = s.vertical_contributors[contributor].n0;
-            int n1 = s.vertical_contributors[contributor].n1;
+            int n0 = context.vertical_contributors[contributor].n0;
+            int n1 = context.vertical_contributors[contributor].n1;
 
-            s.encode_buffer.Fill(0);
+            context.encode_buffer.Clear();
 
-            fixed (float* vertical_coefficients_ptr = s.vertical_coefficients)
-            fixed (float* dst = s.encode_buffer)
+            fixed (float* vertical_coefficients_ptr = context.vertical_coefficients)
+            fixed (float* dst = context.encode_buffer)
             {
                 int coefficient_group = coefficient_width * contributor;
                 float* coefficients = vertical_coefficients_ptr + coefficient_group;
@@ -1227,7 +1231,7 @@ namespace StbSharp
                         for (k = n0; k <= n1; k++)
                         {
                             var ring_buffer_entry = GetRingBufferScanline(
-                                k, s.ring_buffer,
+                                k, context.ring_buffer,
                                 ring_buffer_begin_index,
                                 ring_buffer_first_scanline,
                                 ring_buffer_entries,
@@ -1246,7 +1250,7 @@ namespace StbSharp
                         for (k = n0; k <= n1; k++)
                         {
                             var ring_buffer_entry = GetRingBufferScanline(
-                                k, s.ring_buffer,
+                                k, context.ring_buffer,
                                 ring_buffer_begin_index,
                                 ring_buffer_first_scanline,
                                 ring_buffer_entries,
@@ -1266,7 +1270,7 @@ namespace StbSharp
                         for (k = n0; k <= n1; k++)
                         {
                             var ring_buffer_entry = GetRingBufferScanline(
-                                k, s.ring_buffer,
+                                k, context.ring_buffer,
                                 ring_buffer_begin_index,
                                 ring_buffer_first_scanline,
                                 ring_buffer_entries,
@@ -1287,7 +1291,7 @@ namespace StbSharp
                         for (k = n0; k <= n1; k++)
                         {
                             var ring_buffer_entry = GetRingBufferScanline(
-                                k, s.ring_buffer,
+                                k, context.ring_buffer,
                                 ring_buffer_begin_index,
                                 ring_buffer_first_scanline,
                                 ring_buffer_entries,
@@ -1309,7 +1313,7 @@ namespace StbSharp
                         for (k = n0; k <= n1; k++)
                         {
                             var ring_buffer_entry = GetRingBufferScanline(
-                                k, s.ring_buffer,
+                                k, context.ring_buffer,
                                 ring_buffer_begin_index,
                                 ring_buffer_first_scanline,
                                 ring_buffer_entries,
@@ -1328,20 +1332,20 @@ namespace StbSharp
             }
 
             EncodeScanline(
-                s, output_w, s.output_data.Slice(output_row_start),
-                s.encode_buffer, channels, alpha_channel, decode);
+                context, output_w, context.output_data.Slice(output_row_start),
+                context.encode_buffer, channels, alpha_channel, decode);
         }
 
         public static void ResampleVerticalDownsample(
-            in ResizeContext s, int n, int inFirstScanline, int inLastScanline, float inCenterOfOut)
+            in ResizeContext context, int n, int inFirstScanline, int inLastScanline, float inCenterOfOut)
         {
-            int contributor = n + s.vertical_filter_pixel_margin;
-            int n0 = s.vertical_contributors[contributor].n0;
-            int n1 = s.vertical_contributors[contributor].n1;
+            int contributor = n + context.vertical_filter_pixel_margin;
+            int n0 = context.vertical_contributors[contributor].n0;
+            int n1 = context.vertical_contributors[contributor].n1;
 
-            int coefficient_group = s.vertical_coefficient_width * contributor;
+            int coefficient_group = context.vertical_coefficient_width * contributor;
 
-            fixed (float* src = s.horizontal_buffer)
+            fixed (float* src = context.horizontal_buffer)
             {
                 int x;
                 int c;
@@ -1349,19 +1353,19 @@ namespace StbSharp
                 for (int k = n0; k <= n1; k++)
                 {
                     var ring_buffer_entry = GetRingBufferScanline(
-                        k, s.ring_buffer,
-                        s.ring_buffer_begin_index,
-                        s.ring_buffer_first_scanline,
-                        s.ring_buffer_num_entries,
-                         s.RingBufferLength);
+                        k, context.ring_buffer,
+                        context.ring_buffer_begin_index,
+                        context.ring_buffer_first_scanline,
+                        context.ring_buffer_num_entries,
+                         context.RingBufferLength);
 
                     int coefficient_index = k - n0;
-                    float coefficient = (float)s.vertical_coefficients[coefficient_group + coefficient_index];
+                    float coefficient = (float)context.vertical_coefficients[coefficient_group + coefficient_index];
 
-                    switch (s.channels)
+                    switch (context.channels)
                     {
                         case 1:
-                            for (x = 0; x < s.output_w; x++)
+                            for (x = 0; x < context.output_w; x++)
                             {
                                 int in_pixel_index = x * 1;
                                 ring_buffer_entry[in_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
@@ -1369,7 +1373,7 @@ namespace StbSharp
                             break;
 
                         case 2:
-                            for (x = 0; x < s.output_w; x++)
+                            for (x = 0; x < context.output_w; x++)
                             {
                                 int in_pixel_index = x * 2;
                                 ring_buffer_entry[in_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
@@ -1378,7 +1382,7 @@ namespace StbSharp
                             break;
 
                         case 3:
-                            for (x = 0; x < s.output_w; x++)
+                            for (x = 0; x < context.output_w; x++)
                             {
                                 int in_pixel_index = x * 3;
                                 ring_buffer_entry[in_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
@@ -1388,7 +1392,7 @@ namespace StbSharp
                             break;
 
                         case 4:
-                            for (x = 0; x < s.output_w; x++)
+                            for (x = 0; x < context.output_w; x++)
                             {
                                 int in_pixel_index = x * 4;
                                 ring_buffer_entry[in_pixel_index + 0] += src[in_pixel_index + 0] * coefficient;
@@ -1399,10 +1403,10 @@ namespace StbSharp
                             break;
 
                         default:
-                            for (x = 0; x < s.output_w; x++)
+                            for (x = 0; x < context.output_w; x++)
                             {
-                                int in_pixel_index = x * s.channels;
-                                for (c = 0; c < s.channels; c++)
+                                int in_pixel_index = x * context.channels;
+                                for (c = 0; c < context.channels; c++)
                                     ring_buffer_entry[in_pixel_index + c] += src[in_pixel_index + c] * coefficient;
                             }
                             break;
@@ -1411,161 +1415,167 @@ namespace StbSharp
             }
         }
 
-        public static void BufferLoopUpsample(ref ResizeContext s)
+        public static void BufferLoopUpsample(ref ResizeContext context)
         {
-            float scale_ratio = s.vertical_scale;
-            float out_scanlines_radius = s.vertical_filter.Support(1 / scale_ratio) * scale_ratio;
+            float scale_ratio = context.vertical_scale;
+            float out_scanlines_radius = context.vertical_filter.Support(1 / scale_ratio) * scale_ratio;
 
-            for (int y = 0; y < s.output_h; y++)
+            for (int y = 0; y < context.output_h; y++)
             {
                 CalculateSampleRangeUpsample(
-                    y, (float)out_scanlines_radius, (float)scale_ratio, s.vertical_shift,
+                    y, (float)out_scanlines_radius, (float)scale_ratio, context.vertical_shift,
                     out int in_first_scanline, out int in_last_scanline, out float in_center_of_out);
 
-                if (s.ring_buffer_begin_index >= 0)
+                if (context.ring_buffer_begin_index >= 0)
                 {
-                    while (in_first_scanline > s.ring_buffer_first_scanline)
+                    while (in_first_scanline > context.ring_buffer_first_scanline)
                     {
-                        if (s.ring_buffer_first_scanline == s.ring_buffer_last_scanline)
+                        if (context.ring_buffer_first_scanline == context.ring_buffer_last_scanline)
                         {
-                            s.ring_buffer_begin_index = -1;
-                            s.ring_buffer_first_scanline = 0;
-                            s.ring_buffer_last_scanline = 0;
+                            context.ring_buffer_begin_index = -1;
+                            context.ring_buffer_first_scanline = 0;
+                            context.ring_buffer_last_scanline = 0;
                             break;
                         }
                         else
                         {
-                            s.ring_buffer_first_scanline++;
-                            s.ring_buffer_begin_index =
-                                (s.ring_buffer_begin_index + 1) % s.ring_buffer_num_entries;
+                            context.ring_buffer_first_scanline++;
+                            context.ring_buffer_begin_index =
+                                (context.ring_buffer_begin_index + 1) % context.ring_buffer_num_entries;
                         }
                     }
                 }
 
-                if (s.ring_buffer_begin_index < 0)
-                    DecodeAndResampleUpsample(ref s, in_first_scanline);
+                if (context.ring_buffer_begin_index < 0)
+                    DecodeAndResampleUpsample(ref context, in_first_scanline);
 
-                while (in_last_scanline > s.ring_buffer_last_scanline)
-                    DecodeAndResampleUpsample(ref s, s.ring_buffer_last_scanline + 1);
+                while (in_last_scanline > context.ring_buffer_last_scanline)
+                    DecodeAndResampleUpsample(ref context, context.ring_buffer_last_scanline + 1);
 
                 ResampleVerticalUpsample(
-                    s, y, in_first_scanline, in_last_scanline, in_center_of_out);
+                    context, y, in_first_scanline, in_last_scanline, in_center_of_out);
             }
         }
 
-        public static void EmptyRingBuffer(ref ResizeContext s, int firstNecessaryScanline)
+        public static void EmptyRingBuffer(ref ResizeContext context, int firstNecessaryScanline)
         {
-            if (s.ring_buffer_begin_index < 0)
+            if (context.ring_buffer_begin_index < 0)
                 return;
 
-            int decode = (int)s.datatype * MAX_COLORSPACES + (int)s.colorspace;
-            int ring_buffer_length = s.RingBufferLength;
+            int decode = (int)context.datatype * MAX_COLORSPACES + (int)context.colorspace;
+            int ring_buffer_length = context.RingBufferLength;
 
-            while (firstNecessaryScanline > s.ring_buffer_first_scanline)
+            while (firstNecessaryScanline > context.ring_buffer_first_scanline)
             {
-                if ((s.ring_buffer_first_scanline >= 0) &&
-                    (s.ring_buffer_first_scanline < s.output_h))
+                if ((context.ring_buffer_first_scanline >= 0) &&
+                    (context.ring_buffer_first_scanline < context.output_h))
                 {
                     var ring_buffer_entry = GetRingBufferEntry(
-                         s.ring_buffer,
-                        s.ring_buffer_begin_index,
+                         context.ring_buffer,
+                        context.ring_buffer_begin_index,
                         ring_buffer_length);
 
-                    int output_row_start = s.ring_buffer_first_scanline * s.output_stride_bytes;
-                    var output = s.output_data.Slice(output_row_start, s.output_stride_bytes);
-                    EncodeScanline(s, s.output_w, output, ring_buffer_entry, s.channels, s.alpha_channel, decode);
+                    int output_row_start = context.ring_buffer_first_scanline * context.output_stride_bytes;
+                    var output = context.output_data.Slice(output_row_start, context.output_stride_bytes);
+                    
+                    EncodeScanline(
+                        context, context.output_w, output, ring_buffer_entry, 
+                        context.channels, context.alpha_channel, decode);
                 }
 
-                if (s.ring_buffer_first_scanline == s.ring_buffer_last_scanline)
+                if (context.ring_buffer_first_scanline == context.ring_buffer_last_scanline)
                 {
-                    s.ring_buffer_begin_index = -1;
-                    s.ring_buffer_first_scanline = 0;
-                    s.ring_buffer_last_scanline = 0;
+                    context.ring_buffer_begin_index = -1;
+                    context.ring_buffer_first_scanline = 0;
+                    context.ring_buffer_last_scanline = 0;
                     break;
                 }
                 else
                 {
-                    s.ring_buffer_first_scanline++;
-                    s.ring_buffer_begin_index =
-                        (s.ring_buffer_begin_index + 1) % s.ring_buffer_num_entries;
+                    context.ring_buffer_first_scanline++;
+                    context.ring_buffer_begin_index =
+                        (context.ring_buffer_begin_index + 1) % context.ring_buffer_num_entries;
                 }
             }
         }
 
-        public static void BufferLoopDownsample(ref ResizeContext s)
+        public static void BufferLoopDownsample(ref ResizeContext context)
         {
-            float scale_ratio = s.vertical_scale;
-            float in_pixels_radius = (float)(s.vertical_filter.Support(scale_ratio) / scale_ratio);
-            int pixel_margin = s.vertical_filter_pixel_margin;
-            int max_y = s.input_h + pixel_margin;
+            float scale_ratio = context.vertical_scale;
+            float in_pixels_radius = (float)(context.vertical_filter.Support(scale_ratio) / scale_ratio);
+            int pixel_margin = context.vertical_filter_pixel_margin;
+            int max_y = context.input_h + pixel_margin;
 
             for (int y = -pixel_margin; y < max_y; y++)
             {
                 CalculateSampleRangeDownsample(
-                    y, (float)in_pixels_radius, (float)scale_ratio, s.vertical_shift,
+                    y, (float)in_pixels_radius, (float)scale_ratio, context.vertical_shift,
                     out int out_first_scanline, out int out_last_scanline, out float out_center_of_in);
 
-                if ((out_last_scanline < 0) || (out_first_scanline >= s.output_h))
+                if ((out_last_scanline < 0) || (out_first_scanline >= context.output_h))
                     continue;
 
-                EmptyRingBuffer(ref s, out_first_scanline);
-                DecodeAndResampleDownsample(s, y);
+                EmptyRingBuffer(ref context, out_first_scanline);
+                DecodeAndResampleDownsample(context, y);
 
-                if (s.ring_buffer_begin_index < 0)
-                    AddEmptyRingBufferEntry(ref s, out_first_scanline);
+                if (context.ring_buffer_begin_index < 0)
+                    AddEmptyRingBufferEntry(ref context, out_first_scanline);
 
-                while (out_last_scanline > s.ring_buffer_last_scanline)
-                    AddEmptyRingBufferEntry(ref s, s.ring_buffer_last_scanline + 1);
+                while (out_last_scanline > context.ring_buffer_last_scanline)
+                    AddEmptyRingBufferEntry(ref context, context.ring_buffer_last_scanline + 1);
 
                 ResampleVerticalDownsample(
-                    s,
+                    context,
                     y,
                     out_first_scanline,
                     out_last_scanline,
                     (float)out_center_of_in);
             }
 
-            EmptyRingBuffer(ref s, s.output_h);
+            EmptyRingBuffer(ref context, context.output_h);
         }
 
         public static void Setup(
-            ref ResizeContext s, int inputW, int inputH, int outputW, int outputH, int channels)
+            ref ResizeContext context, 
+            int inputW, int inputH, int outputW, int outputH, int channels)
         {
-            s.input_w = inputW;
-            s.input_h = inputH;
-            s.output_w = outputW;
-            s.output_h = outputH;
-            s.channels = channels;
+            context.input_w = inputW;
+            context.input_h = inputH;
+            context.output_w = outputW;
+            context.output_h = outputH;
+            context.channels = channels;
         }
 
         public static void CalculateTransform(
-            ref ResizeContext s, float s0, float t0, float s1, float t1, Transform? transform)
+            ref ResizeContext context, 
+            float s0, float t0, float s1, float t1, Transform? transform)
         {
-            s.s0 = s0;
-            s.t0 = t0;
-            s.s1 = s1;
-            s.t1 = t1;
+            context.s0 = s0;
+            context.t0 = t0;
+            context.s1 = s1;
+            context.t1 = t1;
 
             if (transform.HasValue)
             {
                 var tf = transform.Value;
-                s.horizontal_scale = tf.ScaleX;
-                s.vertical_scale = tf.ScaleY;
-                s.horizontal_shift = tf.ShiftX;
-                s.vertical_shift = tf.ShiftY;
+                context.horizontal_scale = tf.ScaleX;
+                context.vertical_scale = tf.ScaleY;
+                context.horizontal_shift = tf.ShiftX;
+                context.vertical_shift = tf.ShiftY;
             }
             else
             {
-                s.horizontal_scale = (float)s.output_w / s.input_w / (s1 - s0);
-                s.vertical_scale = (float)s.output_h / s.input_h / (t1 - t0);
-                s.horizontal_shift = s0 * s.output_w / (s1 - s0);
-                s.vertical_shift = t0 * s.output_h / (t1 - t0);
+                context.horizontal_scale = (float)context.output_w / context.input_w / (s1 - s0);
+                context.vertical_scale = (float)context.output_h / context.input_h / (t1 - t0);
+                context.horizontal_shift = s0 * context.output_w / (s1 - s0);
+                context.vertical_shift = t0 * context.output_h / (t1 - t0);
             }
 
         }
 
         public static void ChooseFilters(
-            ref ResizeContext context, Filter? horizontalFilter, Filter? verticalFilter)
+            ref ResizeContext context,
+            Filter? horizontalFilter, Filter? verticalFilter)
         {
             if (horizontalFilter == null)
                 horizontalFilter = UseUpsampling(context.horizontal_scale)
@@ -1581,45 +1591,45 @@ namespace StbSharp
             context.vertical_filter = verticalFilter;
         }
 
-        public static int CalculateMemory(ref ResizeContext s)
+        public static int CalculateMemory(ref ResizeContext context)
         {
-            int pixel_margin = GetFilterPixelMargin(s.horizontal_filter, s.horizontal_scale);
-            int filter_height = GetFilterPixelWidth(s.vertical_filter, s.vertical_scale);
+            int pixel_margin = GetFilterPixelMargin(context.horizontal_filter, context.horizontal_scale);
+            int filter_height = GetFilterPixelWidth(context.vertical_filter, context.vertical_scale);
 
-            s.horizontal_num_contributors = GetContributors(
-                s.horizontal_scale, s.horizontal_filter, s.input_w, s.output_w);
-            s.vertical_num_contributors = GetContributors(
-                s.vertical_scale, s.vertical_filter, s.input_h, s.output_h);
+            context.horizontal_num_contributors = GetContributors(
+                context.horizontal_scale, context.horizontal_filter, context.input_w, context.output_w);
+            context.vertical_num_contributors = GetContributors(
+                context.vertical_scale, context.vertical_filter, context.input_h, context.output_h);
 
-            s.ring_buffer_num_entries = filter_height + 1;
-            s.horizontal_contributors_size = s.horizontal_num_contributors * sizeof(Contributors);
-            s.horizontal_coefficients_size = GetTotalHorizontalCoefficients(s) * sizeof(float);
-            s.vertical_contributors_size = s.vertical_num_contributors * sizeof(Contributors);
-            s.vertical_coefficients_size = GetTotalVerticalCoefficients(s) * sizeof(float);
-            s.decode_buffer_size = (s.input_w + pixel_margin * 2) * s.channels * sizeof(float);
-            s.horizontal_buffer_size = s.output_w * s.channels * sizeof(float);
-            s.ring_buffer_length_bytes = s.output_w * s.channels * sizeof(float);
-            s.ring_buffer_size = s.ring_buffer_length_bytes * s.ring_buffer_num_entries;
-            s.encode_buffer_size = s.output_w * s.channels * sizeof(float);
+            context.ring_buffer_num_entries = filter_height + 1;
+            context.horizontal_contributors_size = context.horizontal_num_contributors * sizeof(Contributors);
+            context.horizontal_coefficients_size = GetTotalHorizontalCoefficients(context) * sizeof(float);
+            context.vertical_contributors_size = context.vertical_num_contributors * sizeof(Contributors);
+            context.vertical_coefficients_size = GetTotalVerticalCoefficients(context) * sizeof(float);
+            context.decode_buffer_size = (context.input_w + pixel_margin * 2) * context.channels * sizeof(float);
+            context.horizontal_buffer_size = context.output_w * context.channels * sizeof(float);
+            context.ring_buffer_length_bytes = context.output_w * context.channels * sizeof(float);
+            context.ring_buffer_size = context.ring_buffer_length_bytes * context.ring_buffer_num_entries;
+            context.encode_buffer_size = context.output_w * context.channels * sizeof(float);
 
-            if (UseHeightUpsampling(s))
-                s.horizontal_buffer_size = 0;
+            if (UseHeightUpsampling(context))
+                context.horizontal_buffer_size = 0;
             else
-                s.encode_buffer_size = 0;
+                context.encode_buffer_size = 0;
 
             return
-                s.horizontal_contributors_size +
-                s.horizontal_coefficients_size +
-                s.vertical_contributors_size +
-                s.vertical_coefficients_size +
-                s.decode_buffer_size +
-                s.horizontal_buffer_size +
-                s.ring_buffer_size +
-                s.encode_buffer_size;
+                context.horizontal_contributors_size +
+                context.horizontal_coefficients_size +
+                context.vertical_contributors_size +
+                context.vertical_coefficients_size +
+                context.decode_buffer_size +
+                context.horizontal_buffer_size +
+                context.ring_buffer_size +
+                context.encode_buffer_size;
         }
 
         public static int ResizeAllocated(
-            ref ResizeContext s,
+            ref ResizeContext context,
             int alphaChannel, int flags, DataType datatype,
             WrapMode horizontalWrap, WrapMode verticalWrap,
             ColorSpace colorspace,
@@ -1627,97 +1637,106 @@ namespace StbSharp
         {
             if (tmpMemory.IsEmpty)
                 return 0;
-            if (s.horizontal_filter == null)
+            if (context.horizontal_filter == null)
                 return 0;
-            if (s.vertical_filter == null)
+            if (context.vertical_filter == null)
                 return 0;
-            if ((s.channels < 0) || (s.channels > 64))
+            if ((context.channels < 0) || (context.channels > 64))
                 return 0;
-            if (alphaChannel >= s.channels)
+            if (alphaChannel >= context.channels)
                 return 0;
 
             if (alphaChannel < 0)
                 flags |= (1 << 1) | (1 << 0);
 
-            int memory_required = CalculateMemory(ref s);
+            int memory_required = CalculateMemory(ref context);
             if (tmpMemory.Length < memory_required)
                 return 0;
 
             tmpMemory = tmpMemory.Slice(0, memory_required);
             tmpMemory.Clear();
 
-            s.alpha_channel = alphaChannel;
-            s.flags = flags;
-            s.datatype = datatype;
-            s.wrap_horizontal = horizontalWrap;
-            s.wrap_vertical = verticalWrap;
-            s.colorspace = colorspace;
-            s.horizontal_coefficient_width =
-                GetCoefficientWidth(s.horizontal_filter, s.horizontal_scale);
-            s.vertical_coefficient_width =
-                GetCoefficientWidth(s.vertical_filter, s.vertical_scale);
-            s.horizontal_filter_pixel_width =
-                GetFilterPixelWidth(s.horizontal_filter, s.horizontal_scale);
-            s.vertical_filter_pixel_width =
-                GetFilterPixelWidth(s.vertical_filter, s.vertical_scale);
-            s.horizontal_filter_pixel_margin =
-                GetFilterPixelMargin(s.horizontal_filter, s.horizontal_scale);
-            s.vertical_filter_pixel_margin =
-                GetFilterPixelMargin(s.vertical_filter, s.vertical_scale);
+            context.alpha_channel = alphaChannel;
+            context.flags = flags;
+            context.datatype = datatype;
+            context.wrap_horizontal = horizontalWrap;
+            context.wrap_vertical = verticalWrap;
+            context.colorspace = colorspace;
+            context.horizontal_coefficient_width =
+                GetCoefficientWidth(context.horizontal_filter, context.horizontal_scale);
+            context.vertical_coefficient_width =
+                GetCoefficientWidth(context.vertical_filter, context.vertical_scale);
+            context.horizontal_filter_pixel_width =
+                GetFilterPixelWidth(context.horizontal_filter, context.horizontal_scale);
+            context.vertical_filter_pixel_width =
+                GetFilterPixelWidth(context.vertical_filter, context.vertical_scale);
+            context.horizontal_filter_pixel_margin =
+                GetFilterPixelMargin(context.horizontal_filter, context.horizontal_scale);
+            context.vertical_filter_pixel_margin =
+                GetFilterPixelMargin(context.vertical_filter, context.vertical_scale);
 
-            s.decode_buffer_pixels = s.input_w + s.horizontal_filter_pixel_margin * 2;
-            s.ring_buffer_begin_index = -1;
+            context.decode_buffer_pixels = context.input_w + context.horizontal_filter_pixel_margin * 2;
+            context.ring_buffer_begin_index = -1;
 
-            s.horizontal_contributors = MemoryMarshal.Cast<byte, Contributors>(tmpMemory.Slice(0, s.horizontal_contributors_size));
-            tmpMemory = tmpMemory.Slice(s.horizontal_contributors_size);
+            context.horizontal_contributors = 
+                MemoryMarshal.Cast<byte, Contributors>(tmpMemory.Slice(0, context.horizontal_contributors_size));
+            tmpMemory = tmpMemory.Slice(context.horizontal_contributors_size);
 
-            s.horizontal_coefficients = MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, s.horizontal_coefficients_size));
-            tmpMemory = tmpMemory.Slice(s.horizontal_coefficients_size);
+            context.horizontal_coefficients = 
+                MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.horizontal_coefficients_size));
+            tmpMemory = tmpMemory.Slice(context.horizontal_coefficients_size);
 
-            s.vertical_contributors = MemoryMarshal.Cast<byte, Contributors>(tmpMemory.Slice(0, s.vertical_contributors_size));
-            tmpMemory = tmpMemory.Slice(s.vertical_contributors_size);
+            context.vertical_contributors =
+                MemoryMarshal.Cast<byte, Contributors>(tmpMemory.Slice(0, context.vertical_contributors_size));
+            tmpMemory = tmpMemory.Slice(context.vertical_contributors_size);
 
-            s.vertical_coefficients = MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, s.vertical_coefficients_size));
-            tmpMemory = tmpMemory.Slice(s.vertical_coefficients_size);
+            context.vertical_coefficients =
+                MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.vertical_coefficients_size));
+            tmpMemory = tmpMemory.Slice(context.vertical_coefficients_size);
 
-            s.decode_buffer = MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, s.decode_buffer_size));
-            tmpMemory = tmpMemory.Slice(s.decode_buffer_size);
+            context.decode_buffer = 
+                MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.decode_buffer_size));
+            tmpMemory = tmpMemory.Slice(context.decode_buffer_size);
 
-            if (UseHeightUpsampling(s))
+            if (UseHeightUpsampling(context))
             {
-                s.horizontal_buffer = default;
+                context.horizontal_buffer = default;
 
-                s.ring_buffer = MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, s.ring_buffer_size));
-                tmpMemory = tmpMemory.Slice(s.ring_buffer_size);
+                context.ring_buffer = 
+                    MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.ring_buffer_size));
+                tmpMemory = tmpMemory.Slice(context.ring_buffer_size);
 
-                s.encode_buffer = MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, s.encode_buffer_size));
+                context.encode_buffer = 
+                    MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.encode_buffer_size));
                 //tmpMemory = tmpMemory.Slice(s.encode_buffer_size);
             }
             else
             {
-                s.horizontal_buffer = MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, s.horizontal_buffer_size));
-                tmpMemory = tmpMemory.Slice(s.horizontal_buffer_size);
+                context.horizontal_buffer =
+                    MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.horizontal_buffer_size));
+                tmpMemory = tmpMemory.Slice(context.horizontal_buffer_size);
 
-                s.ring_buffer = MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, s.ring_buffer_size));
+                context.ring_buffer = 
+                    MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.ring_buffer_size));
                 //tmpMemory = tmpMemory.Slice(s.ring_buffer_size);
 
-                s.encode_buffer = default;
+                context.encode_buffer = default;
             }
 
             CalculateFilters(
-                s.horizontal_contributors, s.horizontal_coefficients,
-                s.horizontal_filter, s.horizontal_scale, s.horizontal_shift,
-                s.input_w, s.output_w);
+                context.horizontal_contributors, context.horizontal_coefficients,
+                context.horizontal_filter, context.horizontal_scale, context.horizontal_shift,
+                context.input_w, context.output_w);
 
             CalculateFilters(
-                s.vertical_contributors, s.vertical_coefficients,
-                s.vertical_filter, s.vertical_scale, s.vertical_shift,
-                s.input_h, s.output_h);
+                context.vertical_contributors, context.vertical_coefficients,
+                context.vertical_filter, context.vertical_scale, context.vertical_shift,
+                context.input_h, context.output_h);
 
-            if (UseHeightUpsampling(s))
-                BufferLoopUpsample(ref s);
+            if (UseHeightUpsampling(context))
+                BufferLoopUpsample(ref context);
             else
-                BufferLoopDownsample(ref s);
+                BufferLoopDownsample(ref context);
 
             return 1;
         }
@@ -1731,28 +1750,28 @@ namespace StbSharp
             WrapMode horizontalWrap, WrapMode verticalWrap,
             ColorSpace colorspace)
         {
-            var s = new ResizeContext();
-            Setup(ref s, inputW, inputH, outputW, outputH, channels);
-            CalculateTransform(ref s, (float)s0, (float)t0, (float)s1, (float)t1, transform);
-            ChooseFilters(ref s, horizontalFilter, verticalFilter);
+            var context = new ResizeContext();
+            Setup(ref context, inputW, inputH, outputW, outputH, channels);
+            CalculateTransform(ref context, (float)s0, (float)t0, (float)s1, (float)t1, transform);
+            ChooseFilters(ref context, horizontalFilter, verticalFilter);
 
-            int tmp_memory_required = CalculateMemory(ref s);
+            int tmp_memory_required = CalculateMemory(ref context);
 
             // TODO: pool
             Memory<byte> tmp_memory = new byte[tmp_memory_required];
 
-            s.input_data = inputData;
-            s.input_stride_bytes = inputStrideInBytes != 0
+            context.input_data = inputData;
+            context.input_stride_bytes = inputStrideInBytes != 0
                     ? inputStrideInBytes
-                    : s.channels * s.input_w * DataTypeSize[(int)datatype];
+                    : context.channels * context.input_w * DataTypeSize[(int)datatype];
 
-            s.output_data = outputData;
-            s.output_stride_bytes = outputStrideInBytes != 0
+            context.output_data = outputData;
+            context.output_stride_bytes = outputStrideInBytes != 0
                     ? outputStrideInBytes
-                    : s.channels * s.output_w * DataTypeSize[(int)datatype];
+                    : context.channels * context.output_w * DataTypeSize[(int)datatype];
 
             return ResizeAllocated(
-                ref s,
+                ref context,
                 alphaChannel, flags, datatype,
                 horizontalWrap, verticalWrap,
                 colorspace,
