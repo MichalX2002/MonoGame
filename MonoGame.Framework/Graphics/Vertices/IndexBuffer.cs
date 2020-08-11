@@ -10,30 +10,30 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class IndexBuffer : BufferBase
     {
-        public IndexElementSize ElementSize { get; }
+        public IndexElementType ElementType { get; }
 
         #region Constructors
 
         protected IndexBuffer(
             GraphicsDevice graphicsDevice,
-            IndexElementSize elementSize,
+            IndexElementType elementType,
             int capacity,
             BufferUsage bufferUsage,
             bool isDynamic) :
             base(graphicsDevice, capacity, bufferUsage, isDynamic)
         {
-            if (elementSize == IndexElementSize.Int)
+            if (elementType == IndexElementType.Int32)
             {
                 if (graphicsDevice.GraphicsProfile == GraphicsProfile.Reach)
                     throw new NotSupportedException(
-                        $"The current graphics profile does not support an element size of " +
-                        $"{elementSize}; use {IndexElementSize.Short} instead.");
+                        $"The current graphics profile does not support an element type of " +
+                        $"{elementType}; use {IndexElementType.Int16} instead.");
             }
-            else if (elementSize != IndexElementSize.Short)
+            else if (elementType != IndexElementType.Int16)
             {
-                throw new ArgumentOutOfRangeException(nameof(elementSize));
+                throw new ArgumentOutOfRangeException(nameof(elementType));
             }
-            ElementSize = elementSize;
+            ElementType = elementType;
 
             if (IsValidThreadContext)
                 PlatformConstruct();
@@ -43,10 +43,10 @@ namespace MonoGame.Framework.Graphics
 
         public IndexBuffer(
             GraphicsDevice graphicsDevice,
-            IndexElementSize elementSize,
+            IndexElementType elementType,
             int capacity,
             BufferUsage bufferUsage) :
-            this(graphicsDevice, elementSize, capacity, bufferUsage, false)
+            this(graphicsDevice, elementType, capacity, bufferUsage, false)
         {
         }
 
@@ -65,7 +65,7 @@ namespace MonoGame.Framework.Graphics
 
             AssertMainThread(true);
 
-            int bufferSize = Capacity * (int)ElementSize;
+            int bufferSize = Capacity * (int)ElementType;
             int dstSize = destination.Length * Unsafe.SizeOf<T>();
 
             if (dstSize > bufferSize)
@@ -100,7 +100,7 @@ namespace MonoGame.Framework.Graphics
 
             AssertMainThread(true);
 
-            int bufferBytes = Capacity * (int)ElementSize;
+            int bufferBytes = Capacity * (int)ElementType;
             int srcSize = source.Length * Unsafe.SizeOf<T>();
 
             if (srcSize > bufferBytes)
@@ -112,7 +112,7 @@ namespace MonoGame.Framework.Graphics
                     nameof(byteOffset), "The range reaches beyond the buffer.");
 
             PlatformSetData(byteOffset, MemoryMarshal.AsBytes(source), options);
-            Count = srcSize / (int)ElementSize;
+            Count = srcSize / (int)ElementType;
         }
 
         public void SetData<T>(
@@ -142,13 +142,12 @@ namespace MonoGame.Framework.Graphics
 
         #endregion
 
-        public static IndexElementSize ToIndexElementSize(Type type)
+        public static IndexElementType ToIndexElementType(Type type)
         {
-            return (type == typeof(short) || type == typeof(ushort))
-                ? IndexElementSize.Short
-                : (type == typeof(int) || type == typeof(uint))
-                ? IndexElementSize.Int
-                : throw new ArgumentException($"Could not determine index element size from {type}.");
+            return 
+                (type == typeof(short) || type == typeof(ushort)) ? IndexElementType.Int16 :
+                (type == typeof(int) || type == typeof(uint)) ? IndexElementType.Int32 : 
+                throw new ArgumentException($"Could not determine index element type from {type}.");
         }
     }
 }

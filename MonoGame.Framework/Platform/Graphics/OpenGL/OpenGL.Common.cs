@@ -17,6 +17,24 @@ namespace MonoGame.OpenGL
         }
     }
 
+    internal static class GLEnumExtensions
+    {
+        public static IndexElementType ToGLElementType(this Framework.Graphics.IndexElementType elementType)
+        {
+            switch (elementType)
+            {
+                case Framework.Graphics.IndexElementType.Int16:
+                    return IndexElementType.UnsignedShort;
+
+                case Framework.Graphics.IndexElementType.Int32:
+                    return IndexElementType.UnsignedInt;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(elementType));
+            }
+        }
+    }
+
     internal partial class GL
     {
         public static int GetBoundTexture2D()

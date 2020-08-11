@@ -157,6 +157,10 @@ This package provides you with MonoGame Framework that uses OpenGL for rendering
     <ProjectReference Include="..\ThirdParty\NVorbis\NVorbis\NVorbis.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Platform\Graphics\Indices\" />
+  </ItemGroup>
+
   <Import Project="Platform\OpenGL.targets" />
   <Import Project="Platform\OpenAL.targets" />
 </Project>

@@ -15,10 +15,10 @@ namespace MonoGame.Framework.Graphics
 
         public DynamicIndexBuffer(
             GraphicsDevice graphicsDevice, 
-            IndexElementSize elementSize,
+            IndexElementType elementType,
             int capacity,
             BufferUsage bufferUsage) :
-            base(graphicsDevice, elementSize, capacity, bufferUsage, true)
+            base(graphicsDevice, elementType, capacity, bufferUsage, true)
         {
         }
     }

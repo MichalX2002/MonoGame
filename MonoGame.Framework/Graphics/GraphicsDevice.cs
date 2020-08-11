@@ -955,7 +955,7 @@ namespace MonoGame.Framework.Graphics
         /// <typeparam name="TVertex">The type of the vertex data.</typeparam>
         /// <typeparam name="TIndex">The type of the index data.</typeparam>
         /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
-        /// <param name="elementSize">The size of index elements.</param>
+        /// <param name="elementType">The size of index elements.</param>
         /// <param name="vertexData">The span of vertices to draw.</param>
         /// <param name="indexData">The span of indices for indexing the vertices.</param>
         /// <param name="primitiveCount">The number of primitives to draw.</param>
@@ -966,7 +966,7 @@ namespace MonoGame.Framework.Graphics
         /// </remarks>
         public void DrawUserIndexedPrimitives<TVertex, TIndex>(
             PrimitiveType primitiveType,
-            IndexElementSize elementSize,
+            IndexElementType elementType,
             ReadOnlySpan<TVertex> vertexData,
             ReadOnlySpan<TIndex> indexData,
             int primitiveCount,
@@ -987,7 +987,7 @@ namespace MonoGame.Framework.Graphics
 
             PlatformDrawUserIndexedPrimitives(
                 primitiveType,
-                elementSize,
+                elementType,
                 MemoryMarshal.AsBytes(vertexData),
                 MemoryMarshal.AsBytes(indexData),
                 primitiveCount,
@@ -1007,7 +1007,7 @@ namespace MonoGame.Framework.Graphics
         /// <typeparam name="TVertex">The type of the vertex data.</typeparam>
         /// <typeparam name="TIndex">The type of the index data.</typeparam>
         /// <param name="primitiveType">The type of primitives to draw with the vertices.</param>
-        /// <param name="elementSize">The size of index elements.</param>
+        /// <param name="elementType">The size of index elements.</param>
         /// <param name="vertexData">The span of vertices to draw.</param>
         /// <param name="indexData">The span of indices for indexing the vertices.</param>
         /// <param name="primitiveCount">The number of primitives to draw.</param>
@@ -1021,7 +1021,7 @@ namespace MonoGame.Framework.Graphics
         /// </remarks>
         public void DrawUserIndexedPrimitives<TVertex, TIndex>(
             PrimitiveType primitiveType,
-            IndexElementSize elementSize,
+            IndexElementType elementType,
             ReadOnlySpan<TVertex> vertexData,
             ReadOnlySpan<TIndex> indexData,
             int primitiveCount)
@@ -1032,7 +1032,7 @@ namespace MonoGame.Framework.Graphics
 
             DrawUserIndexedPrimitives(
                 primitiveType,
-                elementSize,
+                elementType,
                 MemoryMarshal.AsBytes(vertexData),
                 MemoryMarshal.AsBytes(indexData),
                 primitiveCount,
@@ -1066,11 +1066,11 @@ namespace MonoGame.Framework.Graphics
             where TVertex : unmanaged, IVertexType
             where TIndex : unmanaged
         {
-            var elementSize = IndexBuffer.ToIndexElementSize(typeof(TIndex));
+            var elementType = IndexBuffer.ToIndexElementType(typeof(TIndex));
                 
             DrawUserIndexedPrimitives(
                 primitiveType,
-                elementSize,
+                elementType,
                 vertexData,
                 indexData,
                 primitiveCount);

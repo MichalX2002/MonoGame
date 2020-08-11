@@ -7,16 +7,16 @@ namespace MonoGame.Framework.Graphics
     /// <summary>
     /// Defines the size for indices in an <see cref="IndexBuffer"/>.
     /// </summary>
-    public enum IndexElementSize
+    public enum IndexElementType
     {
         /// <summary>
-        /// Use 16-bit integer (signed or unsigned) indices.
+        /// Use 16-bit (signed or unsigned) integer indices.
         /// </summary>
-        Short = 2,
+        Int16,
 
         /// <summary>
-        /// Use 32-bit integer (signed or unsigned) indices.
+        /// Use 32-bit (signed or unsigned) integer indices.
         /// </summary>
-        Int = 4
+        Int32
     }
 }

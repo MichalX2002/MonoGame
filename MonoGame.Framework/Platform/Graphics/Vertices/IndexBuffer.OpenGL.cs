@@ -12,7 +12,7 @@ namespace MonoGame.Framework.Graphics
     {
         private void PlatformConstruct()
         {
-            base.PlatformConstruct(BufferTarget.ElementArrayBuffer, (int)ElementSize);
+            base.PlatformConstruct(BufferTarget.ElementArrayBuffer, (int)ElementType);
         }
 
         private unsafe void PlatformGetData<T>(int byteOffset, Span<T> destination) 
@@ -28,7 +28,7 @@ namespace MonoGame.Framework.Graphics
 
             IntPtr mapPtr = GL.MapBuffer(BufferTarget.ElementArrayBuffer, BufferAccess.ReadOnly);
 
-            int srcBytes = Capacity * (int)ElementSize;
+            int srcBytes = Capacity * (int)ElementType;
             var byteSrc = new ReadOnlySpan<byte>((byte*)mapPtr + byteOffset, srcBytes);
             var byteDst = MemoryMarshal.AsBytes(destination);
             byteSrc.Slice(0, byteDst.Length).CopyTo(byteDst);
@@ -47,7 +47,7 @@ namespace MonoGame.Framework.Graphics
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _glBuffer);
             GL.CheckError();
 
-            DiscardBuffer(BufferTarget.ElementArrayBuffer, options, Capacity * (int)ElementSize);
+            DiscardBuffer(BufferTarget.ElementArrayBuffer, options, Capacity * (int)ElementType);
 
             fixed (T* ptr = data)
             {

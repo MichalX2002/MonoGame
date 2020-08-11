@@ -9,6 +9,8 @@ using System.Runtime.CompilerServices;
 using System.Numerics;
 using System.Globalization;
 using System.Diagnostics;
+using System.ComponentModel;
+using MonoGame.Framework.Graphics.Indices;
 
 #if ANGLE
 using OpenTK.Graphics;
@@ -738,14 +740,14 @@ namespace MonoGame.Framework.Graphics
             return (IRenderTarget)_currentRenderTargetBindings[0].RenderTarget;
         }
 
-        private static GLPrimitiveType PrimitiveTypeGL(PrimitiveType primitiveType)
+        private static GLPrimitiveType GetGLPrimitiveType(PrimitiveType primitiveType)
         {
             return primitiveType switch
             {
-                PrimitiveType.LineList => GLPrimitiveType.Lines,
-                PrimitiveType.LineStrip => GLPrimitiveType.LineStrip,
-                PrimitiveType.TriangleList => GLPrimitiveType.Triangles,
-                PrimitiveType.TriangleStrip => GLPrimitiveType.TriangleStrip,
+                PrimitiveType.LineList => OpenGL.GLPrimitiveType.Lines,
+                PrimitiveType.LineStrip => OpenGL.GLPrimitiveType.LineStrip,
+                PrimitiveType.TriangleList => OpenGL.GLPrimitiveType.Triangles,
+                PrimitiveType.TriangleStrip => OpenGL.GLPrimitiveType.TriangleStrip,
                 _ => throw new ArgumentOutOfRangeException(nameof(primitiveType)),
             };
         }
@@ -898,14 +900,13 @@ namespace MonoGame.Framework.Graphics
         {
             ApplyState(true);
             ApplyAttribs(_vertexShader, baseVertex);
-
-            var elementType = _indexBuffer.ElementSize == IndexElementSize.Short
-                ? IndexElementType.UnsignedShort : IndexElementType.UnsignedInt;
+            
             int elementCount = GetElementCountForType(primitiveType, primitiveCount);
+            var elementType = _indexBuffer!.ElementType.ToGLElementType();
             var indexOffsetInBytes = new IntPtr(startIndex * (int)elementType);
 
             GL.DrawElements(
-                PrimitiveTypeGL(primitiveType), elementCount, elementType, indexOffsetInBytes);
+                GetGLPrimitiveType(primitiveType), elementCount, elementType, indexOffsetInBytes);
             GL.CheckError();
         }
 
@@ -917,7 +918,7 @@ namespace MonoGame.Framework.Graphics
             if (vertexStart < 0)
                 vertexStart = 0;
 
-            GL.DrawArrays(PrimitiveTypeGL(primitiveType), vertexStart, vertexCount);
+            GL.DrawArrays(GetGLPrimitiveType(primitiveType), vertexStart, vertexCount);
             GL.CheckError();
         }
 
@@ -941,14 +942,14 @@ namespace MonoGame.Framework.Graphics
                 declaration.GraphicsDevice = this;
                 declaration.Apply(_vertexShader, (IntPtr)vertexPtr, ShaderProgramHash);
 
-                GL.DrawArrays(PrimitiveTypeGL(type), 0, vertices.Length);
+                GL.DrawArrays(GetGLPrimitiveType(type), 0, vertices.Length);
                 GL.CheckError();
             }
         }
 
         private unsafe void PlatformDrawUserIndexedPrimitives(
             PrimitiveType primitiveType,
-            IndexElementSize indexElementSize,
+            IndexElementType elementType,
             ReadOnlySpan<byte> vertices,
             ReadOnlySpan<byte> indices,
             int primitiveCount,
@@ -964,10 +965,9 @@ namespace MonoGame.Framework.Graphics
             GL.CheckError();
             _indexBufferDirty = true;
 
-            var pType = PrimitiveTypeGL(primitiveType);
+            var pType = GetGLPrimitiveType(primitiveType);
             int elementCount = GetElementCountForType(primitiveType, primitiveCount);
-            var elementType = indexElementSize == IndexElementSize.Short
-                ? IndexElementType.UnsignedShort : IndexElementType.UnsignedInt;
+            var glElementType = elementType.ToGLElementType();
 
             fixed (byte* vertexPtr = vertices)
             {
@@ -977,7 +977,7 @@ namespace MonoGame.Framework.Graphics
 
                 fixed (byte* indexPtr = indices)
                 {
-                    GL.DrawElements(pType, elementCount, elementType, (IntPtr)indexPtr);
+                    GL.DrawElements(pType, elementCount, glElementType, (IntPtr)indexPtr);
                     GL.CheckError();
                 }
             }
@@ -992,9 +992,7 @@ namespace MonoGame.Framework.Graphics
             ApplyState(true);
 
             var elementCount = GetElementCountForType(primitiveType, primitiveCount);
-            var elementType = _indexBuffer.ElementSize == IndexElementSize.Short
-                ? IndexElementType.UnsignedShort : IndexElementType.UnsignedInt;
-
+            var elementType = _indexBuffer!.ElementType.ToGLElementType();
             var indexOffsetInBytes = new IntPtr(startIndex * (int)elementType);
 
             ApplyAttribs(_vertexShader, baseVertex);
@@ -1007,7 +1005,7 @@ namespace MonoGame.Framework.Graphics
                         "Try upgrading your graphics card drivers.");
 
                 GL.DrawElementsInstancedBaseInstance(
-                    PrimitiveTypeGL(primitiveType),
+                    GetGLPrimitiveType(primitiveType),
                     elementCount,
                     elementType,
                     indexOffsetInBytes,
@@ -1017,7 +1015,7 @@ namespace MonoGame.Framework.Graphics
             else
             {
                 GL.DrawElementsInstanced(
-                    PrimitiveTypeGL(primitiveType),
+                    GetGLPrimitiveType(primitiveType),
                     elementCount,
                     elementType,
                     indexOffsetInBytes,

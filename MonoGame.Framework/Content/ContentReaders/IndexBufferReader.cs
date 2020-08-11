@@ -16,8 +16,8 @@ namespace MonoGame.Framework.Content
             bool sixteenBits = input.ReadBoolean();
             int dataSize = input.ReadInt32();
 
-            var elementSize = sixteenBits ? IndexElementSize.Short : IndexElementSize.Int;
-            int elementCount = dataSize / (int)elementSize;
+            var elementType = sixteenBits ? IndexElementType.Int16 : IndexElementType.Int32;
+            int elementCount = dataSize / elementType.TypeSize();
 
             using (var buffer = input.ContentManager.GetScratchBuffer(dataSize))
             {
@@ -25,11 +25,11 @@ namespace MonoGame.Framework.Content
                     throw new InvalidDataException();
 
                 if (indexBuffer == null || 
-                    indexBuffer.ElementSize != elementSize ||
+                    indexBuffer.ElementType != elementType ||
                     indexBuffer.Capacity < elementCount)
                 {
                     indexBuffer = new IndexBuffer(
-                        input.GetGraphicsDevice(), elementSize, elementCount, BufferUsage.None);
+                        input.GetGraphicsDevice(), elementType, elementCount, BufferUsage.None);
                 }
 
                 indexBuffer.SetData(buffer.AsSpan().Slice(0, dataSize));
