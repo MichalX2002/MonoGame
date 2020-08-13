@@ -485,16 +485,14 @@ namespace MonoGame.Framework.Graphics
         }
 
 #if  WINDOWS_UAP
-
         private void SetMultiSamplingToMaximum(
             PresentationParameters presentationParameters, out int quality)
         {
             quality = (int)SharpDX.Direct3D11.StandardMultisampleQualityLevels.StandardMultisamplePattern;
         }
-
 #endif
-#if WINDOWS
 
+#if WINDOWS
         private void CorrectBackBufferSize()
         {
             // Window size can be modified when we're going full screen, 
@@ -871,7 +869,6 @@ namespace MonoGame.Framework.Graphics
             CreateSizeDependentResources();
             ApplyRenderTargets(null);
         }
-
 #endif // WINDOWS
 
         /// <summary>
@@ -1255,8 +1252,7 @@ namespace MonoGame.Framework.Graphics
                 {
                     _d3dContext.InputAssembler.SetIndexBuffer(
                         _indexBuffer._buffer,
-                        _indexBuffer.ElementSize == IndexElementSize.Short ?
-                            Format.R16_UInt : Format.R32_UInt,
+                        _indexBuffer.ElementType.ToDXElementType(),
                         0);
                 }
                 _indexBufferDirty = false;
@@ -1365,17 +1361,17 @@ namespace MonoGame.Framework.Graphics
         }
 
         private int SetUserIndexBuffer(
-            ReadOnlySpan<byte> indexData, IndexElementSize indexElementSize)
+            ReadOnlySpan<byte> indexData, IndexElementType elementType)
         {
             DynamicIndexBuffer buffer;
             int requiredIndexCount = Math.Max(indexData.Length, 6000);
-            if (indexElementSize == IndexElementSize.Short)
+            if (elementType == IndexElementType.Int16)
             {
                 if (_userIndexBuffer16 == null || _userIndexBuffer16.Capacity < requiredIndexCount)
                 {
                     _userIndexBuffer16?.Dispose();
                     _userIndexBuffer16 = new DynamicIndexBuffer(
-                        this, indexElementSize, requiredIndexCount, BufferUsage.WriteOnly);
+                        this, elementType, requiredIndexCount, BufferUsage.WriteOnly);
                 }
                 buffer = _userIndexBuffer16;
             }
@@ -1385,18 +1381,18 @@ namespace MonoGame.Framework.Graphics
                 {
                     _userIndexBuffer32?.Dispose();
                     _userIndexBuffer32 = new DynamicIndexBuffer(
-                        this, indexElementSize, requiredIndexCount, BufferUsage.WriteOnly);
+                        this, elementType, requiredIndexCount, BufferUsage.WriteOnly);
                 }
                 buffer = _userIndexBuffer32;
             }
 
             int startIndex = buffer.UserOffset;
-            int indexCount = indexData.Length / (int)indexElementSize;
+            int indexCount = indexData.Length / elementType.TypeSize();
 
             if ((indexCount + buffer.UserOffset) < buffer.Count)
             {
                 buffer.UserOffset += indexCount;
-                int byteOffset = startIndex * (int)indexElementSize;
+                int byteOffset = startIndex * elementType.TypeSize();
                 buffer.SetData(byteOffset, indexData, SetDataOptions.NoOverwrite);
             }
             else
@@ -1454,7 +1450,7 @@ namespace MonoGame.Framework.Graphics
 
         private void PlatformDrawUserIndexedPrimitives(
             PrimitiveType primitiveType,
-            IndexElementSize elementSize,
+            IndexElementType elementType,
             ReadOnlySpan<byte> vertexData,
             ReadOnlySpan<byte> indexData,
             int primitiveCount,
@@ -1462,7 +1458,7 @@ namespace MonoGame.Framework.Graphics
         {
             var indexCount = GetElementCountForType(primitiveType, primitiveCount);
             var startVertex = SetUserVertexBuffer(vertexData, vertexDeclaration, out _);
-            var startIndex = SetUserIndexBuffer(indexData, elementSize);
+            var startIndex = SetUserIndexBuffer(indexData, elementType);
 
             lock (_d3dContext)
             {

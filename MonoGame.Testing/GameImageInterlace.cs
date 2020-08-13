@@ -220,7 +220,7 @@ namespace MonoGame.Testing
             if (tex != null)
             {
                 float rot = 0;// -MathF.PI / 2;
-                float scale = 1;// / 5.5f;
+                float scale = 1f / 5.5f;
                 float y = 0;// tex.Width * scale;
                 var pos = new Vector2(0, y);
 

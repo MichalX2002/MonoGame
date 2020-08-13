@@ -7,11 +7,11 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets the size of the element type in bytes.
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="elementType"></param>
         /// <returns></returns>
-        public static int TypeSize(this IndexElementType type)
+        public static int TypeSize(this IndexElementType elementType)
         {
-            switch (type)
+            switch (elementType)
             {
                 case IndexElementType.Int16:
                     return 2;
@@ -20,7 +20,7 @@ namespace MonoGame.Framework.Graphics
                     return 4;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(type));
+                    throw new ArgumentOutOfRangeException(nameof(elementType));
             }
         }
     }
