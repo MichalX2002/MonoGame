@@ -10,7 +10,7 @@ namespace MonoGame.Imaging.Pixels
     public interface IReadOnlyPixelRows : IElementContainer, IPixelSource
     {
         /// <summary>
-        /// Gets a row of pixel bytes.
+        /// Gets pixel bytes of a row.
         /// </summary>
         /// <param name="x">The column in the row to get in pixels.</param>
         /// <param name="y">The row to get in pixels.</param>
@@ -25,7 +25,7 @@ namespace MonoGame.Imaging.Pixels
         where TPixel : unmanaged, IPixel
     {
         /// <summary>
-        /// Gets a row of pixels.
+        /// Gets pixel of a row.
         /// </summary>
         /// <param name="x">The column in the row to get in pixels.</param>
         /// <param name="y">The row to get in pixels.</param>

@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using System.Threading;
-using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Pixels;
+using MonoGame.Imaging.Utilities;
 using StbSharp;
 using static StbSharp.ImageWrite;
 
@@ -24,13 +24,8 @@ namespace MonoGame.Imaging.Coders.Encoding
             CancellationToken cancellationToken) :
             base(encoder, config, stream, leaveOpen, cancellationToken)
         {
-            ProgressCallback = (progress) => InvokeProgress(progress, null);
+            ProgressCallback = (progress, rect) => InvokeProgress(progress, rect?.ToRectangle());
             Buffer = RecyclableMemoryManager.Default.GetBlock();
-        }
-
-        public new void InvokeProgress(double percentage, Rectangle? rectangle)
-        {
-            base.InvokeProgress(percentage, rectangle);
         }
 
         public WriteState<TPixelRowProvider> CreateWriteState<TPixelRowProvider>(TPixelRowProvider provider)
@@ -41,8 +36,8 @@ namespace MonoGame.Imaging.Coders.Encoding
             return new WriteState<TPixelRowProvider>(
                 Stream,
                 Buffer!,
-                ProgressCallback,
                 provider,
+                ProgressCallback,
                 CancellationToken);
         }
 

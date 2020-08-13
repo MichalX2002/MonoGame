@@ -1,12 +1,37 @@
 ﻿using System;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace StbSharp
 {
     public static unsafe partial class StbImageResize
     {
+        public delegate void ResizeProgressCallback(float progress, Rect? rectangle);
+
         public delegate float FilterKernelFunction(float x, float scale);
         public delegate float FilterSupportFunction(float scale);
+
+        public enum WrapMode
+        {
+            Clamp = 1,
+            Reflect = 2,
+            Wrap = 3,
+            Zero = 4
+        }
+
+        public enum ColorSpace
+        {
+            Linear = 0,
+            SRgb = 1
+        }
+
+        public enum DataType
+        {
+            UInt8 = 0,
+            UInt16 = 1,
+            UInt32 = 2,
+            Float32 = 3
+        }
 
         public sealed class Filter
         {
@@ -26,16 +51,52 @@ namespace StbSharp
             }
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        public readonly struct Transform
+        {
+            public float ScaleX { get; }
+            public float ScaleY { get; }
+            public float ShiftX { get; }
+            public float ShiftY { get; }
+
+            public Vector2 Scale => new Vector2(ScaleX, ScaleY);
+            public Vector2 Shift => new Vector2(ShiftX, ShiftY);
+
+            public Transform(float scaleX, float scaleY, float shiftX, float shiftY)
+            {
+                ScaleX = scaleX;
+                ScaleY = scaleY;
+                ShiftX = shiftX;
+                ShiftY = shiftY;
+            }
+
+            public Transform(Vector2 scale, Vector2 shift) : this(scale.X, scale.Y, shift.X, shift.Y)
+            {
+            }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Contributors
+        {
+            public int n0;
+            public int n1;
+        }
+
+
         public ref struct ResizeContext
         {
+            public ResizeProgressCallback? ProgressCallback;
+
             public ReadOnlySpan<byte> input_data;
             public int input_w;
             public int input_h;
             public int input_stride_bytes;
+            
             public Span<byte> output_data;
             public int output_w;
             public int output_h;
             public int output_stride_bytes;
+            
             public float s0;
             public float t0;
             public float s1;
@@ -44,6 +105,7 @@ namespace StbSharp
             public float vertical_shift;
             public float horizontal_scale;
             public float vertical_scale;
+            
             public int channels;
             public int alpha_channel;
             public int flags;
@@ -53,6 +115,7 @@ namespace StbSharp
             public WrapMode wrap_horizontal;
             public WrapMode wrap_vertical;
             public ColorSpace colorspace;
+            
             public Span<Contributors> horizontal_contributors;
             public Span<float> horizontal_coefficients;
             public Span<Contributors> vertical_contributors;

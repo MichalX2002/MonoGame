@@ -9,30 +9,44 @@ namespace MonoGame.Imaging
     public partial class Image
     {
         public static void LoadPixels<TPixelFrom, TPixelTo>(
-            IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image<TPixelTo> destination)
+            IReadOnlyPixelRows pixels, Image<TPixelTo> destination, Rectangle? sourceRectangle = null)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
+            if (pixels == null)
+                throw new ArgumentNullException(nameof(pixels));
             if (destination == null)
                 throw new ArgumentNullException(nameof(destination));
 
-            ImagingArgumentGuard.AssertRectangleInSource(pixels, sourceRectangle, nameof(sourceRectangle));
+            var rect = sourceRectangle ?? pixels.GetBounds();
+            ImagingArgumentGuard.AssertNonEmptyRectangle(rect, nameof(sourceRectangle));
 
-            int byteStride = destination.ByteStride;
-            var rowBuffer = byteStride < 4096 ? stackalloc byte[byteStride] : new byte[byteStride];
-            var row = MemoryMarshal.Cast<byte, TPixelFrom>(rowBuffer);
+            Span<byte> rowByteBuffer = stackalloc byte[400];
+            var rowBuffer = MemoryMarshal.Cast<byte, TPixelFrom>(rowByteBuffer);
 
-            for (int y = 0; y < sourceRectangle.Height; y++)
+            for (int y = 0; y < rect.Height; y++)
             {
-                pixels.GetPixelByteRow(sourceRectangle.X, sourceRectangle.Y + y, rowBuffer);
                 var dstRow = destination.GetPixelRowSpan(y);
 
-                ConvertPixels(row, dstRow);
+                int offsetX = 0;
+                do
+                {
+                    int left = rect.Width - offsetX;
+                    int count = Math.Min(rowBuffer.Length, left);
+                    var slice = rowBuffer.Slice(0, count);
+
+                    pixels.GetPixelByteRow(rect.X + offsetX, rect.Y + y, MemoryMarshal.AsBytes(slice));
+
+                    ConvertPixels(slice, dstRow);
+                    dstRow = dstRow.Slice(count);
+                    offsetX += count;
+                }
+                while (offsetX < rect.Width);
             }
         }
 
         public static void LoadPixels(
-            IReadOnlyPixelRows pixels, Rectangle sourceRectangle, Image destination)
+            IReadOnlyPixelRows pixels, Image destination, Rectangle? sourceRectangle = null)
         {
             if (pixels == null)
                 throw new ArgumentNullException(nameof(pixels));
@@ -40,13 +54,13 @@ namespace MonoGame.Imaging
                 throw new ArgumentNullException(nameof(destination));
 
             var loadDelegate = GetLoadPixelRowsDelegate(pixels.PixelType, destination.PixelType);
-            loadDelegate.Invoke(pixels, sourceRectangle, destination);
+            loadDelegate.Invoke(pixels, destination, sourceRectangle);
         }
 
         public static Image LoadPixels(
             IReadOnlyPixelRows pixels, VectorType destinationType, Rectangle? sourceRectangle = null)
         {
-            if (pixels == null) 
+            if (pixels == null)
                 throw new ArgumentNullException(nameof(pixels));
 
             var rect = sourceRectangle ?? pixels.GetBounds();
@@ -55,7 +69,7 @@ namespace MonoGame.Imaging
             var image = Create(destinationType, rect.Size);
             try
             {
-                LoadPixels(pixels, rect, image);
+                LoadPixels(pixels, image, rect);
             }
             catch
             {
@@ -69,9 +83,9 @@ namespace MonoGame.Imaging
             IReadOnlyPixelRows pixels, Rectangle? sourceRectangle = null)
             where TPixel : unmanaged, IPixel<TPixel>
         {
-            if (pixels == null) 
+            if (pixels == null)
                 throw new ArgumentEmptyException(nameof(pixels));
-            
+
             ImagingArgumentGuard.AssertNonEmptyRectangle(sourceRectangle, nameof(sourceRectangle));
             var rect = sourceRectangle ?? pixels.GetBounds();
 
@@ -95,7 +109,7 @@ namespace MonoGame.Imaging
             }
             else
             {
-                LoadPixels(pixels, rect, dstImage);
+                LoadPixels(pixels, dstImage, rect);
             }
             return dstImage;
         }

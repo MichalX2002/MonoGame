@@ -88,7 +88,7 @@ namespace MonoGame.Imaging.Tests
 
             static void OnReadProgress(
                 ImageDecoderState decoderState,
-                double percentage,
+                float percentage,
                 Rectangle? rectangle)
             {
                 Console.WriteLine("Read: " + Math.Round(percentage * 100, 2) + "%");
@@ -121,7 +121,7 @@ namespace MonoGame.Imaging.Tests
 
             static void OnWriteProgress(
                 ImageEncoderState encoderState,
-                double percentage,
+                float percentage,
                 Rectangle? rectangle)
             {
                 //Console.WriteLine("Write: " + Math.Round(percentage * 100, 2) + "%");

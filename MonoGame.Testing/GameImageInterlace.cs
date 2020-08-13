@@ -52,13 +52,25 @@ namespace MonoGame.Testing
 
             base.Initialize();
 
-            void OnProgress(ImageDecoderState decoderState, double percentage, Rectangle? rect)
+            void OnLoadProgress(ImageDecoderState decoderState, float percentage, Rectangle? rect)
             {
                 if (_image == null && decoderState.CurrentImage != null)
                 {
                     _image = decoderState.CurrentImage;
                     (_image as Image<Color>)?.GetPixelSpan().Fill(Color.Red);
-                    Console.WriteLine("setup");
+                    Console.WriteLine("load setup");
+                }
+
+                _lastRow = rect?.Y ?? 0;
+            }
+
+            void OnResizeProgress(Size state, float percentage, Rectangle? rect)
+            {
+                if (_image == null)
+                {
+                    _image = Image<Color>.Create(state);
+                    (_image as Image<Color>)?.GetPixelSpan().Fill(Color.Red);
+                    Console.WriteLine("resize setup");
                 }
 
                 _lastRow = rect?.Y ?? 0;
@@ -70,75 +82,76 @@ namespace MonoGame.Testing
             //    File.OpenRead("../../../very big interlace.png"),
             //    GraphicsDevice);
 
-            //Task.Run(() =>
-            //{
-            //    try
+            Task.Run(() =>
+            {
+                try
+            {
+                var ww = new Stopwatch();
+
+                var http = new HttpClient();
+
+                for (int i = 0; i < 1; i++)
                 {
-                    var ww = new Stopwatch();
-
-                    var http = new HttpClient();
-
-                    for (int i = 0; i < 1; i++)
+                    using (var fs = new FileStream(
+                        //@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg",
+                        "../../../very big interlace.png",
+                        //"../../../very_big_interlace pog.jpg",
+                        FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 8))
+                    //using(var fs = await http.GetStreamAsync(
+                    //    "https://upload.wikimedia.org/wikipedia/commons/3/3d/LARGE_elevation.jpg"))
                     {
-                        using (var fs = new FileStream(
-                            @"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg",
-                            //"../../../very big interlace.png",
-                            //"../../../very_big_interlace pog.jpg",
-                            FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 8))
-                        //using(var fs = await http.GetStreamAsync(
-                        //    "https://upload.wikimedia.org/wikipedia/commons/3/3d/LARGE_elevation.jpg"))
+                        Thread.Sleep(1000);
+
+                        ww.Restart();
+                        var img = Image.Load<Color>(fs, onProgress: OnLoadProgress);
+
+                        _finished = true;
+                        ww.Stop();
+                        Console.WriteLine("Time: " + ww.Elapsed.TotalMilliseconds + "ms");
+
+                        Thread.Sleep(1000);
+
+                        Console.WriteLine(img.Width + "x" + img.Height);
+
+                        var lastRow = img.GetPixelRowSpan(img.Height - 1);
+                        Console.WriteLine(lastRow[0]);
+
+                        var newSize = new Size(img.Width, img.Height / 3);
+                        var procsed = img.Process(c => c.Resize(newSize, newSize, OnResizeProgress));
+
+                        _tex = Texture2D.FromImage(procsed, GraphicsDevice);
+
+                        if (false)
                         {
-                            Thread.Sleep(1000);
-
+                            Console.WriteLine("saving png...");
                             ww.Restart();
-                            var img = Image.Load<Color>(fs);
-
-                            _finished = true;
+                            img.Save("very big recoded.png", ImageFormat.Png);
                             ww.Stop();
-                            Console.WriteLine("Time: " + ww.Elapsed.TotalMilliseconds + "ms");
+                            Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
 
                             Thread.Sleep(1000);
 
-                            Console.WriteLine(img.Width + "x" + img.Height);
+                            Console.WriteLine("Reloading saved png...");
+                            var xd = Image.Load<Color>(File.OpenRead("very big recoded.png"));
+                            Console.WriteLine("Reloaded");
+                            //
+                            //var reLastRow = xd.GetPixelRowSpan(xd.Height - 1);
+                            //Console.WriteLine(reLastRow[0]);
 
-                            var lastRow = img.GetPixelRowSpan(img.Height - 1);
-                            Console.WriteLine(lastRow[0]);
-
-                            var procsed = img.Process(c => c.Resize(new Size(img.Width / 2, img.Height / 2)));
-
-                            _tex = Texture2D.FromImage(procsed, GraphicsDevice);
-
-                            if (false)
-                            {
-                                Console.WriteLine("saving png...");
-                                ww.Restart();
-                                img.Save("very big recoded.png", ImageFormat.Png);
-                                ww.Stop();
-                                Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
-
-                                Thread.Sleep(1000);
-
-                                Console.WriteLine("Reloading saved png...");
-                                var xd = Image.Load<Color>(File.OpenRead("very big recoded.png"));
-                                Console.WriteLine("Reloaded");
-                                //
-                                //var reLastRow = xd.GetPixelRowSpan(xd.Height - 1);
-                                //Console.WriteLine(reLastRow[0]);
-
-                                //Console.WriteLine("saving reloaded png...");
-                                //ww.Restart();
-                                //x.Save("very big reloaded.png", ImageFormat.Png);
-                                //ww.Stop();
-                                //Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
-                            }
+                            //Console.WriteLine("saving reloaded png...");
+                            //ww.Restart();
+                            //x.Save("very big reloaded.png", ImageFormat.Png);
+                            //ww.Stop();
+                            //Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
                         }
                     }
                 }
-            //    catch (Exception ex)
-            //    {
-            //        Console.WriteLine(ex);
-            //    }
-            //});
+            }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            });
         }
 
         protected override void LoadContent()

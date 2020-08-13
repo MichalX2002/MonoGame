@@ -11,7 +11,7 @@ namespace MonoGame.Imaging.Coders.Encoding
     /// </summary>
     public delegate void EncodeProgressCallback(
         ImageEncoderState encoderState,
-        double percentage,
+        float percentage,
         Rectangle? rectangle);
 
     public abstract class ImageEncoderState : ImageCoderState
@@ -43,7 +43,7 @@ namespace MonoGame.Imaging.Coders.Encoding
         {
         }
 
-        protected void InvokeProgress(double percentage, Rectangle? rectangle)
+        protected void InvokeProgress(float percentage, Rectangle? rectangle)
         {
             Progress?.Invoke(this, percentage, rectangle);
         }

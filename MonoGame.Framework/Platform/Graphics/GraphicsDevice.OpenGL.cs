@@ -9,8 +9,6 @@ using System.Runtime.CompilerServices;
 using System.Numerics;
 using System.Globalization;
 using System.Diagnostics;
-using System.ComponentModel;
-using MonoGame.Framework.Graphics.Indices;
 
 #if ANGLE
 using OpenTK.Graphics;

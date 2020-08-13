@@ -10,7 +10,7 @@ namespace MonoGame.Imaging.Coders.Decoding
     /// </summary>
     public delegate void DecodeProgressCallback(
         ImageDecoderState decoderState,
-        double percentage,
+        float percentage,
         Rectangle? rectangle);
 
     public abstract class ImageDecoderState : ImageCoderState
@@ -44,7 +44,7 @@ namespace MonoGame.Imaging.Coders.Decoding
         {
         }
 
-        protected void InvokeProgress(double percentage, Rectangle? rectangle)
+        protected void InvokeProgress(float percentage, Rectangle? rectangle)
         {
             Progress?.Invoke(this, percentage, rectangle);
         }

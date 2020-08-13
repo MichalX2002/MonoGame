@@ -2,66 +2,15 @@
 
 using System;
 using System.Diagnostics;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace StbSharp
 {
     public static unsafe partial class StbImageResize
     {
-        public enum WrapMode
-        {
-            Clamp = 1,
-            Reflect = 2,
-            Wrap = 3,
-            Zero = 4
-        }
-
-        public enum ColorSpace
-        {
-            Linear = 0,
-            SRgb = 1
-        }
-
-        public enum DataType
-        {
-            UInt8 = 0,
-            UInt16 = 1,
-            UInt32 = 2,
-            Float32 = 3
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public readonly struct Transform
-        {
-            public float ScaleX { get; }
-            public float ScaleY { get; }
-            public float ShiftX { get; }
-            public float ShiftY { get; }
-
-            public Vector2 Scale => new Vector2(ScaleX, ScaleY);
-            public Vector2 Shift => new Vector2(ShiftX, ShiftY);
-
-            public Transform(float scaleX, float scaleY, float shiftX, float shiftY)
-            {
-                ScaleX = scaleX;
-                ScaleY = scaleY;
-                ShiftX = shiftX;
-                ShiftY = shiftY;
-            }
-
-            public Transform(Vector2 scale, Vector2 shift) : this(scale.X, scale.Y, shift.X, shift.Y)
-            {
-            }
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct Contributors
-        {
-            public int n0;
-            public int n1;
-        }
+        private const int MAX_COLORSPACES = 2;
 
         private static ReadOnlySpan<byte> DataTypeSize => new byte[] {
             sizeof(byte),
@@ -69,8 +18,6 @@ namespace StbSharp
             sizeof(uint),
             sizeof(float)
         };
-
-        private const int MAX_COLORSPACES = 2;
 
         private static float[] SrgbByteToLinearFloat { get; } = new[]
         {
@@ -168,7 +115,6 @@ namespace StbSharp
                 else
                     return (float)((t - x) / scale);
             }
-
         }
 
         public static float SupportTrapezoid(float scale)
@@ -429,6 +375,7 @@ namespace StbSharp
             {
                 if (coefficientGroup[i] != 0)
                     break;
+
                 contributor.n1 = contributor.n0 + i - 1;
             }
         }
@@ -573,7 +520,8 @@ namespace StbSharp
             {
                 var dst = decode_buffer_ptr + GetDecodeBufferOffset(context);
 
-                if ((context.wrap_vertical == WrapMode.Zero) && ((y < 0) || (y >= context.input_h)))
+                if ((context.wrap_vertical == WrapMode.Zero) &&
+                    ((y < 0) || (y >= context.input_h)))
                 {
                     for (; x < max_x; x++)
                     {
@@ -764,7 +712,7 @@ namespace StbSharp
 
             Span<float> ring_buffer = GetRingBufferEntry(
                 context.ring_buffer, ring_buffer_index, context.RingBufferLength);
-            
+
             ring_buffer.Clear();
 
             return ring_buffer;
@@ -1193,6 +1141,10 @@ namespace StbSharp
                     }
                 }
             }
+
+            //Thread.Sleep(200);
+
+            //context.ReportProgress(0, null);
         }
 
         public static void ResampleVerticalUpsample(
@@ -1477,9 +1429,9 @@ namespace StbSharp
 
                     int output_row_start = context.ring_buffer_first_scanline * context.output_stride_bytes;
                     var output = context.output_data.Slice(output_row_start, context.output_stride_bytes);
-                    
+
                     EncodeScanline(
-                        context, context.output_w, output, ring_buffer_entry, 
+                        context, context.output_w, output, ring_buffer_entry,
                         context.channels, context.alpha_channel, decode);
                 }
 
@@ -1536,18 +1488,20 @@ namespace StbSharp
         }
 
         public static void Setup(
-            ref ResizeContext context, 
-            int inputW, int inputH, int outputW, int outputH, int channels)
+            ref ResizeContext context,
+            int inputW, int inputH, int outputW, int outputH, int channels,
+            StbImageResize.ResizeProgressCallback? onProgress)
         {
             context.input_w = inputW;
             context.input_h = inputH;
             context.output_w = outputW;
             context.output_h = outputH;
             context.channels = channels;
+            context.ProgressCallback = onProgress;
         }
 
         public static void CalculateTransform(
-            ref ResizeContext context, 
+            ref ResizeContext context,
             float s0, float t0, float s1, float t1, Transform? transform)
         {
             context.s0 = s0;
@@ -1678,11 +1632,11 @@ namespace StbSharp
             context.decode_buffer_pixels = context.input_w + context.horizontal_filter_pixel_margin * 2;
             context.ring_buffer_begin_index = -1;
 
-            context.horizontal_contributors = 
+            context.horizontal_contributors =
                 MemoryMarshal.Cast<byte, Contributors>(tmpMemory.Slice(0, context.horizontal_contributors_size));
             tmpMemory = tmpMemory.Slice(context.horizontal_contributors_size);
 
-            context.horizontal_coefficients = 
+            context.horizontal_coefficients =
                 MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.horizontal_coefficients_size));
             tmpMemory = tmpMemory.Slice(context.horizontal_coefficients_size);
 
@@ -1694,7 +1648,7 @@ namespace StbSharp
                 MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.vertical_coefficients_size));
             tmpMemory = tmpMemory.Slice(context.vertical_coefficients_size);
 
-            context.decode_buffer = 
+            context.decode_buffer =
                 MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.decode_buffer_size));
             tmpMemory = tmpMemory.Slice(context.decode_buffer_size);
 
@@ -1702,11 +1656,11 @@ namespace StbSharp
             {
                 context.horizontal_buffer = default;
 
-                context.ring_buffer = 
+                context.ring_buffer =
                     MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.ring_buffer_size));
                 tmpMemory = tmpMemory.Slice(context.ring_buffer_size);
 
-                context.encode_buffer = 
+                context.encode_buffer =
                     MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.encode_buffer_size));
                 //tmpMemory = tmpMemory.Slice(s.encode_buffer_size);
             }
@@ -1716,7 +1670,7 @@ namespace StbSharp
                     MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.horizontal_buffer_size));
                 tmpMemory = tmpMemory.Slice(context.horizontal_buffer_size);
 
-                context.ring_buffer = 
+                context.ring_buffer =
                     MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.ring_buffer_size));
                 //tmpMemory = tmpMemory.Slice(s.ring_buffer_size);
 
@@ -1748,10 +1702,11 @@ namespace StbSharp
             int channels, int alphaChannel, int flags, DataType datatype,
             Filter? horizontalFilter, Filter? verticalFilter,
             WrapMode horizontalWrap, WrapMode verticalWrap,
-            ColorSpace colorspace)
+            ColorSpace colorspace,
+            StbImageResize.ResizeProgressCallback? onProgress = null)
         {
             var context = new ResizeContext();
-            Setup(ref context, inputW, inputH, outputW, outputH, channels);
+            Setup(ref context, inputW, inputH, outputW, outputH, channels, onProgress);
             CalculateTransform(ref context, (float)s0, (float)t0, (float)s1, (float)t1, transform);
             ChooseFilters(ref context, horizontalFilter, verticalFilter);
 
@@ -1781,7 +1736,8 @@ namespace StbSharp
         public static int Resize(
             ReadOnlySpan<byte> inputPixels, int inputW, int inputH, int inputStrideInBytes,
             Span<byte> outputPixels, int outputW, int outputH, int outputStrideInBytes,
-            int numChannels)
+            int numChannels,
+            StbImageResize.ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH, inputStrideInBytes,
@@ -1790,13 +1746,15 @@ namespace StbSharp
                 numChannels, -1, 0, (int)DataType.UInt8,
                 null, null,
                 WrapMode.Clamp, WrapMode.Clamp,
-                ColorSpace.Linear);
+                ColorSpace.Linear,
+                onProgress);
         }
 
         public static int Resize(
             ReadOnlySpan<float> inputPixels, int inputW, int inputH, int inputStrideInBytes,
             Span<byte> outputPixels, int outputW, int outputH, int outputStrideInBytes,
-            int numChannels)
+            int numChannels,
+            StbImageResize.ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 MemoryMarshal.AsBytes(inputPixels), inputW, inputH, inputStrideInBytes,
@@ -1805,13 +1763,15 @@ namespace StbSharp
                 numChannels, -1, 0, DataType.Float32,
                 null, null,
                 WrapMode.Clamp, WrapMode.Clamp,
-                ColorSpace.Linear);
+                ColorSpace.Linear,
+                onProgress);
         }
 
         public static int ResizeSrgb(
             ReadOnlySpan<byte> inputPixels, int inputW, int inputH, int inputStrideInBytes,
             Span<byte> outputPixels, int outputW, int outputH, int outputStrideInBytes,
-            int numChannels, int alphaChannel, int flags)
+            int numChannels, int alphaChannel, int flags,
+            StbImageResize.ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH, inputStrideInBytes,
@@ -1820,14 +1780,16 @@ namespace StbSharp
                 numChannels, alphaChannel, flags, DataType.UInt8,
                 null, null,
                 WrapMode.Clamp, WrapMode.Clamp,
-                ColorSpace.SRgb);
+                ColorSpace.SRgb,
+                onProgress);
         }
 
         public static int ResizeSrgbEdgemode(
             ReadOnlySpan<byte> inputPixels, int inputW, int inputH, int inputStrideInBytes,
             Span<byte> outputPixels, int outputW, int outputH, int outputStrideInBytes,
             int numChannels, int alphaChannel, int flags,
-            WrapMode wrapmode)
+            WrapMode wrapmode,
+            StbImageResize.ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH, inputStrideInBytes,
@@ -1836,7 +1798,8 @@ namespace StbSharp
                 numChannels, alphaChannel, flags, DataType.UInt8,
                 null, null,
                 wrapmode, wrapmode,
-                ColorSpace.SRgb);
+                ColorSpace.SRgb,
+                onProgress);
         }
 
         public static int ResizeGeneric(
@@ -1844,7 +1807,8 @@ namespace StbSharp
             Span<byte> outputPixels, int outputW, int outputH, int outputStrideInBytes,
             int numChannels, int alphaChannel, int flags,
             WrapMode wrapmode, Filter filter,
-            ColorSpace colorspace)
+            ColorSpace colorspace,
+            StbImageResize.ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH,
@@ -1854,7 +1818,8 @@ namespace StbSharp
                 numChannels, alphaChannel, flags, DataType.UInt8,
                 filter, filter,
                 wrapmode, wrapmode,
-                colorspace);
+                colorspace,
+                onProgress);
         }
 
         [CLSCompliant(false)]
@@ -1863,7 +1828,8 @@ namespace StbSharp
             Span<ushort> outputPixels, int outputW, int outputH, int outputStrideInBytes,
             int numChannels, int alphaChannel, int flags,
             WrapMode wrapmode, Filter filter,
-            ColorSpace colorspace)
+            ColorSpace colorspace,
+            StbImageResize.ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 MemoryMarshal.AsBytes(inputPixels), inputW, inputH,
@@ -1873,7 +1839,8 @@ namespace StbSharp
                 numChannels, alphaChannel, flags, DataType.UInt16,
                 filter, filter,
                 wrapmode, wrapmode,
-                colorspace);
+                colorspace,
+                onProgress);
         }
 
         public static int ResizeGeneric(
@@ -1881,7 +1848,8 @@ namespace StbSharp
             Span<float> outputPixels, int outputW, int outputH, int outputStrideInBytes,
             int numChannels, int alphaChannel, int flags,
             WrapMode wrapmode, Filter filter,
-            ColorSpace colorspace)
+            ColorSpace colorspace,
+            StbImageResize.ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 MemoryMarshal.AsBytes(inputPixels), inputW, inputH, inputStrideInBytes,
@@ -1890,7 +1858,8 @@ namespace StbSharp
                 numChannels, alphaChannel, flags, DataType.Float32,
                 filter, filter,
                 wrapmode, wrapmode,
-                colorspace);
+                colorspace,
+                onProgress);
         }
 
         public static int Resize(
@@ -1899,7 +1868,8 @@ namespace StbSharp
             DataType datatype, int numChannels, int alphaChannel, int flags,
             WrapMode horizontalWrap, WrapMode verticalWrap,
             Filter horizontalFilter, Filter verticalFilter,
-            ColorSpace colorspace)
+            ColorSpace colorspace,
+            StbImageResize.ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH, inputStrideInBytes,
@@ -1908,7 +1878,8 @@ namespace StbSharp
                 numChannels, alphaChannel, flags, datatype,
                 horizontalFilter, verticalFilter,
                 horizontalWrap, verticalWrap,
-                colorspace);
+                colorspace,
+                onProgress);
         }
 
         public static int ResizeSubpixel(
@@ -1917,7 +1888,8 @@ namespace StbSharp
             DataType datatype, int numChannels, int alphaChannel, int flags,
             WrapMode horizontalWrap, WrapMode verticalWrap,
             Filter horizontalFilter, Filter verticalFilter,
-            ColorSpace colorspace, Transform? transform)
+            ColorSpace colorspace, Transform? transform,
+            StbImageResize.ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH, inputStrideInBytes,
@@ -1926,7 +1898,8 @@ namespace StbSharp
                 numChannels, alphaChannel, flags, datatype,
                 horizontalFilter, verticalFilter,
                 horizontalWrap, verticalWrap,
-                colorspace);
+                colorspace,
+                onProgress);
         }
 
         public static int ResizeRegion(
@@ -1936,7 +1909,8 @@ namespace StbSharp
             WrapMode horizontalWrap, WrapMode verticalWrap,
             Filter horizontalFilter, Filter verticalFilter,
             ColorSpace colorspace,
-            float s0, float t0, float s1, float t1)
+            float s0, float t0, float s1, float t1,
+            StbImageResize.ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH, inputStrideInBytes,
@@ -1945,7 +1919,8 @@ namespace StbSharp
                 numChannels, alphaChannel, flags, datatype,
                 horizontalFilter, verticalFilter,
                 horizontalWrap, verticalWrap,
-                colorspace);
+                colorspace,
+                onProgress);
         }
     }
 }

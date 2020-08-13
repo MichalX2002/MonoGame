@@ -9,14 +9,16 @@ namespace MonoGame.Imaging
     {
         public static void LoadPixels<TPixelFrom, TPixelTo>(
             ReadOnlySpan<TPixelFrom> pixels,
-            Rectangle sourceRectangle,
             Image<TPixelTo> destination,
+            Rectangle sourceRectangle,
             int? pixelStride = null)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
             if (destination == null)
                 throw new ArgumentNullException(nameof(destination));
+
+            ImagingArgumentGuard.AssertNonEmptyRectangle(sourceRectangle, nameof(sourceRectangle));
 
             int srcStride = pixelStride ?? sourceRectangle.Width;
 
@@ -50,7 +52,7 @@ namespace MonoGame.Imaging
             var image = new Image<TPixelTo>(sourceRectangle.Size);
             try
             {
-                LoadPixels(pixels, sourceRectangle, image, pixelStride);
+                LoadPixels(pixels, image, sourceRectangle, pixelStride);
             }
             catch
             {
