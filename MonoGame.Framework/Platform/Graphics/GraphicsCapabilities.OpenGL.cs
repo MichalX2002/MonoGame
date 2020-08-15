@@ -29,15 +29,15 @@ namespace MonoGame.Framework.Graphics
 
         private void PlatformInitialize(GraphicsDevice device)
         {
-            GL.GetInteger(GetPName.MaxTextureSize, out int maxTexture2DSize);
+            GL.GetInteger(GetParamName.MaxTextureSize, out int maxTexture2DSize);
             GL.CheckError();
             MaxTexture2DSize = maxTexture2DSize;
 
-            GL.GetInteger(GetPName.MaxTextureSize, out int maxTexture3DSize);
+            GL.GetInteger(GetParamName.MaxTextureSize, out int maxTexture3DSize);
             GL.CheckError();
             MaxTexture3DSize = maxTexture2DSize;
 
-            GL.GetInteger(GetPName.MaxTextureSize, out int maxTextureCubeSize);
+            GL.GetInteger(GetParamName.MaxTextureSize, out int maxTextureCubeSize);
             GL.CheckError();
             MaxTextureCubeSize = maxTextureCubeSize;
 

@@ -1,8 +1,8 @@
-using System;
+
 namespace MonoGame.Framework.Graphics
 {
-	public class EffectTechnique
-	{
+    public class EffectTechnique
+    {
         public EffectPassCollection Passes { get; private set; }
 
         public EffectAnnotationCollection Annotations { get; private set; }
@@ -19,14 +19,13 @@ namespace MonoGame.Framework.Graphics
             Passes = cloneSource.Passes.Clone(effect);
         }
 
-        internal EffectTechnique(Effect effect, string name, EffectPassCollection passes, EffectAnnotationCollection annotations)
+        internal EffectTechnique(
+            Effect effect, string name, EffectPassCollection passes, EffectAnnotationCollection annotations)
         {
             Name = name;
             Passes = passes;
             Annotations = annotations;
         }
     }
-
-
 }
 

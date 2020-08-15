@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using MonoGame.OpenAL;
 
 namespace MonoGame.Framework.Audio
@@ -68,19 +69,21 @@ namespace MonoGame.Framework.Audio
         {
         }
 
-        public unsafe void BufferData<T>(
+        public void BufferData<T>(
             ReadOnlySpan<T> data, ALFormat format, int sampleRate, int sampleAlignment = 0)
             where T : unmanaged
         {
             AssertNotDisposed();
 
-            if (!ALController.Instance.SupportsFloat32 && (format == ALFormat.MonoFloat32 || format == ALFormat.StereoFloat32))
+            var controller = ALController.Get();
+
+            if (!controller.SupportsFloat32 && (format == ALFormat.MonoFloat32 || format == ALFormat.StereoFloat32))
                 throw new InvalidOperationException("Float data is not supported by this OpenAL driver.");
 
-            if (!ALController.Instance.SupportsAdpcm && (format == ALFormat.MonoMSAdpcm || format == ALFormat.StereoMSAdpcm))
+            if (!controller.SupportsAdpcm && (format == ALFormat.MonoMSAdpcm || format == ALFormat.StereoMSAdpcm))
                 throw new InvalidOperationException("MS-ADPCM is not supported by this OpenAL driver.");
 
-            if (!ALController.Instance.SupportsIma4 && (format == ALFormat.MonoIma4 || format == ALFormat.StereoIma4))
+            if (!controller.SupportsIma4 && (format == ALFormat.MonoIma4 || format == ALFormat.StereoIma4))
                 throw new InvalidOperationException("IMA/ADPCM is not supported by this OpenAL driver.");
 
             if (BufferId != 0)
@@ -95,7 +98,7 @@ namespace MonoGame.Framework.Audio
                 ALHelper.CheckError("Failed to set buffer alignment.");
             }
 
-            AL.BufferData(BufferId, format, data, sampleRate);
+            AL.BufferData(BufferId, format, MemoryMarshal.AsBytes(data), sampleRate);
             ALHelper.CheckError("Failed to fill buffer.");
         }
 

@@ -28,12 +28,12 @@ namespace MonoGame.Framework.Audio
         public event Event<SoundBank>? Disposing;
 
         /// <summary>
-        /// Is true if the <see cref="SoundBank"/> has been disposed.
+        /// Gets whether the <see cref="SoundBank"/> has been disposed.
         /// </summary>
         public bool IsDisposed { get; private set; }
 
         /// <summary>
-        /// Is true if the <see cref="SoundBank"/> has any live <see cref="Cue"/>s in use.
+        /// Gets whether the <see cref="SoundBank"/> has any live <see cref="Cue"/>s in use.
         /// </summary>
         public bool IsInUse { get; private set; }
 
@@ -92,8 +92,10 @@ namespace MonoGame.Framework.Audio
                 _waveBanks = new WaveBank[numWaveBanks];
                 _waveBankNames = new string[numWaveBanks];
                 for (int i = 0; i < numWaveBanks; i++)
+                {
                     _waveBankNames[i] = System.Text.Encoding.UTF8
-                        .GetString(reader.ReadBytes(64)).Replace("\0", "");
+                        .GetString(reader.ReadBytes(64)).Replace("\0", "", StringComparison.Ordinal);
+                }
 
                 //parse cue name table
                 stream.Seek(cueNamesOffset, SeekOrigin.Begin);
@@ -138,7 +140,7 @@ namespace MonoGame.Framework.Audio
                             stream.Seek(oldPosition, SeekOrigin.Begin);
 
                             _entries.Add(
-                                cueNames[numSimpleCues + i], 
+                                cueNames[numSimpleCues + i],
                                 new XactCueEntry(new XactSound[] { sound }, _defaultProbability));
                         }
                         else
@@ -307,6 +309,23 @@ namespace MonoGame.Framework.Audio
         /// <summary>
         /// Disposes the <see cref="SoundBank"/>.
         /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
+                IsDisposed = true;
+                IsInUse = false;
+
+                if (disposing)
+                {
+                    Disposing?.Invoke(this);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Disposes the <see cref="SoundBank"/>.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
@@ -319,20 +338,6 @@ namespace MonoGame.Framework.Audio
         ~SoundBank()
         {
             Dispose(false);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (IsDisposed)
-                return;
-
-            IsDisposed = true;
-
-            if (disposing)
-            {
-                IsInUse = false;
-                Disposing?.Invoke(this);
-            }
         }
 
         private readonly struct XactCueEntry

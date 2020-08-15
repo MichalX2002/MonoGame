@@ -77,6 +77,10 @@ namespace MonoGame.Framework.Input
 
         #region Equals
 
+        public bool Equals(JoystickCapabilities other) => this == other;
+
+        public override bool Equals(object? obj) => obj is JoystickCapabilities other && Equals(other);
+
         public static bool operator ==(in JoystickCapabilities a, in JoystickCapabilities b)
         {
             return a.IsConnected == b.IsConnected
@@ -89,24 +93,29 @@ namespace MonoGame.Framework.Input
         
         public static bool operator !=(in JoystickCapabilities a, in JoystickCapabilities b) => !(a == b);
 
-        public bool Equals(JoystickCapabilities other) => this == other;
-        public override bool Equals(object obj) => obj is JoystickCapabilities other && Equals(other);
-
         #endregion
-
-        /// <summary>
-        /// Serves as a hash function for a <see cref="JoystickCapabilities"/> object.
-        /// </summary>
-        public override int GetHashCode() => Identifier.GetHashCode();
 
         /// <summary>
         /// Returns a string that represents the current <see cref="JoystickCapabilities"/>.
         /// </summary>
-        /// <returns>A <see cref="T:System.String"/> that represents the current <see cref="T:MonoGame.Framework.Input.JoystickCapabilities"/>.</returns>
+        /// <returns>A <see cref="string"/> that represents the current <see cref="JoystickCapabilities"/>.</returns>
         public override string ToString()
         {
-            return "[JoystickCapabilities: IsConnected=" + IsConnected + ", Identifier=" + Identifier + ", DisplayName=" + DisplayName + ", IsGamepad=" + IsGamepad + " , AxisCount=" + AxisCount + ", ButtonCount=" + ButtonCount + ", HatCount=" + HatCount + "]";
+            return 
+                "{JoystickCapabilities: " +
+                "IsConnected=" + IsConnected +
+                ", Identifier=" + Identifier + 
+                ", DisplayName=" + DisplayName + 
+                ", IsGamepad=" + IsGamepad + 
+                " , AxisCount=" + AxisCount + 
+                ", ButtonCount=" + ButtonCount + 
+                ", HatCount=" + HatCount + "}";
         }
+
+        /// <summary>
+        /// Serves as a hash function for a <see cref="JoystickCapabilities"/> object.
+        /// </summary>
+        public override int GetHashCode() => Identifier.GetHashCode(StringComparison.Ordinal);
     }
 }
 

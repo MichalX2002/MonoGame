@@ -49,7 +49,7 @@ namespace MonoGame.Tools.Pipeline
 
             var stringOk = Global.CheckString(textBox1.Text);
 
-            DefaultButton.Enabled = stringOk && (textBox1.Text != "");
+            DefaultButton.Enabled = stringOk && (!string.IsNullOrEmpty(textBox1.Text));
             label2.Text = !stringOk ? _errInvalidName : "";
 
             Text = textBox1.Text;

@@ -3,11 +3,10 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Collections.Generic;
 using System.Text;
-using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Audio
 {
@@ -17,27 +16,23 @@ namespace MonoGame.Framework.Audio
     public class AudioEngine : IDisposable
     {
         private readonly Dictionary<string, int> _categoryLookup = new Dictionary<string, int>();
-
-        private readonly RpcVariable[] _variables;
         private readonly Dictionary<string, int> _variableLookup = new Dictionary<string, int>();
 
+        private readonly RpcVariable[] _variables;
         private readonly RpcVariable[] _cueVariables;
 
         private readonly Stopwatch _stopwatch;
         private TimeSpan _lastUpdateTime;
 
-        private readonly ReverbSettings _reverbSettings;
+        private readonly ReverbSettings? _reverbSettings;
         private readonly RpcCurve[] _reverbCurves;
 
+        internal readonly RpcCurve[] RpcCurves;
         internal List<Cue> ActiveCues = new List<Cue>();
-
-        internal AudioCategory[] Categories { get; }
-
         internal Dictionary<string, WaveBank> Wavebanks = new Dictionary<string, WaveBank>();
 
-        internal readonly RpcCurve[] RpcCurves;
-
-        internal readonly object UpdateLock = new object();
+        internal object UpdateLock { get; } = new object();
+        internal AudioCategory[] Categories { get; }
 
         /// <summary>
         /// The current content version.
@@ -45,12 +40,12 @@ namespace MonoGame.Framework.Audio
         public const int ContentVersion = 39;
 
         /// <summary>
-        /// This event is triggered when the AudioEngine is disposed.
+        /// This event is triggered when the audio engine is disposed.
         /// </summary>
         public event Event<AudioEngine>? Disposed;
 
         /// <summary>
-        /// Is true if the AudioEngine has been disposed.
+        /// Gets whether the audio engine has been disposed.
         /// </summary>
         public bool IsDisposed { get; private set; }
 
@@ -77,10 +72,13 @@ namespace MonoGame.Framework.Audio
 
         /// <param name="settingsFile">Path to a XACT settings file.</param>
         /// <param name="lookAheadTime">
-        /// Determines how many milliseconds the engine will look ahead when determing when to transition to another sound.
+        /// Determines how many milliseconds the engine will look ahead when
+        /// determing when to transition to another sound.
         /// </param>
         /// <param name="rendererId">A string that specifies the audio renderer to use.</param>
-        /// <remarks>For the best results, use a lookAheadTime of 250 milliseconds or greater.</remarks>
+        /// <remarks>
+        /// For the best results, use a <paramref name="lookAheadTime"/> of 250 milliseconds or greater.
+        /// </remarks>
         public AudioEngine(string settingsFile, TimeSpan lookAheadTime, string rendererId)
         {
             if (string.IsNullOrEmpty(settingsFile))
@@ -271,17 +269,18 @@ namespace MonoGame.Framework.Audio
         /// <remarks>Must be called at least once per frame.</remarks>
         public void Update()
         {
-            var cur = _stopwatch.Elapsed;
-            var elapsed = cur - _lastUpdateTime;
-            _lastUpdateTime = cur;
-            var dt = (float)elapsed.TotalSeconds;
+            TimeSpan current = _stopwatch.Elapsed;
+            TimeSpan elapsed = current - _lastUpdateTime;
+            _lastUpdateTime = current;
+
+            float deltaTime = (float)elapsed.TotalSeconds;
 
             lock (UpdateLock)
             {
                 for (int i = 0; i < ActiveCues.Count;)
                 {
                     var cue = ActiveCues[i];
-                    cue.Update(dt);
+                    cue.Update(deltaTime);
 
                     if (cue.IsStopped || cue.IsDisposed)
                     {
@@ -360,6 +359,20 @@ namespace MonoGame.Framework.Audio
                 _variables[i].SetValue(value);
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
+                IsDisposed = true;
+
+                // TODO: Should we be forcing any active
+                // audio cues to stop here?
+
+                if (disposing)
+                    Disposed?.Invoke(this);
+            }
+        }
+
         /// <summary>
         /// Disposes the <see cref="AudioEngine"/>.
         /// </summary>
@@ -375,20 +388,6 @@ namespace MonoGame.Framework.Audio
         ~AudioEngine()
         {
             Dispose(false);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (IsDisposed)
-                return;
-
-            IsDisposed = true;
-
-            // TODO: Should we be forcing any active
-            // audio cues to stop here?
-
-            if (disposing)
-                Disposed?.Invoke(this);
         }
     }
 }

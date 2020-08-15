@@ -221,7 +221,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             for (int i = 0; i < sharedResources.Count; i++)
             {
                 var resource = sharedResources[i];
-                WriteObject<object>(resource);
+                WriteObject(resource);
             }
         }
 

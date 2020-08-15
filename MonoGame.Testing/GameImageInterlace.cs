@@ -33,9 +33,9 @@ namespace MonoGame.Testing
         private Image _image;
         private Texture2D _tex;
 
-        private int _lastRowFilled = 0;
-        private int _lastRow = 0;
-        private bool _finished = false;
+        private int _lastRowFilled;
+        private int _lastRow;
+        private bool _finished;
 
         public GameImageInterlace()
         {
@@ -85,68 +85,68 @@ namespace MonoGame.Testing
             Task.Run(() =>
             {
                 try
-            {
-                var ww = new Stopwatch();
-
-                var http = new HttpClient();
-
-                for (int i = 0; i < 1; i++)
                 {
-                    using (var fs = new FileStream(
-                        //@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg",
-                        "../../../very big interlace.png",
-                        //"../../../very_big_interlace pog.jpg",
-                        FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 8))
-                    //using(var fs = await http.GetStreamAsync(
-                    //    "https://upload.wikimedia.org/wikipedia/commons/3/3d/LARGE_elevation.jpg"))
+                    var ww = new Stopwatch();
+
+                    var http = new HttpClient();
+
+                    for (int i = 0; i < 1; i++)
                     {
-                        Thread.Sleep(1000);
-
-                        ww.Restart();
-                        var img = Image.Load<Color>(fs, onProgress: OnLoadProgress);
-
-                        _finished = true;
-                        ww.Stop();
-                        Console.WriteLine("Time: " + ww.Elapsed.TotalMilliseconds + "ms");
-
-                        Thread.Sleep(1000);
-
-                        Console.WriteLine(img.Width + "x" + img.Height);
-
-                        var lastRow = img.GetPixelRowSpan(img.Height - 1);
-                        Console.WriteLine(lastRow[0]);
-
-                        var newSize = new Size(img.Width, img.Height / 3);
-                        var procsed = img.Process(c => c.Resize(newSize, newSize, OnResizeProgress));
-
-                        _tex = Texture2D.FromImage(procsed, GraphicsDevice);
-
-                        if (false)
+                        using (var fs = new FileStream(
+                            //@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg",
+                            "../../../very big interlace.png",
+                            //"../../../very_big_interlace pog.jpg",
+                            FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 8))
+                        //using(var fs = await http.GetStreamAsync(
+                        //    "https://upload.wikimedia.org/wikipedia/commons/3/3d/LARGE_elevation.jpg"))
                         {
-                            Console.WriteLine("saving png...");
+                            Thread.Sleep(1000);
+
                             ww.Restart();
-                            img.Save("very big recoded.png", ImageFormat.Png);
+                            var img = Image.Load<Color>(fs, onProgress: OnLoadProgress);
+
+                            _finished = true;
                             ww.Stop();
-                            Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
+                            Console.WriteLine("Time: " + ww.Elapsed.TotalMilliseconds + "ms");
 
                             Thread.Sleep(1000);
 
-                            Console.WriteLine("Reloading saved png...");
-                            var xd = Image.Load<Color>(File.OpenRead("very big recoded.png"));
-                            Console.WriteLine("Reloaded");
-                            //
-                            //var reLastRow = xd.GetPixelRowSpan(xd.Height - 1);
-                            //Console.WriteLine(reLastRow[0]);
+                            Console.WriteLine(img.Width + "x" + img.Height);
 
-                            //Console.WriteLine("saving reloaded png...");
-                            //ww.Restart();
-                            //x.Save("very big reloaded.png", ImageFormat.Png);
-                            //ww.Stop();
-                            //Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
+                            var lastRow = img.GetPixelRowSpan(img.Height - 1);
+                            Console.WriteLine(lastRow[0]);
+
+                            var newSize = new Size(img.Width, img.Height / 3);
+                            var procsed = img.Process(c => c.Resize(newSize, newSize, OnResizeProgress));
+
+                            _tex = Texture2D.FromImage(procsed, GraphicsDevice);
+
+                            if (false)
+                            {
+                                Console.WriteLine("saving png...");
+                                ww.Restart();
+                                img.Save("very big recoded.png", ImageFormat.Png);
+                                ww.Stop();
+                                Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
+
+                                Thread.Sleep(1000);
+
+                                Console.WriteLine("Reloading saved png...");
+                                var xd = Image.Load<Color>(File.OpenRead("very big recoded.png"));
+                                Console.WriteLine("Reloaded");
+                                //
+                                //var reLastRow = xd.GetPixelRowSpan(xd.Height - 1);
+                                //Console.WriteLine(reLastRow[0]);
+
+                                //Console.WriteLine("saving reloaded png...");
+                                //ww.Restart();
+                                //x.Save("very big reloaded.png", ImageFormat.Png);
+                                //ww.Stop();
+                                //Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
+                            }
                         }
                     }
                 }
-            }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex);

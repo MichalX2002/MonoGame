@@ -18,12 +18,19 @@ namespace MonoGame.Framework.Content
         /// </summary>
         public static GraphicsDevice GetGraphicsDevice(this ContentReader contentReader)
         {
+            if (contentReader == null)
+                throw new ArgumentNullException(nameof(contentReader));
+
             var provider = contentReader.ContentManager.ServiceProvider;
             var service = provider.GetService<IGraphicsDeviceService>();
             if (service == null)
                 throw new InvalidOperationException(FrameworkResources.NoGraphicsDeviceService);
 
-            return service.GraphicsDevice;
+            var device = service.GraphicsDevice;
+            if(device == null)
+                throw new InvalidOperationException(FrameworkResources.NoGraphicsDeviceInService);
+
+            return device;
         }
     }
 }

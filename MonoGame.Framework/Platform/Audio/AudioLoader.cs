@@ -329,8 +329,6 @@ namespace MonoGame.Framework.Audio
 #if !ANDROID
             if (Vector.IsHardwareAccelerated)
             {
-                // TODO: consider using SSE or AVX2 directly, which may be a bit faster
-
                 var vMax = new Vector<float>(short.MaxValue);
                 var vMin = new Vector<float>(short.MinValue);
                 var vHalf = new Vector<float>(0.5f);

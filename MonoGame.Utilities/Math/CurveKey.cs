@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.ComponentModel;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework
@@ -155,6 +154,26 @@ namespace MonoGame.Framework
         public override int GetHashCode()
         {
             return HashCode.Combine(Position, Value, TangentIn, TangentOut, Continuity);
+        }
+
+        public static bool operator <(CurveKey left, CurveKey right)
+        {
+            return left is null ? right is object : left.CompareTo(right) < 0;
+        }
+
+        public static bool operator <=(CurveKey left, CurveKey right)
+        {
+            return left is null || left.CompareTo(right) <= 0;
+        }
+
+        public static bool operator >(CurveKey left, CurveKey right)
+        {
+            return left is object && left.CompareTo(right) > 0;
+        }
+
+        public static bool operator >=(CurveKey left, CurveKey right)
+        {
+            return left is null ? right is null : left.CompareTo(right) >= 0;
         }
     }
 }

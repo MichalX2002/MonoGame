@@ -16,14 +16,14 @@ namespace MonoGame.Framework.Audio
         public delegate void BufferReadyDelegate(Microphone source, int sampleCount);
 
         private static List<Microphone> _allMicrophones = new List<Microphone>();
-        private static ReadOnlyCollection<Microphone> _allMicrophonesRead;
+        private static ReadOnlyCollection<Microphone>? _allMicrophonesRead;
 
         private TimeSpan _bufferDuration;
 
         /// <summary>
         /// Returns the default microphone.
         /// </summary>
-        public static Microphone Default { get; internal set; }
+        public static Microphone? Default { get; internal set; }
 
         /// <summary>
         /// Returns all available microphones.

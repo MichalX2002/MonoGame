@@ -26,8 +26,8 @@ namespace MonoGame.Framework.Media
             set
             {
                 if (value < 0f || value > 1f)
-                    throw new ArgumentOutOfRangeException();
-                
+                    throw new ArgumentOutOfRangeException(nameof(value));
+
                 if (_masterVolume != value)
                 {
                     _masterVolume = value;
@@ -42,20 +42,17 @@ namespace MonoGame.Framework.Media
         /// The amount of time samples indicates the update rate.
         /// </para>
         /// </summary>
-        public static ReadOnlyMemory<TimeSpan> UpdateTiming
-        {
-            get =>
-#if DIRECTX || DESKTOPGL
-                OggStreamer.Instance.UpdateTiming;
-#else
-                ReadOnlyMemory<TimeSpan>.Empty;
-#endif
-        }
+        public static ReadOnlyMemory<TimeSpan> UpdateTiming => PlatformGetUpdateTiming();
 
         /// <summary>
-        /// Occurs when the <see cref="Song"/> stops though not when the it loops.
+        /// Occurs when the <see cref="Song"/> stops though not when it loops.
         /// </summary>
         public event Event<Song>? Finished;
+
+        /// <summary>
+        /// Occurs when the <see cref="Song"/> loops.
+        /// </summary>
+        public event Event<Song>? Looped;
 
         /// <summary>
         /// Gets whether the <see cref="Song"/> is disposed.
@@ -127,7 +124,7 @@ namespace MonoGame.Framework.Media
             set
             {
                 AssertNotDisposed();
-                PlatformSetPitch(value);
+                PlatformSetPitch(MathHelper.Clamp(value, 0, 2));
             }
         }
 
@@ -161,8 +158,12 @@ namespace MonoGame.Framework.Media
         /// <param name="name">The name for the song.</param>
         public static Song FromStream(Stream stream, bool leaveOpen, string name)
         {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+
             if (!stream.CanSeek)
                 throw new ArgumentException("The stream is not seekable.");
+
             return new Song(stream, leaveOpen, name);
         }
 

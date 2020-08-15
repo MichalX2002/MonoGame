@@ -13,6 +13,8 @@ namespace MonoGame.Framework
 
         internal const string NoGraphicsDeviceService = "The graphics device service is missing.";
 
+        internal const string NoGraphicsDeviceInService = "The graphics device service is missing a graphics device.";
+
         internal const string OffThreadSpanNotSupported =
             "The method (which uses a Span<T> parameter) can only be called on the main thread on this platform. " +
             "Use a Memory<T> overload to work with the resource from outside the main thread.";

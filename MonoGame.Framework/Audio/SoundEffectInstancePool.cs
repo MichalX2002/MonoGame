@@ -18,7 +18,7 @@ namespace MonoGame.Framework.Audio
         {
             // Reduce garbage generation by allocating enough capacity for
             // the maximum playing instances or at least some reasonable value.
-            int maxInstances = Math.Min(SoundEffect.MAX_PLAYING_INSTANCES, 1024);
+            int maxInstances = Math.Min(SoundEffect.MaxPlayingInstances, 1024);
 
             _playingInstances = new List<SoundEffectInstance>(maxInstances);
             _pooledInstances = new List<SoundEffectInstance>(maxInstances);
@@ -33,7 +33,7 @@ namespace MonoGame.Framework.Audio
             get
             {
                 lock (SyncRoot)
-                    return _playingInstances.Count < SoundEffect.MAX_PLAYING_INSTANCES;
+                    return _playingInstances.Count < SoundEffect.MaxPlayingInstances;
             }
         }
 

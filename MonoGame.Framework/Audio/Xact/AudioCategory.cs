@@ -119,7 +119,8 @@ namespace MonoGame.Framework.Audio
         public void SetVolume(float volume)
         {
             if (volume < 0)
-                throw new ArgumentOutOfRangeException("The volume must be positive.");
+                throw new ArgumentOutOfRangeException(
+                    nameof(volume), "The volume value must be positive.");
 
             // Updating all the sounds in a category can be
             // very expensive... so avoid it if we can.

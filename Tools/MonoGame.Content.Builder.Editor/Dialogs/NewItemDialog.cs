@@ -75,7 +75,7 @@ namespace MonoGame.Tools.Pipeline
             else
             {
                 labelError.Text = "";
-                DefaultButton.Enabled = (textBox1.Text != "") && (list1.SelectedIndex >= 0);
+                DefaultButton.Enabled = (!string.IsNullOrEmpty(textBox1.Text)) && (list1.SelectedIndex >= 0);
             }
         }
 

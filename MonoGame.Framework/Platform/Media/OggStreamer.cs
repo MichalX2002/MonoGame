@@ -1,38 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using MonoGame.Framework.Audio;
+using MonoGame.Framework.Utilities;
 using MonoGame.OpenAL;
 
 namespace MonoGame.Framework.Media
 {
+    // TODO: split up into a streamer base that supports multiple formats
+
     internal class OggStreamer : IDisposable
     {
         public const float DefaultUpdateRate = 16;
-        public const int DefaultBufferSize = 8000;
+        public const int DefaultBufferSize = 8192;
         public const int MaxQueuedBuffers = 4;
-
-        internal static object SingletonMutex { get; } = new object();
 
         internal object IterationMutex { get; } = new object();
         private object FillMutex { get; } = new object();
 
-        private static OggStreamer _instance;
         private float[] _readBuffer;
-        private short[] _castBuffer;
+        private short[]? _castBuffer;
         internal HashSet<OggStream> _streams;
-        private TimeSpan[] _threadTiming;
+        private TimeSpan[] _updateTiming;
         private float _updateRate;
 
         private readonly Thread _thread;
         private bool _pendingFinish;
         private volatile bool _cancelled;
 
+        public ALController Controller { get; }
         public int BufferSize { get; }
         public TimeSpan UpdateDelay { get; private set; }
 
-        public ReadOnlyMemory<TimeSpan> UpdateTiming => _threadTiming.AsMemory();
+        public ReadOnlyMemory<TimeSpan> UpdateTiming => _updateTiming.AsMemory();
 
         public float UpdateRate
         {
@@ -44,37 +46,18 @@ namespace MonoGame.Framework.Media
             }
         }
 
-        public static OggStreamer Instance
-        {
-            get
-            {
-                lock (SingletonMutex)
-                {
-                    if (_instance == null)
-                        throw new InvalidOperationException("No instance running.");
-                    return _instance;
-                }
-            }
-        }
-
         public OggStreamer(int bufferSize = DefaultBufferSize, float updateRate = DefaultUpdateRate)
         {
-            lock (SingletonMutex)
-            {
-                if (_instance != null)
-                    throw new InvalidOperationException("An instance has already been created.");
-                _instance = this;
-            }
+            Controller = ALController.Get();
 
             BufferSize = bufferSize;
             UpdateRate = updateRate;
 
-            _threadTiming = new TimeSpan[(int)(UpdateRate < 1 ? 1 : UpdateRate)];
-            
+            _updateTiming = new TimeSpan[(int)Math.Max(1, UpdateRate)];
             _streams = new HashSet<OggStream>();
 
             _readBuffer = new float[BufferSize];
-            if (!ALController.Instance.SupportsFloat32)
+            if (!Controller.SupportsFloat32)
                 _castBuffer = new short[BufferSize];
 
             _thread = new Thread(SongStreamingThread)
@@ -83,22 +66,6 @@ namespace MonoGame.Framework.Media
                 Priority = ThreadPriority.BelowNormal
             };
             _thread.Start();
-        }
-
-        public void Dispose()
-        {
-            lock (SingletonMutex)
-            {
-                Debug.Assert(_instance == this,
-                    "A new instance was assigned without locking the singleton mutex.");
-
-                _cancelled = true;
-                lock (IterationMutex)
-                    _streams.Clear();
-
-                _thread.Join(1000);
-                _instance = null;
-            }
         }
 
         internal bool AddStream(OggStream stream)
@@ -113,16 +80,19 @@ namespace MonoGame.Framework.Media
                 return _streams.Remove(stream);
         }
 
-        public bool TryFillBuffer(OggStream stream, out ALBuffer buffer)
+        public bool TryFillBuffer(OggStream stream, [MaybeNullWhen(false)] out ALBuffer buffer)
         {
             lock (FillMutex)
             {
                 var reader = stream.Reader;
+                if (reader == null)
+                    throw new ObjectDisposedException(stream.GetType().Name);
+
                 int readSamples = reader.ReadSamples(_readBuffer);
                 if (readSamples > 0)
                 {
                     var channels = (AudioChannels)reader.Channels;
-                    bool useFloat = ALController.Instance.SupportsFloat32;
+                    bool useFloat = Controller.SupportsFloat32;
                     ALFormat format = ALHelper.GetALFormat(channels, useFloat);
 
                     Span<float> dataSpan = _readBuffer.AsSpan(0, readSamples);
@@ -151,56 +121,68 @@ namespace MonoGame.Framework.Media
 
             while (!_cancelled)
             {
-                var sleepTime = UpdateDelay - watch.Elapsed;
-                if (sleepTime.TotalMilliseconds > 0)
-                    Thread.Sleep(sleepTime);
+                long sleepTicks = UpdateDelay.Ticks - watch.ElapsedTicks;
+                if (sleepTicks > TimeSpan.TicksPerMillisecond)
+                {
+                    int sleepMillis = (int)(sleepTicks / TimeSpan.TicksPerMillisecond);
+                    ThreadHelper.Instance.Sleep(watch, sleepMillis);
+                }
 
                 if (_cancelled)
                     break;
 
                 watch.Restart();
 
-                localStreams.Clear();
-                lock (IterationMutex)
+                if (_streams.Count > 0)
                 {
-                    foreach (var stream in _streams)
-                        localStreams.Add(stream);
-                }
-
-                foreach (OggStream stream in localStreams)
-                {
-                    lock (stream.ReadMutex)
+                    lock (IterationMutex)
                     {
-                        lock (IterationMutex)
-                            if (!_streams.Contains(stream))
-                                continue;
-
-                        if (!FillStream(stream))
-                            continue;
+                        foreach (var stream in _streams)
+                            localStreams.Add(stream);
                     }
 
-                    lock (stream.StopMutex)
+                    foreach (OggStream stream in localStreams)
                     {
-                        if (stream.IsPreparing)
-                            continue;
+                        lock (stream.ReadMutex)
+                        {
+                            lock (IterationMutex)
+                                if (!_streams.Contains(stream))
+                                    continue;
 
-                        lock (IterationMutex)
-                            if (!_streams.Contains(stream))
+                            if (!FillStream(stream))
+                                continue;
+                        }
+
+                        lock (stream.StopMutex)
+                        {
+                            if (stream.IsPreparing)
                                 continue;
 
-                        var state = stream.GetState();
-                        if (state == ALSourceState.Stopped)
-                        {
-                            AL.SourcePlay(stream.SourceId);
-                            ALHelper.CheckError("Failed to play after fill.");
+                            lock (IterationMutex)
+                                if (!_streams.Contains(stream))
+                                    continue;
+
+                            var state = stream.GetState();
+                            if (state == ALSourceState.Stopped)
+                            {
+                                AL.SourcePlay(stream.SourceId);
+                                ALHelper.CheckError("Failed to play after fill.");
+                            }
                         }
                     }
-                }
-                watch.Stop();
+                    localStreams.Clear();
 
-                // shift all elements forward and update the first element
-                Array.Copy(_threadTiming, 0, _threadTiming, destinationIndex: 1, _threadTiming.Length - 1);
-                _threadTiming[0] = watch.Elapsed;
+                    // Shift all elements forward, clipping off the last value...
+                    Array.Copy(_updateTiming, 0, _updateTiming, destinationIndex: 1, _updateTiming.Length - 1);
+                    // ... and set the first (now empty) element.
+                    _updateTiming[0] = watch.Elapsed;
+                }
+                else
+                {
+                    Array.Clear(_updateTiming, 0, _updateTiming.Length);
+                }
+
+                watch.Stop();
             }
         }
 
@@ -227,7 +209,7 @@ namespace MonoGame.Framework.Media
             int buffersFilled = 0;
             for (int i = 0; i < requested; i++)
             {
-                if (TryFillBuffer(stream, out ALBuffer buffer))
+                if (TryFillBuffer(stream, out var buffer))
                 {
                     stream.QueueBuffer(buffer);
                     buffersFilled++;
@@ -236,12 +218,11 @@ namespace MonoGame.Framework.Media
                 {
                     if (stream.IsLooped)
                     {
-                        // closing and opening the stream is a bit expensive
-                        //stream.Close();
-                        //stream.Open();
-
-                        // we don't support non-seekable streams anyway
-                        stream.Reader.SamplePosition = 0;
+                        lock (stream.ReadMutex)
+                        {
+                            if (stream.Reader != null)
+                                stream.Reader.SamplePosition = 0;
+                        }
                     }
                     else
                     {
@@ -268,6 +249,16 @@ namespace MonoGame.Framework.Media
                 return false;
             }
             return true;
+        }
+
+        public void Dispose()
+        {
+            _cancelled = true;
+
+            lock (IterationMutex)
+                _streams.Clear();
+
+            _thread.Join(1000);
         }
     }
 }

@@ -19,22 +19,20 @@ namespace MonoGame.Framework.Audio
 {
     internal sealed class ALController : IDisposable
     {
-        private static readonly object _initMutex = new object();
-        private static ALController _instance;
+        private static object InitMutex { get; } = new object();
 
-        private static bool _closed;
         private IntPtr _context;
         private uint[] _allSources;
 
 #if DESKTOPGL || DIRECTX || ANGLE
         // MacOS & Linux share a limit of 256.
-        internal const int MAX_NUMBER_OF_SOURCES = 256;
+        internal const int MaxNumberOfSources = 256;
 #elif IOS
         // Reference: http://stackoverflow.com/questions/3894044/maximum-number-of-openal-sound-buffers-on-iphone
-        internal const int MAX_NUMBER_OF_SOURCES = 32;
+        internal const int MaxNumberOfSources = 32;
 #elif ANDROID
         // Set to the same as OpenAL on iOS
-        internal const int MAX_NUMBER_OF_SOURCES = 32;
+        internal const int MaxNumberOfSources = 32;
 #endif
 
 #if ANDROID
@@ -43,9 +41,6 @@ namespace MonoGame.Framework.Audio
         private const int DEFAULT_UPDATE_BUFFER_COUNT = 2;
 #endif
 
-#if DESKTOPGL || DIRECTX || ANDROID
-        private static OggStreamer _oggstreamer;
-#endif
 
         private Queue<uint> _availableSources;
         private HashSet<uint> _sourcesInUse;
@@ -57,22 +52,11 @@ namespace MonoGame.Framework.Audio
         public bool SupportsFloat32 { get; private set; }
         public uint Filter { get; private set; }
 
+        public OggStreamer Streamer { get; private set; }
         public IntPtr Device { get; private set; }
         public EffectsExtension Efx { get; }
 
-        public static ALController Instance
-        {
-            get
-            {
-                if (_closed)
-                    throw new ObjectDisposedException(nameof(ALController));
-
-                if (_instance == null)
-                    throw new AudioHardwareException("OpenAL context has failed to initialize.");
-
-                return _instance;
-            }
-        }
+        public static ALController? Instance { get; private set; }
 
         /// <summary>
         /// Sets up the hardware resources used by the controller.
@@ -94,7 +78,7 @@ namespace MonoGame.Framework.Audio
 
             // We have hardware here and it is ready
 
-            _allSources = new uint[MAX_NUMBER_OF_SOURCES];
+            _allSources = new uint[MaxNumberOfSources];
             AL.GenSources(_allSources);
             ALHelper.CheckError("Failed to generate sources.");
 
@@ -106,14 +90,28 @@ namespace MonoGame.Framework.Audio
             _sourcesInUse = new HashSet<uint>();
         }
 
-        public static void EnsureInitialized()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <exception cref="AudioHardwareException">Instance is not initialized.</exception>
+        /// <returns></returns>
+        public static ALController Get()
         {
-            if (_instance != null)
+            if (Instance == null)
+                throw new AudioHardwareException("OpenAL controller is not initialized.");
+
+            return Instance;
+        }
+
+        public static void InitializeInstance()
+        {
+            if (Instance != null)
                 return;
 
             try
             {
-                _instance = new ALController();
+                Instance = new ALController();
+                Instance.Streamer = new OggStreamer();
             }
             catch (DllNotFoundException)
             {
@@ -127,10 +125,6 @@ namespace MonoGame.Framework.Audio
             {
                 throw new AudioHardwareException("Failed to initialize OpenAL.", ex);
             }
-
-#if DESKTOPGL || DIRECTX || ANDROID
-            _oggstreamer = new OggStreamer();
-#endif
         }
 
         /// <summary>
@@ -142,7 +136,7 @@ namespace MonoGame.Framework.Audio
         /// <returns>True if the sound controller was setup, and false if not.</returns>
         private bool Open()
         {
-            lock (_initMutex)
+            lock (InitMutex)
             {
                 try
                 {
@@ -304,11 +298,10 @@ namespace MonoGame.Framework.Audio
 
         public static void DestroyInstance()
         {
-            if (_instance != null)
+            if (Instance != null)
             {
-                _instance.Dispose();
-                _closed = true;
-                _instance = null;
+                Instance.Dispose();
+                Instance = null!;
             }
         }
 
@@ -372,16 +365,7 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Dispose of the OpenALSoundCOntroller.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Dispose of the OpenALSoundCOntroller.
+        /// Disposes the <see cref="ALController"/>.
         /// </summary>
         /// <param name="disposing">If true, the managed resources are to be disposed.</param>
         private void Dispose(bool disposing)
@@ -390,10 +374,7 @@ namespace MonoGame.Framework.Audio
             {
                 if (disposing)
                 {
-#if DESKTOPGL || DIRECTX
-                    if (_oggstreamer != null)
-                        _oggstreamer.Dispose();
-#endif
+                    Streamer.Dispose();
 
                     if (Filter != 0 && Efx.IsAvailable)
                         Efx.DeleteFilter(Filter);
@@ -408,6 +389,15 @@ namespace MonoGame.Framework.Audio
                 }
                 _isDisposed = true;
             }
+        }
+
+        /// <summary>
+        /// Disposes the <see cref="ALController"/>.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         ~ALController()

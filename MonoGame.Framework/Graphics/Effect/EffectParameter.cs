@@ -261,12 +261,25 @@ namespace MonoGame.Framework.Graphics
             return new Quaternion(vecInfo[0], vecInfo[1], vecInfo[2], vecInfo[3]);
         }
 
-        /*
-        public Quaternion[] GetValueQuaternionArray ()
+        public Quaternion[] GetValueQuaternionArray()
         {
-            throw new NotImplementedException();
+            if (ParameterClass != EffectParameterClass.Vector ||
+                ParameterType != EffectParameterType.Single)
+                throw new InvalidCastException();
+
+            if (Elements != null && Elements.Count > 0)
+            {
+                var result = new Quaternion[Elements.Count];
+                for (int i = 0; i < Elements.Count; i++)
+                {
+                    float[] v = Elements[i].GetValueSingleArray();
+                    result[i] = new Quaternion(v[0], v[1], v[2], v[3]);
+                }
+                return result;
+            }
+
+            return null;
         }
-        */
 
         public float GetValueSingle()
         {
@@ -458,12 +471,13 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        /*
-        public void SetValue (bool[] value)
+        public void SetValue(ReadOnlySpan<bool> value)
         {
-            throw new NotImplementedException();
+            for (var i = 0; i < value.Length; i++)
+                Elements[i].SetValue(value[i]);
+
+            StateKey = unchecked(NextStateKey++);
         }
-        */
 
         public void SetValue(int value)
         {
@@ -480,7 +494,7 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValue(int[] value)
+        public void SetValue(ReadOnlySpan<int> value)
         {
             for (var i = 0; i < value.Length; i++)
                 Elements[i].SetValue(value[i]);
@@ -490,7 +504,7 @@ namespace MonoGame.Framework.Graphics
 
         public void SetValue(in Matrix4x4 value)
         {
-            if (ParameterClass != EffectParameterClass.Matrix || 
+            if (ParameterClass != EffectParameterClass.Matrix ||
                 ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
 
@@ -583,6 +597,14 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
+        public void SetValue(ReadOnlySpan<Matrix4x4> value)
+        {
+            for (var i = 0; i < value.Length; i++)
+                Elements[i].SetValue(value[i]);
+
+            StateKey = unchecked(NextStateKey++);
+        }
+
         public void SetValueTranspose(in Matrix4x4 value)
         {
             if (ParameterClass != EffectParameterClass.Matrix ||
@@ -660,123 +682,15 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValue(ReadOnlySpan<Matrix4x4> values)
+        public void SetValueTranspose(ReadOnlySpan<Matrix4x4> value)
         {
-            if (ParameterClass != EffectParameterClass.Matrix ||
-                ParameterType != EffectParameterType.Single)
-                throw new InvalidCastException();
-
-            if (RowCount == 4 && ColumnCount == 4)
-            {
-                for (var i = 0; i < values.Length; i++)
-                {
-                    var fData = (float[])Elements[i].Data;
-
-                    fData[0] = values[i].M11;
-                    fData[1] = values[i].M21;
-                    fData[2] = values[i].M31;
-                    fData[3] = values[i].M41;
-
-                    fData[4] = values[i].M12;
-                    fData[5] = values[i].M22;
-                    fData[6] = values[i].M32;
-                    fData[7] = values[i].M42;
-
-                    fData[8] = values[i].M13;
-                    fData[9] = values[i].M23;
-                    fData[10] = values[i].M33;
-                    fData[11] = values[i].M43;
-
-                    fData[12] = values[i].M14;
-                    fData[13] = values[i].M24;
-                    fData[14] = values[i].M34;
-                    fData[15] = values[i].M44;
-                }
-            }
-            else if (RowCount == 4 && ColumnCount == 3)
-            {
-                for (var i = 0; i < values.Length; i++)
-                {
-                    var fData = (float[])Elements[i].Data;
-
-                    fData[0] = values[i].M11;
-                    fData[1] = values[i].M21;
-                    fData[2] = values[i].M31;
-                    fData[3] = values[i].M41;
-
-                    fData[4] = values[i].M12;
-                    fData[5] = values[i].M22;
-                    fData[6] = values[i].M32;
-                    fData[7] = values[i].M42;
-
-                    fData[8] = values[i].M13;
-                    fData[9] = values[i].M23;
-                    fData[10] = values[i].M33;
-                    fData[11] = values[i].M43;
-                }
-            }
-            else if (RowCount == 3 && ColumnCount == 4)
-            {
-                for (var i = 0; i < values.Length; i++)
-                {
-                    var fData = (float[])Elements[i].Data;
-
-                    fData[0] = values[i].M11;
-                    fData[1] = values[i].M21;
-                    fData[2] = values[i].M31;
-
-                    fData[3] = values[i].M12;
-                    fData[4] = values[i].M22;
-                    fData[5] = values[i].M32;
-
-                    fData[6] = values[i].M13;
-                    fData[7] = values[i].M23;
-                    fData[8] = values[i].M33;
-
-                    fData[9] = values[i].M14;
-                    fData[10] = values[i].M24;
-                    fData[11] = values[i].M34;
-                }
-            }
-            else if (RowCount == 3 && ColumnCount == 3)
-            {
-                for (var i = 0; i < values.Length; i++)
-                {
-                    var fData = (float[])Elements[i].Data;
-
-                    fData[0] = values[i].M11;
-                    fData[1] = values[i].M21;
-                    fData[2] = values[i].M31;
-
-                    fData[3] = values[i].M12;
-                    fData[4] = values[i].M22;
-                    fData[5] = values[i].M32;
-
-                    fData[6] = values[i].M13;
-                    fData[7] = values[i].M23;
-                    fData[8] = values[i].M33;
-                }
-            }
-            else if (RowCount == 3 && ColumnCount == 2)
-            {
-                for (var i = 0; i < values.Length; i++)
-                {
-                    var fData = (float[])Elements[i].Data;
-
-                    fData[0] = values[i].M11;
-                    fData[1] = values[i].M21;
-                    fData[2] = values[i].M31;
-
-                    fData[3] = values[i].M12;
-                    fData[4] = values[i].M22;
-                    fData[5] = values[i].M32;
-                }
-            }
+            for (var i = 0; i < value.Length; i++)
+                Elements[i].SetValueTranspose(value[i]);
 
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValue(in Quaternion value)
+        public void SetValue(Quaternion value)
         {
             if (ParameterClass != EffectParameterClass.Vector ||
                 ParameterType != EffectParameterType.Single)
@@ -791,17 +705,19 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        /*
-        public void SetValue (Quaternion[] value)
+        public void SetValue(ReadOnlySpan<Quaternion> value)
         {
-            throw new NotImplementedException();
+            for (var i = 0; i < value.Length; i++)
+                Elements[i].SetValue(value[i]);
+
+            StateKey = unchecked(NextStateKey++);
         }
-        */
 
         public void SetValue(float value)
         {
             if (ParameterType != EffectParameterType.Single)
                 throw new InvalidCastException();
+
             ((float[])Data)[0] = value;
             StateKey = unchecked(NextStateKey++);
         }
@@ -814,13 +730,6 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        /*
-        public void SetValue (string value)
-        {
-            throw new NotImplementedException();
-        }
-        */
-
         public void SetValue(Texture value)
         {
             if (ParameterType != EffectParameterType.Texture &&
@@ -828,9 +737,7 @@ namespace MonoGame.Framework.Graphics
                 ParameterType != EffectParameterType.Texture2D &&
                 ParameterType != EffectParameterType.Texture3D &&
                 ParameterType != EffectParameterType.TextureCube)
-            {
                 throw new InvalidCastException();
-            }
 
             Data = value;
             StateKey = unchecked(NextStateKey++);
@@ -848,10 +755,11 @@ namespace MonoGame.Framework.Graphics
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValue(Vector2[] value)
+        public void SetValue(ReadOnlySpan<Vector2> value)
         {
             for (var i = 0; i < value.Length; i++)
                 Elements[i].SetValue(value[i]);
+
             StateKey = unchecked(NextStateKey++);
         }
 
@@ -865,13 +773,15 @@ namespace MonoGame.Framework.Graphics
             fData[0] = value.X;
             fData[1] = value.Y;
             fData[2] = value.Z;
+
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValue(Vector3[] value)
+        public void SetValue(ReadOnlySpan<Vector3> value)
         {
             for (var i = 0; i < value.Length; i++)
                 Elements[i].SetValue(value[i]);
+
             StateKey = unchecked(NextStateKey++);
         }
 
@@ -886,13 +796,15 @@ namespace MonoGame.Framework.Graphics
             fData[1] = value.Y;
             fData[2] = value.Z;
             fData[3] = value.W;
+
             StateKey = unchecked(NextStateKey++);
         }
 
-        public void SetValue(Vector4[] value)
+        public void SetValue(ReadOnlySpan<Vector4> value)
         {
             for (var i = 0; i < value.Length; i++)
                 Elements[i].SetValue(value[i]);
+
             StateKey = unchecked(NextStateKey++);
         }
     }

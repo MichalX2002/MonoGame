@@ -470,7 +470,7 @@ namespace MonoGame.Imaging.Tests
                         var ms = new MemoryStream();
                         stream.CopyTo(ms);
 
-                        var sha = SHA1.Create();
+                        var sha = SHA256.Create();
 
                         try
                         {
@@ -537,27 +537,27 @@ namespace MonoGame.Imaging.Tests
             }
         }
 
-        static unsafe void OriginalLoad(MemoryStream endmee)
-        {
-            fixed (byte* omg = endmee.GetBuffer())
-            {
-                var ccc = new StbImageSharp.StbImage.stbi__context();
-                ccc.img_buffer = omg;
-                ccc.img_buffer_end = omg + endmee.Length;
-
-                int w;
-                int h;
-                int comp;
-                StbImageSharp.StbImage.stbi__result_info ri;
-                void* pp = StbImageSharp.StbImage.stbi__png_load(ccc, &w, &h, &comp, 0, &ri);
-
-                var vec = StbImageDecoderState.GetVectorType(
-                    new ImageRead.ReadState() { OutComponents = comp, OutDepth = ri.bits_per_channel });
-                var uu = new UnmanagedMemory<byte>(w * h * comp * ri.bits_per_channel / 8);
-                new Span<byte>(pp, w * h * comp * ri.bits_per_channel / 8).CopyTo(uu.Span);
-                var mg = Image.WrapMemory(vec, uu, new Size(w, h));
-                mg.Save("wtf/_OMG.png");
-            }
-        }
+        //static unsafe void OriginalLoad(MemoryStream endmee)
+        //{
+        //    fixed (byte* omg = endmee.GetBuffer())
+        //    {
+        //        var ccc = new StbImageSharp.StbImage.stbi__context();
+        //        ccc.img_buffer = omg;
+        //        ccc.img_buffer_end = omg + endmee.Length;
+        //
+        //        int w;
+        //        int h;
+        //        int comp;
+        //        StbImageSharp.StbImage.stbi__result_info ri;
+        //        void* pp = StbImageSharp.StbImage.stbi__png_load(ccc, &w, &h, &comp, 0, &ri);
+        //
+        //        var vec = StbImageDecoderState.GetVectorType(
+        //            new ImageRead.ReadState() { OutComponents = comp, OutDepth = ri.bits_per_channel });
+        //        var uu = new UnmanagedMemory<byte>(w * h * comp * ri.bits_per_channel / 8);
+        //        new Span<byte>(pp, w * h * comp * ri.bits_per_channel / 8).CopyTo(uu.Span);
+        //        var mg = Image.WrapMemory(vec, uu, new Size(w, h));
+        //        mg.Save("wtf/_OMG.png");
+        //    }
+        //}
     }
 }

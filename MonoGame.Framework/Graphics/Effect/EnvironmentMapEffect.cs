@@ -436,7 +436,7 @@ namespace MonoGame.Framework.Graphics
         {
             // Recompute the world+view+projection matrix or fog vector?
             dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
-                dirtyFlags, world, view, projection, worldView,
+                dirtyFlags, world, view, projection, ref worldView,
                 fogEnabled, fogStart, fogEnd, worldViewProjParam, fogVectorParam);
 
             // Recompute the world inverse transpose and eye position?

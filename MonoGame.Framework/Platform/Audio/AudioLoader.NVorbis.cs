@@ -17,7 +17,7 @@ namespace MonoGame.Framework.Audio
             var reader = new VorbisReader(stream, leaveOpen: false);
             try
             {
-                bool useFloat = ALController.Instance.SupportsFloat32;
+                bool useFloat = ALController.Get().SupportsFloat32;
                 int sampleSize = useFloat ? sizeof(float) : sizeof(short);
 
                 channels = reader.Channels;

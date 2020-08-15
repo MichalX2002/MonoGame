@@ -395,7 +395,7 @@ namespace MonoGame.Framework.Graphics
         {
             // Recompute the world+view+projection matrix or fog vector?
             dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
-                dirtyFlags, _world, _view, _projection, _worldView,
+                dirtyFlags, _world, _view, _projection, ref _worldView,
                 _fogEnabled, _fogStart, _fogEnd, _worldViewProjParam, _fogVectorParam);
 
             // Recompute the diffuse/emissive/alpha material color parameters?

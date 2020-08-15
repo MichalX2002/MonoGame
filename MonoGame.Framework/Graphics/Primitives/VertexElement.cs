@@ -32,7 +32,8 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <remarks>
         /// Usage indices in a vertex declaration usually start with 0. When multiple vertex buffers
-        /// are bound to the input assembler stage (see <see cref="GraphicsDevice.SetVertexBuffers"/>),
+        /// are bound to the input assembler stage 
+        /// (see <see cref="GraphicsDevice.SetVertexBuffers(ReadOnlySpan{VertexBufferBinding})"/>),
         /// the usage indices are internally adjusted based on the order in which the vertex buffers are bound.
         /// </remarks>
         public int UsageIndex { get; set; }
@@ -72,7 +73,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Determines whether the specified <see cref="object"/> is equal to this instance.
         /// </summary>
-        public override bool Equals(object obj) => obj is VertexElement other && Equals(other);
+        public override bool Equals(object? obj) => obj is VertexElement other && Equals(other);
 
         /// <summary>
         /// Determines whether the specified <see cref="VertexElement"/> is equal to this instance.

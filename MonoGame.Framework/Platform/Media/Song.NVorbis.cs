@@ -13,34 +13,51 @@ namespace MonoGame.Framework.Media
     {
         internal OggStream _stream;
         private float _volume;
+        private float _pitch;
         private TimeSpan? _duration;
         private bool _isAtEnd;
 
         private void PlatformInitialize(Stream stream, bool leaveOpen)
         {
-            // init OpenAL if need be
-            ALController.EnsureInitialized();
+            ALController.InitializeInstance();
 
-            _stream = new OggStream(this, stream, leaveOpen, OnFinishedPlaying);
+            _stream = new OggStream(stream, leaveOpen, ALController.Get().Streamer, OnFinished, OnLooped);
             _stream.Prepare(immediate: true);
 
             _duration = _stream.GetLength();
         }
 
-        private void OnFinishedPlaying()
+        private void OnFinished()
         {
             Finished?.Invoke(this);
             _isAtEnd = true;
         }
 
+        private void OnLooped()
+        {
+            Looped?.Invoke(this);
+            _isAtEnd = false;
+        }
+
         private static void PlatformMasterVolumeChanged()
         {
-            var streamer = OggStreamer.Instance;
+            if (ALController.Instance == null)
+                return;
+
+            var streamer = ALController.Instance.Streamer;
             lock (streamer.IterationMutex)
             {
                 foreach (var stream in streamer._streams)
-                    stream.Volume = stream.Parent._volume * _masterVolume;
+                    stream.UpdateVolume();
             }
+        }
+
+        private static ReadOnlyMemory<TimeSpan> PlatformGetUpdateTiming()
+        {
+            if (ALController.Instance == null)
+                return ReadOnlyMemory<TimeSpan>.Empty;
+
+            return ALController.Instance.Streamer.UpdateTiming;
         }
 
         private void PlatformPlay(bool immediate, TimeSpan? startPosition)
@@ -65,7 +82,7 @@ namespace MonoGame.Framework.Media
 
         private void PlatformSetLooped(bool value)
         {
-            if(_stream != null)
+            if (_stream != null)
                 _stream.IsLooped = value;
         }
 
@@ -126,20 +143,19 @@ namespace MonoGame.Framework.Media
         {
             _volume = value;
             if (_stream != null)
-                _stream.Volume = _volume * _masterVolume;
+                _stream.Volume = _volume;
         }
 
         private float PlatformGetPitch()
         {
-            if (_stream != null)
-                return _stream.Pitch;
-            return 0;
+            return _stream != null ? _pitch : 1;
         }
 
         private void PlatformSetPitch(float value)
         {
+            _pitch = value;
             if (_stream != null)
-                _stream.Pitch = value;
+                _stream.Pitch = _pitch;
         }
 
         private TimeSpan? PlatformGetDuration()

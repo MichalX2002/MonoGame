@@ -23,13 +23,9 @@ namespace MonoGame.Framework.Audio
         internal ALController Controller { get; private set; }
         internal uint? SourceId { get; set; }
 
-        /// <summary>
-        /// Gets the OpenAL sound controller, constructs the sound buffer, 
-        /// and sets up the event delegates for the reserved and recycled events.
-        /// </summary>
         internal void PlatformInitialize()
         {
-            Controller = ALController.Instance;
+            Controller = ALController.Get();
         }
 
         private void PlatformApply3D(AudioListener listener, AudioEmitter emitter)

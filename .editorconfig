@@ -65,3 +65,5 @@ dotnet_diagnostic.CA2213.severity = none
 
 # CA1065: Do not raise exceptions in unexpected locations
 dotnet_diagnostic.CA1065.severity = none
+
+dotnet_diagnostic.CA1812.severity = none

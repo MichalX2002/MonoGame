@@ -11,7 +11,7 @@ namespace MonoGame.OpenAL
 {
     using OS = PlatformInfo.OS;
 
-    internal class AL
+    public class AL
     {
         public static IntPtr NativeLibrary { get; private set; } = GetNativeLibrary();
 
@@ -70,11 +70,11 @@ namespace MonoGame.OpenAL
         private delegate void d_albufferdata(uint buffer, int format, IntPtr data, int size, int freq);
         private static d_albufferdata alBufferData = FuncLoader.LoadFunction<d_albufferdata>(NativeLibrary, "alBufferData");
 
-        public static unsafe void BufferData<T>(uint buffer, ALFormat format, ReadOnlySpan<T> data, int freq)
-            where T : unmanaged
+        [CLSCompliant(false)]
+        public static unsafe void BufferData(uint buffer, ALFormat format, ReadOnlySpan<byte> data, int freq)
         {
-            fixed (T* ptr = data)
-                alBufferData(buffer, (int)format, (IntPtr)ptr, data.Length * sizeof(T), freq);
+            fixed (byte* ptr = data)
+                alBufferData(buffer, (int)format, (IntPtr)ptr, data.Length, freq);
         }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

@@ -13,7 +13,7 @@ namespace MonoGame.Framework.Graphics
     /// </summary>
     public sealed class Model : GraphicsResource
     {
-        private static Matrix4x4[] _sharedDrawBoneMatrices;
+        private static Matrix4x4[]? _sharedDrawBoneMatrices;
         
         /// <summary>
         /// A collection of <see cref="ModelBone"/> objects which describe how each mesh in the
@@ -39,11 +39,7 @@ namespace MonoGame.Framework.Graphics
         /// Skinning data is example of attached object for model.
         /// </remarks>
         /// </summary>
-        public object AttachedData { get; set; }
-
-        internal Model()
-        {
-        }
+        public object? AttachedData { get; set; }
 
         /// <summary>
         /// Constructs a model. 
@@ -91,16 +87,18 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Draws the model meshes.
         /// </summary>
+        /// <param name="graphicsDevice">The graphics device to draw the model to.</param>
         /// <param name="world">The world transform.</param>
         /// <param name="view">The view transform.</param>
         /// <param name="projection">The projection transform.</param>
-        public void Draw(in Matrix4x4 world, in Matrix4x4 view, in Matrix4x4 projection) 
-        {       
-            int boneCount = Bones.Count;
-            
+        public void Draw(GraphicsDevice graphicsDevice, in Matrix4x4 world, in Matrix4x4 view, in Matrix4x4 projection) 
+        {
+            if (graphicsDevice == null)
+                throw new ArgumentNullException(nameof(graphicsDevice));
+
             if (_sharedDrawBoneMatrices == null ||
-                _sharedDrawBoneMatrices.Length < boneCount)
-                _sharedDrawBoneMatrices = new Matrix4x4[boneCount];
+                _sharedDrawBoneMatrices.Length < Bones.Count)
+                _sharedDrawBoneMatrices = new Matrix4x4[Bones.Count];
             
             // Look up combined bone matrices for the entire model.            
             CopyAbsoluteBoneTransformsTo(_sharedDrawBoneMatrices);
@@ -118,7 +116,7 @@ namespace MonoGame.Framework.Graphics
                     effectMatricies.Projection = projection;
                 }
 
-                mesh.Draw();
+                mesh.Draw(graphicsDevice);
             }
         }
 

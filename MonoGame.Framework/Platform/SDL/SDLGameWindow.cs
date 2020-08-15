@@ -241,6 +241,8 @@ namespace MonoGame.Framework
 
         public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
         {
+            Debug.Assert(_game.GraphicsDeviceManager != null);
+
             _screenDeviceName = screenDeviceName;
 
             Rectangle prevBounds = Bounds;

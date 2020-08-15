@@ -3,11 +3,9 @@ using System.Collections.ObjectModel;
 
 namespace MonoGame.Framework.Graphics
 {
-
 	public sealed class ModelMeshPartCollection : ReadOnlyCollection<ModelMeshPart>
 	{
-		public ModelMeshPartCollection(IList<ModelMeshPart> list)
-			: base(list)
+		public ModelMeshPartCollection(IList<ModelMeshPart> list) : base(list)
 		{
 		}
 	}

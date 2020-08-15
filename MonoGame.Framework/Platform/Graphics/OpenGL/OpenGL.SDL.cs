@@ -27,11 +27,7 @@ namespace MonoGame.OpenGL
                 return default;
             }
 
-#if NETSTANDARD
             return Marshal.GetDelegateForFunctionPointer<T>(ret);
-#else
-            return (T)(object)Marshal.GetDelegateForFunctionPointer(ret, typeof(T));
-#endif
         }
 
         private static IGraphicsContext PlatformCreateContext(IWindowHandle window)

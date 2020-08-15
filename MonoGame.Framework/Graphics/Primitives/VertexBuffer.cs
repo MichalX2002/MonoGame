@@ -92,7 +92,7 @@ namespace MonoGame.Framework.Graphics
                     nameof(elementStride), "The vertex stride may not be larger than the buffer capacity.");
 
             if (byteOffset + dstSize > bufferSize)
-                throw new ArgumentOutOfRangeException(
+                throw new ArgumentException(
                     "The requested range of offset and length reaches beyond the buffer.");
 
             PlatformGetData(byteOffset, MemoryMarshal.AsBytes(destination), elementStride);

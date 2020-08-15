@@ -16,7 +16,7 @@ namespace MonoGame.Framework
     /// </remarks>
     public static class FrameworkDispatcher
     {
-        private static bool _initialized = false;
+        private static bool _initialized;
 
         /// <summary>
         /// Processes framework events.

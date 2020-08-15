@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using MonoGame.Framework.Graphics;
 
 namespace MonoGame.OpenGL
 {
@@ -8,13 +9,6 @@ namespace MonoGame.OpenGL
     [AttributeUsage(AttributeTargets.Delegate)]
     internal sealed class MonoNativeFunctionWrapper : Attribute
     {
-    }
-
-    internal class MonoGameGLException : Exception
-    {
-        public MonoGameGLException(string message) : base(message)
-        {
-        }
     }
 
     internal static class GLEnumExtensions
@@ -52,7 +46,7 @@ namespace MonoGame.OpenGL
             if (error != ErrorCode.NoError)
             {
                 Debug.WriteLine(error);
-                throw new MonoGameGLException("GL.GetError() returned " + error);
+                throw new PlatformGraphicsException("GL.GetError() returned " + error);
             }
         }
 
@@ -63,7 +57,7 @@ namespace MonoGame.OpenGL
             {
                 CheckError();
             }
-            catch (MonoGameGLException ex)
+            catch (PlatformGraphicsException ex)
             {
 #if ANDROID
                 // Todo: Add generic MonoGame logging interface

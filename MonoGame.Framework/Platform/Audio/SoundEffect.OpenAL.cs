@@ -21,9 +21,9 @@ namespace MonoGame.Framework.Audio
 {
     public sealed partial class SoundEffect : IDisposable
     {
-        internal const int MAX_PLAYING_INSTANCES = ALController.MAX_NUMBER_OF_SOURCES;
-        internal static uint ReverbSlot = 0;
-        internal static uint ReverbEffect = 0;
+        internal const int MaxPlayingInstances = ALController.MaxNumberOfSources;
+        internal static uint ReverbSlot;
+        internal static uint ReverbEffect;
 
         internal ALBuffer? SoundBuffer;
 
@@ -72,7 +72,7 @@ namespace MonoGame.Framework.Audio
         private void PlatformInitializeIeeeFloat(
             ReadOnlySpan<byte> data, int sampleRate, AudioChannels channels, int loopStart, int loopLength)
         {
-            if (ALController.Instance.SupportsFloat32)
+            if (ALController.Get().SupportsFloat32)
             {
                 var format = AudioLoader.GetSoundFormat(AudioLoader.FormatIeee, (int)channels, 32);
                 SoundBuffer = ALBufferPool.Rent();
@@ -99,7 +99,7 @@ namespace MonoGame.Framework.Audio
             ReadOnlySpan<byte> data, int sampleRate, AudioChannels channels, int blockAlignment,
             int loopStart, int loopLength)
         {
-            if (ALController.Instance.SupportsAdpcm)
+            if (ALController.Get().SupportsAdpcm)
             {
                 var format = AudioLoader.GetSoundFormat(AudioLoader.FormatMsAdpcm, (int)channels, 0);
                 int sampleAlignment = AudioLoader.SampleAlignment(format, blockAlignment);
@@ -125,7 +125,7 @@ namespace MonoGame.Framework.Audio
             ReadOnlySpan<byte> data, int sampleRate, AudioChannels channels, int blockAlignment,
             int loopStart, int loopLength)
         {
-            if (ALController.Instance.SupportsIma4)
+            if (ALController.Get().SupportsIma4)
             {
                 var format = AudioLoader.GetSoundFormat(AudioLoader.FormatIma4, (int)channels, 0);
                 int sampleAlignment = AudioLoader.SampleAlignment(format, blockAlignment);
@@ -216,7 +216,7 @@ namespace MonoGame.Framework.Audio
 
         internal static void PlatformSetReverbSettings(ReverbSettings reverbSettings)
         {
-            var efx = ALController.Instance.Efx;
+            var efx = ALController.Get().Efx;
             if (!efx.IsAvailable)
                 return;
 
@@ -248,7 +248,7 @@ namespace MonoGame.Framework.Audio
             // map these from 0-100 down to 0-1
             efx.Effect(ReverbEffect, EfxEffectf.EaxReverbDensity, reverbSettings.DensityPct / 100f);
             efx.AuxiliaryEffectSlot(ReverbSlot, EfxEffectSlotf.EffectSlotGain, reverbSettings.WetDryMixPct / 200f);
-
+            
             // Dont know what to do with these; EFX has no mapping for them. 
             // Just ignore for now we can enable them as we go. 
             //efx.SetEffectParam(ReverbEffect, EfxEffectf.PositionLeft, reverbSettings.PositionLeft);
@@ -276,14 +276,14 @@ namespace MonoGame.Framework.Audio
 
         internal static void PlatformInitialize()
         {
-            ALController.EnsureInitialized();
+            ALController.InitializeInstance();
         }
 
         internal static void PlatformShutdown()
         {
             if (_systemState == SoundSystemState.Initialized && ReverbEffect != 0)
             {
-                var efx = ALController.Instance.Efx;
+                var efx = ALController.Get().Efx;
                 efx.DeleteAuxiliaryEffectSlot(ReverbSlot);
                 efx.DeleteEffect(ReverbEffect);
             }

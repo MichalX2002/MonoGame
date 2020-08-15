@@ -34,15 +34,16 @@ namespace MonoGame.Framework.Graphics
         private Matrix4x4 _world = Matrix4x4.Identity;
         private Matrix4x4 _view = Matrix4x4.Identity;
         private Matrix4x4 _projection = Matrix4x4.Identity;
-        private Matrix4x4 _worldView;
         private Vector3 _diffuseColor = Vector3.One;
-        private Vector3 _emissiveColor = Vector3.Zero;
-        private Vector3 _ambientLightColor = Vector3.Zero;
+        private Vector3 _emissiveColor;
+        private Vector3 _ambientLightColor;
         private float _alpha = 1;
         private float _fogStart;
         private float _fogEnd = 1;
         private int _weightsPerVertex = 4;
         private EffectDirtyFlags _dirtyFlags = EffectDirtyFlags.All;
+
+        private Matrix4x4 _worldView;
 
         #endregion
 
@@ -268,15 +269,9 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Sets an array of skinning bone transform matrices.
         /// </summary>
-        public void SetBoneTransforms(Matrix4x4[] boneTransforms)
+        public void SetBoneTransforms(ReadOnlySpan<Matrix4x4> boneTransforms)
         {
-            if ((boneTransforms == null) || (boneTransforms.Length == 0))
-                throw new ArgumentNullException(nameof(boneTransforms));
-
-            if (boneTransforms.Length > MaxBones)
-                throw new ArgumentException();
-
-            _bonesParam.SetValue(boneTransforms);
+            _bonesParam.SetValue(boneTransforms.Slice(0, Math.Min(MaxBones, boneTransforms.Length)));
         }
 
         /// <summary>
@@ -291,9 +286,7 @@ namespace MonoGame.Framework.Graphics
 
             // Convert matrices from 43 to 44 format.
             for (int i = 0; i < bones.Length; i++)
-            {
                 bones[i].M44 = 1;
-            }
 
             return bones;
         }
@@ -317,7 +310,6 @@ namespace MonoGame.Framework.Graphics
 
         #region Methods
 
-
         /// <summary>
         /// Creates a new SkinnedEffect with default parameter settings.
         /// </summary>
@@ -334,9 +326,7 @@ namespace MonoGame.Framework.Graphics
             var identityBones = new Matrix4x4[MaxBones];
 
             for (int i = 0; i < MaxBones; i++)
-            {
                 identityBones[i] = Matrix4x4.Identity;
-            }
 
             SetBoneTransforms(identityBones);
         }
@@ -388,7 +378,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Looks up shortcut references to our effect parameters.
         /// </summary>
-        private void CacheEffectParameters(SkinnedEffect cloneSource)
+        private void CacheEffectParameters(SkinnedEffect? cloneSource)
         {
             _textureParam = Parameters["Texture"];
             _diffuseColorParam = Parameters["DiffuseColor"];
@@ -430,19 +420,19 @@ namespace MonoGame.Framework.Graphics
         {
             // Recompute the world+view+projection matrix or fog vector?
             _dirtyFlags = EffectHelpers.SetWorldViewProjAndFog(
-                _dirtyFlags, _world, _view, _projection, _worldView,
+                _dirtyFlags, _world, _view, _projection, ref _worldView,
                 _fogEnabled, _fogStart, _fogEnd, _worldViewProjParam, _fogVectorParam);
 
             // Recompute the world inverse transpose and eye position?
             _dirtyFlags = EffectHelpers.SetLightingMatrices(
-                _dirtyFlags, _world, _view, 
+                _dirtyFlags, _world, _view,
                 _worldParam, _worldInverseTransposeParam, _eyePositionParam);
 
             // Recompute the diffuse/emissive/alpha material color parameters?
             if ((_dirtyFlags & EffectDirtyFlags.MaterialColor) != 0)
             {
                 EffectHelpers.SetMaterialColor(
-                    true, _alpha, _diffuseColor, _emissiveColor, _ambientLightColor, 
+                    true, _alpha, _diffuseColor, _emissiveColor, _ambientLightColor,
                     _diffuseColorParam, _emissiveColorParam);
 
                 _dirtyFlags &= ~EffectDirtyFlags.MaterialColor;

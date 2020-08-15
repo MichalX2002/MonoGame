@@ -2,7 +2,6 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-#define CHECK_ARGS
 #define CHECK_EOF
 //#define LOCAL_SHADOW
 
@@ -13,6 +12,27 @@ namespace MonoGame.Framework
 {
     internal class Lz4DecoderStream : Stream
     {
+        private long _inputLength;
+        private Stream _input;
+
+        //because we might not be able to match back across invocations,
+        //we have to keep the last window's worth of bytes around for reuse
+        //we use a circular buffer for this - every time we write into this
+        //buffer, we also write the same into our output buffer
+
+        private const int DecBufLen = 65536;
+        private const int DecBufMask = 0xFFFF;
+
+        private const int InBufLen = 128;
+
+        private readonly byte[] decodeBuffer = new byte[DecBufLen + InBufLen];
+        private int decodeBufferPos, inBufPos, inBufEnd;
+
+        //we keep track of which phase we're in so that we can jump right back
+        //into the correct part of decoding
+
+        private DecodePhase phase;
+
         public Lz4DecoderStream()
         {
         }
@@ -24,8 +44,8 @@ namespace MonoGame.Framework
 
         public void Reset(Stream input, long inputLength = long.MaxValue)
         {
-            this.inputLength = inputLength;
-            this.input = input;
+            _inputLength = inputLength;
+            _input = input;
 
             phase = DecodePhase.ReadToken;
 
@@ -41,30 +61,10 @@ namespace MonoGame.Framework
 
         protected override void Dispose(bool disposing)
         {
-            input = null;
+            _input = null!;
+
             base.Dispose(disposing);
         }
-
-        private long inputLength;
-        private Stream input;
-
-        //because we might not be able to match back across invocations,
-        //we have to keep the last window's worth of bytes around for reuse
-        //we use a circular buffer for this - every time we write into this
-        //buffer, we also write the same into our output buffer
-
-        private const int DecBufLen = 0x10000;
-        private const int DecBufMask = 0xFFFF;
-
-        private const int InBufLen = 128;
-
-        private readonly byte[] decodeBuffer = new byte[DecBufLen + InBufLen];
-        private int decodeBufferPos, inBufPos, inBufEnd;
-
-        //we keep track of which phase we're in so that we can jump right back
-        //into the correct part of decoding
-
-        private DecodePhase phase;
 
         private enum DecodePhase
         {
@@ -83,17 +83,16 @@ namespace MonoGame.Framework
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-#if CHECK_ARGS
-            if (buffer == null)
-                throw new ArgumentNullException(nameof(buffer));
+            return Read(buffer.AsSpan(offset, count));
+        }
 
-            if (offset < 0 || count < 0 || buffer.Length - count < offset)
-                throw new ArgumentOutOfRangeException();
-
-            if (input == null)
+        public override int Read(Span<byte> buffer)
+        {
+            if (_input == null)
                 throw new InvalidOperationException();
-#endif
-            int nRead, nToRead = count;
+
+            int nRead, nToRead = buffer.Length;
+            int offset = 0;
 
             var decBuf = decodeBuffer;
 
@@ -206,8 +205,7 @@ namespace MonoGame.Framework
             {
                 if (inBufPos + nReadLit <= inBufEnd)
                 {
-                    int ofs = offset;
-
+                    int ofs = 0;
                     for (int c = nReadLit; c-- != 0;)
                         buffer[ofs++] = decBuf[inBufPos++];
 
@@ -218,7 +216,7 @@ namespace MonoGame.Framework
 #if LOCAL_SHADOW
                     this.inBufPos = inBufPos;
 #endif
-                    nRead = ReadCore(buffer, offset, nReadLit);
+                    nRead = ReadCore(buffer.Slice(offset, nReadLit));
 #if LOCAL_SHADOW
                     inBufPos = this.inBufPos;
                     inBufEnd = this.inBufEnd;
@@ -310,7 +308,7 @@ namespace MonoGame.Framework
             int nCpyMat = matLen < nToRead ? matLen : nToRead;
             if (nCpyMat != 0)
             {
-                nRead = count - nToRead;
+                nRead = buffer.Length - nToRead;
 
                 int bufDst = matDst - nRead;
                 if (bufDst > 0)
@@ -345,14 +343,14 @@ namespace MonoGame.Framework
             goto readToken;
 
             finish:
-            nRead = count - nToRead;
+            nRead = buffer.Length - nToRead;
 
             int nToBuf = nRead < DecBufLen ? nRead : DecBufLen;
             int repPos = offset - nToBuf;
 
             if (nToBuf == DecBufLen)
             {
-                Buffer.BlockCopy(buffer, repPos, decBuf, 0, DecBufLen);
+                buffer.Slice(repPos, DecBufLen).CopyTo(decBuf);
                 decodeBufferPos = 0;
             }
             else
@@ -378,15 +376,15 @@ namespace MonoGame.Framework
 
             if (inBufPos == inBufEnd)
             {
-                int nRead = input.Read(buf, DecBufLen,
-                    InBufLen < inputLength ? InBufLen : (int)inputLength);
+                int nRead = _input.Read(buf, DecBufLen,
+                    InBufLen < _inputLength ? InBufLen : (int)_inputLength);
 
 #if CHECK_EOF
                 if (nRead == 0)
                     return -1;
 #endif
 
-                inputLength -= nRead;
+                _inputLength -= nRead;
 
                 inBufPos = DecBufLen;
                 inBufEnd = DecBufLen + nRead;
@@ -401,15 +399,15 @@ namespace MonoGame.Framework
 
             if (inBufPos == inBufEnd)
             {
-                int nRead = input.Read(buf, DecBufLen,
-                    InBufLen < inputLength ? InBufLen : (int)inputLength);
+                int nRead = _input.Read(buf, DecBufLen,
+                    InBufLen < _inputLength ? InBufLen : (int)_inputLength);
 
 #if CHECK_EOF
                 if (nRead == 0)
                     return -1;
 #endif
 
-                inputLength -= nRead;
+                _inputLength -= nRead;
 
                 inBufPos = DecBufLen;
                 inBufEnd = DecBufLen + nRead;
@@ -419,8 +417,8 @@ namespace MonoGame.Framework
             {
                 buf[DecBufLen] = buf[inBufPos];
 
-                int nRead = input.Read(buf, DecBufLen + 1,
-                    InBufLen - 1 < inputLength ? InBufLen - 1 : (int)inputLength);
+                int nRead = _input.Read(buf, DecBufLen + 1,
+                    InBufLen - 1 < _inputLength ? InBufLen - 1 : (int)_inputLength);
 
 #if CHECK_EOF
                 if (nRead == 0)
@@ -432,7 +430,7 @@ namespace MonoGame.Framework
                 }
 #endif
 
-                inputLength -= nRead;
+                _inputLength -= nRead;
 
                 inBufPos = DecBufLen;
                 inBufEnd = DecBufLen + nRead + 1;
@@ -444,9 +442,10 @@ namespace MonoGame.Framework
             return ret;
         }
 
-        private int ReadCore(byte[] buffer, int offset, int count)
+        private int ReadCore(Span<byte> buffer)
         {
-            int nToRead = count;
+            int nToRead = buffer.Length;
+            int offset = 0;
 
             var buf = decodeBuffer;
             int inBufLen = inBufEnd - inBufPos;
@@ -469,14 +468,14 @@ namespace MonoGame.Framework
 
                 if (nToRead >= InBufLen)
                 {
-                    nRead = input.Read(buffer, offset,
-                        nToRead < inputLength ? nToRead : (int)inputLength);
+                    nRead = _input.Read(buffer.Slice(offset,
+                        nToRead < _inputLength ? nToRead : (int)_inputLength));
                     nToRead -= nRead;
                 }
                 else
                 {
-                    nRead = input.Read(buf, DecBufLen,
-                        InBufLen < inputLength ? InBufLen : (int)inputLength);
+                    nRead = _input.Read(buf, DecBufLen,
+                        InBufLen < _inputLength ? InBufLen : (int)_inputLength);
 
                     inBufPos = DecBufLen;
                     inBufEnd = DecBufLen + nRead;
@@ -492,18 +491,16 @@ namespace MonoGame.Framework
                     nToRead -= fromBuf;
                 }
 
-                inputLength -= nRead;
+                _inputLength -= nRead;
             }
 
-            return count - nToRead;
+            return buffer.Length - nToRead;
         }
 
         #region Stream internals
 
         public override bool CanRead => true;
-
         public override bool CanSeek => false;
-
         public override bool CanWrite => false;
 
         public override void Flush()

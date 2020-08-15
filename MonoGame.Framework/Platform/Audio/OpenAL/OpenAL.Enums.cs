@@ -1,7 +1,7 @@
 ﻿
 namespace MonoGame.OpenAL
 {
-    internal enum ALFormat
+    public enum ALFormat
     {
         Mono8 = 0x1100,
         Mono16 = 0x1101,
@@ -15,7 +15,7 @@ namespace MonoGame.OpenAL
         StereoFloat32 = 0x10011,
     }
 
-    internal enum ALError
+    public enum ALError
     {
         NoError = 0,
         InvalidName = 0xA001,
@@ -25,18 +25,18 @@ namespace MonoGame.OpenAL
         OutOfMemory = 0xA005,
     }
 
-    internal enum ALGetString
+    public enum ALGetString
     {
         Extensions = 0xB004,
     }
 
-    internal enum ALBufferi
+    public enum ALBufferi
     {
         UnpackBlockAlignmentSoft = 0x200C,
         LoopSoftPointsExt = 0x2015,
     }
 
-    internal enum ALGetBufferi
+    public enum ALGetBufferi
     {
         Frequency = 0x2001,
         Bits = 0x2002,
@@ -44,31 +44,31 @@ namespace MonoGame.OpenAL
         Size = 0x2004,
     }
 
-    internal enum ALSourceb
+    public enum ALSourceb
     {
         Looping = 0x1007,
     }
 
-    internal enum ALSourcei
+    public enum ALSourcei
     {
         SourceRelative = 0x202,
         Buffer = 0x1009,
         EfxDirectFilter = 0x20005
     }
 
-    internal enum ALSource3i
+    public enum ALSource3i
     {
         EfxAuxilarySendFilter = 0x20006,
     }
 
-    internal enum ALSourcef
+    public enum ALSourcef
     {
         Pitch = 0x1003,
         Gain = 0x100A,
         ReferenceDistance = 0x1020
     }
 
-    internal enum ALGetSourcei
+    public enum ALGetSourcei
     {
         SampleOffset = 0x1025,
         SourceState = 0x1010,
@@ -76,7 +76,7 @@ namespace MonoGame.OpenAL
         BuffersProcessed = 0x1016,
     }
 
-    internal enum ALSourceState
+    public enum ALSourceState
     {
         Initial = 0x1011,
         Playing = 0x1012,
@@ -84,46 +84,47 @@ namespace MonoGame.OpenAL
         Stopped = 0x1014,
     }
 
-    internal enum ALListener3f
+    public enum ALListener3f
     {
         Position = 0x1004,
     }
 
-    internal enum ALSource3f
+    public enum ALSource3f
     {
         Position = 0x1004,
         Velocity = 0x1006,
     }
 
-    internal enum ALDistanceModel
+    public enum ALDistanceModel
     {
         None = 0,
         InverseDistanceClamped = 0xD002,
     }
 
-    internal enum ALCError
+    public enum ALCError
     {
         NoError = 0,
     }
 
-    internal enum ALCGetString
+    public enum ALCGetString
     {
         CaptureDeviceSpecifier = 0x0310,
         CaptureDefaultDeviceSpecifier = 0x0311,
         Extensions = 0x1006,
     }
 
-    internal enum ALCGetInteger
+    public enum ALCGetInteger
     {
         CaptureSamples = 0x0312,
     }
 
-    internal enum EfxFilteri
+    public enum EfxFilteri
     {
         FilterType = 0x8001,
     }
 
-    internal enum EfxFilterf
+#pragma warning disable CA1069 // Enums values should not be duplicated
+    public enum EfxFilterf
     {
         LowpassGain = 0x0001,
         LowpassGainHF = 0x0002,
@@ -133,8 +134,9 @@ namespace MonoGame.OpenAL
         BandpassGainLF = 0x0002,
         BandpassGainHF = 0x0003,
     }
+#pragma warning restore CA1069 // Enums values should not be duplicated
 
-    internal enum EfxFilterType
+    public enum EfxFilterType
     {
         None = 0x0000,
         Lowpass = 0x0001,
@@ -142,18 +144,18 @@ namespace MonoGame.OpenAL
         Bandpass = 0x0003,
     }
 
-    internal enum EfxEffecti
+    public enum EfxEffecti
     {
         EffectType = 0x8001,
         SlotEffect = 0x0001,
     }
 
-    internal enum EfxEffectSlotf
+    public enum EfxEffectSlotf
     {
         EffectSlotGain = 0x0002,
     }
 
-    internal enum EfxEffectf
+    public enum EfxEffectf
     {
         EaxReverbDensity = 0x0001,
         EaxReverbDiffusion = 0x0002,
@@ -180,7 +182,7 @@ namespace MonoGame.OpenAL
         DecayHighFrequencyLimit = 0x0017,
     }
 
-    internal enum EfxEffectType
+    public enum EfxEffectType
     {
         Reverb = 0x8000,
     }

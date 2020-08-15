@@ -58,7 +58,7 @@ namespace MonoGame.Testing
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
-            _pixel.SetData(new Color[] { Color.White }.AsSpan());
+            _pixel.SetData(new Color[] { Color.White });
 
             _test = Content.Load<Texture2D>("test");
 
@@ -96,8 +96,10 @@ namespace MonoGame.Testing
                 _watch.Restart();
                 _songs[i] = Content.Load<Song>(songs[i]);
                 _songs[i].IsLooped = false;
-                _songs[i].Volume = 0.005f;
+                _songs[i].Volume = 0.002f;
                 _songs[i].Pitch = 2f;
+                _songs[i].Finished += (song) => Console.WriteLine("finished");
+                _songs[i].Looped += (song) => Console.WriteLine("looped");
                 _watch.Stop();
                 Console.WriteLine("Content.Load<Song>('" + songs[i] + "') Time: " + _watch.ElapsedMilliseconds + "ms");
             }
@@ -131,9 +133,24 @@ namespace MonoGame.Testing
         }
 
         private Song _lastSong;
-        int songIndex = 0;
+        int songIndex;
         float f = 3f;
-        int frameIndex = 0;
+        int frameIndex;
+
+        private void MoveNext()
+        {
+            _watch.Restart();
+
+            //_lastSong?.Stop();
+
+            _lastSong = _songs[songIndex++];
+            _lastSong.Play();
+            if (songIndex >= _songs.Length)
+                songIndex = 0;
+
+            _watch.Stop();
+            Console.WriteLine("Moved next in " + _watch.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
+        }
 
         protected override void Update(GameTime time)
         {
@@ -141,20 +158,12 @@ namespace MonoGame.Testing
                 Exit();
 
             f += time.ElapsedTotalSeconds;
+
             if (f >= 1f && _songs.Length > 0)
             {
                 f = 0f;
 
-                _watch.Restart();
-
-                //_lastSong?.Stop();
-                _lastSong = _songs[songIndex++];
-                _lastSong.Play();
-                if (songIndex >= _songs.Length)
-                    songIndex = 0;
-
-                _watch.Stop();
-                Console.WriteLine("Moved next in " + _watch.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
+                MoveNext();
 
                 if (Directory.Exists("frames"))
                 {
@@ -203,7 +212,7 @@ namespace MonoGame.Testing
             _spriteBatch.Draw(_test, new Vector2(0 + xx, 0 + yy), Color.White);
 
             DrawShadedString(
-                _font, "Timing: " + avg.ToString("0.0000"), new Vector2(10, 5), Color.White, Color.Black);
+                _font, "Streaming: " + avg.ToString("0.0") + "ms", new Vector2(10, 5), Color.White, Color.Black);
 
             //using (var tex = new Texture2D(GraphicsDevice, 1, 1))
             //{

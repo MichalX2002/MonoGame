@@ -23,7 +23,7 @@ namespace MonoGame.Framework.Audio
 
         private readonly RpcVariable[] _variables;
 
-        private XactSound _curSound;
+        private XactSound _currentSound;
 
         private bool _applied3D;
         private bool _played;
@@ -65,8 +65,8 @@ namespace MonoGame.Framework.Audio
         {
             get
             {
-                if (_curSound != null)
-                    return _curSound.IsPaused;
+                if (_currentSound != null)
+                    return _currentSound.IsPaused;
                 return false;
             }
         }
@@ -81,8 +81,8 @@ namespace MonoGame.Framework.Audio
         {
             get
             {
-                if (_curSound != null)
-                    return _curSound.Playing;
+                if (_currentSound != null)
+                    return _currentSound.Playing;
                 return false;
             }
         }
@@ -94,8 +94,8 @@ namespace MonoGame.Framework.Audio
         {
             get
             {
-                if (_curSound != null)
-                    return _curSound.Stopped;
+                if (_currentSound != null)
+                    return _currentSound.Stopped;
                 return !IsDisposed && !IsPrepared;
             }
         }
@@ -125,7 +125,7 @@ namespace MonoGame.Framework.Audio
             IsDisposed = false;
             IsCreated = false;
             IsPrepared = true;
-            _curSound = null;
+            _currentSound = null;
         }
 
         /// <summary>Pauses playback.</summary>
@@ -133,8 +133,8 @@ namespace MonoGame.Framework.Audio
         {
             lock (_engine.UpdateLock)
             {
-                if (_curSound != null)
-                    _curSound.Pause();
+                if (_currentSound != null)
+                    _currentSound.Pause();
             }
         }
 
@@ -150,11 +150,11 @@ namespace MonoGame.Framework.Audio
 
                 //TODO: Probabilities
                 var index = XactHelpers.Random.Next(_sounds.Length);
-                _curSound = _sounds[index];
+                _currentSound = _sounds[index];
 
                 var volume = UpdateRpcCurves();
 
-                _curSound.Play(volume, _engine);
+                _currentSound.Play(volume, _engine);
             }
 
             _played = true;
@@ -166,8 +166,8 @@ namespace MonoGame.Framework.Audio
         {
             lock (_engine.UpdateLock)
             {
-                if (_curSound != null)
-                    _curSound.Resume();
+                if (_currentSound != null)
+                    _currentSound.Resume();
             }
         }
 
@@ -182,8 +182,8 @@ namespace MonoGame.Framework.Audio
             {
                 _engine.ActiveCues.Remove(this);
 
-                if (_curSound != null)
-                    _curSound.Stop(options);
+                if (_currentSound != null)
+                    _currentSound.Stop(options);
             }
 
             IsPrepared = false;
@@ -288,8 +288,8 @@ namespace MonoGame.Framework.Audio
                 var angle = MathHelper.ToDegrees(MathF.Acos(slope));
                 var j = FindVariable("OrientationAngle");
                 _variables[j].SetValue(angle);
-                if (_curSound != null)
-                    _curSound.SetCuePan(Vector3.Dot(direction, right));
+                if (_currentSound != null)
+                    _currentSound.SetCuePan(Vector3.Dot(direction, right));
 
                 // Calculate doppler effect.
                 var relativeVelocity = emitter.Velocity - listener.Velocity;
@@ -299,12 +299,12 @@ namespace MonoGame.Framework.Audio
             _applied3D = true;
         }
 
-        internal void Update(float dt)
+        internal void Update(float deltaTime)
         {
-            if (_curSound == null)
+            if (_currentSound == null)
                 return;
 
-            _curSound.Update(dt);
+            _currentSound.Update(deltaTime);
 
             UpdateRpcCurves();
         }
@@ -314,7 +314,7 @@ namespace MonoGame.Framework.Audio
             var volume = 1f;
 
             // Evaluate the runtime parameter controls.
-            var rpcCurves = _curSound.RpcCurves;
+            var rpcCurves = _currentSound.RpcCurves;
             if (rpcCurves.Length > 0)
             {
                 var pitch = 0f;
@@ -366,11 +366,26 @@ namespace MonoGame.Framework.Audio
                 if (volume < 0f)
                     volume = 0f;
 
-                _curSound.UpdateState(
+                _currentSound.UpdateState(
                     _engine, volume, pitch, reverbMix, filterFrequency, filterQFactor);
             }
 
             return volume;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
+                IsDisposed = true;
+
+                if (disposing)
+                {
+                    IsCreated = false;
+                    IsPrepared = false;
+                    Disposed?.Invoke(this);
+                }
+            }
         }
 
         /// <summary>
@@ -379,21 +394,7 @@ namespace MonoGame.Framework.Audio
         public void Dispose()
         {
             Dispose(true);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (IsDisposed)
-                return;
-
-            IsDisposed = true;
-
-            if (disposing)
-            {
-                IsCreated = false;
-                IsPrepared = false;
-                Disposed?.Invoke(this);
-            }
+            GC.SuppressFinalize(this);
         }
     }
 }

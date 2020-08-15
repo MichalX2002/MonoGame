@@ -2,11 +2,26 @@ using System;
 
 namespace MonoGame.Framework.Graphics
 {
-	public sealed class ModelMeshPart
-	{
-        private Effect _effect;
+    public sealed class ModelMeshPart
+    {
+        private Effect? _effect;
+        internal ModelMesh _parent;
 
-        public Effect Effect 
+        public object? Tag { get; set; }
+        public int PrimitiveCount { get; set; }
+
+        internal int EffectIndex { get; set; }
+
+        internal int IndexBufferIndex { get; set; }
+        public IndexBuffer IndexBuffer { get; set; }
+        public int StartIndex { get; set; }
+
+        internal int VertexBufferIndex { get; set; }
+        public VertexBuffer VertexBuffer { get; set; }
+        public int VertexCount { get; set; }
+        public int VertexOffset { get; set; }
+
+        public Effect? Effect 
         {
             get => _effect;
             set
@@ -18,7 +33,7 @@ namespace MonoGame.Framework.Graphics
                 {
                     // First check to see any other parts are also using this effect.
                     var removeEffect = true;
-                    foreach (var part in parent.MeshParts)
+                    foreach (var part in _parent.MeshParts)
                     {
                         if (part != this && part._effect == _effect)
                         {
@@ -28,44 +43,24 @@ namespace MonoGame.Framework.Graphics
                     }
 
                     if (removeEffect)
-                        parent.Effects.Remove(_effect);
+                        _parent.Effects.Remove(_effect);
                 }
 
                 // Set the new effect.
                 _effect = value;
 
-                if (_effect != null && !parent.Effects.Contains(_effect))
-                    parent.Effects.Add(_effect);
+                if (_effect != null && !_parent.Effects.Contains(_effect))
+                    _parent.Effects.Add(_effect);
             }
         }
 
-		public IndexBuffer IndexBuffer { get; set; }
-
-		public int NumVertices { get; set; }
-
-		public int PrimitiveCount { get; set; }
-
-		public int StartIndex { get; set; }
-
-		public object Tag { get; set; }
-
-		public VertexBuffer VertexBuffer { get; set; }
-
-		public int VertexOffset { get; set; }
-
-		internal int VertexBufferIndex { get; set; }
-
-		internal int IndexBufferIndex { get; set; }
-
-		internal int EffectIndex { get; set; }
-		
-		internal ModelMesh parent;
-
         /// <summary>
-        /// Using this constructor is strongly discouraged. Adding meshes to models at runtime is
-        /// not supported and may lead to <see cref="NullReferenceException"/>s if parent is not set.
+        /// Constructs the model mesh part.
         /// </summary>
-        [Obsolete("This constructor is deprecated and will be made internal in a future release.")]
-        public ModelMeshPart() { }
-	}
+        /// <param name="parent"></param>
+        public ModelMeshPart(ModelMesh parent) 
+        {
+            _parent = parent ?? throw new ArgumentNullException(nameof(parent));
+        }
+    }
 }

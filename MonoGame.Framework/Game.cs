@@ -6,26 +6,23 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime;
-using System.Threading;
-#if WINDOWS_UAP
-using System.Threading.Tasks;
-using Windows.ApplicationModel.Activation;
-#endif
 using MonoGame.Framework.Audio;
 using MonoGame.Framework.Content;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input.Touch;
 using MonoGame.Framework.Utilities;
 
+#if WINDOWS_UAP
+using Windows.ApplicationModel.Activation;
+#endif
+
 namespace MonoGame.Framework
 {
     public partial class Game : IDisposable
     {
-        private static PlatformInfo.OS _currentOS = PlatformInfo.CurrentOS;
-
         private ContentManager _content;
 
-        private object Locker { get; } = new object();
+        private object SleepMutex { get; } = new object();
 
         internal GamePlatform Platform { get; }
 
@@ -47,8 +44,8 @@ namespace MonoGame.Framework
                 (u, handler) => u.UpdateOrderChanged += handler,
                 (u, handler) => u.UpdateOrderChanged -= handler);
 
-        private IGraphicsDeviceManager _graphicsDeviceManager;
-        private IGraphicsDeviceService _graphicsDeviceService;
+        private GraphicsDeviceManager? _graphicsDeviceManager;
+        private IGraphicsDeviceService? _graphicsDeviceService;
 
         private TimeSpan _targetElapsedTime;
         private TimeSpan _inactiveSleepTime;
@@ -76,10 +73,11 @@ namespace MonoGame.Framework
             InactiveSleepTime = TimeSpan.FromTicks(333333); // 30fps
             MaxElapsedTime = TimeSpan.FromMilliseconds(500);
 
+            // TODO: make Game instances depend on a GamePlatform instead
             Platform = GamePlatform.PlatformCreate(this);
             Platform.Activated += OnActivated;
             Platform.Deactivated += OnDeactivated;
-            Services.AddService(typeof(GamePlatform), Platform);
+            Services.AddService(Platform);
 
             // Calling Update() for first time initializes some systems
             FrameworkDispatcher.Update();
@@ -95,8 +93,6 @@ namespace MonoGame.Framework
                 Platform.Log(Message);
         }
 
-        #region IDisposable Implementation
-
         [DebuggerHidden]
         private void AssertNotDisposed()
         {
@@ -104,75 +100,17 @@ namespace MonoGame.Framework
                 throw new ObjectDisposedException(GetType().Name);
         }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-            Disposed?.Invoke(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_isDisposed)
-            {
-                if (disposing)
-                {
-                    // Dispose loaded game components
-                    for (int i = 0; i < Components.Count; i++)
-                    {
-                        if (Components[i] is IDisposable disposable)
-                            disposable.Dispose();
-                    }
-                    Components = null;
-
-                    if (_content != null)
-                    {
-                        _content.Dispose();
-                        _content = null;
-                    }
-
-                    if (_graphicsDeviceManager is GraphicsDeviceManager gdm)
-                    {
-                        gdm.Dispose();
-                        _graphicsDeviceManager = null;
-                    }
-
-                    if (Platform != null)
-                    {
-                        Platform.Activated -= OnActivated;
-                        Platform.Deactivated -= OnDeactivated;
-                        Services.RemoveService<GamePlatform>();
-
-                        Platform.Dispose();
-                    }
-
-                    ContentTypeReaderManager.ClearReaderFactories();
-
-                    SoundEffect.PlatformShutdown();
-                }
-                _isDisposed = true;
-            }
-        }
-
-        ~Game()
-        {
-            Dispose(false);
-        }
-
-        #endregion IDisposable Implementation
-
         #region Properties
+
+        public GameServiceContainer Services { get; }
+        public GameTime Time { get; } = new GameTime();
 
         public LaunchParameters LaunchParameters { get; private set; }
         public GameComponentCollection Components { get; private set; }
-        public GameServiceContainer Services { get; }
 
         public bool IsFixedTimeStep { get; set; } = true;
-        public GameTime Time { get; } = new GameTime();
 
-        [CLSCompliant(false)]
-        public GameWindow Window => Platform.Window;
-
+        public GameWindow? Window => Platform.Window;
         public bool IsActive => Platform.IsActive;
 
         public bool IsMouseVisible
@@ -248,9 +186,14 @@ namespace MonoGame.Framework
                 {
                     _graphicsDeviceService = Services.GetService<IGraphicsDeviceService>();
                     if (_graphicsDeviceService == null)
-                        throw new InvalidOperationException("No Graphics Device Service");
+                        throw new InvalidOperationException(FrameworkResources.NoGraphicsDeviceService);
                 }
-                return _graphicsDeviceService.GraphicsDevice;
+
+                var device = _graphicsDeviceService.GraphicsDevice;
+                if (device == null)
+                    throw new InvalidOperationException(FrameworkResources.NoGraphicsDeviceInService);
+
+                return device;
             }
         }
 
@@ -393,18 +336,11 @@ namespace MonoGame.Framework
 
             RetryTick:
 
-            if (!IsActive && (InactiveSleepTime.TotalMilliseconds >= 1.0))
-            {
-#if WINDOWS_UAP
-                lock (_locker)
-                    Monitor.Wait(_locker, InactiveSleepTime);
-#else
-                Thread.Sleep(InactiveSleepTime);
-#endif
-            }
+            if (!IsActive && InactiveSleepTime.Ticks >= TimeSpan.TicksPerMillisecond)
+                ThreadHelper.Instance.Sleep(SleepMutex, InactiveSleepTime.Milliseconds);
 
             // Advance the accumulated elapsed time.
-            var currentTicks = Stopwatch.GetTimestamp();
+            long currentTicks = Stopwatch.GetTimestamp();
             _accumulatedElapsedTicks += currentTicks - _previousTicks;
             _previousTicks = currentTicks;
 
@@ -416,26 +352,8 @@ namespace MonoGame.Framework
                 // Check if the sleep time is more than 1 millisecond.
                 if (sleepTicks >= Stopwatch.Frequency / 1000)
                 {
-                    var sleepTime = TimeSpan.FromTicks(sleepTicks);
-
-                    switch (_currentOS)
-                    {
-                        case PlatformInfo.OS.Windows:
-                            if (PlatformInfo.Platform == MonoGamePlatform.WindowsUniversal)
-                            {
-                                lock (Locker)
-                                    Monitor.Wait(Locker, sleepTime);
-                            }
-                            else
-                            {
-                                Thread.Sleep(sleepTime);
-                            }
-                            break;
-
-                        default:
-                            Thread.Sleep(sleepTime);
-                            break;
-                    }
+                    int sleepMillis = (int)(sleepTicks / TimeSpan.TicksPerMillisecond);
+                    ThreadHelper.Instance.Sleep(SleepMutex, sleepMillis);
                 }
 
                 // Keep looping until it's time to perform the next update
@@ -529,11 +447,6 @@ namespace MonoGame.Framework
             if (_shouldExit)
                 return;
 
-            // TODO: This should be removed once all platforms use the new GraphicsDeviceManager
-#if !(WINDOWS && DIRECTX)
-            InternalApplyChanges();
-#endif
-
             // According to the information given on MSDN (see link below),
             // all GameComponents in Components at the time Initialize() is called are initialized.
             // http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.game.initialize.aspx
@@ -542,23 +455,28 @@ namespace MonoGame.Framework
 
             _graphicsDeviceService = Services.GetService<IGraphicsDeviceService>();
 
+            // TODO: This should be removed once all platforms use the new GraphicsDeviceManager
+#if !(WINDOWS && DIRECTX)
             if (_graphicsDeviceService != null &&
                 _graphicsDeviceService.GraphicsDevice != null)
             {
-                LoadContent();
+                InternalApplyChanges();
             }
+#endif
+
+            LoadContent();
         }
 
-        private static readonly Action<IDrawable, GameTime> DrawAction =
+        private static Action<IDrawable, GameTime> DrawAction { get; } =
             (drawable, gameTime) => drawable.Draw(gameTime);
+
+        private static Action<IUpdateable, GameTime> UpdateAction { get; } =
+            (updateable, gameTime) => updateable.Update(gameTime);
 
         protected virtual void Draw(GameTime gameTime)
         {
             _drawables.ForEachFilteredItem(DrawAction, gameTime);
         }
-
-        private static readonly Action<IUpdateable, GameTime> UpdateAction =
-            (updateable, gameTime) => updateable.Update(gameTime);
 
         protected virtual void Update(GameTime gameTime)
         {
@@ -668,8 +586,8 @@ namespace MonoGame.Framework
         internal void DoInitialize()
         {
             AssertNotDisposed();
-            if (GraphicsDevice == null && GraphicsDeviceManager != null)
-                _graphicsDeviceManager.CreateDevice();
+
+            GraphicsDeviceManager?.CreateDevice();
 
             Platform.BeforeInitialize();
             Initialize();
@@ -691,13 +609,14 @@ namespace MonoGame.Framework
 
         #endregion Internal Methods
 
-        internal GraphicsDeviceManager GraphicsDeviceManager
+        internal GraphicsDeviceManager? GraphicsDeviceManager
         {
             get
             {
                 if (_graphicsDeviceManager == null)
-                    _graphicsDeviceManager = Services.GetService<IGraphicsDeviceManager>();
-                return (GraphicsDeviceManager)_graphicsDeviceManager;
+                    _graphicsDeviceManager = Services.GetService<IGraphicsDeviceManager>() as GraphicsDeviceManager;
+
+                return _graphicsDeviceManager;
             }
             set
             {
@@ -750,265 +669,64 @@ namespace MonoGame.Framework
                 _drawables.Remove(drawable);
         }
 
-        /// <summary>
-        /// Provides efficient, reusable sorting and filtering based on a
-        /// configurable sort comparer, filter predicate, and associate change events.
-        /// </summary>
-        private class SortingFilteringCollection<T> : ICollection<T>
+        #region IDisposable
+
+        protected virtual void Dispose(bool disposing)
         {
-            private readonly List<T> _items;
-            private readonly List<AddJournalEntry<T>> _addJournal;
-            private readonly Comparison<AddJournalEntry<T>> _addJournalSortComparison;
-            private readonly List<int> _removeJournal;
-            private readonly List<T> _cachedFilteredItems;
-            private bool _shouldRebuildCache;
-
-            private readonly Predicate<T> _filter;
-            private readonly Comparison<T> _sort;
-            private readonly Action<T, Event<object>> _filterChangedSubscriber;
-            private readonly Action<T, Event<object>> _filterChangedUnsubscriber;
-            private readonly Action<T, Event<object>> _sortChangedSubscriber;
-            private readonly Action<T, Event<object>> _sortChangedUnsubscriber;
-
-            public SortingFilteringCollection(
-                Predicate<T> filter,
-                Action<T, Event<object>> filterChangedSubscriber,
-                Action<T, Event<object>> filterChangedUnsubscriber,
-                Comparison<T> sort,
-                Action<T, Event<object>> sortChangedSubscriber,
-                Action<T, Event<object>> sortChangedUnsubscriber)
+            if (!_isDisposed)
             {
-                _items = new List<T>();
-                _addJournal = new List<AddJournalEntry<T>>();
-                _removeJournal = new List<int>();
-                _cachedFilteredItems = new List<T>();
-                _shouldRebuildCache = true;
-
-                _filter = filter;
-                _filterChangedSubscriber = filterChangedSubscriber;
-                _filterChangedUnsubscriber = filterChangedUnsubscriber;
-                _sort = sort;
-                _sortChangedSubscriber = sortChangedSubscriber;
-                _sortChangedUnsubscriber = sortChangedUnsubscriber;
-
-                _addJournalSortComparison = CompareAddJournalEntry;
-            }
-
-            private int CompareAddJournalEntry(AddJournalEntry<T> x, AddJournalEntry<T> y)
-            {
-                int result = _sort(x.Item, y.Item);
-                if (result != 0)
-                    return result;
-                return x.Order - y.Order;
-            }
-
-            public void ForEachFilteredItem<TUserData>(Action<T, TUserData> action, TUserData userData)
-            {
-                if (_shouldRebuildCache)
+                if (disposing)
                 {
-                    ProcessRemoveJournal();
-                    ProcessAddJournal();
-
-                    // Rebuild the cache
-                    _cachedFilteredItems.Clear();
-                    for (int i = 0; i < _items.Count; ++i)
-                        if (_filter(_items[i]))
-                            _cachedFilteredItems.Add(_items[i]);
-
-                    _shouldRebuildCache = false;
-                }
-
-                for (int i = 0; i < _cachedFilteredItems.Count; ++i)
-                    action(_cachedFilteredItems[i], userData);
-
-                // If the cache was invalidated as a result of processing items,
-                // now is a good time to clear it and give the GC (more of) a
-                // chance to do its thing.
-                if (_shouldRebuildCache)
-                    _cachedFilteredItems.Clear();
-            }
-
-            public void Add(T item)
-            {
-                // NOTE: We subscribe to item events after items in _addJournal have been merged.
-                _addJournal.Add(new AddJournalEntry<T>(_addJournal.Count, item));
-                InvalidateCache();
-            }
-
-            public bool Remove(T item)
-            {
-                if (_addJournal.Remove(AddJournalEntry<T>.CreateKey(item)))
-                    return true;
-
-                var index = _items.IndexOf(item);
-                if (index >= 0)
-                {
-                    UnsubscribeFromItemEvents(item);
-                    _removeJournal.Add(index);
-                    InvalidateCache();
-                    return true;
-                }
-                return false;
-            }
-
-            public void Clear()
-            {
-                for (int i = 0; i < _items.Count; ++i)
-                {
-                    _filterChangedUnsubscriber(_items[i], Item_FilterPropertyChanged);
-                    _sortChangedUnsubscriber(_items[i], Item_SortPropertyChanged);
-                }
-
-                _addJournal.Clear();
-                _removeJournal.Clear();
-                _items.Clear();
-
-                InvalidateCache();
-            }
-
-            public bool Contains(T item)
-            {
-                return _items.Contains(item);
-            }
-
-            public void CopyTo(T[] array, int arrayIndex)
-            {
-                _items.CopyTo(array, arrayIndex);
-            }
-
-            public int Count => _items.Count;
-
-            public bool IsReadOnly => false;
-
-            public IEnumerator<T> GetEnumerator()
-            {
-                return _items.GetEnumerator();
-            }
-
-            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-            {
-                return ((System.Collections.IEnumerable)_items).GetEnumerator();
-            }
-
-            private static readonly Comparison<int> RemoveJournalSortComparison =
-                (x, y) => Comparer<int>.Default.Compare(y, x); // Sort high to low
-
-            private void ProcessRemoveJournal()
-            {
-                if (_removeJournal.Count == 0)
-                    return;
-
-                // Remove items in reverse.  (Technically there exist faster
-                // ways to bulk-remove from a variable-length array, but List<T>
-                // does not provide such a method.)
-                _removeJournal.Sort(RemoveJournalSortComparison);
-                for (int i = 0; i < _removeJournal.Count; ++i)
-                    _items.RemoveAt(_removeJournal[i]);
-                _removeJournal.Clear();
-            }
-
-            private void ProcessAddJournal()
-            {
-                if (_addJournal.Count == 0)
-                    return;
-
-                // Prepare the _addJournal to be merge-sorted with _items.
-                // _items is already sorted (because it is always sorted).
-                _addJournal.Sort(_addJournalSortComparison);
-
-                int iAddJournal = 0;
-                int iItems = 0;
-
-                while (iItems < _items.Count && iAddJournal < _addJournal.Count)
-                {
-                    var addJournalItem = _addJournal[iAddJournal].Item;
-                    // If addJournalItem is less than (belongs before)
-                    // _items[iItems], insert it.
-                    if (_sort(addJournalItem, _items[iItems]) < 0)
+                    // Dispose loaded game components
+                    for (int i = Components.Count; i-- > 0;)
                     {
-                        SubscribeToItemEvents(addJournalItem);
-                        _items.Insert(iItems, addJournalItem);
-                        ++iAddJournal;
+                        if (Components[i] is IDisposable disposable)
+                            disposable.Dispose();
                     }
-                    // Always increment iItems, either because we inserted and
-                    // need to move past the insertion, or because we didn't
-                    // insert and need to consider the next element.
-                    ++iItems;
+                    Components = null!;
+
+                    if (_content != null)
+                    {
+                        _content.Dispose();
+                        _content = null!;
+                    }
+
+                    if (_graphicsDeviceManager != null)
+                    {
+                        _graphicsDeviceManager.Dispose();
+                        _graphicsDeviceManager = null!;
+                    }
+
+                    if (Platform != null)
+                    {
+                        Platform.Activated -= OnActivated;
+                        Platform.Deactivated -= OnDeactivated;
+                        Services.RemoveService<GamePlatform>();
+
+                        Platform.Dispose();
+                    }
+
+                    ContentTypeReaderManager.ClearReaderFactories();
+
+                    SoundEffect.PlatformShutdown();
                 }
 
-                // If _addJournal had any "tail" items, append them all now.
-                for (; iAddJournal < _addJournal.Count; ++iAddJournal)
-                {
-                    var addJournalItem = _addJournal[iAddJournal].Item;
-                    SubscribeToItemEvents(addJournalItem);
-                    _items.Add(addJournalItem);
-                }
-
-                _addJournal.Clear();
-            }
-
-            private void SubscribeToItemEvents(T item)
-            {
-                _filterChangedSubscriber(item, Item_FilterPropertyChanged);
-                _sortChangedSubscriber(item, Item_SortPropertyChanged);
-            }
-
-            private void UnsubscribeFromItemEvents(T item)
-            {
-                _filterChangedUnsubscriber(item, Item_FilterPropertyChanged);
-                _sortChangedUnsubscriber(item, Item_SortPropertyChanged);
-            }
-
-            private void InvalidateCache()
-            {
-                _shouldRebuildCache = true;
-            }
-
-            private void Item_FilterPropertyChanged(object sender)
-            {
-                InvalidateCache();
-            }
-
-            private void Item_SortPropertyChanged(object sender)
-            {
-                var item = (T)sender;
-                var index = _items.IndexOf(item);
-
-                _addJournal.Add(new AddJournalEntry<T>(_addJournal.Count, item));
-                _removeJournal.Add(index);
-
-                // Until the item is back in place, we don't care about its
-                // events.  We will re-subscribe when _addJournal is processed.
-                UnsubscribeFromItemEvents(item);
-                InvalidateCache();
+                _isDisposed = true;
+                Disposed?.Invoke(this);
             }
         }
 
-        private readonly struct AddJournalEntry<T>
+        public void Dispose()
         {
-            public readonly int Order;
-            public readonly T Item;
-
-            public AddJournalEntry(int order, T item)
-            {
-                Order = order;
-                Item = item;
-            }
-
-            public static AddJournalEntry<T> CreateKey(T item) => new AddJournalEntry<T>(-1, item);
-
-            public override bool Equals(object obj)
-            {
-                if (obj is AddJournalEntry<T> entry)
-                {
-                    return Item is IEquatable<T> equatable
-                        ? equatable.Equals(entry.Item)
-                        : Equals(Item, entry.Item);
-                }
-                return false;
-            }
-
-            public override int GetHashCode() => Item.GetHashCode();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
+
+        ~Game()
+        {
+            Dispose(false);
+        }
+
+        #endregion 
     }
 }

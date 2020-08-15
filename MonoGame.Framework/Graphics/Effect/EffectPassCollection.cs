@@ -1,13 +1,32 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace MonoGame.Framework.Graphics
 {
     public class EffectPassCollection : IEnumerable<EffectPass>
     {
-		private readonly EffectPass[] _passes;
+        private readonly EffectPass[] _passes;
 
-        internal EffectPassCollection(EffectPass [] passes)
+        public int Count => _passes.Length;
+
+        public EffectPass this[int index] => _passes[index];
+
+        public EffectPass? this[string name]
+        {
+            get
+            {
+                // TODO: Add a name to pass lookup table.
+                foreach (var pass in _passes)
+                {
+                    if (pass.Name == name)
+                        return pass;
+                }
+                return null;
+            }
+        }
+
+        internal EffectPassCollection(EffectPass[] passes)
         {
             _passes = passes;
         }
@@ -15,44 +34,24 @@ namespace MonoGame.Framework.Graphics
         internal EffectPassCollection Clone(Effect effect)
         {
             var passes = new EffectPass[_passes.Length];
+
             for (var i = 0; i < _passes.Length; i++)
                 passes[i] = new EffectPass(effect, _passes[i]);
 
             return new EffectPassCollection(passes);
         }
 
-        public EffectPass this[int index]
-        {
-            get { return _passes[index]; }
-        }
-
-        public EffectPass this[string name]
-        {
-            get 
-            {
-                // TODO: Add a name to pass lookup table.
-				foreach (var pass in _passes) 
-                {
-					if (pass.Name == name)
-						return pass;
-				}
-				return null;
-		    }
-        }
-
-        public int Count => _passes.Length;
-
         public Enumerator GetEnumerator()
         {
             return new Enumerator(_passes);
         }
-            
+
         IEnumerator<EffectPass> IEnumerable<EffectPass>.GetEnumerator()
         {
             return ((IEnumerable<EffectPass>)_passes).GetEnumerator();
         }
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return _passes.GetEnumerator();
         }
@@ -62,11 +61,23 @@ namespace MonoGame.Framework.Graphics
             private readonly EffectPass[] _array;
             private int _index;
 
+            public EffectPass Current { get; private set; }
+
+            object IEnumerator.Current
+            {
+                get
+                {
+                    if (_index == _array.Length + 1)
+                        throw new InvalidOperationException();
+                    return Current;
+                }
+            }
+
             internal Enumerator(EffectPass[] array)
             {
                 _array = array;
                 _index = 0;
-                Current = null;
+                Current = null!;
             }
 
             public bool MoveNext()
@@ -77,32 +88,20 @@ namespace MonoGame.Framework.Graphics
                     _index++;
                     return true;
                 }
+
                 _index = _array.Length + 1;
-                Current = null;
+                Current = null!;
                 return false;
             }
 
-            public EffectPass Current { get; private set; }
+            public void Reset()
+            {
+                _index = 0;
+                Current = null!;
+            }
 
             public void Dispose()
             {
-
-            }
-
-            object System.Collections.IEnumerator.Current
-            {
-                get
-                {
-                    if (_index == _array.Length + 1)
-                        throw new InvalidOperationException();
-                    return Current;
-                }
-            }
-
-            void System.Collections.IEnumerator.Reset()
-            {
-                _index = 0;
-                Current = null;
             }
         }
     }

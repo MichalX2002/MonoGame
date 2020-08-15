@@ -74,7 +74,7 @@ namespace MonoGame.Framework.Graphics
             in Matrix4x4 world, 
             in Matrix4x4 view, 
             in Matrix4x4 projection, 
-            Matrix4x4 worldView,
+            ref Matrix4x4 worldView,
             bool fogEnabled, 
             float fogStart,
             float fogEnd,

@@ -1490,7 +1490,7 @@ namespace StbSharp
         public static void Setup(
             ref ResizeContext context,
             int inputW, int inputH, int outputW, int outputH, int channels,
-            StbImageResize.ResizeProgressCallback? onProgress)
+            ResizeProgressCallback? onProgress)
         {
             context.input_w = inputW;
             context.input_h = inputH;
@@ -1703,7 +1703,7 @@ namespace StbSharp
             Filter? horizontalFilter, Filter? verticalFilter,
             WrapMode horizontalWrap, WrapMode verticalWrap,
             ColorSpace colorspace,
-            StbImageResize.ResizeProgressCallback? onProgress = null)
+            ResizeProgressCallback? onProgress = null)
         {
             var context = new ResizeContext();
             Setup(ref context, inputW, inputH, outputW, outputH, channels, onProgress);
@@ -1737,7 +1737,7 @@ namespace StbSharp
             ReadOnlySpan<byte> inputPixels, int inputW, int inputH, int inputStrideInBytes,
             Span<byte> outputPixels, int outputW, int outputH, int outputStrideInBytes,
             int numChannels,
-            StbImageResize.ResizeProgressCallback? onProgress = null)
+            ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH, inputStrideInBytes,
@@ -1754,7 +1754,7 @@ namespace StbSharp
             ReadOnlySpan<float> inputPixels, int inputW, int inputH, int inputStrideInBytes,
             Span<byte> outputPixels, int outputW, int outputH, int outputStrideInBytes,
             int numChannels,
-            StbImageResize.ResizeProgressCallback? onProgress = null)
+            ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 MemoryMarshal.AsBytes(inputPixels), inputW, inputH, inputStrideInBytes,
@@ -1771,7 +1771,7 @@ namespace StbSharp
             ReadOnlySpan<byte> inputPixels, int inputW, int inputH, int inputStrideInBytes,
             Span<byte> outputPixels, int outputW, int outputH, int outputStrideInBytes,
             int numChannels, int alphaChannel, int flags,
-            StbImageResize.ResizeProgressCallback? onProgress = null)
+            ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH, inputStrideInBytes,
@@ -1789,7 +1789,7 @@ namespace StbSharp
             Span<byte> outputPixels, int outputW, int outputH, int outputStrideInBytes,
             int numChannels, int alphaChannel, int flags,
             WrapMode wrapmode,
-            StbImageResize.ResizeProgressCallback? onProgress = null)
+            ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH, inputStrideInBytes,
@@ -1808,7 +1808,7 @@ namespace StbSharp
             int numChannels, int alphaChannel, int flags,
             WrapMode wrapmode, Filter filter,
             ColorSpace colorspace,
-            StbImageResize.ResizeProgressCallback? onProgress = null)
+            ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH,
@@ -1829,7 +1829,7 @@ namespace StbSharp
             int numChannels, int alphaChannel, int flags,
             WrapMode wrapmode, Filter filter,
             ColorSpace colorspace,
-            StbImageResize.ResizeProgressCallback? onProgress = null)
+            ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 MemoryMarshal.AsBytes(inputPixels), inputW, inputH,
@@ -1849,7 +1849,7 @@ namespace StbSharp
             int numChannels, int alphaChannel, int flags,
             WrapMode wrapmode, Filter filter,
             ColorSpace colorspace,
-            StbImageResize.ResizeProgressCallback? onProgress = null)
+            ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 MemoryMarshal.AsBytes(inputPixels), inputW, inputH, inputStrideInBytes,
@@ -1869,7 +1869,7 @@ namespace StbSharp
             WrapMode horizontalWrap, WrapMode verticalWrap,
             Filter horizontalFilter, Filter verticalFilter,
             ColorSpace colorspace,
-            StbImageResize.ResizeProgressCallback? onProgress = null)
+            ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH, inputStrideInBytes,
@@ -1889,7 +1889,7 @@ namespace StbSharp
             WrapMode horizontalWrap, WrapMode verticalWrap,
             Filter horizontalFilter, Filter verticalFilter,
             ColorSpace colorspace, Transform? transform,
-            StbImageResize.ResizeProgressCallback? onProgress = null)
+            ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH, inputStrideInBytes,
@@ -1910,7 +1910,7 @@ namespace StbSharp
             Filter horizontalFilter, Filter verticalFilter,
             ColorSpace colorspace,
             float s0, float t0, float s1, float t1,
-            StbImageResize.ResizeProgressCallback? onProgress = null)
+            ResizeProgressCallback? onProgress = null)
         {
             return ResizeArbitrary(
                 inputPixels, inputW, inputH, inputStrideInBytes,

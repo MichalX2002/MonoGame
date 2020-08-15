@@ -14,7 +14,7 @@ namespace MonoGame.Framework
     public partial class GraphicsDeviceManager : IGraphicsDeviceService, IGraphicsDeviceManager, IDisposable
     {
         private readonly Game _game;
-        private bool _initialized = false;
+        private bool _initialized;
 
         private int _preferredBackBufferHeight;
         private int _preferredBackBufferWidth;
@@ -24,7 +24,6 @@ namespace MonoGame.Framework
         private DisplayOrientation _supportedOrientations;
         private PresentInterval _presentInterval;
         private bool _drawBegun;
-        private bool _disposed;
         private bool _hardwareModeSwitch = true;
         private bool _wantFullScreen;
         private GraphicsProfile _graphicsProfile;
@@ -42,6 +41,11 @@ namespace MonoGame.Framework
         public const int DefaultBackBufferHeight = 480;
 
         #region Properties
+
+        /// <summary>
+        /// Gets whether the manager is disposed.
+        /// </summary>
+        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Gets or sets the profile which determines the graphics feature level.
@@ -274,7 +278,7 @@ namespace MonoGame.Framework
             _game.Services.AddService<IGraphicsDeviceService>(this);
         }
 
-        private void CreateDevice()
+        public void CreateDevice()
         {
             if (GraphicsDevice != null)
                 return;
@@ -315,11 +319,6 @@ namespace MonoGame.Framework
             GraphicsDevice.PresentationChanged += OnPresentationChanged;
 
             OnDeviceCreated();
-        }
-
-        void IGraphicsDeviceManager.CreateDevice()
-        {
-            CreateDevice();
         }
 
         public bool BeginDraw()
@@ -519,27 +518,26 @@ namespace MonoGame.Framework
 
         #region IDisposable
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!IsDisposed)
             {
                 if (disposing)
                 {
                     GraphicsDevice?.Dispose();
                     GraphicsDevice = null;
                 }
-                _disposed = true;
+
+                IsDisposed = true;
                 Disposed?.Invoke(this);
             }
         }
 
-        #endregion
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         /// <summary>
         /// Finalizes the <see cref="GraphicsDeviceManager"/> and disposes it.
@@ -548,5 +546,7 @@ namespace MonoGame.Framework
         {
             Dispose(false);
         }
+
+        #endregion
     }
 }

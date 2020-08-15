@@ -22,7 +22,7 @@ namespace MonoGame.Framework.Audio
             throw new AudioHardwareException(string.Format("{0} - {1}",
                 operation, string.Format(errorFmt, error)));
         }
-       
+
         internal static void PopulateCaptureDevices()
         {
             // clear microphones
@@ -38,11 +38,11 @@ namespace MonoGame.Framework.Audio
             IntPtr deviceList = ALC.alcGetString(IntPtr.Zero, (int)ALCGetString.CaptureDeviceSpecifier);
 
             // we need to marshal a string array
-            string deviceIdentifier = Marshal.PtrToStringAnsi(deviceList);
+            string? deviceIdentifier = Marshal.PtrToStringAnsi(deviceList);
             while (!string.IsNullOrEmpty(deviceIdentifier))
-            {  
+            {
                 var microphone = new Microphone(deviceIdentifier);
-                _allMicrophones.Add(microphone);          
+                _allMicrophones.Add(microphone);
                 if (deviceIdentifier == defaultDevice)
                     Default = microphone;
 
@@ -114,12 +114,15 @@ namespace MonoGame.Framework.Audio
 
         internal void Update()
         {
-            int sampleCount = GetQueuedSampleCount();
-            if (sampleCount > 0)
-                BufferReady.Invoke(this, sampleCount);
+            if (BufferReady != null)
+            {
+                int sampleCount = GetQueuedSampleCount();
+                if (sampleCount > 0)
+                    BufferReady.Invoke(this, sampleCount);
+            }
         }
 
-        internal unsafe int PlatformGetData<T>(Span<T> buffer) 
+        internal unsafe int PlatformGetData<T>(Span<T> buffer)
             where T : unmanaged
         {
             int sampleCount = GetQueuedSampleCount();

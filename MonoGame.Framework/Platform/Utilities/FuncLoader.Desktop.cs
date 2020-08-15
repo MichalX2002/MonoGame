@@ -8,7 +8,7 @@ namespace MonoGame.Framework
     [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Interop")]
     internal class FuncLoader
     {
-        private class Windows
+        private static class Windows
         {
             [DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
             public static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
@@ -17,7 +17,7 @@ namespace MonoGame.Framework
             public static extern IntPtr LoadLibraryW(string lpszLib);
         }
 
-        private class Linux
+        private static class Linux
         {
             [DllImport("libdl.so.2")]
             public static extern IntPtr dlopen(string path, int flags);
@@ -26,7 +26,7 @@ namespace MonoGame.Framework
             public static extern IntPtr dlsym(IntPtr handle, string symbol);
         }
 
-        private class OSX
+        private static class OSX
         {
             [DllImport("/usr/lib/libSystem.dylib")]
             public static extern IntPtr dlopen(string path, int flags);
@@ -90,7 +90,8 @@ namespace MonoGame.Framework
             return Linux.dlopen(libname, RTLD_LAZY);
         }
 
-        public static T LoadFunction<T>(IntPtr library, string function, bool throwIfNotFound = false)
+        public static T? LoadFunction<T>(IntPtr library, string function, bool throwIfNotFound = false)
+            where T : Delegate
         {
             var ret = IntPtr.Zero;
 
@@ -109,11 +110,7 @@ namespace MonoGame.Framework
                 return default;
             }
 
-#if NETSTANDARD
             return Marshal.GetDelegateForFunctionPointer<T>(ret);
-#else
-            return (T)(object)Marshal.GetDelegateForFunctionPointer(ret, typeof(T));
-#endif
         }
     }
 }

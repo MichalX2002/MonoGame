@@ -1,23 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace MonoGame.Framework.Graphics
 {
     /// <summary>
-    /// Represents a mesh that is part of a Model.
+    /// Represents a mesh that is part of a <see cref="Model"/>.
     /// </summary>
     public sealed class ModelMesh
     {
-        private GraphicsDevice _graphicsDevice;
+        private ModelBone _parentBone;
 
-        public ModelMesh(GraphicsDevice graphicsDevice, List<ModelMeshPart> parts)
+        /// <summary>
+        /// Constructs the model mesh out of required components.
+        /// </summary>
+        /// <param name="parts"></param>
+        /// <param name="parentBone"></param>
+        public ModelMesh(List<ModelMeshPart> parts, ModelBone parentBone)
         {
             // TODO: Complete member initialization
-            _graphicsDevice = graphicsDevice;
+            _parentBone = parentBone ?? throw new ArgumentNullException(nameof(parentBone));
 
             MeshParts = new ModelMeshPartCollection(parts);
 
-            for (int i = 0; i < parts.Count; i++)
-                parts[i].parent = this;
+            for (int i = 0; i < MeshParts.Count; i++)
+                MeshParts[i]._parent = this;
 
             Effects = new ModelEffectCollection();
         }
@@ -50,31 +56,38 @@ namespace MonoGame.Framework.Graphics
         /// Gets the <see cref="ModelMeshPart"/> objects that make up this mesh.
         /// Each part is composed of primitives that share the same material.
         /// </summary>
-        public ModelMeshPartCollection MeshParts { get; set; }
-
-        /// <summary>
-        /// Gets the name of this mesh.
-        /// </summary>
-        public string Name { get; set; }
+        public ModelMeshPartCollection MeshParts { get; }
 
         /// <summary>
         /// Gets the parent bone for this mesh. The parent bone contains a
         /// transformation matrix that describes the mesh location relative to
         /// any parent meshes in a model.
         /// </summary>
-        public ModelBone ParentBone { get; set; }
+        public ModelBone ParentBone
+        {
+            get => _parentBone;
+            set => _parentBone = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        /// <summary>
+        /// Gets the name of this mesh.
+        /// </summary>
+        public string? Name { get; set; }
 
         /// <summary>
         /// Gets or sets an object identifying this mesh.
         /// </summary>
-        public object Tag { get; set; }
+        public object? Tag { get; set; }
 
         /// <summary>
         /// Draws all the <see cref="ModelMeshPart"/> object in this mesh, 
         /// using their current <see cref="Effect"/> settings.
         /// </summary>
-        public void Draw()
+        public void Draw(GraphicsDevice graphicsDevice)
         {
+            if (graphicsDevice == null)
+                throw new ArgumentNullException(nameof(graphicsDevice));
+
             for (int i = 0; i < MeshParts.Count; i++)
             {
                 var part = MeshParts[i];
@@ -82,13 +95,23 @@ namespace MonoGame.Framework.Graphics
 
                 if (part.PrimitiveCount > 0)
                 {
-                    _graphicsDevice.SetVertexBuffer(part.VertexBuffer);
-                    _graphicsDevice.Indices = part.IndexBuffer;
+                    graphicsDevice.SetVertexBuffer(part.VertexBuffer);
+                    graphicsDevice.Indices = part.IndexBuffer;
 
-                    for (int j = 0; j < effect.CurrentTechnique.Passes.Count; j++)
+                    if (effect != null)
                     {
-                        effect.CurrentTechnique.Passes[j].Apply();
-                        _graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, part.VertexOffset, part.StartIndex, part.PrimitiveCount);
+                        foreach (var pass in effect.CurrentTechnique.Passes)
+                        {
+                            pass.Apply();
+
+                            graphicsDevice.DrawIndexedPrimitives(
+                                PrimitiveType.TriangleList, part.VertexOffset, part.StartIndex, part.PrimitiveCount);
+                        }
+                    }
+                    else
+                    {
+                        graphicsDevice.DrawIndexedPrimitives(
+                            PrimitiveType.TriangleList, part.VertexOffset, part.StartIndex, part.PrimitiveCount);
                     }
                 }
             }

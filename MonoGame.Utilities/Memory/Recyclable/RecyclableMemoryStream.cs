@@ -265,11 +265,7 @@ namespace MonoGame.Framework.Memory
         /// <summary>
         /// Equivalent to <see cref="Stream.Dispose"/>.
         /// </summary>
-#if NETSTANDARD1_4
-        public void Close()
-#else
         public override void Close()
-#endif
         {
             Dispose(true);
         }
@@ -385,11 +381,7 @@ namespace MonoGame.Framework.Memory
         /// a new buffer from the pool will be required.
         /// </remarks>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-#if NETSTANDARD1_4
-        public byte[] GetBuffer()
-#else
         public override byte[] GetBuffer()
-#endif
         {
             CheckDisposed();
 

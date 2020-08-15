@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using MonoGame.Framework.Graphics;
-using System.Globalization;
+﻿using MonoGame.Framework.Graphics;
 
 namespace MonoGame.Effect.TPGParser
 {
@@ -18,7 +15,7 @@ namespace MonoGame.Effect.TPGParser
         public BlendState blendState;
         public RasterizerState rasterizerState;
         public DepthStencilState depthStencilState;
-		
+        
         private static Blend ToAlphaBlend(Blend blend)
         {
             switch (blend)

@@ -61,7 +61,7 @@ namespace MonoGame.Framework.Graphics
                     return 4;
             }
 
-            throw new ArgumentException();
+            throw new ArgumentOutOfRangeException(nameof(elementFormat));
         }
 
         internal static VertexPointerType OpenGLVertexPointerType(this VertexElementFormat elementFormat)
@@ -105,7 +105,7 @@ namespace MonoGame.Framework.Graphics
                     return VertexPointerType.Float;
             }
 
-            throw new ArgumentException();
+            throw new ArgumentOutOfRangeException(nameof(elementFormat));
         }
 
         internal static VertexAttribPointerType OpenGLVertexAttribPointerType(this VertexElementFormat elementFormat)
@@ -151,7 +151,7 @@ namespace MonoGame.Framework.Graphics
 #endif
             }
 
-            throw new ArgumentException();
+            throw new ArgumentOutOfRangeException(nameof(elementFormat));
         }
 
         public static bool OpenGLVertexAttribNormalized(this VertexElement element)
@@ -221,7 +221,7 @@ namespace MonoGame.Framework.Graphics
 #endif
             }
 
-            throw new ArgumentException();
+            throw new ArgumentOutOfRangeException(nameof(elementFormat));
         }
 
         internal static NormalPointerType OpenGLNormalPointerType(this VertexElementFormat elementFormat)
@@ -267,7 +267,7 @@ namespace MonoGame.Framework.Graphics
 #endif
             }
 
-            throw new ArgumentException();
+            throw new ArgumentOutOfRangeException(nameof(elementFormat));
         }
 
         internal static TexCoordPointerType OpenGLTexCoordPointerType(this VertexElementFormat elementFormat)
@@ -313,7 +313,7 @@ namespace MonoGame.Framework.Graphics
 #endif
             }
 
-            throw new ArgumentException();
+            throw new ArgumentOutOfRangeException(nameof(elementFormat));
         }
 
 
@@ -335,7 +335,7 @@ namespace MonoGame.Framework.Graphics
                     return BlendEquationMode.FuncSubtract;
 
                 default:
-                    throw new ArgumentException();
+                    throw new ArgumentOutOfRangeException(nameof(function));
             }
         }
 
@@ -369,6 +369,7 @@ namespace MonoGame.Framework.Graphics
                     return BlendingFactorSrc.SrcColor;
                 case Blend.Zero:
                     return BlendingFactorSrc.Zero;
+
                 default:
                     throw new ArgumentOutOfRangeException(
                         nameof(blend), "The specified blend function is not implemented.");

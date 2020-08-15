@@ -24,7 +24,6 @@ namespace MonoGame.Framework.Content
 
         private IGraphicsDeviceService _graphicsDeviceService;
         private HashSet<IDisposable> _disposableAssets = new HashSet<IDisposable>();
-        private bool _disposed;
 
         private static ReadOnlyMemory<string> CultureNames { get; } = new[]
         {
@@ -78,6 +77,8 @@ namespace MonoGame.Framework.Content
         /// </summary>
         protected Dictionary<string, object?> LoadedAssets { get; } =
             new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
+
+        public bool IsDisposed { get; private set; }
 
         public string RootDirectory { get; set; } = string.Empty;
         public IServiceProvider ServiceProvider { get; }
@@ -192,7 +193,7 @@ namespace MonoGame.Framework.Content
             if (string.IsNullOrEmpty(assetName))
                 throw new ArgumentNullException(nameof(assetName));
 
-            if (_disposed)
+            if (IsDisposed)
                 throw new ObjectDisposedException(nameof(ContentManager));
 
             // On some platforms, name and slash direction matter.
@@ -343,6 +344,9 @@ namespace MonoGame.Framework.Content
         {
             foreach (var asset in LoadedAssets)
             {
+                if (asset.Value == null)
+                    continue;
+
                 if (!ReloadAssetDelegateCache.TryGetValue(asset.Key, out var reloadAssetDelegate))
                 {
                     var methodInfo = ((Action<string, object>)ReloadAsset).Method.GetGenericMethodDefinition();
@@ -378,7 +382,7 @@ namespace MonoGame.Framework.Content
             if (string.IsNullOrEmpty(assetName))
                 throw new ArgumentNullException(nameof(assetName));
 
-            if (_disposed)
+            if (IsDisposed)
                 throw new ObjectDisposedException(nameof(ContentManager));
 
             if (_graphicsDeviceService == null)
@@ -414,28 +418,35 @@ namespace MonoGame.Framework.Content
             return RecyclableMemoryManager.Default.GetBuffer(size, nameof(ContentManager));
         }
 
-        // If disposing is true, it was called explicitly and we should dispose managed objects.
-        // If disposing is false, it was called by the finalizer and managed objects should not be disposed.
+        /// <summary>
+        /// Disposes this <see cref="ContentManager"/>.
+        /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!IsDisposed)
             {
+                // Once disposed, content manager wont be used again
+                RemoveContentManager(this);
+
                 if (disposing)
                     Unload();
 
-                _disposed = true;
+                IsDisposed = true;
             }
         }
 
+        /// <summary>
+        /// Disposes this <see cref="ContentManager"/>.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-
-            // Once disposed, content manager wont be used again
-            RemoveContentManager(this);
         }
 
+        /// <summary>
+        /// Disposes this <see cref="ContentManager"/>.
+        /// </summary>
         ~ContentManager()
         {
             Dispose(false);

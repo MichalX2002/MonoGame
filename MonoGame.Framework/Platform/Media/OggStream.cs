@@ -9,9 +9,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using NVorbis;
-using MonoGame.OpenAL;
 using MonoGame.Framework.Audio;
+using MonoGame.OpenAL;
+using NVorbis;
 
 namespace MonoGame.Framework.Media
 {
@@ -22,20 +22,21 @@ namespace MonoGame.Framework.Media
 
         private bool _leaveStreamOpen;
         private Stream _stream;
-
         private uint _alFilterId;
         private Queue<ALBuffer> _queuedBuffers;
 
         private float _volume;
         private float _pitch;
 
-        public Song Parent { get; }
-        public VorbisReader Reader { get; private set; }
+        public OggStreamer Streamer { get; }
+        public VorbisReader? Reader { get; private set; }
         public bool IsReady { get; private set; }
         public bool IsPreparing { get; private set; }
-
         public bool IsLooped { get; set; }
-        public Action OnFinished { get; private set; }
+
+        public Action? OnFinished { get; private set; }
+        public Action? OnLooped { get; private set; }
+
         public int QueuedBufferCount => _queuedBuffers.Count;
         public uint SourceId { get; private set; }
 
@@ -44,8 +45,8 @@ namespace MonoGame.Framework.Media
             get => _volume;
             set
             {
-                AL.Source(SourceId, ALSourcef.Gain, _volume = value);
-                ALHelper.CheckError("Failed to set volume.");
+                _volume = value;
+                UpdateVolume();
             }
         }
 
@@ -60,18 +61,26 @@ namespace MonoGame.Framework.Media
         }
 
         public OggStream(
-            Song parent, Stream stream, bool leaveOpen, Action onFinished = null)
+            Stream stream, bool leaveOpen, OggStreamer streamer,
+            Action? onFinished = null, Action? onLooped = null)
         {
-            Parent = parent;
-            OnFinished = onFinished;
+            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
+            Streamer = streamer ?? throw new ArgumentNullException(nameof(streamer));
             _leaveStreamOpen = leaveOpen;
-            _stream = stream;
+            OnFinished = onFinished;
+            OnLooped = onLooped;
 
             _queuedBuffers = new Queue<ALBuffer>();
-            SourceId = ALController.Instance.ReserveSource();
+            SourceId = Streamer.Controller.ReserveSource();
 
             Volume = 1;
             Pitch = 1;
+        }
+
+        internal void UpdateVolume()
+        {
+            AL.Source(SourceId, ALSourcef.Gain, _volume * Song.MasterVolume);
+            ALHelper.CheckError("Failed to set volume.");
         }
 
         public void Prepare(bool immediate)
@@ -108,7 +117,6 @@ namespace MonoGame.Framework.Media
                 }
 
                 IsPreparing = false;
-                OggStreamer.Instance.AddStream(this);
             }
         }
 
@@ -117,15 +125,14 @@ namespace MonoGame.Framework.Media
             var state = GetState();
             switch (state)
             {
-                case ALSourceState.Playing:
-                    return;
-
                 case ALSourceState.Paused:
                     Resume();
                     return;
 
-                default:
+                case ALSourceState.Initial:
+                case ALSourceState.Stopped:
                     Prepare(immediate);
+                    Streamer.AddStream(this);
 
                     AL.SourcePlay(SourceId);
                     ALHelper.CheckError("Failed to play source.");
@@ -139,7 +146,7 @@ namespace MonoGame.Framework.Media
             if (state != ALSourceState.Playing)
                 return;
 
-            OggStreamer.Instance.RemoveStream(this);
+            Streamer.RemoveStream(this);
             AL.SourcePause(SourceId);
             ALHelper.CheckError("Failed to pause source.");
         }
@@ -150,12 +157,12 @@ namespace MonoGame.Framework.Media
             if (state != ALSourceState.Paused)
                 return;
 
-            OggStreamer.Instance.AddStream(this);
+            Streamer.AddStream(this);
             AL.SourcePlay(SourceId);
             ALHelper.CheckError("Failed to play source.");
         }
 
-        void StopPlayback()
+        private void StopPlayback()
         {
             AL.SourceStop(SourceId);
             ALHelper.CheckError("Failed to stop source.");
@@ -169,9 +176,11 @@ namespace MonoGame.Framework.Media
 
                 lock (ReadMutex)
                 {
-                    OggStreamer.Instance.RemoveStream(this);
+                    Streamer.RemoveStream(this);
                     Empty();
-                    Reader.SamplePosition = 0;
+
+                    if (Reader != null)
+                        Reader.SamplePosition = 0;
                 }
 
                 AL.Source(SourceId, ALSourcei.Buffer, 0);
@@ -182,7 +191,7 @@ namespace MonoGame.Framework.Media
             }
         }
 
-        void Empty(int attempts = 0)
+        private void Empty(int attempts = 0)
         {
             AL.GetSource(SourceId, ALGetSourcei.BuffersProcessed, out int processed);
             ALHelper.CheckError("Failed to fetch processed buffers.");
@@ -221,6 +230,9 @@ namespace MonoGame.Framework.Media
         /// </summary>
         public void SeekTo(TimeSpan pos)
         {
+            if (Reader == null)
+                return;
+
             lock (ReadMutex)
             {
                 Stop();
@@ -253,23 +265,26 @@ namespace MonoGame.Framework.Media
             return state;
         }
 
-        internal void Open(bool precache = false)
+        public void Open(bool precache = false)
         {
             if (Reader == null)
             {
+                if (_stream == null)
+                    throw new ObjectDisposedException(GetType().Name);
+
                 var containerReader = new NVorbis.Ogg.OggContainerReader(_stream, _leaveStreamOpen);
                 Reader = new VorbisReader(containerReader);
-                _stream = null;
             }
 
             if (precache)
                 FillAndEnqueueBuffer();
+
             IsReady = true;
         }
 
         private void FillAndEnqueueBuffer()
         {
-            if (OggStreamer.Instance.TryFillBuffer(this, out ALBuffer buffer))
+            if (Streamer.TryFillBuffer(this, out var buffer))
                 QueueBuffer(buffer);
         }
 
@@ -287,19 +302,22 @@ namespace MonoGame.Framework.Media
             ALBufferPool.Return(buffer);
         }
 
-        public override int GetHashCode() => (int)SourceId;
+        public override int GetHashCode() => HashCode.Combine(SourceId);
 
         internal void Close()
         {
-            Reader?.Dispose();
-            Reader = null;
-
-            IsReady = false;
-
-            if (_stream != null && !_leaveStreamOpen)
+            lock (ReadMutex)
             {
-                _stream.Dispose();
-                _stream = null;
+                Reader?.Dispose();
+                Reader = null!;
+
+                IsReady = false;
+
+                if (_stream != null && !_leaveStreamOpen)
+                {
+                    _stream.Dispose();
+                    _stream = null!;
+                }
             }
         }
 
@@ -313,7 +331,7 @@ namespace MonoGame.Framework.Media
 
                 lock (ReadMutex)
                 {
-                    OggStreamer.Instance.RemoveStream(this);
+                    Streamer.RemoveStream(this);
                     if (state != ALSourceState.Initial)
                         Empty();
                     Close();
@@ -326,7 +344,7 @@ namespace MonoGame.Framework.Media
             while (_queuedBuffers.Count > 0)
                 DequeueAndReturnBuffer();
 
-            ALController.Instance.RecycleSource(SourceId);
+            Streamer.Controller.RecycleSource(SourceId);
             SourceId = 0;
         }
     }

@@ -10,6 +10,8 @@ namespace MonoGame.Imaging
     {
         private PixelBuffer _buffer;
 
+        public override int ByteStride => _buffer.ByteStride;
+
         protected PixelBuffer Buffer
         {
             get
@@ -18,8 +20,6 @@ namespace MonoGame.Imaging
                 return _buffer;
             }
         }
-
-        public override int ByteStride => _buffer.ByteStride;
 
         #region Constructors
 

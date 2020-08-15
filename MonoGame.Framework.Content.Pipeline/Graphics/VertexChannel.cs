@@ -115,9 +115,9 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
         /// <summary>
         /// Reads channel content and automatically converts it to the specified vector format.
         /// </summary>
-        /// <typeparam name="TargetType">Target vector format of the converted data.</typeparam>
+        /// <typeparam name="TTarget">Target vector format of the converted data.</typeparam>
         /// <returns>The converted data.</returns>
-        public abstract IEnumerable<TargetType> ReadConvertedContent<TargetType>();
+        public abstract IEnumerable<TTarget> ReadConvertedContent<TTarget>();
 
         /// <summary>
         /// Adds a new element to the end of the collection.

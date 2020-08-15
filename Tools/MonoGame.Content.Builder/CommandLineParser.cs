@@ -20,7 +20,7 @@ namespace MonoGame.Content.Builder
     /// </summary>
     public class MGBuildParser
     {
-        public static MGBuildParser Instance;
+        public static MGBuildParser Instance { get; private set; }
 
         private readonly object _optionsObject;
         private readonly Queue<MemberInfo> _requiredOptions;
@@ -35,9 +35,10 @@ namespace MonoGame.Content.Builder
 
         public MGBuildParser(object optionsObject)
         {
+            _optionsObject = optionsObject ?? throw new ArgumentNullException(nameof(optionsObject));
+
             Instance = this;
 
-            _optionsObject = optionsObject;
             _requiredOptions = new Queue<MemberInfo>();
             _optionalOptions = new Dictionary<string, MemberInfo>();
             _requiredUsageHelp = new List<string>();
@@ -188,7 +189,7 @@ namespace MonoGame.Content.Builder
                     var expected = ifCondition.Value;
                     if (!_properties.TryGetValue(ifCondition.Key, out string actual))
                         return;
-                    if (expected != string.Empty && !expected.Equals(actual))
+                    if (!string.IsNullOrEmpty(expected) && !expected.Equals(actual))
                         return;
                 }
             }
@@ -490,7 +491,7 @@ namespace MonoGame.Content.Builder
             }
 
             throw new ArgumentException(
-                "Only FieldInfo and PropertyInfo are valid arguments.", "member");
+                "Only FieldInfo and PropertyInfo are valid arguments.", nameof(member));
         }
 
         public string Title { get; set; }
@@ -599,7 +600,8 @@ namespace MonoGame.Content.Builder
             }
         }
 
-        static T GetAttribute<T>(ICustomAttributeProvider provider) where T : Attribute
+        static T GetAttribute<T>(ICustomAttributeProvider provider) 
+            where T : Attribute
         {
             return provider.GetCustomAttributes(typeof(T), false).OfType<T>().FirstOrDefault();
         }
