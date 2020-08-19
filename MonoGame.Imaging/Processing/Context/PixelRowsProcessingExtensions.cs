@@ -12,7 +12,8 @@ namespace MonoGame.Imaging.Processing
 
     public static class PixelRowsProcessingExtensions
     {
-        public static Image Process(this IReadOnlyPixelRows pixels, 
+        public static Image Process(
+            this IReadOnlyPixelRows pixels, 
             ImagingConfig imagingConfig, RowsProcessorCallback processor)
         {
             if (processor == null)
@@ -20,14 +21,16 @@ namespace MonoGame.Imaging.Processing
             return processor.Invoke(new ReadOnlyPixelRowsContext(imagingConfig, pixels));
         }
 
-        public static Image Process(this IReadOnlyPixelRows pixels, 
+        public static Image Process(
+            this IReadOnlyPixelRows pixels, 
             RowsProcessorCallback processor)
         {
             return Process(pixels, ImagingConfig.Default, processor);
         }
 
         public static Image<TPixel> Process<TPixel>(
-            this IReadOnlyPixelRows<TPixel> pixels, ImagingConfig imagingConfig, RowsProcessorCallback<TPixel> processor)
+            this IReadOnlyPixelRows<TPixel> pixels, 
+            ImagingConfig imagingConfig, RowsProcessorCallback<TPixel> processor)
             where TPixel : unmanaged, IPixel<TPixel>
         {
             if (processor == null)
@@ -36,7 +39,8 @@ namespace MonoGame.Imaging.Processing
         }
 
         public static Image<TPixel> Process<TPixel>(
-            this IReadOnlyPixelRows<TPixel> pixels, RowsProcessorCallback<TPixel> processor)
+            this IReadOnlyPixelRows<TPixel> pixels, 
+            RowsProcessorCallback<TPixel> processor)
             where TPixel : unmanaged, IPixel<TPixel>
         {
             return Process(pixels, ImagingConfig.Default, processor);

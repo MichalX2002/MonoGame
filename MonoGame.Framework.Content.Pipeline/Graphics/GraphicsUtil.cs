@@ -26,7 +26,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             }
 
             using (var image = Image.WrapMemory<RgbaVector>(src.GetPixelData(), new Size(src.Height, src.Width)))
-            using (var resized = image.Process(x => x.Resize(new Size(newWidth, newHeight))))
+            using (var resized = image.Process(x => x.Resize(new Size(newWidth, newHeight), 0)))
             {
                 var result = new PixelBitmapContent<RgbaVector>(newWidth, newHeight);
                 result.SetPixelData(resized.GetPixelSpan());

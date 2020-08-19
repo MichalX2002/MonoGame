@@ -3,6 +3,11 @@
   This file is subject to the terms and conditions defined in
   file 'LICENSE.txt', which is part of this source code package.
 -->
+<!--
+  MonoGame - Copyright (C) The MonoGame Team
+  This file is subject to the terms and conditions defined in
+  file 'LICENSE.txt', which is part of this source code package.
+-->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
@@ -25,16 +30,16 @@
     Outputs:
       - MGCBCommand: the command to run the MGCB tool without any arguments
   -->
-  <Target Name="UpdateMGCB" Condition="'$(MGCBCommand)' == ''">
+  <Target Name="GetMGCB" Condition="'$(MGCBCommand)' == ''">
 
     <PropertyGroup>
       <MGCBExe Condition="'$(MGCBExe)' == ''">$(MSBuildThisFileDirectory)Tools\MGCB.exe</MGCBExe>
       <MGCBCommand>&quot;$(MGCBExe)&quot;</MGCBCommand>
     </PropertyGroup>
-
+	
   </Target>
 
-
+  <!--
     Converts MonoGameContentReference items to ContentReference items, deriving the necessary metadata.
     Outputs:
       - ContentReference: references to .mgcb files that can be built with MGCB
@@ -153,12 +158,12 @@
       - ExtraContent: built content files
         - ContentDir: the relative path of the embedded folder to contain the content files
   -->
-  <Target Name="RunContentBuilder" DependsOnTargets="PrepareContentBuilder">
+  <Target Name="RunContentBuilder" DependsOnTargets="GetMGCB;PrepareContentBuilder">
 
     <!-- Execute MGCB from the project directory so we use the correct manifest. -->
     <Exec
       Condition="'%(ContentReference.FullPath)' != ''"
-      Command="$(DotnetCommand) $(MGCBPath) $(MonoGameMGCBAdditionalArguments) /@:&quot;%(ContentReference.FullPath)&quot; /platform:$(MonoGamePlatform) /outputDir:&quot;%(ContentReference.ContentOutputDir)&quot; /intermediateDir:&quot;%(ContentReference.ContentIntermediateOutputDir)&quot; /workingDir:&quot;%(ContentReference.FullDir)&quot;"
+      Command="$(MGCBCommand) $(MonoGameMGCBAdditionalArguments) /@:&quot;%(ContentReference.FullPath)&quot; /platform:$(MonoGamePlatform) /outputDir:&quot;%(ContentReference.ContentOutputDir)&quot; /intermediateDir:&quot;%(ContentReference.ContentIntermediateOutputDir)&quot; /workingDir:&quot;%(ContentReference.FullDir)&quot;"
       WorkingDirectory="$(MSBuildProjectDirectory)" />
 
     <ItemGroup>

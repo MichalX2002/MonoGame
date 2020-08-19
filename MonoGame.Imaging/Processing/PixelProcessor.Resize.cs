@@ -87,5 +87,17 @@ namespace MonoGame.Imaging.Processing
 
             return Image.LoadPixels<TPixel>(output);
         }
+
+        /// <summary>
+        /// Creates a resized version of the source image using the default resampler.
+        /// </summary>
+        public static Image<TPixel> Resize<TPixel>(
+            this ReadOnlyPixelRowsContext<TPixel> context,
+            Size size,
+            ProcessingProgressCallback<object?>? onProgress = null)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            return Resize(context, size, null, onProgress);
+        }
     }
 }
