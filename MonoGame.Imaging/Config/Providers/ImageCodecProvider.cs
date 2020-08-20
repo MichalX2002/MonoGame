@@ -10,7 +10,8 @@ namespace MonoGame.Imaging.Config
     public class ImageCoderProvider<TCoder> : IEnumerable<KeyValuePair<ImageFormat, TCoder>>
         where TCoder : class, IImageCoder
     {
-        private ConcurrentDictionary<ImageFormat, TCoder> _coders = new ConcurrentDictionary<ImageFormat, TCoder>();
+        private ConcurrentDictionary<ImageFormat, TCoder> _coders =
+            new ConcurrentDictionary<ImageFormat, TCoder>();
 
         public IEnumerable<ImageFormat> Keys => _coders.Keys;
         public IEnumerable<TCoder> Values => _coders.Values;

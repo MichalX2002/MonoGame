@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.Vectors;
@@ -13,7 +11,7 @@ namespace MonoGame.Imaging.Coders.Detection
 {
     public abstract class StbImageInfoDetectorBase : IImageInfoDetector
     {
-        public readonly struct InfoResult
+        public class InfoResult
         {
             public ImageRead.ReadState ReadState { get; }
 

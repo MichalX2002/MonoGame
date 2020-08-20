@@ -57,7 +57,7 @@ namespace MonoGame.Testing
                 if (_image == null && decoderState.CurrentImage != null)
                 {
                     _image = decoderState.CurrentImage;
-                    (_image as Image<Color>)?.GetPixelSpan().Fill(Color.Red);
+                    (_image as Image<Color>)?.GetPixelSpan().Fill(Color.Transparent);
                     Console.WriteLine("load setup");
                 }
 
@@ -69,7 +69,7 @@ namespace MonoGame.Testing
                 if (_image == null)
                 {
                     _image = Image<Color>.Create(state);
-                    (_image as Image<Color>)?.GetPixelSpan().Fill(Color.Red);
+                    (_image as Image<Color>)?.GetPixelSpan().Fill(Color.Transparent);
                     Console.WriteLine("resize setup");
                 }
 
@@ -82,44 +82,46 @@ namespace MonoGame.Testing
             //    File.OpenRead("../../../very big interlace.png"),
             //    GraphicsDevice);
 
-            Task.Run(() =>
-            {
+            //Task.Run(() =>
+            //{
                 try
                 {
                     var ww = new Stopwatch();
 
-                    var http = new HttpClient();
+                    var web = new WebClient();
 
                     for (int i = 0; i < 1; i++)
                     {
                         using (var fs = new FileStream(
-                            //@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg",
-                            "../../../very big interlace.png",
+                            "../../../very big prog.jpg",
+                            //"../../../very big interlace.png",
                             //"../../../very_big_interlace pog.jpg",
                             FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 8))
-                        //using(var fs = await http.GetStreamAsync(
+                        //using(var fs = web.OpenRead(
                         //    "https://upload.wikimedia.org/wikipedia/commons/3/3d/LARGE_elevation.jpg"))
                         {
                             Thread.Sleep(1000);
 
                             ww.Restart();
-                            var img = Image.Load<Color>(fs, onProgress: OnLoadProgress);
+                            var img = Image.Load<Color>(fs/*, onProgress: OnLoadProgress*/);
 
                             _finished = true;
                             ww.Stop();
                             Console.WriteLine("Time: " + ww.Elapsed.TotalMilliseconds + "ms");
-
-                            Thread.Sleep(1000);
 
                             Console.WriteLine(img.Width + "x" + img.Height);
 
                             var lastRow = img.GetPixelRowSpan(img.Height - 1);
                             Console.WriteLine(lastRow[0]);
 
+                            Thread.Sleep(1000);
+
+                            //_tex = Texture2D.FromImage(img, GraphicsDevice);
+
+                            return;
+
                             var newSize = new Size(img.Width, img.Height / 3);
                             var procsed = img.Process(c => c.Resize(newSize, newSize, OnResizeProgress));
-
-                            _tex = Texture2D.FromImage(procsed, GraphicsDevice);
 
                             if (false)
                             {
@@ -151,7 +153,7 @@ namespace MonoGame.Testing
                 {
                     Console.WriteLine(ex);
                 }
-            });
+            //});
         }
 
         protected override void LoadContent()
@@ -187,7 +189,7 @@ namespace MonoGame.Testing
             var image = _image;
             if (image != null)
             {
-                if (tex == null)
+                if (tex == null || tex.Width != image.Width || tex.Height != image.Height)
                 {
                     var surfaceFormat = Texture2D.GetVectorFormat(image.PixelType.Type).SurfaceFormat;
                     tex = new Texture2D(GraphicsDevice, image.Width, image.Height, false, surfaceFormat);
@@ -220,7 +222,7 @@ namespace MonoGame.Testing
             if (tex != null)
             {
                 float rot = 0;// -MathF.PI / 2;
-                float scale = 1f / 5.5f;
+                float scale = 1f / 11f;
                 float y = 0;// tex.Width * scale;
                 var pos = new Vector2(0, y);
 
