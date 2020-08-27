@@ -3,12 +3,13 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Numerics;
 
 namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Defines the buffers for clearing when calling 
-    /// <see cref="GraphicsDevice.Clear(ClearOptions, Color, float, int)"/>.
+    /// <see cref="GraphicsDevice.Clear(ClearOptions, Vector4, float, int)"/>.
     /// </summary>
     [Flags]
     public enum ClearOptions

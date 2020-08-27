@@ -419,7 +419,7 @@ namespace MonoGame.Framework.Content
         }
 
         /// <summary>
-        /// Disposes this <see cref="ContentManager"/>.
+        /// Disposes the content manager and unloads it's contents.
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
@@ -436,7 +436,7 @@ namespace MonoGame.Framework.Content
         }
 
         /// <summary>
-        /// Disposes this <see cref="ContentManager"/>.
+        /// Disposes the content manager and unloads it's contents.
         /// </summary>
         public void Dispose()
         {
@@ -445,7 +445,7 @@ namespace MonoGame.Framework.Content
         }
 
         /// <summary>
-        /// Disposes this <see cref="ContentManager"/>.
+        /// Disposes the <see cref="ContentManager"/>.
         /// </summary>
         ~ContentManager()
         {

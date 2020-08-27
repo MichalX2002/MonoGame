@@ -306,9 +306,6 @@ namespace MonoGame.Framework.Audio
             return cue;
         }
 
-        /// <summary>
-        /// Disposes the <see cref="SoundBank"/>.
-        /// </summary>
         protected virtual void Dispose(bool disposing)
         {
             if (!IsDisposed)
@@ -323,9 +320,6 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        /// <summary>
-        /// Disposes the <see cref="SoundBank"/>.
-        /// </summary>
         public void Dispose()
         {
             Dispose(true);
@@ -333,7 +327,7 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Disposes this <see cref="SoundBank"/>.
+        /// Disposes the <see cref="SoundBank"/>.
         /// </summary>
         ~SoundBank()
         {

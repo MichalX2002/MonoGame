@@ -1235,12 +1235,6 @@ namespace MonoGame.Framework.Graphics
 
         #region IDisposable
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (!IsDisposed)
@@ -1282,8 +1276,14 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         /// <summary>
-        /// Disposes this <see cref="GraphicsDevice"/>.
+        /// Disposes the <see cref="GraphicsDevice"/>.
         /// </summary>
         ~GraphicsDevice()
         {

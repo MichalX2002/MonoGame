@@ -8,26 +8,25 @@ namespace MonoGame.Framework
     public class GameTime
     {
         public bool IsRunningSlowly { get; set; }
-        public TimeSpan TotalGameTime { get; set; }
-        public TimeSpan ElapsedGameTime { get; set; }
+        public TimeSpan Total { get; set; }
+        public TimeSpan Elapsed { get; set; }
 
-        public float ElapsedTotalSeconds => (float)ElapsedGameTime.TotalSeconds;
+        public float ElapsedTotalSeconds => (float)Elapsed.TotalSeconds;
 
-        public GameTime() : this(TimeSpan.Zero, TimeSpan.Zero)
+        public GameTime(TimeSpan totalRealTime, TimeSpan elapsedRealTime, bool isRunningSlowly)
         {
-            IsRunningSlowly = false;
+            Total = totalRealTime;
+            Elapsed = elapsedRealTime;
+            IsRunningSlowly = isRunningSlowly;
         }
 
         public GameTime(TimeSpan totalGameTime, TimeSpan elapsedGameTime) :
-            this(totalGameTime, elapsedGameTime, false)
+            this(totalGameTime, elapsedGameTime, isRunningSlowly: false)
         {
         }
 
-        public GameTime (TimeSpan totalRealTime, TimeSpan elapsedRealTime, bool isRunningSlowly)
+        public GameTime() : this(TimeSpan.Zero, TimeSpan.Zero)
         {
-            TotalGameTime = totalRealTime;
-            ElapsedGameTime = elapsedRealTime;
-            IsRunningSlowly = isRunningSlowly;
         }
     }
 }

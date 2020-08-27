@@ -102,8 +102,8 @@ namespace MonoGame.Framework
 
         #region Properties
 
-        public GameServiceContainer Services { get; }
         public GameTime Time { get; } = new GameTime();
+        public GameServiceContainer Services { get; }
 
         public LaunchParameters LaunchParameters { get; private set; }
         public GameComponentCollection Components { get; private set; }
@@ -234,7 +234,7 @@ namespace MonoGame.Framework
         {
             Platform.ResetElapsedTime();
             ResetGameTimer();
-            Time.ElapsedGameTime = TimeSpan.Zero;
+            Time.Elapsed = TimeSpan.Zero;
             _accumulatedElapsedTicks = 0;
             _previousTicks = 0;
         }
@@ -318,7 +318,8 @@ namespace MonoGame.Framework
                     break;
 
                 default:
-                    throw new ArgumentException($"Handling for the run behavior {runBehavior} is not implemented.");
+                    throw new ArgumentException(
+                        $"Handling for the run behavior {runBehavior} is not implemented.");
             }
         }
 
@@ -366,13 +367,13 @@ namespace MonoGame.Framework
 
             if (IsFixedTimeStep)
             {
-                Time.ElapsedGameTime = TargetElapsedTime;
+                Time.Elapsed = TargetElapsedTime;
                 int stepCount = 0;
 
                 // Perform as many full fixed length time steps as we can.
                 while (_accumulatedElapsedTicks >= _targetElapsedTicks && !_shouldExit)
                 {
-                    Time.TotalGameTime += TargetElapsedTime;
+                    Time.Total += TargetElapsedTime;
                     _accumulatedElapsedTicks -= _targetElapsedTicks;
                     stepCount++;
 
@@ -394,19 +395,20 @@ namespace MonoGame.Framework
                     Time.IsRunningSlowly = true;
                 }
 
-                //Every time we just do one update and one draw, then we are not running slowly, so decrease the lag
+                // Every time we just do one update and one draw, 
+                // then we are not running slowly, so decrease the lag
                 if (stepCount == 1 && _updateFrameLag > 0)
                     _updateFrameLag--;
 
                 // Draw needs to know the total elapsed time
                 // that occured for the fixed length updates.
-                Time.ElapsedGameTime = TimeSpan.FromTicks(TargetElapsedTime.Ticks * stepCount);
+                Time.Elapsed = TimeSpan.FromTicks(TargetElapsedTime.Ticks * stepCount);
             }
             else
             {
                 // Perform a single variable length update.
-                Time.ElapsedGameTime = TimeSpan.FromTicks(_accumulatedElapsedTicks);
-                Time.TotalGameTime += Time.ElapsedGameTime;
+                Time.Elapsed = TimeSpan.FromTicks(_accumulatedElapsedTicks);
+                Time.Total += Time.Elapsed;
                 _accumulatedElapsedTicks = 0;
 
                 DoUpdate(Time);
@@ -565,7 +567,7 @@ namespace MonoGame.Framework
                 Update(gameTime);
 
                 //The TouchPanel needs to know the time for when touches arrive
-                TouchPanel.CurrentTimestamp = gameTime.TotalGameTime;
+                TouchPanel.CurrentTimestamp = gameTime.Total;
             }
         }
 
@@ -623,6 +625,7 @@ namespace MonoGame.Framework
                 if (_graphicsDeviceManager != null)
                     throw new InvalidOperationException(
                         "The GraphicsDeviceManager is already set and cannot be changed.");
+
                 _graphicsDeviceManager = value;
             }
         }
@@ -722,6 +725,9 @@ namespace MonoGame.Framework
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Disposes the <see cref="Game"/>.
+        /// </summary>
         ~Game()
         {
             Dispose(false);

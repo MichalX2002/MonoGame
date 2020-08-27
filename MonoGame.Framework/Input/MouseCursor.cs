@@ -170,7 +170,9 @@ namespace MonoGame.Framework.Input
             }
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Releases the cursor handle.
+        /// </summary>
         public void Dispose()
         {
             Dispose(disposing: true);
@@ -178,7 +180,7 @@ namespace MonoGame.Framework.Input
         }
 
         /// <summary>
-        /// Disposes the cursor handle.
+        /// Disposes the <see cref="MouseCursor"/>.
         /// </summary>
         ~MouseCursor()
         {

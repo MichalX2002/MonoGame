@@ -414,7 +414,6 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -422,7 +421,7 @@ namespace MonoGame.Framework.Audio
         }
 
         /// <summary>
-        /// Disposes this <see cref="WaveBank"/>.
+        /// Disposes the <see cref="WaveBank"/>.
         /// </summary>
         ~WaveBank()
         {

@@ -207,8 +207,8 @@ namespace MonoGame.Testing
             for (int i = 0; i < updateTimes.Length; i++)
                 avg += updateTimes[i].TotalMilliseconds;
 
-            float xx = (MathF.Sin((float)time.TotalGameTime.TotalSeconds) + 1) / 2 * 50;
-            float yy = (MathF.Cos((float)time.TotalGameTime.TotalSeconds) + 1) / 2 * 50;
+            float xx = (MathF.Sin((float)time.Total.TotalSeconds) + 1) / 2 * 50;
+            float yy = (MathF.Cos((float)time.Total.TotalSeconds) + 1) / 2 * 50;
             _spriteBatch.Draw(_test, new Vector2(0 + xx, 0 + yy), Color.White);
 
             DrawShadedString(
