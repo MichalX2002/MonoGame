@@ -12,7 +12,8 @@ namespace MonoGame.Imaging
 
         // TODO: add meta data (that can be read AND written)
 
-        public ImageInfo(int width, int height, VectorComponentInfo componentInfo, ImageFormat format)
+        public ImageInfo(
+            int width, int height, VectorComponentInfo componentInfo, ImageFormat format)
         {
             Width = width;
             Height = height;

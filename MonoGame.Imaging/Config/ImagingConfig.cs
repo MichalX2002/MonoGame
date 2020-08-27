@@ -26,17 +26,19 @@ namespace MonoGame.Imaging
 
             var decoders = new ImageCoderProvider<IImageDecoder>();
             decoders.TryAdd(ImageFormat.Bmp, new BmpImageDecoder());
+            decoders.TryAdd(ImageFormat.Tga, new TgaImageDecoder());
             decoders.TryAdd(ImageFormat.Png, new PngImageDecoder());
             decoders.TryAdd(ImageFormat.Jpeg, new JpegImageDecoder());
 
             var encoders = new ImageCoderProvider<IImageEncoder>();
             encoders.TryAdd(ImageFormat.Bmp, new BmpImageEncoder());
+            encoders.TryAdd(ImageFormat.Tga, new TgaImageEncoder());
             encoders.TryAdd(ImageFormat.Png, new PngImageEncoder());
             encoders.TryAdd(ImageFormat.Jpeg, new JpegImageEncoder());
-            encoders.TryAdd(ImageFormat.Tga, new TgaImageEncoder());
 
             var formatDetectors = new ImageFormatDetectorProvider();
             formatDetectors.TryAdd(ImageFormat.Bmp, new BmpImageFormatDetector());
+            formatDetectors.TryAdd(ImageFormat.Tga, new TgaImageFormatDetector());
             formatDetectors.TryAdd(ImageFormat.Png, new PngImageFormatDetector());
             formatDetectors.TryAdd(ImageFormat.Jpeg, new JpegImageFormatDetector());
 
