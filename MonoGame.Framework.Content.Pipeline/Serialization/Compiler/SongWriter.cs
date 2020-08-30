@@ -7,7 +7,7 @@ using MonoGame.Framework.Content.Pipeline.Processors;
 namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 {
     [ContentTypeWriter]
-    class SongWriter : BuiltInContentWriter<SongContent>
+    internal class SongWriter : BuiltInContentWriter<SongContent>
     {
         /// <summary>
         /// Writes the value to the output.
@@ -16,8 +16,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// <param name="value">The value to write to the output.</param>
         protected internal override void Write(ContentWriter output, SongContent value)
         {
-            output.Write(value.fileName);
-            output.WriteObject((int)value.duration.TotalMilliseconds);
+            output.Write(value.FileName);
+            output.WriteObject(value.Duration);
         }
     }
 }

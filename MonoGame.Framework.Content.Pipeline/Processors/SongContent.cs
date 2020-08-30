@@ -12,18 +12,18 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
     [CompressedContent]
     public sealed class SongContent
     {
-        internal string fileName;
-        internal TimeSpan duration;
+        public string FileName { get; }
+        public TimeSpan Duration { get; }
 
         /// <summary>
         /// Creates a new instance of the SongContent class
         /// </summary>
         /// <param name="fileName">Filename of the song</param>
         /// <param name="duration">Duration of the song</param>
-        internal SongContent(string fileName, TimeSpan duration)
+        public SongContent(string fileName, TimeSpan duration)
         {
-            this.fileName = fileName;
-            this.duration = duration;
+            FileName = fileName;
+            Duration = duration;
         }
     }
 }

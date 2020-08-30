@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <BaseOutputPath>..\..\Artifacts\MonoGame.Effect.Compiler</BaseOutputPath>
     <PackAsTool>true</PackAsTool>
+    <Nullable>enable</Nullable>
     <ToolCommandName>mgfxc</ToolCommandName>
     <PackageId>dotnet-mgfxc</PackageId>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
@@ -32,7 +33,7 @@
     <Compile Include="..\..\MonoGame.Framework\Graphics\States\TextureAddressMode.cs" />
     <Compile Include="..\..\MonoGame.Framework\Graphics\States\TextureFilter.cs" />
     <Compile Include="..\..\MonoGame.Framework\Graphics\States\TextureFilterMode.cs" />
-    <Compile Include="..\..\MonoGame.Framework\Graphics\Vertices\VertexElementUsage.cs" />
+    <Compile Include="..\..\MonoGame.Framework\Graphics\Primitives\VertexElementUsage.cs" />
     <Compile Include="..\..\MonoGame.Framework\Design\Vector2TypeConverter.cs" />
     <Compile Include="..\..\MonoGame.Framework\Design\Vector3TypeConverter.cs" />
     <Compile Include="..\..\MonoGame.Framework\Design\Vector4TypeConverter.cs" />

@@ -59,7 +59,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                 input.DataLength,
                 input.LoopStart,
                 input.LoopLength,
-                input.Duration.TotalMilliseconds);
+                input.Duration);
         }
     }
 }

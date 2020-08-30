@@ -62,7 +62,7 @@ namespace MonoGame.Framework.Media
         /// <summary>
         /// Gets the name of the <see cref="Song"/>.
         /// </summary>
-        public string Name { get; }
+        public string? Name { get; }
 
         #endregion
 
@@ -144,19 +144,19 @@ namespace MonoGame.Framework.Media
 
         #endregion
 
-        private Song(Stream stream, bool leaveOpen, string name)
+        internal Song(Stream stream, bool leaveOpen, string? name, TimeSpan? duration)
         {
             Name = name;
-            PlatformInitialize(stream, leaveOpen);
+            PlatformInitialize(stream, leaveOpen, duration);
         }
 
         /// <summary>
         /// Creates a <see cref="Song"/> that is streamed from a seekable stream.
         /// </summary>
         /// <param name="stream">The seekable stream.</param>
-        /// <param name="leaveOpen">true to leave the stream open after disposal; false to also dispose it.</param>
+        /// <param name="leaveOpen">true to leave the stream open after disposal; false to dispose it.</param>
         /// <param name="name">The name for the song.</param>
-        public static Song FromStream(Stream stream, bool leaveOpen, string name)
+        public static Song FromStream(Stream stream, bool leaveOpen, string? name)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
@@ -164,18 +164,20 @@ namespace MonoGame.Framework.Media
             if (!stream.CanSeek)
                 throw new ArgumentException("The stream is not seekable.");
 
-            return new Song(stream, leaveOpen, name);
+            return new Song(stream, leaveOpen, name, null);
         }
 
         /// <summary>
         /// Creates a <see cref="Song"/> that is streamed from a file.
         /// </summary>
         /// <param name="uri">The path to the song file.</param>
-        /// <param name="name">The name for the song. See <see cref="Name"/>.</param>
-        public static Song FromUri(Uri uri, string name = null)
+        /// <param name="name">The name for the song.</param>
+        public static Song FromUri(Uri uri, string? name)
         {
+            if (uri == null)
+                throw new ArgumentNullException(nameof(uri));
+
             string path = Path.GetFullPath(uri.OriginalString);
-            name ??= Path.GetFileNameWithoutExtension(path);
             return FromStream(File.OpenRead(path), leaveOpen: false, name);
         }
 

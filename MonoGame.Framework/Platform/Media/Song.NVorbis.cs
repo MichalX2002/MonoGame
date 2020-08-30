@@ -17,14 +17,14 @@ namespace MonoGame.Framework.Media
         private TimeSpan? _duration;
         private bool _isAtEnd;
 
-        private void PlatformInitialize(Stream stream, bool leaveOpen)
+        private void PlatformInitialize(Stream stream, bool leaveOpen, TimeSpan? duration)
         {
             ALController.InitializeInstance();
 
             _stream = new OggStream(stream, leaveOpen, ALController.Get().Streamer, OnFinished, OnLooped);
             _stream.Prepare(immediate: true);
 
-            _duration = _stream.GetLength();
+            _duration = duration ?? _stream.GetLength();
         }
 
         private void OnFinished()

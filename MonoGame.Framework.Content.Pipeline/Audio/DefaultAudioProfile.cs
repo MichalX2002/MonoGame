@@ -119,7 +119,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             int sampleRate = 0;
             int format = 0;
             string sampleFormat = null;
-            double durationInSeconds = 0;
+            double durationSeconds = 0;
             var formatName = string.Empty;
 
             try
@@ -140,11 +140,11 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
 
                         case "streams.stream.0.start_time":
                             if (double.TryParse(kv[1].Trim('"'), NumberStyles.Any, numberFormat, out double seconds))
-                                durationInSeconds += seconds;
+                                durationSeconds += seconds;
                             break;
 
                         case "streams.stream.0.duration":
-                            durationInSeconds += double.Parse(kv[1].Trim('"'), numberFormat);
+                            durationSeconds += double.Parse(kv[1].Trim('"'), numberFormat);
                             break;
 
                         case "streams.stream.0.channels":
@@ -162,6 +162,11 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                                 averageBytesPerSecond = bitsPerSec / 8;
                             break;
 
+                        case "streams.stream.0.codec_tag":
+                            var hex = kv[1][3..^1];
+                            format = int.Parse(hex, NumberStyles.HexNumber);
+                            break;
+
                         case "format.bit_rate":
                             if (averageBytesPerSecond == 0)
                                 averageBytesPerSecond = int.Parse(kv[1].Trim('"'), numberFormat) / 8;
@@ -169,11 +174,6 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
 
                         case "format.format_name":
                             formatName = kv[1].Trim('"').ToUpperInvariant();
-                            break;
-
-                        case "streams.stream.0.codec_tag":
-                            var hex = kv[1][3..^1];
-                            format = int.Parse(hex, NumberStyles.HexNumber);
                             break;
                     }
                 }
@@ -214,7 +214,6 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             }
 
             // Figure out the file type.
-            var durationMs = (int)Math.Floor(durationInSeconds * 1000.0);
             if (formatName == "WAV")
             {
                 audioFileType = AudioFileType.Wav;
@@ -223,28 +222,24 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             {
                 audioFileType = AudioFileType.Mp3;
                 format = 1;
-                durationMs = (int)Math.Ceiling(durationInSeconds * 1000.0);
                 bitsPerSample = Math.Min(bitsPerSample, 16);
             }
             else if (formatName == "WMA" || formatName == "ASF")
             {
                 audioFileType = AudioFileType.Wma;
                 format = 1;
-                durationMs = (int)Math.Ceiling(durationInSeconds * 1000.0);
                 bitsPerSample = Math.Min(bitsPerSample, 16);
             }
             else if (formatName == "OGG")
             {
                 audioFileType = AudioFileType.Ogg;
                 format = 1;
-                durationMs = (int)Math.Ceiling(durationInSeconds * 1000.0);
                 bitsPerSample = Math.Min(bitsPerSample, 16);
             }
             else if (formatName == "OPUS")
             {
                 audioFileType = AudioFileType.Opus;
                 format = 1;
-                durationMs = (int)Math.Ceiling(durationInSeconds * 1000.0);
                 bitsPerSample = Math.Min(bitsPerSample, 16);
             }
             else
@@ -257,8 +252,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             if (bitsPerSample > 0 && format != 2 && format != 17)
                 blockAlign = bitsPerSample * channelCount / 8;
 
-            // XNA seems to only be accurate to the millisecond.
-            duration = TimeSpan.FromMilliseconds(durationMs);
+            duration = TimeSpan.FromTicks((long)(durationSeconds * TimeSpan.TicksPerSecond));
 
             // Looks like XNA calculates the average bps from
             // the sample rate and block alignment.
@@ -279,7 +273,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             if (audioFileType != AudioFileType.Wav)
                 loopLength = 0;
             else
-                loopLength = (int)Math.Floor(sampleRate * durationInSeconds);
+                loopLength = (int)Math.Floor(sampleRate * durationSeconds);
         }
 
         internal static void SkipRiffWaveHeader(

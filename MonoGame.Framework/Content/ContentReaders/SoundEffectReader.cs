@@ -4,7 +4,6 @@
 
 using System;
 using System.Buffers.Binary;
-using System.IO;
 using MonoGame.Framework.Audio;
 using MonoGame.Framework.Memory;
 using MonoGame.OpenAL;
@@ -16,6 +15,7 @@ namespace MonoGame.Framework.Content
         protected internal override SoundEffect Read(
             ContentReader input, SoundEffect existingInstance)
         {
+            #region Old XNA spec
             // XNB format for SoundEffect...
             //            
             // Byte [format size]	Format	WAVEFORMATEX structure
@@ -35,7 +35,7 @@ namespace MonoGame.Framework.Content
             //  WORD  nBlockAlign;      // byte[12] +2
             //  WORD  wBitsPerSample;   // byte[14] +2
             //  WORD  cbSize;           // byte[16] +2
-            //
+            #endregion
             // We let the sound effect deal with parsing this based
             // on what format the audio data actually is.
 
@@ -44,7 +44,7 @@ namespace MonoGame.Framework.Content
 
             int loopStart = input.ReadInt32();
             int loopLength = input.ReadInt32();
-            double durationMs = input.ReadDouble();
+            var duration = input.ReadObject<TimeSpan>();
 
             SoundEffect effect;
             int rawSize = input.ReadInt32();
@@ -53,8 +53,7 @@ namespace MonoGame.Framework.Content
             SoundEffect CreateSoundEffect(RecyclableBuffer buffer)
             {
                 var data = buffer.AsSpan(0, buffer.BaseLength);
-                var duration = TimeSpan.FromMilliseconds(durationMs);
-
+                
                 return new SoundEffect(header, data, duration, loopStart, loopLength)
                 {
                     // Store the original asset name for debugging later.

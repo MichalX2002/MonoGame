@@ -97,7 +97,7 @@ namespace MonoGame.Testing
                 _songs[i] = Content.Load<Song>(songs[i]);
                 _songs[i].IsLooped = false;
                 _songs[i].Volume = 0.015f;
-                _songs[i].Pitch = 1.5f;
+                _songs[i].Pitch = 3f;
                 _songs[i].Finished += (song) => Console.WriteLine("finished");
                 _songs[i].Looped += (song) => Console.WriteLine("looped");
                 _watch.Stop();
@@ -159,7 +159,7 @@ namespace MonoGame.Testing
 
             f += time.ElapsedTotalSeconds;
 
-            if (f >= 2f && _songs.Length > 0)
+            if (f >= 3f && _songs.Length > 0)
             {
                 f = 0f;
 
