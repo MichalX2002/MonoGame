@@ -272,8 +272,7 @@ namespace MonoGame.Framework.Media
                 if (_stream == null)
                     throw new ObjectDisposedException(GetType().Name);
 
-                var containerReader = new NVorbis.Ogg.OggContainerReader(_stream, _leaveStreamOpen);
-                Reader = new VorbisReader(containerReader);
+                Reader = new VorbisReader(_stream, _leaveStreamOpen);
             }
 
             if (precache)
