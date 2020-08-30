@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Buffers.Binary;
 using System.IO;
 using MonoGame.Framework.Graphics;
 
@@ -123,7 +124,9 @@ namespace MonoGame.Framework.Content
                             {
                                 for (int x = 0; x < levelWidth; x++)
                                 {
-                                    int color = BitConverter.ToInt32(levelData, y * pitch + x * bytesPerPixel);
+                                    int color = BinaryPrimitives.ReadInt32LittleEndian(
+                                        levelData.AsSpan(y * pitch + x * bytesPerPixel));
+
                                     levelData[y * pitch + x * 4] = (byte)((color >> 16) & 0xff); //R:=W
                                     levelData[y * pitch + x * 4 + 1] = (byte)((color >> 8) & 0xff); //G:=V
                                     levelData[y * pitch + x * 4 + 2] = (byte)((color) & 0xff); //B:=U
@@ -142,7 +145,7 @@ namespace MonoGame.Framework.Content
                             {
                                 for (int x = 0; x < levelWidth; x++)
                                 {
-                                    ushort pixel = BitConverter.ToUInt16(levelData, offset);
+                                    ushort pixel = BinaryPrimitives.ReadUInt16LittleEndian(levelData.AsSpan(offset));
                                     pixel = (ushort)(((pixel & 0x7FFF) << 1) | ((pixel & 0x8000) >> 15));
                                     levelData[offset] = (byte)pixel;
                                     levelData[offset + 1] = (byte)(pixel >> 8);
@@ -160,7 +163,7 @@ namespace MonoGame.Framework.Content
                             {
                                 for (int x = 0; x < levelWidth; x++)
                                 {
-                                    ushort pixel = BitConverter.ToUInt16(levelData, offset);
+                                    ushort pixel = BinaryPrimitives.ReadUInt16LittleEndian(levelData.AsSpan(offset));
                                     pixel = (ushort)(((pixel & 0x0FFF) << 4) | ((pixel & 0xF000) >> 12));
                                     levelData[offset] = (byte)pixel;
                                     levelData[offset + 1] = (byte)(pixel >> 8);
