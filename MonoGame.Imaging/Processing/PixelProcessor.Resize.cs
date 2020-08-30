@@ -2,8 +2,8 @@
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
-using MonoGame.Imaging.Coders.Decoding;
 using MonoGame.Imaging.Pixels;
+using MonoGame.Imaging.Utilities;
 using StbSharp;
 
 namespace MonoGame.Imaging.Processing
@@ -23,15 +23,19 @@ namespace MonoGame.Imaging.Processing
             ProcessingProgressCallback<object?>? onProgress = null)
         {
             throw new NotImplementedException();
+        }
 
-            var outputImage = Image.Create(context.PixelType, size);
-
-            // TODO: FIXME:
-            //StbImageResize.stbir_resize(
-            //    inputImg, context.Width, context.Height, context.Stride, outputImage, 
-            //    outputImage.Width, outputImage.Height, outputImage.ByteStride, StbImageResize.DataType)
-            //
-            //    return outputImage;
+        /// <summary>
+        /// Creates a resized version of the source image using the default resampler.
+        /// </summary>
+        public static Image Resize<TState>(
+            this ReadOnlyPixelRowsContext context,
+            Size size,
+            VectorType? destinationType = null,
+            TState state = default,
+            ProcessingProgressCallback<TState>? onProgress = null)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -77,7 +81,7 @@ namespace MonoGame.Imaging.Processing
             var output = Image<Color>.CreateUninitialized(size);
 
             var progressCallback = onProgress == null ? (StbImageResize.ResizeProgressCallback?)null :
-                (p, r) => onProgress!.Invoke(state, p, new Rectangle());
+                (p, r) => onProgress!.Invoke(state, p, r.ToMGRect());
 
             StbImageResize.Resize(
                 MemoryMarshal.AsBytes(source.GetPixelSpan()), source.Width, source.Height, source.ByteStride,

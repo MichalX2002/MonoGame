@@ -93,8 +93,8 @@ namespace MonoGame.Testing
                     for (int i = 0; i < 1; i++)
                     {
                         using (var fs = new FileStream(
-                            "../../../very big prog.jpg",
-                            //"../../../very big interlace.png",
+                            //"../../../very big prog.jpg",
+                            "../../../very big interlace.png",
                             //"../../../very_big_interlace pog.jpg",
                             FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 8))
                         //using(var fs = web.OpenRead(

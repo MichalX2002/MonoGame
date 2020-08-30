@@ -24,7 +24,7 @@ namespace MonoGame.Imaging.Coders.Encoding
             CancellationToken cancellationToken) :
             base(encoder, config, stream, leaveOpen, cancellationToken)
         {
-            ProgressCallback = (progress, rect) => InvokeProgress(progress, rect?.ToRectangle());
+            ProgressCallback = (progress, rect) => InvokeProgress(progress, rect?.ToMGRect());
             Buffer = RecyclableMemoryManager.Default.GetBlock();
         }
 
