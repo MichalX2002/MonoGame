@@ -66,7 +66,7 @@ namespace MonoGame.Framework.Memory
             if (Buffer != null)
             {
                 Manager.ReturnBuffer(Buffer, Tag);
-                Buffer = null;
+                Buffer = null!;
             }
         }
     }

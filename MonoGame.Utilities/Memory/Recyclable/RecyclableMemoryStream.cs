@@ -29,8 +29,8 @@ using System.Threading;
 namespace MonoGame.Framework.Memory
 {
     /// <summary>
-    /// MemoryStream implementation that deals with pooling and managing memory streams which use potentially large
-    /// buffers.
+    /// MemoryStream implementation that deals with pooling and 
+    /// managing memory streams which use potentially large buffers.
     /// </summary>
     /// <remarks>
     /// This class works in tandem with the RecyclableMemoryManager to supply MemoryStream
@@ -81,7 +81,6 @@ namespace MonoGame.Framework.Memory
         /// </summary>
         private List<byte[]>? _dirtyBuffers;
 
-        // long to allow Interlocked.Read (for .NET Standard 1.4 compat)
         private long _disposedState;
 
         /// <summary>
@@ -412,17 +411,18 @@ namespace MonoGame.Framework.Memory
         }
 
         /// <summary>
-        /// Returns an <see cref="ArraySegment{byte}"/> that wraps a single buffer containing the contents of the stream.
+        /// Returns an <see cref="ArraySegment{byte}"/> that wraps a
+        /// single buffer containing the contents of the stream.
         /// </summary>
         /// <param name="buffer">An ArraySegment containing a reference to the underlying bytes.</param>
         /// <returns>Always returns true.</returns>
-        /// <remarks>GetBuffer has no failure modes (it always returns something, even if it's an empty buffer), therefore this method
-        /// always returns a valid ArraySegment to the same buffer returned by GetBuffer.</remarks>
-#if NET40 || NET45
-        public bool TryGetBuffer(out ArraySegment<byte> buffer)  
-#else
+        /// <remarks>
+        /// GetBuffer has no failure modes 
+        /// (it always returns something, even if it's an empty buffer), 
+        /// therefore this method always returns a valid ArraySegment to 
+        /// the same buffer returned by GetBuffer.
+        /// </remarks>
         public override bool TryGetBuffer(out ArraySegment<byte> buffer)
-#endif
         {
             CheckDisposed();
             buffer = new ArraySegment<byte>(GetBuffer(), 0, (int)Length);
@@ -431,8 +431,10 @@ namespace MonoGame.Framework.Memory
         }
 
         /// <summary>
-        /// Returns a new array with a copy of the buffer's contents. You should almost certainly be using GetBuffer combined 
-        /// with the Length to access the bytes in this stream. Calling ToArray will destroy the benefits of pooled buffers,
+        /// Returns a new array with a copy of the buffer's contents. 
+        /// You should almost certainly be using <see cref="GetBuffer"/> combined 
+        /// with the Length to access the bytes in this stream. 
+        /// Calling <see cref="ToArray"/> will destroy the benefits of pooled buffers,
         /// but it is included for the sake of completeness.
         /// </summary>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
@@ -461,7 +463,7 @@ namespace MonoGame.Framework.Memory
         /// <exception cref="ArgumentOutOfRangeException">offset or count is less than 0</exception>
         /// <exception cref="ArgumentException">offset subtracted from the buffer length is less than count</exception>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        public override int Read(byte[] buffer, int offset, int count) => SafeRead(buffer, offset, count, ref _position);
+        public override int Read(byte[] buffer, int offset, int count) => Read(buffer, offset, count, ref _position);
 
         /// <summary>
         /// Reads from the specified position into the provided buffer.
@@ -475,7 +477,7 @@ namespace MonoGame.Framework.Memory
         /// <exception cref="ArgumentOutOfRangeException">offset or count is less than 0</exception>
         /// <exception cref="ArgumentException">offset subtracted from the buffer length is less than count</exception>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        public int SafeRead(byte[] buffer, int offset, int count, ref int streamPosition)
+        public int Read(byte[] buffer, int offset, int count, ref int streamPosition)
         {
             CheckDisposed();
             if (buffer == null)
@@ -492,7 +494,7 @@ namespace MonoGame.Framework.Memory
         /// <param name="buffer">Destination buffer</param>
         /// <returns>The number of bytes read</returns>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        public override int Read(Span<byte> buffer) => SafeRead(buffer, ref _position);
+        public override int Read(Span<byte> buffer) => Read(buffer, ref _position);
 
         /// <summary>
         /// Reads from the specified position into the provided buffer.
@@ -501,7 +503,7 @@ namespace MonoGame.Framework.Memory
         /// <param name="streamPosition">Position in the stream to start reading from</param>
         /// <returns>The number of bytes read</returns>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        public int SafeRead(Span<byte> buffer, ref int streamPosition)
+        public int Read(Span<byte> buffer, ref int streamPosition)
         {
             CheckDisposed();
 
@@ -590,7 +592,7 @@ namespace MonoGame.Framework.Memory
         /// </summary>
         /// <returns>The byte at the current position, or -1 if the position is at the end of the stream.</returns>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        public override int ReadByte() => SafeReadByte(ref _position);
+        public override int ReadByte() => ReadByte(ref _position);
 
         /// <summary>
         /// Reads a single byte from the specified position in the stream.
@@ -598,7 +600,7 @@ namespace MonoGame.Framework.Memory
         /// <param name="streamPosition">The position in the stream to read from</param>
         /// <returns>The byte at the current position, or -1 if the position is at the end of the stream.</returns>
         /// <exception cref="ObjectDisposedException">Object has been disposed</exception>
-        public int SafeReadByte(ref int streamPosition)
+        public int ReadByte(ref int streamPosition)
         {
             CheckDisposed();
             if (streamPosition == _length)
@@ -611,8 +613,9 @@ namespace MonoGame.Framework.Memory
                 value = _blocks[blockOffset.Block][blockOffset.Offset];
             }
             else
+            {
                 value = _largeBuffer.Buffer[streamPosition];
-
+            }
             streamPosition++;
             return value;
         }
@@ -681,7 +684,6 @@ namespace MonoGame.Framework.Memory
         /// Synchronously writes this stream's bytes to the parameter stream.
         /// </summary>
         /// <param name="stream">Destination stream</param>
-        /// <remarks>Important: This does a synchronous write, which may not be desired in some situations</remarks>
         public override void WriteTo(Stream stream)
         {
             CheckDisposed();
@@ -703,7 +705,9 @@ namespace MonoGame.Framework.Memory
                 }
             }
             else
+            {
                 stream.Write(_largeBuffer.Buffer, 0, _length);
+            }
         }
         #endregion
 
@@ -723,30 +727,30 @@ namespace MonoGame.Framework.Memory
             if (_length - fromPosition <= 0)
                 return 0;
 
-            int amountToCopy;
-            if (_largeBuffer == null)
+            if (_largeBuffer != null)
             {
-                var blockOffset = GetBlockOffset(fromPosition);
-                int bytesWritten = 0;
-                int bytesRemaining = Math.Min(buffer.Length, _length - fromPosition);
-
-                while (bytesRemaining > 0)
-                {
-                    amountToCopy = Math.Min(_blocks[blockOffset.Block].Length - blockOffset.Offset, bytesRemaining);
-                    _blocks[blockOffset.Block].AsSpan(blockOffset.Offset, amountToCopy).CopyTo(buffer.Slice(bytesWritten));
-
-                    bytesWritten += amountToCopy;
-                    bytesRemaining -= amountToCopy;
-
-                    blockOffset.Block++;
-                    blockOffset.Offset = 0;
-                }
-                return bytesWritten;
+                int amountToCopy = Math.Min(buffer.Length, _length - fromPosition);
+                _largeBuffer.AsSpan(fromPosition, amountToCopy).CopyTo(buffer);
+                return amountToCopy;
             }
 
-            amountToCopy = Math.Min(buffer.Length, _length - fromPosition);
-            _largeBuffer.AsSpan(fromPosition, amountToCopy).CopyTo(buffer);
-            return amountToCopy;
+            var blockOffset = GetBlockOffset(fromPosition);
+            int bytesWritten = 0;
+            int bytesRemaining = Math.Min(buffer.Length, _length - fromPosition);
+
+            while (bytesRemaining > 0)
+            {
+                int amountToCopy = Math.Min(_blocks[blockOffset.Block].Length - blockOffset.Offset, bytesRemaining);
+                var blockSrc = _blocks[blockOffset.Block].AsSpan(blockOffset.Offset, amountToCopy);
+                blockSrc.CopyTo(buffer.Slice(bytesWritten));
+
+                bytesWritten += amountToCopy;
+                bytesRemaining -= amountToCopy;
+
+                blockOffset.Block++;
+                blockOffset.Offset = 0;
+            }
+            return bytesWritten;
         }
 
         public struct BlockOffset
