@@ -58,11 +58,11 @@ namespace MonoGame.Framework
         {
         }
 
-        protected virtual void UnloadContent ()
+        protected virtual void UnloadContent()
         {
         }
 
-        public virtual void Draw(GameTime gameTime)
+        public virtual void Draw(in FrameTime time)
         {
         }
 

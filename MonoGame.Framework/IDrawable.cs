@@ -6,13 +6,13 @@ namespace MonoGame.Framework
 {
     public interface IDrawable
     {
-		event Event<object> DrawOrderChanged;
+        event Event<object> DrawOrderChanged;
         event Event<object> VisibleChanged;
 
         int DrawOrder { get; }
         bool Visible { get; }
 
-        void Draw(GameTime gameTime);
+        void Draw(in FrameTime time);
     }
 }
 

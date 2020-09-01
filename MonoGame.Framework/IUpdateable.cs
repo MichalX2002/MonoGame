@@ -6,12 +6,12 @@ namespace MonoGame.Framework
 {
 	public interface IUpdateable
 	{
-		event Event<object> EnabledChanged;
-		event Event<object> UpdateOrderChanged;
-	
 		bool Enabled { get; }
 		int UpdateOrder { get; }
 
-		void Update(GameTime gameTime);
+		event Event<object> EnabledChanged;
+		event Event<object> UpdateOrderChanged;
+
+		void Update(in FrameTime time);
 	}
 }

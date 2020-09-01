@@ -5,8 +5,8 @@
 using System;
 
 namespace MonoGame.Framework
-{   
-    public class GameComponent : IGameComponent, IUpdateable, IComparable<GameComponent>, IDisposable
+{
+    public class GameComponent : IComparable<GameComponent>, IGameComponent, IUpdateable, IDisposable
     {
         private bool _enabled = true;
         private int _updateOrder;
@@ -47,16 +47,11 @@ namespace MonoGame.Framework
             Game = game;
         }
 
-        ~GameComponent()
-        {
-            Dispose(false);
-        }
-
         public virtual void Initialize()
         {
         }
 
-        public virtual void Update(GameTime gameTime)
+        public virtual void Update(in FrameTime time)
         {
         }
 
@@ -70,13 +65,28 @@ namespace MonoGame.Framework
             EnabledChanged?.Invoke(this);
         }
 
+        #region IComparable<GameComponent> Members
+
+        // TODO: Should be removed, as it is not part of XNA 4.0
+        public int CompareTo(GameComponent? other)
+        {
+            if (this == other)
+                return 0;
+            if (other == null)
+                return 1;
+
+            return other.UpdateOrder - UpdateOrder;
+        }
+
+        #endregion
+
         /// <summary>
         /// Shuts down the component.
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
         }
-        
+
         /// <summary>
         /// Shuts down the component.
         /// </summary>
@@ -85,15 +95,5 @@ namespace MonoGame.Framework
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
-        #region IComparable<GameComponent> Members
-
-        // TODO: Should be removed, as it is not part of XNA 4.0
-        public int CompareTo(GameComponent other)
-        {
-            return other.UpdateOrder - UpdateOrder;
-        }
-
-        #endregion
     }
 }

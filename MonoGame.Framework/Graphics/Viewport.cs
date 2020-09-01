@@ -4,53 +4,45 @@
 
 using System;
 using System.Numerics;
-using System.Runtime.Serialization;
 
 namespace MonoGame.Framework.Graphics
 {
     /// <summary>
     /// Describes the view bounds for render-target surface.
     /// </summary>
-    [DataContract]
-    public struct Viewport : IEquatable<Viewport>
+    public readonly struct Viewport : IEquatable<Viewport>
     {
         #region Properties
 
         /// <summary>
         /// The x coordinate of the beginning of this viewport.
         /// </summary>
-        [DataMember]
-        public int X { get; set; }
+        public int X { get; }
 
         /// <summary>
         /// The y coordinate of the beginning of this viewport.
         /// </summary>
-        [DataMember]
-        public int Y { get; set; }
+        public int Y { get; }
 
         /// <summary>
         /// The width of the bounds in pixels.
         /// </summary>
-        [DataMember]
-        public int Width { get; set; }
+        public int Width { get; }
 
         /// <summary>
         /// The height of the bounds in pixels.
         /// </summary>
-        [DataMember]
-        public int Height { get; set; }
+        public int Height { get; }
 
         /// <summary>
         /// The lower limit of depth of this viewport.
         /// </summary>
-        [DataMember]
-        public float MinDepth { get; set; }
+        public float MinDepth { get; }
 
         /// <summary>
         /// The upper limit of depth of this viewport.
         /// </summary>
-        [DataMember]
-        public float MaxDepth { get; set; }
+        public float MaxDepth { get; }
 
         #endregion
 
@@ -70,22 +62,12 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Gets or sets a boundary of this <see cref="Viewport"/>.
         /// </summary>
-        public Rectangle Bounds
-        {
-            readonly get => new Rectangle(X, Y, Width, Height);
-            set
-            {
-                X = value.X;
-                Y = value.Y;
-                Width = value.Width;
-                Height = value.Height;
-            }
-        }
+        public Rectangle Bounds => new Rectangle(X, Y, Width, Height);
 
         /// <summary>
         /// Returns the subset of the viewport that is guaranteed to be visible on a lower quality display.
         /// </summary>
-        public readonly Rectangle TitleSafeArea => GraphicsDevice.GetTitleSafeArea(X, Y, Width, Height);
+        public Rectangle TitleSafeArea => GraphicsDevice.GetTitleSafeArea(X, Y, Width, Height);
 
         #region Constructors
 
@@ -109,13 +91,15 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
-        /// Constructs a viewport from the given values. The <see cref="MinDepth"/> will be zero and <see cref="MaxDepth"/> will be one.
+        /// Constructs a viewport from the given values. 
+        /// The <see cref="MinDepth"/> will be zero and <see cref="MaxDepth"/> will be one.
         /// </summary>
         /// <param name="x">The x coordinate of the upper-left corner of the view bounds in pixels.</param>
         /// <param name="y">The y coordinate of the upper-left corner of the view bounds in pixels.</param>
         /// <param name="width">The width of the view bounds in pixels.</param>
         /// <param name="height">The height of the view bounds in pixels.</param>
-        public Viewport(int x, int y, int width, int height) : this(x, y, width, height, minDepth: 0, maxDepth: 1)
+        public Viewport(int x, int y, int width, int height) :
+            this(x, y, width, height, minDepth: 0, maxDepth: 1)
         {
         }
 
@@ -123,7 +107,8 @@ namespace MonoGame.Framework.Graphics
         /// Creates a new instance of <see cref="Viewport"/> struct.
         /// </summary>
         /// <param name="bounds">
-        /// A <see cref="Rectangle"/> that defines the location and size of the <see cref="Viewport"/> in a render target.
+        /// A <see cref="Rectangle"/> that defines the location and size of
+        /// the <see cref="Viewport"/> in a render target.
         /// </param>
         public Viewport(Rectangle bounds) : this(bounds.X, bounds.Y, bounds.Width, bounds.Height)
         {
@@ -150,7 +135,12 @@ namespace MonoGame.Framework.Graphics
             var matrix = world * view * projection;
             var result = Vector3.Transform(source, matrix);
 
-            float a = (source.X * matrix.M14) + (source.Y * matrix.M24) + (source.Z * matrix.M34) + matrix.M44;
+            float a =
+                (source.X * matrix.M14) + 
+                (source.Y * matrix.M24) + 
+                (source.Z * matrix.M34) + 
+                matrix.M44;
+
             if (!WithinEpsilon(a, 1f))
             {
                 result.X /= a;
@@ -171,7 +161,8 @@ namespace MonoGame.Framework.Graphics
 
         /// <summary>
         /// Unprojects a <see cref="Vector3"/> from screen space into model space.
-        /// The source point is transformed from screen space to view space by the inverse of the projection matrix,
+        /// The source point is transformed from screen space to 
+        /// view space by the inverse of the projection matrix,
         /// then from view space to world space by the inverse of the view matrix, and
         /// finally from world space to model space by the inverse of the world matrix.
         /// Note source.Z must be less than or equal to MaxDepth.
@@ -227,11 +218,11 @@ namespace MonoGame.Framework.Graphics
             return !(a == b);
         }
 
-        public readonly bool Equals(Viewport other) => this == other;
+        public bool Equals(Viewport other) => this == other;
 
-        public override readonly bool Equals(object? obj) => obj is Viewport other && this == other;
+        public override bool Equals(object? obj) => obj is Viewport other && this == other;
 
-        public override readonly int GetHashCode() => HashCode.Combine(X, Y, Width, Height, MinDepth, MaxDepth);
+        public override int GetHashCode() => HashCode.Combine(X, Y, Width, Height, MinDepth, MaxDepth);
 
         /// <summary>
         /// Returns a <see cref="string"/> representation of this <see cref="Viewport"/> in the format:
@@ -240,7 +231,7 @@ namespace MonoGame.Framework.Graphics
         /// MinDepth:[<see cref="MinDepth"/>] MaxDepth:[<see cref="MaxDepth"/>]}
         /// </summary>
         /// <returns>A <see cref="string"/> representation of this <see cref="Viewport"/>.</returns>
-        public override readonly string ToString()
+        public override string ToString()
         {
             return
                 "{X:" + X + " Y:" + Y +

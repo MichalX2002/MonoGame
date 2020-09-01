@@ -1,22 +1,15 @@
-﻿using MonoGame.Framework;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Numerics;
+using System.Threading.Tasks;
+using MonoGame.Framework;
 using MonoGame.Framework.Audio;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 using MonoGame.Framework.Media;
 using MonoGame.Imaging;
 using MonoGame.Imaging.Coders.Encoding;
-using MonoGame.Imaging.Pixels;
-using MonoGame.Imaging.Processing;
-using NVorbis;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Numerics;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MonoGame.Testing
 {
@@ -97,11 +90,13 @@ namespace MonoGame.Testing
                 _songs[i] = Content.Load<Song>(songs[i]);
                 _songs[i].IsLooped = false;
                 _songs[i].Volume = 0.015f;
-                _songs[i].Pitch = 3f;
+                _songs[i].Pitch = 1f;
                 _songs[i].Finished += (song) => Console.WriteLine("finished");
                 _songs[i].Looped += (song) => Console.WriteLine("looped");
                 _watch.Stop();
-                Console.WriteLine("Content.Load<Song>('" + songs[i] + "') Time: " + _watch.ElapsedMilliseconds + "ms");
+
+                Console.WriteLine(
+                    "Content.Load<Song>('" + songs[i] + "') Time: " + _watch.ElapsedMilliseconds + "ms");
             }
 
             //readers = new List<VorbisReader>();
@@ -126,16 +121,16 @@ namespace MonoGame.Testing
             //}
         }
 
-        List<VorbisReader> readers;
+        //List<VorbisReader> readers;
 
         protected override void UnloadContent()
         {
         }
 
         private Song _lastSong;
-        int songIndex;
-        float f = 3f;
-        int frameIndex;
+        private int songIndex;
+        private float f = 3f;
+        private int frameIndex;
 
         private void MoveNext()
         {
@@ -152,7 +147,7 @@ namespace MonoGame.Testing
             Console.WriteLine("Moved next in " + _watch.Elapsed.TotalMilliseconds.ToString("0.00") + "ms");
         }
 
-        protected override void Update(GameTime time)
+        protected override void Update(in FrameTime time)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
@@ -196,7 +191,7 @@ namespace MonoGame.Testing
             base.Update(time);
         }
 
-        protected override void Draw(GameTime time)
+        protected override void Draw(in FrameTime time)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 

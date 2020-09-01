@@ -82,8 +82,8 @@ namespace MonoGame.Testing
             //    File.OpenRead("../../../very big interlace.png"),
             //    GraphicsDevice);
 
-            //Task.Run(() =>
-            //{
+            Action body = () =>
+            {
                 try
                 {
                     var ww = new Stopwatch();
@@ -93,8 +93,8 @@ namespace MonoGame.Testing
                     for (int i = 0; i < 1; i++)
                     {
                         using (var fs = new FileStream(
-                            //"../../../very big prog.jpg",
-                            "../../../very big interlace.png",
+                            "../../../very big prog.jpg",
+                            //"../../../very big interlace.png",
                             //"../../../very_big_interlace pog.jpg",
                             FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 8))
                         //using(var fs = web.OpenRead(
@@ -103,7 +103,7 @@ namespace MonoGame.Testing
                             Thread.Sleep(1000);
 
                             ww.Restart();
-                            var img = Image.Load<Color>(fs/*, onProgress: OnLoadProgress*/);
+                            var img = Image.Load<Color>(fs, onProgress: OnLoadProgress);
 
                             _finished = true;
                             ww.Stop();
@@ -115,7 +115,7 @@ namespace MonoGame.Testing
                             Console.WriteLine(lastRow[0]);
 
                             Thread.Sleep(1000);
-
+                            
                             //_tex = Texture2D.FromImage(img, GraphicsDevice);
 
                             return;
@@ -153,7 +153,16 @@ namespace MonoGame.Testing
                 {
                     Console.WriteLine(ex);
                 }
-            //});
+            };
+
+            if (false)
+            {
+                body();
+            }
+            else
+            {
+                Task.Run(body);
+            }
         }
 
         protected override void LoadContent()
@@ -170,7 +179,7 @@ namespace MonoGame.Testing
             base.UnloadContent();
         }
 
-        protected override void Update(GameTime gameTime)
+        protected override void Update(in FrameTime time)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
@@ -178,10 +187,10 @@ namespace MonoGame.Testing
                 return;
             }
 
-            base.Update(gameTime);
+            base.Update(time);
         }
 
-        protected override void Draw(GameTime gameTime)
+        protected override void Draw(in FrameTime time)
         {
             GraphicsDevice.Clear(Color.White);
 
@@ -222,7 +231,7 @@ namespace MonoGame.Testing
             if (tex != null)
             {
                 float rot = 0;// -MathF.PI / 2;
-                float scale = 1f / 11f;
+                float scale = 1f / 10.5f;
                 float y = 0;// tex.Width * scale;
                 var pos = new Vector2(0, y);
 
@@ -265,7 +274,7 @@ namespace MonoGame.Testing
 
             _spriteBatch.End();
 
-            base.Draw(gameTime);
+            base.Draw(time);
         }
     }
 }

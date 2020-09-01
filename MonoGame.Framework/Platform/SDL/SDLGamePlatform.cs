@@ -339,7 +339,8 @@ namespace MonoGame.Framework
 
         public override void StartRunLoop()
         {
-            throw new NotSupportedException("The desktop platform does not support asynchronous run loops.");
+            throw new NotSupportedException(
+                "The desktop platform does not support asynchronous run loops.");
         }
 
         public override void Exit()
@@ -347,12 +348,12 @@ namespace MonoGame.Framework
             Interlocked.Increment(ref _isExiting);
         }
 
-        public override bool BeforeUpdate(GameTime gameTime)
+        public override bool BeforeUpdate(in FrameTime time)
         {
             return true;
         }
 
-        public override bool BeforeDraw(GameTime gameTime)
+        public override bool BeforeDraw(in FrameTime time)
         {
             return true;
         }
@@ -370,7 +371,8 @@ namespace MonoGame.Framework
             _window.BeginScreenDeviceChange(willBeFullScreen);
         }
 
-        public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
+        public override void EndScreenDeviceChange(
+            string screenDeviceName, int clientWidth, int clientHeight)
         {
             _window.EndScreenDeviceChange(screenDeviceName, clientWidth, clientHeight);
         }

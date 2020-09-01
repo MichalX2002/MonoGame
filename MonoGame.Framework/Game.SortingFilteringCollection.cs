@@ -66,7 +66,8 @@ namespace MonoGame.Framework
                 return x.Order - y.Order;
             }
 
-            public void ForEachFilteredItem<TUserData>(Action<T, TUserData> action, TUserData userData)
+            public void ForEachFilteredItem<TData>(
+                ByRefAction<T, TData> action, in TData data)
             {
                 if (_shouldRebuildCache)
                 {
@@ -83,7 +84,7 @@ namespace MonoGame.Framework
                 }
 
                 for (int i = 0; i < _cachedFilteredItems.Count; ++i)
-                    action(_cachedFilteredItems[i], userData);
+                    action(_cachedFilteredItems[i], data);
 
                 // If the cache was invalidated as a result of processing items,
                 // now is a good time to clear it and give the GC (more of) a
@@ -104,7 +105,7 @@ namespace MonoGame.Framework
                 if (_addJournal.Remove(AddJournalEntry<T>.CreateKey(item)))
                     return true;
 
-                var index = _items.IndexOf(item);
+                int index = _items.IndexOf(item);
                 if (index >= 0)
                 {
                     UnsubscribeFromItemEvents(item);
@@ -151,10 +152,10 @@ namespace MonoGame.Framework
 
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
             {
-                return ((System.Collections.IEnumerable)_items).GetEnumerator();
+                return GetEnumerator();
             }
 
-            private static readonly Comparison<int> RemoveJournalSortComparison =
+            private static Comparison<int> RemoveJournalSortComparison { get; } =
                 (x, y) => Comparer<int>.Default.Compare(y, x); // Sort high to low
 
             private void ProcessRemoveJournal()
@@ -185,25 +186,25 @@ namespace MonoGame.Framework
 
                 while (iItems < _items.Count && iAddJournal < _addJournal.Count)
                 {
-                    var addJournalItem = _addJournal[iAddJournal].Item;
+                    T addJournalItem = _addJournal[iAddJournal].Item;
                     // If addJournalItem is less than (belongs before)
                     // _items[iItems], insert it.
                     if (_sort(addJournalItem, _items[iItems]) < 0)
                     {
                         SubscribeToItemEvents(addJournalItem);
                         _items.Insert(iItems, addJournalItem);
-                        ++iAddJournal;
+                        iAddJournal++;
                     }
                     // Always increment iItems, either because we inserted and
                     // need to move past the insertion, or because we didn't
                     // insert and need to consider the next element.
-                    ++iItems;
+                    iItems++;
                 }
 
                 // If _addJournal had any "tail" items, append them all now.
                 for (; iAddJournal < _addJournal.Count; ++iAddJournal)
                 {
-                    var addJournalItem = _addJournal[iAddJournal].Item;
+                    T addJournalItem = _addJournal[iAddJournal].Item;
                     SubscribeToItemEvents(addJournalItem);
                     _items.Add(addJournalItem);
                 }
@@ -235,8 +236,8 @@ namespace MonoGame.Framework
 
             private void Item_SortPropertyChanged(object sender)
             {
-                var item = (T)sender;
-                var index = _items.IndexOf(item);
+                T item = (T)sender;
+                int index = _items.IndexOf(item);
 
                 _addJournal.Add(new AddJournalEntry<T>(_addJournal.Count, item));
                 _removeJournal.Add(index);

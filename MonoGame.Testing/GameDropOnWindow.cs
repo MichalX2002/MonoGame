@@ -54,7 +54,7 @@ namespace MonoGame.Testing
             base.UnloadContent();
         }
 
-        protected override void Update(GameTime gameTime)
+        protected override void Update(in FrameTime time)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
@@ -62,10 +62,10 @@ namespace MonoGame.Testing
                 return;
             }
 
-            base.Update(gameTime);
+            base.Update(time);
         }
 
-        protected override void Draw(GameTime gameTime)
+        protected override void Draw(in FrameTime time)
         {
             GraphicsDevice.Clear(Color.White);
 
@@ -83,7 +83,7 @@ namespace MonoGame.Testing
 
             _spriteBatch.End();
 
-            base.Draw(gameTime);
+            base.Draw(time);
         }
 
 

@@ -20,11 +20,9 @@ namespace MonoGame.Framework
 {
     public partial class Game : IDisposable
     {
+        private delegate void ByRefAction<TSender, TData>(TSender sender, in TData time);
+
         private ContentManager _content;
-
-        private object SleepMutex { get; } = new object();
-
-        internal GamePlatform Platform { get; }
 
         private SortingFilteringCollection<IDrawable> _drawables =
             new SortingFilteringCollection<IDrawable>(
@@ -50,6 +48,10 @@ namespace MonoGame.Framework
         private TimeSpan _targetElapsedTime;
         private TimeSpan _inactiveSleepTime;
         private TimeSpan _maxElapsedTime;
+
+        private long _totalTimeTicks;
+        private long _elapsedTimeTicks;
+        private bool _isRunningSlowly;
 
         private long _targetElapsedTicks;
         private long _accumulatedElapsedTicks;
@@ -102,13 +104,23 @@ namespace MonoGame.Framework
 
         #region Properties
 
-        public GameTime Time { get; } = new GameTime();
+        private object SleepMutex { get; } = new object();
+
+        internal GamePlatform Platform { get; }
+
         public GameServiceContainer Services { get; }
 
         public LaunchParameters LaunchParameters { get; private set; }
         public GameComponentCollection Components { get; private set; }
 
         public bool IsFixedTimeStep { get; set; } = true;
+
+        public FrameTime Time => new FrameTime(
+            TimeSpan.FromTicks(_totalTimeTicks),
+            TimeSpan.FromTicks(_elapsedTimeTicks),
+            _isRunningSlowly);
+
+        public bool IsRunningSlowly => _isRunningSlowly;
 
         public GameWindow? Window => Platform.Window;
         public bool IsActive => Platform.IsActive;
@@ -234,7 +246,7 @@ namespace MonoGame.Framework
         {
             Platform.ResetElapsedTime();
             ResetGameTimer();
-            Time.Elapsed = TimeSpan.Zero;
+            _elapsedTimeTicks = 0;
             _accumulatedElapsedTicks = 0;
             _previousTicks = 0;
         }
@@ -308,7 +320,7 @@ namespace MonoGame.Framework
 
                 case GameRunBehavior.Synchronous:
                     // XNA runs one Update even before showing the window
-                    DoUpdate(new GameTime());
+                    DoUpdate(new FrameTime());
 
                     if (!_shouldExit)
                         Platform.RunLoop();
@@ -367,13 +379,13 @@ namespace MonoGame.Framework
 
             if (IsFixedTimeStep)
             {
-                Time.Elapsed = TargetElapsedTime;
+                _elapsedTimeTicks = TargetElapsedTime.Ticks;
                 int stepCount = 0;
 
                 // Perform as many full fixed length time steps as we can.
                 while (_accumulatedElapsedTicks >= _targetElapsedTicks && !_shouldExit)
                 {
-                    Time.Total += TargetElapsedTime;
+                    _totalTimeTicks += TargetElapsedTime.Ticks;
                     _accumulatedElapsedTicks -= _targetElapsedTicks;
                     stepCount++;
 
@@ -384,15 +396,15 @@ namespace MonoGame.Framework
                 _updateFrameLag += Math.Max(0, stepCount - 1);
 
                 //If we think we are running slowly, wait until the lag clears before resetting it
-                if (Time.IsRunningSlowly)
+                if (_isRunningSlowly)
                 {
                     if (_updateFrameLag == 0)
-                        Time.IsRunningSlowly = false;
+                        _isRunningSlowly = false;
                 }
                 else if (_updateFrameLag >= 5)
                 {
                     //If we lag more than 5 frames, start thinking we are running slowly
-                    Time.IsRunningSlowly = true;
+                    _isRunningSlowly = true;
                 }
 
                 // Every time we just do one update and one draw, 
@@ -402,13 +414,13 @@ namespace MonoGame.Framework
 
                 // Draw needs to know the total elapsed time
                 // that occured for the fixed length updates.
-                Time.Elapsed = TimeSpan.FromTicks(TargetElapsedTime.Ticks * stepCount);
+                _elapsedTimeTicks = TargetElapsedTime.Ticks * stepCount;
             }
             else
             {
                 // Perform a single variable length update.
-                Time.Elapsed = TimeSpan.FromTicks(_accumulatedElapsedTicks);
-                Time.Total += Time.Elapsed;
+                _elapsedTimeTicks = _accumulatedElapsedTicks;
+                _totalTimeTicks += _elapsedTimeTicks;
                 _accumulatedElapsedTicks = 0;
 
                 DoUpdate(Time);
@@ -469,20 +481,26 @@ namespace MonoGame.Framework
             LoadContent();
         }
 
-        private static Action<IDrawable, GameTime> DrawAction { get; } =
-            (drawable, gameTime) => drawable.Draw(gameTime);
+        private static ByRefAction<IDrawable, FrameTime> DrawAction { get; } =
+            delegate (IDrawable drawable, in FrameTime time)
+            {
+                drawable.Draw(time);
+            };
 
-        private static Action<IUpdateable, GameTime> UpdateAction { get; } =
-            (updateable, gameTime) => updateable.Update(gameTime);
+        private static ByRefAction<IUpdateable, FrameTime> UpdateAction { get; } =
+            delegate (IUpdateable updateable, in FrameTime time)
+            {
+                updateable.Update(time);
+            };
 
-        protected virtual void Draw(GameTime gameTime)
+        protected virtual void Draw(in FrameTime time)
         {
-            _drawables.ForEachFilteredItem(DrawAction, gameTime);
+            _drawables.ForEachFilteredItem(DrawAction, time);
         }
 
-        protected virtual void Update(GameTime gameTime)
+        protected virtual void Update(in FrameTime time)
         {
-            _updateables.ForEachFilteredItem(UpdateAction, gameTime);
+            _updateables.ForEachFilteredItem(UpdateAction, time);
         }
 
         protected virtual void OnExiting(Game sender)
@@ -556,31 +574,31 @@ namespace MonoGame.Framework
         }
 #endif
 
-        internal void DoUpdate(GameTime gameTime)
+        internal void DoUpdate(in FrameTime time)
         {
             AssertNotDisposed();
 
-            if (Platform.BeforeUpdate(gameTime))
+            if (Platform.BeforeUpdate(time))
             {
                 FrameworkDispatcher.Update();
 
-                Update(gameTime);
+                Update(time);
 
                 //The TouchPanel needs to know the time for when touches arrive
-                TouchPanel.CurrentTimestamp = gameTime.Total;
+                TouchPanel.CurrentTimestamp = time.Total;
             }
         }
 
-        internal void DoDraw(GameTime gameTime)
+        internal void DoDraw(in FrameTime time)
         {
             AssertNotDisposed();
 
             // Draw and EndDraw should not be called if BeginDraw returns false.
             // http://stackoverflow.com/questions/4054936/manual-control-over-when-to-redraw-the-screen/4057180#4057180
             // http://stackoverflow.com/questions/4235439/xna-3-1-to-4-0-requires-constant-redraw-or-will-display-a-purple-screen
-            if (Platform.BeforeDraw(gameTime) && BeginDraw())
+            if (Platform.BeforeDraw(time) && BeginDraw())
             {
-                Draw(gameTime);
+                Draw(time);
                 EndDraw();
             }
         }

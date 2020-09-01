@@ -119,14 +119,14 @@ namespace MonoGame.Framework
         /// is called for all IUpdatable components.  Returning false from this
         /// method will result in this round of Update calls being skipped.
         /// </summary>
-        public abstract bool BeforeUpdate(GameTime gameTime);
+        public abstract bool BeforeUpdate(in FrameTime time);
 
         /// <summary>
         /// Gives derived classes an opportunity to do work just before Draw
         /// is called for all IDrawable components.  Returning false from this
         /// method will result in this round of Draw calls being skipped.
         /// </summary>
-        public abstract bool BeforeDraw(GameTime gameTime);
+        public abstract bool BeforeDraw(in FrameTime time);
 
         /// <summary>
         /// When implemented in a derived class, causes the game to enter
@@ -175,19 +175,21 @@ namespace MonoGame.Framework
 
         /// <summary>
         /// Gives derived classes an opportunity to take action after
-        /// Game.TargetElapsedTime has been set.
+        /// <see cref="Game.TargetElapsedTime"/> has been set.
         /// </summary>
         public virtual void TargetElapsedTimeChanged()
         {
         }
 
         /// <summary>
-        /// MSDN: Use this method if your game is recovering from a slow-running state,
-        /// and ElapsedGameTime is too large to be useful. 
-        /// Frame timing is generally handled by the Game class, 
+        /// Use this method if your game is recovering from a slow-running state,
+        /// and <see cref="FrameTime.Elapsed"/> is too large to be useful. 
+        /// <para>
+        /// Frame timing is generally handled by the <see cref="Game"/>, 
         /// but some platforms still handle it elsewhere. 
-        /// Once all platforms rely on the Game class's functionality, 
+        /// Once all platforms rely on the <see cref="Game"/> functionality, 
         /// this method and any overrides should be removed.
+        /// </para>
         /// </summary>
         public virtual void ResetElapsedTime()
         {

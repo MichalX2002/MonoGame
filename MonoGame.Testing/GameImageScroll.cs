@@ -1,17 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Enumeration;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Numerics;
-using System.Runtime;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using MonoGame.Framework;
@@ -99,8 +92,8 @@ namespace MonoGame.Testing
                     {
                         ShouldIncludePredicate = (ref FileSystemEntry x) =>
                         {
-                            return !x.IsDirectory && 
-                                (x.FileName.EndsWith(".bmp") || 
+                            return !x.IsDirectory &&
+                                (x.FileName.EndsWith(".bmp") ||
                                 x.FileName.EndsWith(".png") ||
                                 x.FileName.EndsWith(".jpg") ||
                                 x.FileName.EndsWith(".jpeg") ||
@@ -187,7 +180,7 @@ namespace MonoGame.Testing
             _moved = true;
         }
 
-        protected override void Update(GameTime gameTime)
+        protected override void Update(in FrameTime time)
         {
             var keyboard = Keyboard.GetState();
             if (keyboard.IsKeyDown(Keys.Escape))
@@ -224,10 +217,10 @@ namespace MonoGame.Testing
                 }
             }
 
-            base.Update(gameTime);
+            base.Update(time);
         }
 
-        protected override void Draw(GameTime gameTime)
+        protected override void Draw(in FrameTime time)
         {
             GraphicsDevice.Clear(Color.Black);
 
@@ -243,30 +236,28 @@ namespace MonoGame.Testing
 
             DrawFrames(_spriteBatch);
 
-            DrawOverlay(_spriteBatch, gameTime);
+            DrawOverlay(_spriteBatch, time);
 
-            base.Draw(gameTime);
+            base.Draw(time);
         }
 
         private float viewY = 0;
 
 
         // make these into dynamic variables
-        const int frameTextHeight = 40;
-
-        const int frameWidth = 150;
-        const int frameHeight = 125 + frameTextHeight;
-
-        const int frameSpacingX = 5;
-        const int frameSpacingY = 5;
+        private const int frameTextHeight = 40;
+        private const int frameWidth = 150;
+        private const int frameHeight = 125 + frameTextHeight;
+        private const int frameSpacingX = 5;
+        private const int frameSpacingY = 5;
 
         private bool _moved = true;
         private List<FrameLayout> _frames = new List<FrameLayout>();
         private ConcurrentQueue<FrameLayout> _previewLoadQueue = new ConcurrentQueue<FrameLayout>();
-        const int uploadsPerFrame = 10;
+        private const int uploadsPerFrame = 10;
+        private float renderscale = 0.66f;
 
-        float renderscale = 0.66f;
-        Matrix4x4 transformation => 
+        private Matrix4x4 RenderTransformation =>
             Matrix4x4.CreateScale(renderscale) * Matrix4x4.CreateTranslation(0, viewY, 0);
 
         private void ClearFrames()
@@ -314,11 +305,11 @@ namespace MonoGame.Testing
             }
         }
 
-        private void DrawOverlay(SpriteBatch spriteBatch, GameTime time)
+        private void DrawOverlay(SpriteBatch spriteBatch, in FrameTime time)
         {
             spriteBatch.Begin(
                 SpriteSortMode.FrontToBack, BlendState.NonPremultiplied, SamplerState.LinearClamp,
-                transformMatrix: transformation);
+                transformMatrix: RenderTransformation);
 
             float delta = Math.Min(time.ElapsedTotalSeconds, 0.1f);
 
@@ -354,7 +345,7 @@ namespace MonoGame.Testing
         {
             spriteBatch.Begin(
                 SpriteSortMode.FrontToBack, BlendState.NonPremultiplied, SamplerState.LinearClamp,
-                transformMatrix: transformation);
+                transformMatrix: RenderTransformation);
 
             int uploadsLeft = uploadsPerFrame;
 
