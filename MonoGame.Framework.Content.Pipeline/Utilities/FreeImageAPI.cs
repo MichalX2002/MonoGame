@@ -5,7 +5,6 @@
 using System;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
-using MonoGame.Framework.Utilities;
 
 namespace FreeImageAPI
 {
@@ -98,21 +97,26 @@ namespace FreeImageAPI
         private const string NativeLibName = "FreeImage";
 
         [DllImport(NativeLibName, EntryPoint = "FreeImage_ConvertFromRawBits")]
-        public static extern IntPtr ConvertFromRawBits(byte[] bits, int width, int height, int pitch, uint bpp, uint red_mask, uint green_mask, uint blue_mask, bool topdown);
+        public static extern IntPtr ConvertFromRawBits(
+            byte[] bits, int width, int height, int pitch, uint bpp,
+            uint red_mask, uint green_mask, uint blue_mask, bool topdown);
 
         [DllImport(NativeLibName, EntryPoint = "FreeImage_Rescale")]
-        public static extern IntPtr Rescale(IntPtr dib, int dst_width, int dst_height, FREE_IMAGE_FILTER filter);
+        public static extern IntPtr Rescale(
+            IntPtr dib, int dst_width, int dst_height, FREE_IMAGE_FILTER filter);
 
         [DllImport(NativeLibName, EntryPoint = "FreeImage_Unload")]
         public static extern void Unload(IntPtr dib);
 
         [DllImport(NativeLibName, EntryPoint = "FreeImage_ConvertToRawBits")]
-        public static extern void ConvertToRawBits(byte[] bits, IntPtr dib, int pitch, uint bpp, uint red_mask, uint green_mask, uint blue_mask, bool topdown);
+        public static extern void ConvertToRawBits(
+            byte[] bits, IntPtr dib, int pitch, uint bpp,
+            uint red_mask, uint green_mask, uint blue_mask, bool topdown);
 
-        [DllImport(NativeLibName, CharSet = CharSet.Unicode, EntryPoint = "FreeImage_GetFileTypeU")]
+        [DllImport(NativeLibName, EntryPoint = "FreeImage_GetFileTypeU", CharSet = CharSet.Unicode)]
         public static extern FREE_IMAGE_FORMAT GetFileTypeU(string filename, int size);
 
-        [DllImport(NativeLibName, EntryPoint = "FreeImage_GetFileType")]
+        [DllImport(NativeLibName, EntryPoint = "FreeImage_GetFileType", CharSet = CharSet.Ansi)]
         public static extern FREE_IMAGE_FORMAT GetFileTypeS(string filename, int size);
 
         public static FREE_IMAGE_FORMAT GetFileType(string filename, int size)
@@ -123,10 +127,10 @@ namespace FreeImageAPI
                 return GetFileTypeS(filename, size);
         }
 
-        [DllImport(NativeLibName, CharSet = CharSet.Unicode, EntryPoint = "FreeImage_LoadU")]
+        [DllImport(NativeLibName, EntryPoint = "FreeImage_LoadU", CharSet = CharSet.Unicode)]
         public static extern IntPtr LoadU(FREE_IMAGE_FORMAT fif, string filename, int flags);
 
-        [DllImport(NativeLibName, EntryPoint = "FreeImage_Load")]
+        [DllImport(NativeLibName, EntryPoint = "FreeImage_Load", CharSet = CharSet.Ansi)]
         public static extern IntPtr LoadS(FREE_IMAGE_FORMAT fif, string filename, int flags);
 
         public static IntPtr Load(FREE_IMAGE_FORMAT fif, string filename, int flags)
@@ -174,7 +178,9 @@ namespace FreeImageAPI
         public static extern uint GetBlueMask(IntPtr dib);
 
         [DllImport(NativeLibName, EntryPoint = "FreeImage_AllocateT")]
-        public static extern IntPtr AllocateT(FREE_IMAGE_TYPE type, int width, int height, int bpp, uint red_mask, uint green_mask, uint blue_mask);
+        public static extern IntPtr AllocateT(
+            FREE_IMAGE_TYPE type, int width, int height, int bpp,
+            uint red_mask, uint green_mask, uint blue_mask);
 
         [DllImport(NativeLibName, EntryPoint = "FreeImage_GetScanLine")]
         public static extern IntPtr GetScanLine(IntPtr dib, int scanline);

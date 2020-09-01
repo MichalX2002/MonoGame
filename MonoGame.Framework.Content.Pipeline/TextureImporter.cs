@@ -68,9 +68,9 @@ namespace MonoGame.Framework.Content.Pipeline
         public override TextureContent Import(string filename, ContentImporterContext context)
         {
             // Special case for loading some formats
-            switch (Path.GetExtension(filename).ToLower())
+            switch (Path.GetExtension(filename).ToUpperInvariant())
             {
-                case ".dds":
+                case ".DDS":
                     return DdsLoader.Import(filename, context);
             }
 
@@ -78,14 +78,18 @@ namespace MonoGame.Framework.Content.Pipeline
 
             var format = FreeImage.GetFileType(filename, 0);
             var fBitmap = FreeImage.Load(format, filename, 0);
+
             //if freeimage can not recognize the image type
             if (format == FREE_IMAGE_FORMAT.FIF_UNKNOWN)
+            {
                 throw new ContentLoadException("TextureImporter failed to load '" + filename + "'");
-
+            }
             //if freeimage can recognize the file headers but can't read its contents
             else if (fBitmap == IntPtr.Zero)
+            {
                 throw new InvalidContentException(
                     "TextureImporter couldn't understand the contents of '" + filename + "'", output.Identity);
+            }
 
             var height = (int)FreeImage.GetHeight(fBitmap);
             var width = (int)FreeImage.GetWidth(fBitmap);
@@ -95,8 +99,8 @@ namespace MonoGame.Framework.Content.Pipeline
             fBitmap = ConvertAndSwapChannels(fBitmap, imageType);
 
             // The bits per pixel and image type may have changed
-            uint bpp = FreeImage.GetBPP(fBitmap);
             imageType = FreeImage.GetImageType(fBitmap);
+            uint bpp = FreeImage.GetBPP(fBitmap);
             var pitch = (int)FreeImage.GetPitch(fBitmap);
             var redMask = FreeImage.GetRedMask(fBitmap);
             var greenMask = FreeImage.GetGreenMask(fBitmap);
@@ -132,6 +136,7 @@ namespace MonoGame.Framework.Content.Pipeline
             output.Faces[0].Add(face);
             return output;
         }
+
         /// <summary>
         /// Expands images to have an alpha channel and swaps red and blue channels
         /// </summary>
@@ -175,6 +180,7 @@ namespace MonoGame.Framework.Content.Pipeline
 
             return fBitmap;
         }
+
         /// <summary>
         /// Switches the red and blue channels
         /// </summary>

@@ -67,7 +67,7 @@ namespace MonoGame.Framework.Content
             var texture = existingInstance ?? new Texture2D(
                 reader.GetGraphicsDevice(), width, height, levelCountOutput > 1, convertedFormat);
 
-            for (int level = 0; level < levelCount; level++)
+            for (int level = 0; level < levelCountOutput; level++)
             {
                 int levelDataSizeInBytes = reader.ReadInt32();
                 using (var levelDataBuffer = reader.ContentManager.GetScratchBuffer(levelDataSizeInBytes))
@@ -78,9 +78,6 @@ namespace MonoGame.Framework.Content
 
                     int levelWidth = Math.Max(width >> level, 1);
                     int levelHeight = Math.Max(height >> level, 1);
-
-                    if (level >= levelCountOutput)
-                        continue;
 
                     //Convert the image data if required
                     switch (surfaceFormat)
