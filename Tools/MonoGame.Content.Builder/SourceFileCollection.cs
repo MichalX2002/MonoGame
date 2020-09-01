@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using System.Xml.Serialization;
 using MonoGame.Framework.Content.Pipeline;
 using MonoGame.Framework.Graphics;
@@ -19,11 +20,10 @@ namespace MonoGame.Content.Builder
         public string Config { get; set; }
 
         [XmlArrayItem("File")]
-        public List<string> SourceFiles { get; set; }
+        public List<string> SourceFiles { get; }
 
         [XmlArrayItem("File")]
-        public List<string> DestFiles { get; set; }
-
+        public List<string> DestFiles { get; }
 
         public SourceFileCollection()
         {
@@ -37,7 +37,7 @@ namespace MonoGame.Content.Builder
             var deserializer = new XmlSerializer(typeof(SourceFileCollection));
             try
             {
-                using (var textReader = new StreamReader(filePath))
+                using (var textReader = new XmlTextReader(filePath))
                     return (SourceFileCollection)deserializer.Deserialize(textReader);
             }
             catch (Exception)
@@ -58,7 +58,9 @@ namespace MonoGame.Content.Builder
         {
             foreach (var sourceFile in other.SourceFiles)
             {
-                var inContent = SourceFiles.Any(e => string.Equals(e, sourceFile, StringComparison.InvariantCultureIgnoreCase));
+                bool inContent = SourceFiles.Any(
+                    e => string.Equals(e, sourceFile, StringComparison.InvariantCultureIgnoreCase));
+               
                 if (!inContent)
                     SourceFiles.Add(sourceFile);
             }

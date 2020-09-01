@@ -39,7 +39,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
         public override SongContent Process(AudioContent input, ContentProcessorContext context)
         {
             // The xnb name is the basis for the final song filename.
-            var songInputFile = context.OutputFilename;
+            string songInputFile = context.OutputFilename;
 
             // Convert and write out the song media file.
             var profile = AudioProfile.ForPlatform(context.TargetPlatform);
@@ -48,20 +48,21 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                 Quality,
                 input, 
                 songInputFile, 
-                out string songOutFile, 
-                context.Logger);
+                out string songOutFile);
 
             // Let the pipeline know about the song file so it can clean things up.
             context.AddOutputFile(songOutFile);
 
             if (Quality != finalQuality)
+            {
                 context.Logger.LogMessage(
-                    "Failed to convert using \"{0}\" quality, used \"{1}\" quality", 
+                    "Failed to convert using \"{0}\" quality, used \"{1}\" quality",
                     Quality, finalQuality);
+            }
 
             // Return the XNB song content.
-            var dirPath = Path.GetDirectoryName(context.OutputFilename) + Path.DirectorySeparatorChar;
-            var filePath = PathHelper.GetRelativePath(dirPath, songOutFile);
+            string dirPath = Path.GetDirectoryName(context.OutputFilename) + Path.DirectorySeparatorChar;
+            string filePath = PathHelper.GetRelativePath(dirPath, songOutFile);
             return new SongContent(filePath, input.Duration);
         }
     }

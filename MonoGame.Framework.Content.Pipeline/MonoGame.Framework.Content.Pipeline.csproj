@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Nullable>enable</Nullable>
     <BaseOutputPath>..\Artifacts\MonoGame.Framework.Content.Pipeline</BaseOutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>MonoGame is an open source implementation of the Microsoft XNA 4.x Framework. The goal is to make it easy for XNA developers to create cross-platform games with extremely high code reuse.

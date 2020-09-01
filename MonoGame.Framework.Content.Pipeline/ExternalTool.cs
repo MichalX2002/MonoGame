@@ -30,12 +30,12 @@ namespace MonoGame.Framework.Content.Pipeline
             string arguments,
             out StringBuilder stdout,
             out StringBuilder stderr,
-            string stdin = null)
+            string? stdin = null)
         {
             // This particular case is likely to be the most common and thus
             // warrants its own specific error message rather than falling
             // back to a general exception from Process.Start()
-            var fullPath = FindCommand(command);
+            string fullPath = FindCommand(command);
             if (string.IsNullOrEmpty(fullPath))
                 throw new Exception(string.Format("Couldn't locate external tool '{0}'.", command));
 
@@ -49,7 +49,7 @@ namespace MonoGame.Framework.Content.Pipeline
             static void RedirectStream(
                 StreamReader input, StringBuilder output)
             {
-                string line;
+                string? line;
                 while ((line = input.ReadLine()) != null)
                 {
                     output.AppendLine(line);
@@ -103,7 +103,7 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <remarks>
         /// It's apparently necessary to use the full path when running on some systems.
         /// </remarks>
-        private static string FindCommand(string command)
+        private static string? FindCommand(string command)
         {
             // Expand any environment variables.
             command = Environment.ExpandEnvironmentVariables(command);
@@ -160,7 +160,8 @@ namespace MonoGame.Framework.Content.Pipeline
         /// <param name="path">The full path to the executable.</param> 
         private static void EnsureExecutable(string path)
         {
-            if (!path.StartsWith("/home") && !path.StartsWith("/Users"))
+            if (!path.StartsWith("/home") && 
+                !path.StartsWith("/Users"))
                 return;
 
             try

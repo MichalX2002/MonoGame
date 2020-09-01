@@ -76,22 +76,26 @@ namespace MonoGame.Tools.Pipeline.Utilities
 
         private void ShowVersion(InvocationContext context)
         {
-            var version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            var version = Assembly
+                .GetExecutingAssembly()
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                .InformationalVersion;
+
             context.Console.Out.WriteLine(version);
         }
 
-        private InvocationMiddleware CreateShortCircuitMiddleware(Option option, Action<InvocationContext> action)
+        private static InvocationMiddleware CreateShortCircuitMiddleware(
+            Option option, Action<InvocationContext> action)
         {
             return async (context, next) =>
             {
-
                 if (context.ParseResult.HasOption(option))
                 {
                     action(context);
                 }
                 else
                 {
-                    await next(context);
+                    await next(context).ConfigureAwait(false);
                 }
             };
         }

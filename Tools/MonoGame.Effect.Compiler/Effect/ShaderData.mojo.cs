@@ -200,8 +200,8 @@ namespace MonoGame.Effect
                 glslCode;
 
             // Enable standard derivatives extension as necessary
-            if ((glslCode.IndexOf("dFdx", StringComparison.InvariantCulture) >= 0)
-                || (glslCode.IndexOf("dFdy", StringComparison.InvariantCulture) >= 0))
+            if ((glslCode.Contains("dFdx", StringComparison.InvariantCulture))
+                || (glslCode.Contains("dFdy", StringComparison.InvariantCulture)))
             {
                 glslCode = "#extension GL_OES_standard_derivatives : enable\r\n" + glslCode;
             }

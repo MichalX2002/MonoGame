@@ -2,6 +2,7 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.Xml.Serialization;
 using DrawingColor = System.Drawing.Color;
 
@@ -25,6 +26,8 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
 
         public static implicit operator DrawingColor(XmlColor x)
         {
+            if (x == null)
+                throw new ArgumentNullException(nameof(x));
             return x._color;
         }
 
@@ -44,11 +47,12 @@ namespace MonoGame.Framework.Content.Pipeline.Builder
         {            
             if (!value.Contains(","))
                 return DrawingColor.FromName(value);
-            var colors = value.Split(',');
-            int.TryParse(colors.Length > 0 ? colors[0] : string.Empty, out int r);
-            int.TryParse(colors.Length > 1 ? colors[1] : string.Empty, out int g);
-            int.TryParse(colors.Length > 2 ? colors[2] : string.Empty, out int b);
-            int.TryParse(colors.Length > 3 ? colors[3] : string.Empty, out int a);
+
+            string[] colors = value.Split(',');
+            _ = int.TryParse(colors.Length > 0 ? colors[0] : string.Empty, out int r);
+            _ = int.TryParse(colors.Length > 1 ? colors[1] : string.Empty, out int g);
+            _ = int.TryParse(colors.Length > 2 ? colors[2] : string.Empty, out int b);
+            _ = int.TryParse(colors.Length > 3 ? colors[3] : string.Empty, out int a);
 
             return DrawingColor.FromArgb(a, r, g, b);
         }

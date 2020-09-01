@@ -21,10 +21,11 @@ namespace MonoGame.Framework.Media
         {
             ALController.InitializeInstance();
 
-            _stream = new OggStream(stream, leaveOpen, ALController.Get().Streamer, OnFinished, OnLooped);
+            _stream = new OggStream(
+                stream, leaveOpen, ALController.Get().Streamer, OnFinished, OnLooped);
             _stream.Prepare(immediate: true);
 
-            _duration = duration ?? _stream.GetLength();
+            _duration = duration ?? _stream.GetTotalTime();
         }
 
         private void OnFinished()

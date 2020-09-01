@@ -22,11 +22,11 @@ namespace MonoGame.Tools.Pipeline
         private readonly PipelineProject _project;
         private readonly IContentItemObserver _observer;
         private readonly OpaqueDataDictionary _processorParams = new OpaqueDataDictionary();
-        
+
         private string _processor;
 
         private List<string> _errors;
-        
+
         #endregion
 
         #region CommandLineParameters
@@ -104,7 +104,7 @@ namespace MonoGame.Tools.Pipeline
         public bool Clean { set => _clean = value; }
         private bool _clean;
 
-        #pragma warning restore 414
+#pragma warning restore 414
 
         [CommandLineParameter(
             Name = "compress",
@@ -305,7 +305,7 @@ namespace MonoGame.Tools.Pipeline
             using var io = File.CreateText(_project.OriginalPath);
             SaveProject(io, null);
         }
-        
+
         public void SaveProject(TextWriter io, Func<ContentItem, bool> filterItem)
         {
             const string lineFormat = "/{0}:{1}";
@@ -444,52 +444,52 @@ namespace MonoGame.Tools.Pipeline
             using var io = XmlReader.Create(File.OpenText(projectFilePath));
             while (io.Read())
             {
-                if (io.NodeType == XmlNodeType.Element)
+                if (io.NodeType != XmlNodeType.Element)
+                    continue;
+
+                var buildAction = io.LocalName;
+                if (buildAction.Equals("Reference"))
                 {
-                    var buildAction = io.LocalName;
-                    if (buildAction.Equals("Reference"))
-                    {
-                        ReadIncludeReference(io, out _, out string hintPath);
+                    ReadIncludeReference(io, out _, out string hintPath);
 
-                        if (!string.IsNullOrEmpty(hintPath) &&
-                            hintPath.IndexOf("microsoft", StringComparison.CurrentCultureIgnoreCase) == -1 &&
-                            hintPath.IndexOf("monogamecontentprocessors", StringComparison.CurrentCultureIgnoreCase) == -1)
-                        {
-                            _project.References.Add(hintPath);
-                        }
+                    if (!string.IsNullOrEmpty(hintPath) &&
+                        !hintPath.Contains("microsoft", StringComparison.CurrentCultureIgnoreCase) &&
+                        !hintPath.Contains("monogamecontentprocessors", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        _project.References.Add(hintPath);
                     }
-                    else if (buildAction.Equals("Content") || buildAction.Equals("None"))
+                }
+                else if (buildAction.Equals("Content") || buildAction.Equals("None"))
+                {
+                    ReadIncludeContent(io, out string include, out string copyToOutputDirectory);
+
+                    if (!string.IsNullOrEmpty(copyToOutputDirectory) &&
+                        !copyToOutputDirectory.Equals("Never"))
                     {
-                        ReadIncludeContent(io, out string include, out string copyToOutputDirectory);
-
-                        if (!string.IsNullOrEmpty(copyToOutputDirectory) &&
-                            !copyToOutputDirectory.Equals("Never"))
-                        {
-                            var sourceFilePath = Path.GetDirectoryName(projectFilePath);
-                            sourceFilePath += "\\" + include;
-
-                            OnCopy(sourceFilePath);
-                        }
-                    }
-                    else if (buildAction.Equals("Compile"))
-                    {
-                        ReadIncludeCompile(
-                            io, out string include, out _, out string importer,
-                            out string processor, out string[] processorParams);
-
-                        Importer = importer;
-                        Processor = processor;
-                        if (processorParams != null)
-                        {
-                            foreach (var i in processorParams)
-                                AddProcessorParam(i);
-                        }
-
-                        var sourceFilePath = Path.GetDirectoryName(projectFilePath);
+                        string sourceFilePath = Path.GetDirectoryName(projectFilePath);
                         sourceFilePath += "\\" + include;
 
-                        OnBuild(sourceFilePath);
+                        OnCopy(sourceFilePath);
                     }
+                }
+                else if (buildAction.Equals("Compile"))
+                {
+                    ReadIncludeCompile(
+                        io, out string include, out _, out string importer,
+                        out string processor, out string[] processorParams);
+
+                    Importer = importer;
+                    Processor = processor;
+                    if (processorParams != null)
+                    {
+                        foreach (var i in processorParams)
+                            AddProcessorParam(i);
+                    }
+
+                    var sourceFilePath = Path.GetDirectoryName(projectFilePath);
+                    sourceFilePath += "\\" + include;
+
+                    OnBuild(sourceFilePath);
                 }
             }
         }
@@ -498,7 +498,7 @@ namespace MonoGame.Tools.Pipeline
 
         private void ReadIncludeReference(XmlReader io, out string include, out string hintPath)
         {
-            include = io.GetAttribute("Include").Unescape();            
+            include = io.GetAttribute("Include").Unescape();
             hintPath = null;
 
             if (!io.IsEmptyElement)
@@ -584,7 +584,7 @@ namespace MonoGame.Tools.Pipeline
                             default:
                                 if (io.LocalName.Contains("ProcessorParameters_"))
                                 {
-                                    var line = io.LocalName.Replace("ProcessorParameters_", "");
+                                    string line = io.LocalName.Replace("ProcessorParameters_", "");
                                     line += "=";
                                     io.Read();
                                     line += io.Value;
@@ -601,9 +601,9 @@ namespace MonoGame.Tools.Pipeline
 
         private string FormatDivider(string label)
         {
-            string commentFormat = 
-                Environment.NewLine + 
-                "#----------------------------------------------------------------------------#" + 
+            string commentFormat =
+                Environment.NewLine +
+                "#----------------------------------------------------------------------------#" +
                 Environment.NewLine;
 
             label = " " + label + " ";

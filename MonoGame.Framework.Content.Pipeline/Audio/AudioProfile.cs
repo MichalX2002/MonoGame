@@ -5,7 +5,6 @@
 using System;
 using System.Linq;
 
-
 namespace MonoGame.Framework.Content.Pipeline.Audio
 {
     public abstract class AudioProfile
@@ -43,8 +42,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         public abstract ConversionQuality ConvertAudio(
             TargetPlatform platform,
             ConversionQuality quality, 
-            AudioContent content,
-            ContentBuildLogger logger = null);
+            AudioContent content);
 
         /// <summary>
         /// Converts the audio content to a streaming format that works on targeted platform.
@@ -53,15 +51,14 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         /// <param name="quality">The suggested audio quality level.</param>
         /// <param name="content">he audio content to convert.</param>
         /// <param name="inputFile">The input file name. This may change varying on platform and profile.</param>
-        /// <param name="outputFile">The output file name, changed by platform and profile.</param>
+        /// <param name="destinationFile">The output file name, changed by platform and profile.</param>
         /// <returns>The quality used for conversion which could be different from the suggested quality.</returns>
         public abstract ConversionQuality ConvertStreamingAudio(
             TargetPlatform platform,
             ConversionQuality quality, 
             AudioContent content, 
             string inputFile,
-            out string outputFile,
-            ContentBuildLogger logger = null);
+            out string destinationFile);
 
         protected static int QualityToSampleRate(
             ConversionFormat format, ConversionQuality quality, int sourceSampleRate)
@@ -85,11 +82,13 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             {
                 case ConversionQuality.Low:
                     return 96000;
+
                 case ConversionQuality.Medium:
                     return 128000;
-            }
 
-            return 192000;
+                default:
+                    return 192000;
+            }
         }
     }
 }

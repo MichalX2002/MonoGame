@@ -220,7 +220,7 @@ namespace MonoGame.Tools.Pipeline
             MissingProcessor = new ProcessorTypeDescription()
                 {
                     DisplayName = "Invalid / Missing Processor",
-                    Properties = new ProcessorTypeDescription.ProcessorPropertyCollection(new ProcessorTypeDescription.Property[0]),
+                    Properties = new ProcessorTypeDescription.ProcessorPropertyCollection(Array.Empty<ProcessorTypeDescription.Property>()),
                 };
 
             NullImporter = new ImporterTypeDescription()
@@ -231,7 +231,7 @@ namespace MonoGame.Tools.Pipeline
             NullProcessor = new ProcessorTypeDescription()
             {
                 DisplayName = "",
-                Properties = new ProcessorTypeDescription.ProcessorPropertyCollection(new ProcessorTypeDescription.Property[0]),
+                Properties = new ProcessorTypeDescription.ProcessorPropertyCollection(Array.Empty<ProcessorTypeDescription.Property>()),
             };
 
             _watchers = new List<FileSystemWatcher>();

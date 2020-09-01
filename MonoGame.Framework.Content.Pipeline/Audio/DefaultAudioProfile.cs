@@ -33,8 +33,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         public override ConversionQuality ConvertAudio(
             TargetPlatform platform,
             ConversionQuality quality,
-            AudioContent content,
-            ContentBuildLogger logger = null)
+            AudioContent content)
         {
             //// Default to PCM data, or ADPCM if the source is ADPCM.
             //var targetFormat = ConversionFormat.Pcm;
@@ -52,7 +51,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             //}
 
             var targetFormat = ConversionFormat.Vorbis;
-            return ConvertToFormat(content, targetFormat, quality, null, logger);
+            return ConvertToFormat(content, targetFormat, quality, null);
         }
 
         private static ConversionFormat PlatformToFormat(TargetPlatform platform)
@@ -79,18 +78,18 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             ConversionQuality quality,
             AudioContent content,
             string inputFile,
-            out string outputFile,
-            ContentBuildLogger logger = null)
+            out string destinationFile)
         {
             var targetFormat = PlatformToFormat(platform);
 
             // Get the song output path with the target format extension.
-            outputFile = Path.ChangeExtension(inputFile, AudioHelper.GetExtension(targetFormat));
+            destinationFile = Path.ChangeExtension(
+                inputFile, AudioHelper.GetExtension(targetFormat));
 
             // Make sure the output folder for the file exists.
-            Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
+            Directory.CreateDirectory(Path.GetDirectoryName(destinationFile));
 
-            return ConvertToFormat(content, targetFormat, quality, outputFile, logger);
+            return ConvertToFormat(content, targetFormat, quality, destinationFile);
         }
 
         public static void ProbeFormat(
@@ -101,15 +100,21 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             out int loopStart,
             out int loopLength)
         {
-            var ffprobeExitCode = ExternalTool.Run(
+            string ffprobeArguments = string.Format(
+                "-i \"{0}\" -show_format -show_entries streams -v quiet -of flat", sourceFile);
+
+            int ffprobeExitCode = ExternalTool.Run(
                 "ffprobe",
-                string.Format("-i \"{0}\" -show_format -show_entries streams -v quiet -of flat", sourceFile),
+                ffprobeArguments,
                 out var ffprobeStdout,
                 out var ffprobeStderr);
 
             if (ffprobeExitCode != 0)
+            {
                 throw new InvalidOperationException(
-                    "ffprobe exited with non-zero exit code.", new Exception(ffprobeStderr.ToString()));
+                    "ffprobe exited with non-zero exit code.",
+                    new Exception(ffprobeStderr.ToString()));
+            }
 
             // Set default values if information is not available.
             int averageBytesPerSecond = 0;
@@ -125,7 +130,8 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             try
             {
                 var numberFormat = CultureInfo.InvariantCulture.NumberFormat;
-                foreach (var line in ffprobeStdout.ToString().Split(_newlineChars, StringSplitOptions.RemoveEmptyEntries))
+                foreach (var line in ffprobeStdout.ToString()
+                    .Split(_newlineChars, StringSplitOptions.RemoveEmptyEntries))
                 {
                     string[] kv = line.Split(new[] { '=' }, 2);
                     switch (kv[0])
@@ -139,7 +145,8 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                             break;
 
                         case "streams.stream.0.start_time":
-                            if (double.TryParse(kv[1].Trim('"'), NumberStyles.Any, numberFormat, out double seconds))
+                            if (double.TryParse(
+                                kv[1].Trim('"'), NumberStyles.Any, numberFormat, out double seconds))
                                 durationSeconds += seconds;
                             break;
 
@@ -158,13 +165,15 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                         case "streams.stream.0.bit_rate":
                             if (averageBytesPerSecond != 0)
                                 break;
-                            if (int.TryParse(kv[1].Trim('"'), NumberStyles.Integer, numberFormat, out int bitsPerSec))
+
+                            if (int.TryParse(
+                                kv[1].Trim('"'), NumberStyles.Integer, numberFormat, out int bitsPerSec))
                                 averageBytesPerSecond = bitsPerSec / 8;
                             break;
 
                         case "streams.stream.0.codec_tag":
-                            var hex = kv[1][3..^1];
-                            format = int.Parse(hex, NumberStyles.HexNumber);
+                            string hex = kv[1][3..^1];
+                            format = int.Parse(hex, NumberStyles.HexNumber, numberFormat);
                             break;
 
                         case "format.bit_rate":
@@ -251,8 +260,9 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             // ffprobe doesn't report blockAlign for ADPCM and we cannot calculate it like this
             if (bitsPerSample > 0 && format != 2 && format != 17)
                 blockAlign = bitsPerSample * channelCount / 8;
-
-            duration = TimeSpan.FromTicks((long)(durationSeconds * TimeSpan.TicksPerSecond));
+            
+            duration = TimeSpan.FromTicks(
+                (long)Math.Ceiling(durationSeconds * TimeSpan.TicksPerSecond));
 
             // Looks like XNA calculates the average bps from
             // the sample rate and block alignment.
@@ -277,7 +287,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         }
 
         internal static void SkipRiffWaveHeader(
-            FileStream data, out long dataLength, out AudioFormat audioFormat)
+            FileStream data, out long dataLength, out AudioFormat? audioFormat)
         {
             audioFormat = null;
 
@@ -322,7 +332,9 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
 
                         fmtLength -= 2 + 2 + 4 + 4 + 2 + 2;
                         if (fmtLength < 0)
-                            throw new InvalidOperationException("riff wave header has unexpected format");
+                            throw new InvalidOperationException(
+                                "riff wave header has unexpected format");
+
                         reader.BaseStream.Seek(fmtLength, SeekOrigin.Current);
                     }
                     else
@@ -336,18 +348,18 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
         public static void WritePcmFile(
             AudioContent content, string saveToFile, int bitRate = 192000, int? sampleRate = null)
         {
-            string arguments = string.Format(
+            string ffmpegArguments = string.Format(
                 "-y -i \"{0}\" -vn -c:a pcm_s16le -b:a {2} {3} -f:a wav " +
                 "-strict experimental -threads {4} \"{1}\"",
                 content.FileName,
                 saveToFile,
                 bitRate,
-                sampleRate != null ? "-ar " + sampleRate.Value : string.Empty,
+                sampleRate.HasValue ? "-ar " + sampleRate.Value : string.Empty,
                 FfmpegThreads);
 
             var ffmpegExitCode = ExternalTool.Run(
                 "ffmpeg",
-                arguments,
+                ffmpegArguments,
                 out var ffmpegStdout,
                 out var ffmpegStderr);
 
@@ -360,18 +372,17 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             AudioContent content,
             ConversionFormat formatType,
             ConversionQuality quality,
-            string saveToFile,
-            ContentBuildLogger logger = null)
+            string? destinationFile)
         {
-            if (saveToFile != null)
+            if (destinationFile != null)
             {
-                saveToFile = Path.GetFullPath(saveToFile);
-                if (File.Exists(saveToFile))
-                    ExternalTool.DeleteFile(saveToFile);
+                destinationFile = Path.GetFullPath(destinationFile);
+                if (File.Exists(destinationFile))
+                    ExternalTool.DeleteFile(destinationFile);
             }
 
-            string outputFile = saveToFile ?? Path.GetTempFileName();
-            FileStream result = null;
+            string outputFile = destinationFile ?? Path.GetTempFileName();
+            FileStream? result = null;
             try
             {
                 string ffmpegCodecName, ffmpegMuxerName;
@@ -450,16 +461,18 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                 int ffmpegExitCode;
                 do
                 {
+                    string ffmpegArguments = string.Format(
+                        "-y -i \"{0}\" -vn -c:a {1} -b:a {2} -ar {3} -f:a {4} -strict experimental \"{5}\"",
+                        content.FileName,
+                        ffmpegCodecName,
+                        QualityToBitRate(quality),
+                        QualityToSampleRate(formatType, quality, content.Format.SampleRate),
+                        ffmpegMuxerName,
+                        outputFile);
+
                     ffmpegExitCode = ExternalTool.Run(
                         "ffmpeg",
-                        string.Format(
-                            "-y -i \"{0}\" -vn -c:a {1} -b:a {2} -ar {3} -f:a {4} -strict experimental \"{5}\"",
-                            content.FileName,
-                            ffmpegCodecName,
-                            QualityToBitRate(quality),
-                            QualityToSampleRate(formatType, quality, content.Format.SampleRate),
-                            ffmpegMuxerName,
-                            outputFile),
+                        ffmpegArguments,
                         out ffmpegStdout,
                         out ffmpegStderr,
                         null);
@@ -481,7 +494,8 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                 if (dataLength > int.MaxValue)
                 {
                     result.Dispose();
-                    throw new InvalidDataException("Size of raw audio data exceeded " + int.MaxValue + " bytes.");
+                    throw new InvalidDataException(
+                        "Size of raw audio data exceeded " + int.MaxValue + " bytes.");
                 }
 
                 // deal with adpcm
@@ -490,8 +504,8 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                     // riff contains correct blockAlign
                     audioFormat = riffAudioFormat;
 
-                    // fix loopLength -> has to be multiple of sample per block
-                    // see https://msdn.microsoft.com/de-de/library/windows/desktop/ee415711(v=vs.85).aspx
+                    // fix loopLength -> has to be multiple of sample per block, see:
+                    // https://msdn.microsoft.com/de-de/library/windows/desktop/ee415711(v=vs.85).aspx
                     int samplesPerBlock = SampleAlignment(audioFormat);
                     loopLength = (int)(audioFormat.SampleRate * duration.TotalSeconds);
                     int remainder = loopLength % samplesPerBlock;
@@ -501,7 +515,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
                 var wrap = new DisposeCallbackStream(result);
                 wrap.OnDispose += (s, disposing) =>
                 {
-                    if (saveToFile == null) // we used a tmp path instead
+                    if (destinationFile == null) // we used a tmp path instead
                         ExternalTool.DeleteFile(outputFile); // so delete that tmp file
                 };
                 content.SetData(wrap, (int)dataLength, audioFormat, duration, loopStart, loopLength);
@@ -510,7 +524,7 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
             {
                 result?.Dispose();
 
-                if (saveToFile == null) // we used a tmp path instead
+                if (destinationFile == null) // we used a tmp path instead
                     ExternalTool.DeleteFile(outputFile); // so delete that tmp file
 
                 throw;
@@ -520,15 +534,23 @@ namespace MonoGame.Framework.Content.Pipeline.Audio
 
         /// <summary>
         /// Converts block alignment in bytes to sample alignment, primarily for compressed formats.
-        /// Calculation of sample alignment from http://kcat.strangesoft.net/openal-extensions/SOFT_block_alignment.txt
+        /// Calculation of sample alignment from 
+        /// http://kcat.strangesoft.net/openal-extensions/SOFT_block_alignment.txt
         /// </summary>
         static int SampleAlignment(AudioFormat format)
         {
             switch (format.Format)
             {
-                case 2: return (format.BlockAlign / format.ChannelCount - 7) * 2 + 2;       // MS-ADPCM
-                case 17: return (format.BlockAlign / format.ChannelCount - 4) / 4 * 8 + 1;  // IMA/ADPCM
-                default: return 0;
+                // MS-ADPCM
+                case 2:
+                    return (format.BlockAlign / format.ChannelCount - 7) * 2 + 2;
+
+                // IMA/ADPCM
+                case 17:
+                    return (format.BlockAlign / format.ChannelCount - 4) / 4 * 8 + 1;
+
+                default:
+                    return 0;
             }
         }
     }

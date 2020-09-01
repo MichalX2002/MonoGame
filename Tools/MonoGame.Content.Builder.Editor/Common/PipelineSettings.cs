@@ -2,9 +2,11 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.IsolatedStorage;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace MonoGame.Tools.Pipeline
@@ -29,7 +31,7 @@ namespace MonoGame.Tools.Pipeline
         {
             Default = new PipelineSettings();
         }
-        
+
         public PipelineSettings()
         {
             ProjectHistory = new List<string>();
@@ -46,7 +48,7 @@ namespace MonoGame.Tools.Pipeline
                 _isoStore = IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Assembly, null, null);
                 _isoStoreInit = true;
             }
-            catch 
+            catch
             {
             }
         }
@@ -56,16 +58,22 @@ namespace MonoGame.Tools.Pipeline
         /// </summary>
         public void AddProjectHistory(string file)
         {
-            var cleanFile = file.Trim();
+            if (file == null)
+                throw new ArgumentNullException(nameof(file));
+
+            string cleanFile = file.Trim();
             ProjectHistory.Remove(cleanFile);
             ProjectHistory.Add(cleanFile);
         }
-        
+
         public void RemoveProjectHistory(string file)
         {
-            var cleanFile = file.Trim();
+            if (file == null)
+                throw new ArgumentNullException(nameof(file));
+
+            string cleanFile = file.Trim();
             ProjectHistory.Remove(cleanFile);
-        }   
+        }
 
         public void Clear()
         {
@@ -89,30 +97,36 @@ namespace MonoGame.Tools.Pipeline
                 using var writer = new StreamWriter(isoStream);
                 var serializer = new XmlSerializer(typeof(PipelineSettings));
                 serializer.Serialize(writer, this);
-            } 
-            catch 
+            }
+            catch
             {
             }
         }
 
         public void Load()
-		{
+        {
             if (!_isoStoreInit)
                 return;
-            
+
             try
             {
-                if (_isoStore.FileExists(SettingsPath))
-                {
-                    using var isoStream = new IsolatedStorageFileStream(SettingsPath, FileMode.Open, _isoStore);
-                    using var reader = new StreamReader(isoStream);
-                    var serializer = new XmlSerializer(typeof(PipelineSettings));
-                    Default = (PipelineSettings)serializer.Deserialize(reader);
+                if (!_isoStore.FileExists(SettingsPath))
+                    return;
+                
+                using var isoStream = new IsolatedStorageFileStream(
+                    SettingsPath, FileMode.Open, _isoStore);
 
-                    var history = Default.ProjectHistory.ToArray();
-                    foreach (var h in history)
-                        if (!File.Exists(h))
-                            Default.ProjectHistory.Remove(h);
+                using var reader = new XmlTextReader(isoStream);
+                var serializer = new XmlSerializer(typeof(PipelineSettings));
+                Default = (PipelineSettings)serializer.Deserialize(reader);
+
+                for (int i = Default.ProjectHistory.Count; i-- > 0;)
+                {
+                    string entry = Default.ProjectHistory[i];
+
+                    if (!File.Exists(entry))
+                        Default.ProjectHistory.RemoveAt(i);
+
                 }
             }
             catch

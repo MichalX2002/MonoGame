@@ -249,7 +249,7 @@ namespace MonoGame.Framework.Media
                 return Reader.TimePosition;
         }
 
-        public TimeSpan? GetLength()
+        public TimeSpan? GetTotalTime()
         {
             if (Reader == null)
                 return default;

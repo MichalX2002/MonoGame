@@ -65,7 +65,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 if ((weight > 0.0f) && (index < maxWeights))
                 {
                     sum += weight;
-                    ++index;
+                    index++;
                 }
                 else
                 {
@@ -78,7 +78,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
                 throw new InvalidContentException("Total bone weights in a collection must not be zero");
 
             // Normalize each weight
-            int count = weights.Count();
+            int count = weights.Count;
             // Old-school trick. Multiplication is faster than division, so multiply by the inverse.
             float invSum = 1.0f / sum;
             for (index = 0; index < count; ++index)

@@ -6,11 +6,17 @@ namespace MonoGame.Effect
 {
     internal partial class ShaderData
     {
-        public static ShaderData CreateHLSL(byte[] byteCode, bool isVertexShader, List<ConstantBufferData> cbuffers, int sharedIndex, Dictionary<string, SamplerStateInfo> samplerStates, bool debug)
+        public static ShaderData CreateHLSL(
+            byte[] byteCode, 
+            bool isVertexShader, 
+            List<ConstantBufferData> cbuffers, 
+            int sharedIndex, 
+            Dictionary<string, SamplerStateInfo> samplerStates, 
+            bool debug)
         {
             var dxshader = new ShaderData(isVertexShader, sharedIndex, byteCode)
             {
-                _attributes = new Attribute[0]
+                _attributes = System.Array.Empty<Attribute>()
             };
 
             // Strip the bytecode we're gonna save!
@@ -64,7 +70,7 @@ namespace MonoGame.Effect
                                 parameterName = samplerName
                             };
 
-                            if (samplerStates.TryGetValue(samplerName, out SamplerStateInfo state))
+                            if (samplerStates.TryGetValue(samplerName, out SamplerStateInfo? state))
                             {
                                 sampler.parameterName = state.TextureName ?? samplerName;
                                 sampler.state = state.State;

@@ -115,9 +115,8 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                     OutStream = outputStream;
 
                     // Dispose managed resources we allocated
-                    if (bodyStream != null)
-                        bodyStream.Dispose();
-                    bodyStream = null;
+                    bodyStream?.Dispose();
+                    bodyStream = null!;
                 }
                 disposed = true;
             }
@@ -143,7 +142,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
 
                 // Before we write the header, try to compress the body stream. If compression fails, we want to
                 // turn off the compressContent flag so the correct flags are written in the header
-                MemoryStream compressedStream = null;
+                MemoryStream? compressedStream = null;
                 try
                 {
                     if (compressContent)
@@ -203,10 +202,10 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
             Write('B');
             Write(targetPlatformIdentifiers[(int)TargetPlatform]);
             Write(XnbFormatVersion);
-            
+
             // We cannot use LZX compression, so we use the public domain LZ4 compression. 
             // Use one of the spare bits in the flags byte to specify LZ4.
-            byte flags = 
+            byte flags =
                 (byte)((TargetProfile == GraphicsProfile.HiDef ? HiDefContent : 0) |
                 (compressContent ? ContentCompressedLz4 : 0));
 
@@ -265,7 +264,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         /// <returns>The ContentTypeWriter for the type.</returns>
         internal ContentTypeWriter GetTypeWriter(Type type)
         {
-            if (!typeMap.TryGetValue(type, out ContentTypeWriter typeWriter))
+            if (!typeMap.TryGetValue(type, out ContentTypeWriter? typeWriter))
             {
                 int index = typeWriters.Count;
                 typeWriter = compiler.GetTypeWriter(type);
@@ -303,13 +302,19 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
                 {
                     // Make sure the filename ends with .xnb
                     if (!fileName.EndsWith(".xnb"))
+                    {
                         throw new ArgumentException(string.Format(
-                            "ExternalReference '{0}' must reference a .xnb file", fileName));
+                            "ExternalReference '{0}' must reference a .xnb file",
+                            fileName));
+                    }
 
                     // Make sure it is in the same root directory
                     if (!fileName.StartsWith(rootDirectory, StringComparison.OrdinalIgnoreCase))
+                    {
                         throw new ArgumentException(string.Format(
-                            "ExternalReference '{0}' must be in the root directory '{1}'", fileName, rootDirectory));
+                            "ExternalReference '{0}' must be in the root directory '{1}'",
+                            fileName, rootDirectory));
+                    }
 
                     // Strip the .xnb extension
                     fileName = fileName[0..^4];
@@ -329,7 +334,9 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Compiler
         public void WriteObject<T>(T value)
         {
             if (value == null)
+            {
                 Write7BitEncodedInt(0);
+            }
             else
             {
                 var typeWriter = GetTypeWriter(value.GetType());

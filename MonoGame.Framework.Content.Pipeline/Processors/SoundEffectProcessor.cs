@@ -35,7 +35,8 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
         /// <param name="input">The audio content to build.</param>
         /// <param name="context">Context for the specified processor.</param>
         /// <returns>The built audio.</returns>
-        public override SoundEffectContent Process(AudioContent input, ContentProcessorContext context)
+        public override SoundEffectContent Process(
+            AudioContent input, ContentProcessorContext context)
         {
             if (input == null)
                 throw new ArgumentNullException(nameof(input));
@@ -44,8 +45,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
                 throw new ArgumentNullException(nameof(context));
 
             var profile = AudioProfile.ForPlatform(context.TargetPlatform);
-            var finalQuality = profile.ConvertAudio(
-                context.TargetPlatform, Quality, input, context.Logger);
+            var finalQuality = profile.ConvertAudio(context.TargetPlatform, Quality, input);
 
             if (Quality != finalQuality)
                 context.Logger.LogMessage(

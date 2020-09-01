@@ -19,7 +19,7 @@ namespace MonoGame.Tools.Pipeline
         private readonly PropertyDescriptor _property;
 
         public MultiTargetPropertyDescriptor(string propertyName, Type propertyType, Type componentType, PropertyDescriptor property, object[] targets)
-            : base(propertyName, new Attribute[] { })
+            : base(propertyName, Array.Empty<Attribute>())
         {
             _propertyType = propertyType;
             _componentType = componentType;
@@ -65,7 +65,7 @@ namespace MonoGame.Tools.Pipeline
         private readonly OpaqueDataDictionary _target;
 
         public OpaqueDataDictionaryElementPropertyDescriptor(string propertyName, Type propertyType, OpaqueDataDictionary target)
-            : base(propertyName, new Attribute[] { })
+            : base(propertyName, Array.Empty<Attribute>())
         {
             _propertyType = propertyType;
             _propertyName = propertyName;
@@ -106,7 +106,7 @@ namespace MonoGame.Tools.Pipeline
         private readonly object _value;
 
         public ReadonlyPropertyDescriptor(string propertyName, Type propertyType, Type componentType, object value)
-            : base(propertyName, new Attribute[] {})
+            : base(propertyName, Array.Empty<Attribute>())
         {
             _propertyType = propertyType;
             _componentType = componentType;

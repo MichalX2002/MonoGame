@@ -72,7 +72,7 @@ namespace MonoGame.Tools.Pipeline
 
         private void Grid1_SelectionChanged(object sender, EventArgs e)
         {
-            buttonRemove.Enabled = grid1.SelectedItems.Count() > 0;
+            buttonRemove.Enabled = grid1.SelectedItems.Any();
         }
 
         private void Grid1_KeyDown(object sender, KeyEventArgs e)

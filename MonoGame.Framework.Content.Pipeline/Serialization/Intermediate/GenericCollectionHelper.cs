@@ -12,7 +12,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             return GetCollectionElementType(type, checkAncestors) != null;
         }
 
-        private static Type GetCollectionElementType(Type type, bool checkAncestors)
+        private static Type? GetCollectionElementType(Type type, bool checkAncestors)
         {
             if (!checkAncestors && type.BaseType != null && FindCollectionInterface(type.BaseType) != null)
                 return null;
@@ -24,7 +24,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             return collectionInterface.GetGenericArguments()[0];
         }
 
-        private static Type FindCollectionInterface(Type type)
+        private static Type? FindCollectionInterface(Type type)
         {
             var interfaces = type.FindInterfaces((t, o) =>
             {
@@ -45,21 +45,30 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
         public GenericCollectionHelper(IntermediateSerializer serializer, Type type)
         {
             var collectionElementType = GetCollectionElementType(type, false);
+            if (collectionElementType == null)
+                throw new ArgumentException($"Failed to get collection element type of {type}.");
             _contentSerializer = serializer.GetTypeSerializer(collectionElementType);
 
             var collectionType = typeof(ICollection<>).MakeGenericType(collectionElementType);
-            _countProperty = collectionType.GetProperty("Count");
-            _addMethod = collectionType.GetMethod("Add", new[] { collectionElementType });
+            var countProperty = collectionType.GetProperty("Count");
+            if (countProperty == null)
+                throw new Exception("Failed to get property for reflection.");
+            _countProperty = countProperty;
+
+            var addMethod = collectionType.GetMethod("Add", new[] { collectionElementType });
+            if (addMethod == null)
+                throw new Exception("Failed to get method for reflection.");
+            _addMethod = addMethod;
         }
 
-        public bool ObjectIsEmpty(object list)
+        public bool ObjectIsEmpty(object? list)
         {
-            return (int) _countProperty.GetValue(list, null) == 0;
+            return (int)(_countProperty.GetValue(list, null) ?? 0) == 0;
         }
 
         public void ScanChildren(ContentTypeSerializer.ChildCallback callback, object collection)
         {
-            foreach (var item in (IEnumerable) collection)
+            foreach (var item in (IEnumerable)collection)
                 if (item != null)
                     callback(_contentSerializer, item);
         }
@@ -70,7 +79,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
             {
                 ElementName = format.CollectionItemName
             };
-            foreach (var item in (IEnumerable) collection)
+            foreach (var item in (IEnumerable)collection)
                 output.WriteObject(item, itemFormat, _contentSerializer);
         }
 

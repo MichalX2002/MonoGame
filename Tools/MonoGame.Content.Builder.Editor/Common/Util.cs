@@ -30,7 +30,7 @@ namespace MonoGame.Tools.Pipeline
                 return filespec;
 
             if (!Path.IsPathRooted(folder))
-                throw new ArgumentException("Must be an absolute path.", "folder");
+                throw new ArgumentException("Must be an absolute path.", nameof(folder));
 
             filespec = Path.GetFullPath(filespec).TrimEnd(new[] { '/', '\\' });
             folder = Path.GetFullPath(folder).TrimEnd(new[] { '/', '\\' });
@@ -40,7 +40,7 @@ namespace MonoGame.Tools.Pipeline
 
             var pathUri = new Uri(filespec);
             var folderUri = new Uri(folder + Path.DirectorySeparatorChar);
-            var result = folderUri.MakeRelativeUri(pathUri).ToString();
+            string result = folderUri.MakeRelativeUri(pathUri).ToString();
             result = result.Replace('/', Path.DirectorySeparatorChar);
             result = Uri.UnescapeDataString(result);
 
