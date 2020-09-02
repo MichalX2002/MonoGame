@@ -15,7 +15,11 @@
     <Compile Include="..\ThirdParty\StbSharp\ImageWrite\src\**\*.cs" Exclude="..\ThirdParty\StbSharp\ImageWrite\src\obj\**">
       <Link>ImageWrite\%(FileName)%(Extension)</Link>
     </Compile>
- 
+
+    <Compile Include="..\ThirdParty\StbSharp\TrueType\src\**\*.cs" Exclude="..\ThirdParty\StbSharp\TrueType\src\obj\**">
+      <Link>TrueType\%(FileName)%(Extension)</Link>
+    </Compile>
+    
     <Compile Include="..\ThirdParty\StbSharp\Shared\src\**\*.cs" Exclude="..\ThirdParty\StbSharp\Shared\src\obj\**">
       <Link>Shared\%(FileName)%(Extension)</Link>
     </Compile>

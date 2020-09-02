@@ -134,7 +134,7 @@ namespace MonoGame.Imaging
                 var delegateParams = typeof(LoadPixelDataDelegate).GetDelegateParameters().AsTypes();
                 var lambdaParams = delegateParams.Select(x => Expression.Parameter(x)).ToList();
                 var callParams = lambdaParams.Cast<Expression>().ToList();
-                callParams[3] = Expression.Convert(callParams[3], typeof(Image<>).MakeGenericType(destinationType.Type));
+                callParams[2] = Expression.Convert(callParams[2], typeof(Image<>).MakeGenericType(destinationType.Type));
 
                 var genericMethod = _loadPixelDataMethod!.MakeGenericMethod(sourceType.Type, destinationType.Type);
                 var call = Expression.Call(genericMethod, callParams);

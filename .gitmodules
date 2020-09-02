@@ -21,3 +21,6 @@
 [submodule "ThirdParty/SDL_GameControllerDB"]
 	path = ThirdParty/SDL_GameControllerDB
 	url = https://github.com/gabomdq/SDL_GameControllerDB/
+[submodule "ThirdParty/StbSharp/TrueType"]
+	path = ThirdParty/StbSharp/TrueType
+	url = https://github.com/TechnologicalPizza/StbSharp.TrueType

@@ -82,7 +82,7 @@ namespace MonoGame.Testing
             //    File.OpenRead("../../../very big interlace.png"),
             //    GraphicsDevice);
 
-            Action body = () =>
+            void LoadBody()
             {
                 try
                 {
@@ -116,7 +116,7 @@ namespace MonoGame.Testing
                             Console.WriteLine(lastRow[0]);
 
                             Thread.Sleep(1000);
-                            
+
                             //_tex = Texture2D.FromImage(img, GraphicsDevice);
 
                             return;
@@ -154,15 +154,15 @@ namespace MonoGame.Testing
                 {
                     Console.WriteLine(ex);
                 }
-            };
+            }
 
             if (false)
             {
-                body();
+                LoadBody();
             }
             else
             {
-                Task.Run(body);
+                Task.Run(LoadBody);
             }
         }
 
