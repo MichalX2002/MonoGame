@@ -4,6 +4,7 @@ using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Framework.Audio;
@@ -60,6 +61,8 @@ namespace MonoGame.Testing
             if (!TrueType.InitFont(info, File.ReadAllBytes("C:/Windows/Fonts/arial.ttf"), 0))
                 throw new Exception("Failed to load font.");
 
+            Thread.Sleep(1000);
+
             var watch = new Stopwatch();
 
             watch.Restart();
@@ -100,7 +103,7 @@ namespace MonoGame.Testing
 
             _spriteBatch.Begin();
 
-            DrawShadedString(_font, "NICE", new Vector2(50, 50), Color.White, Color.Black);
+            DrawShadedString(_font, "meh :[", new Vector2(50, 50), Color.White, Color.Black);
 
             _spriteBatch.End();
 
