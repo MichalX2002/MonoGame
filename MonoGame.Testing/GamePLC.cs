@@ -61,26 +61,58 @@ namespace MonoGame.Testing
             if (!TrueType.InitFont(info, File.ReadAllBytes("C:/Windows/Fonts/arial.ttf"), 0))
                 throw new Exception("Failed to load font.");
 
-            Thread.Sleep(1000);
-
             var watch = new Stopwatch();
 
-            watch.Restart();
-            char ch = '@';
-            var glyphBitmap = TrueType.GetCodepointBitmap(
-                info, new Vector2(1, 1), new Rune(ch).Value,
-                out int glyphWidth, out int glyphHeight, out var glyphOffset);
-            watch.Stop();
-            Console.WriteLine("GetCodepointBitmap: " + watch.ElapsedMilliseconds + "ms");
-
-            watch.Restart();
-            using (var glyphImage = Image.LoadPixelData<Alpha8>(
-                glyphBitmap, new Rectangle(0, 0, glyphWidth, glyphHeight), null))
+            if (true)
             {
-                glyphImage.Save("glyph_" + ch + ".png");
+                Thread.Sleep(500);
+
+                watch.Restart();
+                char ch = '@';
+                var glyphBitmap = TrueType.GetCodepointBitmap(
+                    info, new Vector2(1f), new Rune(ch).Value,
+                    out int glyphWidth, out int glyphHeight, out var glyphOffset);
+                watch.Stop();
+                Console.WriteLine("GetCodepointBitmap: " + watch.ElapsedMilliseconds + "ms");
+
+                watch.Restart();
+                using (var glyphImage = Image.LoadPixelData<Alpha8>(
+                    glyphBitmap, new Rectangle(0, 0, glyphWidth, glyphHeight), null))
+                {
+                    glyphImage.Save("glyph_" + ch + ".png");
+                }
+                watch.Stop();
+                Console.WriteLine("Glyph Save: " + watch.ElapsedMilliseconds + "ms");
             }
-            watch.Stop();
-            Console.WriteLine("Glyph Save: " + watch.ElapsedMilliseconds + "ms");
+
+            if (false)
+            {
+                Thread.Sleep(500);
+
+                // used both to compute SDF and in 'shader'
+                float pixel_dist_scale = 64;   // trades off precision w/ ability to handle *smaller* sizes
+                byte onedge_value = 128;
+                int padding = 3; // not used in shader
+
+                // the larger the scale, the better large font sizes look
+                    
+                watch.Restart();
+                char ch = '@';
+                var glyphBitmap = TrueType.GetCodepointSDF(
+                    info, new Vector2(1f), new Rune(ch).Value, padding, onedge_value, pixel_dist_scale,
+                    out int glyphWidth, out int glyphHeight, out var glyphOffset);
+                watch.Stop();
+                Console.WriteLine("GetCodepointSDF: " + watch.ElapsedMilliseconds + "ms");
+
+                watch.Restart();
+                using (var glyphImage = Image.LoadPixelData<Alpha8>(
+                    glyphBitmap, new Rectangle(0, 0, glyphWidth, glyphHeight), null))
+                {
+                    glyphImage.Save("sdf_" + ch + ".png");
+                }
+                watch.Stop();
+                Console.WriteLine("SDF Save: " + watch.ElapsedMilliseconds + "ms");
+            }
         }
 
         protected override void UnloadContent()
