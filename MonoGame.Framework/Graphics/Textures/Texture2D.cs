@@ -63,7 +63,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         /// <summary>
-        /// Creates a new texture of a given size with a surface format and optional mipmaps 
+        /// Creates a new texture of a given size with a surface format and optional mipmaps.
         /// </summary>
         public Texture2D(
             GraphicsDevice graphicsDevice,
@@ -310,18 +310,19 @@ namespace MonoGame.Framework.Graphics
                 {
                     int sliceWidth = checkedRect.Width - offsetX;
                     int count = sliceWidth > bufferCapacity ? bufferCapacity : sliceWidth;
-                    var slice = vectorRow.Slice(0, count * srcVectorType.ElementSize);
+                    var srcSlice = vectorRow.Slice(0, count * srcVectorType.ElementSize);
+                    var dstSlice = buffer.Slice(0, count * dstVectorType.ElementSize);
 
-                    convertPixels.Invoke(slice, buffer);
+                    convertPixels.Invoke(srcSlice, dstSlice);
 
                     var textureRect = new Rectangle(
                         checkedRect.X + offsetX,
                         checkedRect.Y + y,
                         width: count,
                         height: 1);
-                    SetData(buffer, textureRect, level, arraySlice);
+                    SetData(dstSlice, textureRect, level, arraySlice);
 
-                    vectorRow = vectorRow.Slice(slice.Length);
+                    vectorRow = vectorRow.Slice(srcSlice.Length);
                     offsetX += count;
 
                 } while (!vectorRow.IsEmpty);

@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Framework.Audio;
+using MonoGame.Framework.Content;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
 using MonoGame.Framework.Media;
@@ -18,16 +19,16 @@ using StbSharp;
 
 namespace MonoGame.Testing
 {
-    public class GamePLC : Game
+    public partial class GamePLC : Game
     {
         private GraphicsDeviceManager _graphicsManager;
         private SpriteBatch _spriteBatch;
 
         private Texture2D _pixel;
 
-        private MouseCursor _customCursor;
-
-        private SpriteFont _font;
+        private SpriteFont _spriteFont;
+        private Font _font;
+        private FontTextureCache _fontCache;
 
         private Stopwatch _watch;
 
@@ -45,6 +46,15 @@ namespace MonoGame.Testing
             IsMouseVisible = true;
 
             base.Initialize();
+
+            //Draw(default);
+            //
+            //var states = _fontCache._textureStates;
+            //for (int i = 0; i < states.Count; i++)
+            //{
+            //    var state = states[i];
+            //    state.Texture.Save("state_" + i + ".png");
+            //}
         }
 
         protected override void LoadContent()
@@ -55,7 +65,7 @@ namespace MonoGame.Testing
             _pixel = new Texture2D(GraphicsDevice, 1, 1);
             _pixel.SetData(new Color[] { Color.White });
 
-            _font = Content.Load<SpriteFont>("arial");
+            _spriteFont = Content.Load<SpriteFont>("arial");
 
             var info = new TrueType.FontInfo();
             if (!TrueType.InitFont(info, File.ReadAllBytes("C:/Windows/Fonts/arial.ttf"), 0))
@@ -63,7 +73,7 @@ namespace MonoGame.Testing
 
             var watch = new Stopwatch();
 
-            if (true)
+            if (false)
             {
                 Thread.Sleep(500);
 
@@ -95,7 +105,7 @@ namespace MonoGame.Testing
                 int padding = 3; // not used in shader
 
                 // the larger the scale, the better large font sizes look
-                    
+
                 watch.Restart();
                 char ch = '@';
                 var glyphBitmap = TrueType.GetCodepointSDF(
@@ -113,6 +123,13 @@ namespace MonoGame.Testing
                 watch.Stop();
                 Console.WriteLine("SDF Save: " + watch.ElapsedMilliseconds + "ms");
             }
+
+            _font = new Font(File.ReadAllBytes("C:/Windows/Fonts/arial.ttf"));
+            //var scale = new Vector2(font.GetScaleByPixel(32));
+            //
+            //var img  = font.GetGlyphBitmap(font.GetGlyphIndex(new Rune('%').Value), scale);
+
+            _fontCache = new FontTextureCache(GraphicsDevice, 4096, SurfaceFormat.Rgba32);
         }
 
         protected override void UnloadContent()
@@ -134,16 +151,67 @@ namespace MonoGame.Testing
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             _spriteBatch.Begin();
+            {
+                DrawShadedString(
+                    _spriteFont, "meh :[", new Vector2(50, 10), Color.White, Color.Black);
+            }
+            _spriteBatch.End();
 
-            DrawShadedString(_font, "meh :[", new Vector2(50, 50), Color.White, Color.Black);
+            _spriteBatch.Begin(
+                blendState: BlendState.NonPremultiplied,
+                transformMatrix: Matrix4x4.CreateScale(1));
+            {
+                string sicc = "h€llo ön you dis is the cool fönt cäche thing";
+                //string sicc = "@";
+                var span = sicc.AsSpan();
 
+                float x = 0;
+                do
+                {
+                    if (Rune.DecodeFromUtf16(span, out Rune rune, out int consumed) !=
+                        System.Buffers.OperationStatus.Done)
+                        break;
+
+                    float spriteScale = (float)(Math.Sin(time.Total.TotalSeconds * 0.5) + 1) * 32;
+                    float actualPixelSize = spriteScale + 8f;
+                    int visiblePixelHeight = (int)Math.Ceiling(actualPixelSize);
+
+                    int glyphIndex = _font.GetGlyphIndex(rune.Value);
+                    var glyph = _fontCache.GetGlyph(_font, visiblePixelHeight, glyphIndex);
+                   
+                    float actualScale = _font.GetScaleByPixel(actualPixelSize);
+                    float visibleScale = _font.GetScaleByPixel(visiblePixelHeight);
+                    float sizeFactor = actualScale / visibleScale;
+                    
+                    if (glyph != null)
+                    {
+                        var texRect = glyph.TextureRect;
+                        var glyphRect = glyph.GlyphRect;
+
+                        var pos = new Vector2(10 + x, 60 - glyphRect.Height * actualScale);
+                        _spriteBatch.Draw(
+                            glyph.Texture, pos, texRect, Color.Red,
+                            0, Vector2.Zero, sizeFactor, SpriteFlip.None, 0);
+
+                        x += glyphRect.Width * actualScale;
+                    }
+                    else
+                    {
+                        x += 16 * sizeFactor;
+                    }
+
+                    span = span.Slice(consumed);
+                }
+                while (!span.IsEmpty);
+            }
             _spriteBatch.End();
 
             base.Draw(time);
         }
 
         private void DrawShadedString(
-            SpriteFont font, string value, Vector2 position, Color textColor, Color backgroundColor)
+            SpriteFont font, string value, Vector2 position,
+            Color textColor, Color backgroundColor)
         {
             _spriteBatch.DrawString(font, value, position + new Vector2(1f), backgroundColor);
             _spriteBatch.DrawString(font, value, position, textColor);
