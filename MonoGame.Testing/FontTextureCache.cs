@@ -10,12 +10,17 @@ namespace MonoGame.Testing
     {
         public class Glyph
         {
+            public GlyphHeightMap HeightMap { get; }
             public Texture2D Texture { get; }
             public Rectangle TextureRect { get; }
             public RectangleF GlyphRect { get; }
 
-            public Glyph(Texture2D texture, Rectangle textureRect, RectangleF glyphRect)
+            public Vector2 Scale => HeightMap.Scale;
+
+            public Glyph(
+                GlyphHeightMap heightMap, Texture2D texture, Rectangle textureRect, RectangleF glyphRect)
             {
+                HeightMap = heightMap ?? throw new ArgumentNullException(nameof(heightMap));
                 Texture = texture ?? throw new ArgumentNullException(nameof(texture));
                 TextureRect = textureRect;
                 GlyphRect = glyphRect;
@@ -56,7 +61,7 @@ namespace MonoGame.Testing
             public int Width => Texture.Width;
             public int Height => Texture.Height;
 
-            public int Padding { get; } = 1;
+            public int Padding { get; } = 2;
 
             public int Column;
             public int Row;
@@ -117,8 +122,10 @@ namespace MonoGame.Testing
         {
             if (font == null)
                 throw new ArgumentNullException(nameof(font));
+            if (pixelHeight <= 0)
+                throw new ArgumentOutOfRangeException(nameof(pixelHeight));
 
-            pixelHeight = pixelHeight - pixelHeight % 2;
+            pixelHeight = Math.Max(pixelHeight - pixelHeight % 2, 2);
 
             if (!_map.TryGetValue(pixelHeight, out var heightMap))
             {
@@ -138,9 +145,6 @@ namespace MonoGame.Testing
             if (!glyphs.TryGetValue(glyphIndex, out var state))
             {
                 using var image = font.GetGlyphBitmap(glyphIndex, heightMap.Scale);
-
-                font.GetGlyphBox(glyphIndex, out var glyphRect);
-
                 if (image != null)
                 {
                     var texRect = new Rectangle(0, 0, image.Width, image.Height);
@@ -172,7 +176,8 @@ namespace MonoGame.Testing
                         texRect.Position = position;
                     }
 
-                    var region = new Glyph(array.Texture, texRect, glyphRect);
+                    font.GetGlyphBox(glyphIndex, out var glyphRect);
+                    var region = new Glyph(heightMap, array.Texture, texRect, glyphRect);
                     region.Texture.SetData(image, texRect);
                     state = region;
                 }

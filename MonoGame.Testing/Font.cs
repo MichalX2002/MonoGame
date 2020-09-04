@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using Microsoft.VisualBasic.CompilerServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
 using MonoGame.Imaging;
@@ -16,6 +15,16 @@ namespace MonoGame.Testing
         {
             FontInfo = new TT.FontInfo();
             TT.InitFont(FontInfo, fontData, fontIndex);
+        }
+
+        public void GetGlyphHMetrics(int glyph, out int advanceWidth, out int leftSideBearing)
+        {
+            TT.GetGlyphHMetrics(FontInfo, glyph, out advanceWidth, out leftSideBearing);
+        }
+
+        public void GetFontVMetrics(out int ascent, out int descent, out int lineGap)
+        {
+            TT.GetFontVMetrics(FontInfo, out ascent, out descent, out lineGap);
         }
 
         public int GetGlyphIndex(int codepoint)

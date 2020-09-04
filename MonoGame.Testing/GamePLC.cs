@@ -159,9 +159,9 @@ namespace MonoGame.Testing
 
             _spriteBatch.Begin(
                 blendState: BlendState.NonPremultiplied,
-                transformMatrix: Matrix4x4.CreateScale(1));
+                transformMatrix: Matrix4x4.CreateScale(2));
             {
-                string sicc = "h€llo ön you dis is the cool fönt cäche thing";
+                string sicc = "h€llo hello ön you dis is the cool fönt cäche thing";
                 //string sicc = "@";
                 var span = sicc.AsSpan();
 
@@ -172,33 +172,37 @@ namespace MonoGame.Testing
                         System.Buffers.OperationStatus.Done)
                         break;
 
-                    float spriteScale = (float)(Math.Sin(time.Total.TotalSeconds * 0.5) + 1) * 32;
-                    float actualPixelSize = spriteScale + 8f;
-                    int visiblePixelHeight = (int)Math.Ceiling(actualPixelSize);
+                    // TODO: fix jittery transitions as the "glyph origin" can move between pixel heights
+
+                    float spriteScale = (float)(Math.Sin(time.Total.TotalSeconds * 0.15) + 1) * 8;
+                    float actualPixelSize = spriteScale + 24f;
+                    int requestedPixelHeight = (int)Math.Ceiling(actualPixelSize);
 
                     int glyphIndex = _font.GetGlyphIndex(rune.Value);
-                    var glyph = _fontCache.GetGlyph(_font, visiblePixelHeight, glyphIndex);
-                   
-                    float actualScale = _font.GetScaleByPixel(actualPixelSize);
-                    float visibleScale = _font.GetScaleByPixel(visiblePixelHeight);
-                    float sizeFactor = actualScale / visibleScale;
-                    
+                    var glyph = _fontCache.GetGlyph(_font, requestedPixelHeight, glyphIndex);
+
+                    float actualScaleF = _font.GetScaleByPixel(actualPixelSize);
+                    var actualScale = new Vector2(actualScaleF);
+
+                    _font.GetGlyphHMetrics(glyphIndex, out int advanceWidth, out int leftSideBearing);
+                    _font.GetFontVMetrics(out int ascent, out int descent, out int lineGap);
+
                     if (glyph != null)
                     {
+                        var scaleFactor = actualScale / glyph.Scale;
+
                         var texRect = glyph.TextureRect;
                         var glyphRect = glyph.GlyphRect;
 
-                        var pos = new Vector2(10 + x, 60 - glyphRect.Height * actualScale);
-                        _spriteBatch.Draw(
-                            glyph.Texture, pos, texRect, Color.Red,
-                            0, Vector2.Zero, sizeFactor, SpriteFlip.None, 0);
+                        GetGlyphBoxSubpixel(glyphRect, actualScale, default, out var glyphBox);
 
-                        x += glyphRect.Width * actualScale;
+                        var pos = new Vector2(10 + x + leftSideBearing * actualScale.X, 100 + glyphBox.Y);
+                        _spriteBatch.Draw(
+                            glyph.Texture, pos, texRect, Color.White,
+                            0, Vector2.Zero, scaleFactor, SpriteFlip.None, 0);
                     }
-                    else
-                    {
-                        x += 16 * sizeFactor;
-                    }
+
+                    x += advanceWidth * actualScale.X;
 
                     span = span.Slice(consumed);
                 }
@@ -207,6 +211,27 @@ namespace MonoGame.Testing
             _spriteBatch.End();
 
             base.Draw(time);
+        }
+
+        public static void GetGlyphBoxSubpixel(
+            RectangleF rawGlyphBox, Vector2 scale, Vector2 shift, out RectangleF glyphBox)
+        {
+            var br = rawGlyphBox.BottomRight;
+
+            glyphBox = FromEdgePoints(
+                tlX: rawGlyphBox.X * scale.X + shift.X,
+                tlY: -br.Y * scale.Y + shift.Y,
+                brX: br.X * scale.X + shift.X,
+                brY: -rawGlyphBox.Y * scale.Y + shift.Y);
+        }
+
+        public static RectangleF FromEdgePoints(float tlX, float tlY, float brX, float brY)
+        {
+            return new RectangleF(
+                tlX,
+                tlY,
+                brX - tlX,
+                brY - tlY);
         }
 
         private void DrawShadedString(
