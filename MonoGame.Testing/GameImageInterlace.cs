@@ -261,13 +261,10 @@ namespace MonoGame.Testing
                     .Append(gc1).Append(',')
                     .Append(gc2).Append(']').AppendLine();
 
-                //var str =
-                //    $"Memory: {Math.Round(totalMb, totalMbDecimals).ToString("0." + new string('0', totalMbDecimals))}M \n" +
-                //    $"GC Heap: {Math.Round(gcMb, gcMbDecimals).ToString("0." + new string('0', gcMbDecimals))}M \n" +
-                //    $"GC Counts: [{gc0}, {gc1}, {gc2}]";
-
                 RuneEnumerator e = _debugBuilder;
-                _spriteBatch.DrawString(_font, e, new Vector2(-1, -1), Color.White);
+                _spriteBatch.DrawString(_font, e, new Vector2(-0.75f, -0.75f), Color.White);
+                _spriteBatch.DrawString(_font, e, new Vector2(1, -0.75f), Color.Gray);
+                _spriteBatch.DrawString(_font, e, new Vector2(-0.75f, 1), Color.Gray);
                 _spriteBatch.DrawString(_font, e, new Vector2(1, 1), Color.Black);
                 _spriteBatch.DrawString(_font, e, new Vector2(0, 0), Color.Cyan);
                 _debugBuilder.Clear();

@@ -17,9 +17,14 @@ namespace MonoGame.Testing
             TT.InitFont(FontInfo, fontData, fontIndex);
         }
 
-        public void GetGlyphHMetrics(int glyph, out int advanceWidth, out int leftSideBearing)
+        public bool GetGlyphRightSideBearing(int glyphIndex, out float rightSideBearing)
         {
-            TT.GetGlyphHMetrics(FontInfo, glyph, out advanceWidth, out leftSideBearing);
+            return TT.GetGlyphRightSideBearing(FontInfo, glyphIndex, out rightSideBearing);
+        }
+
+        public void GetGlyphHMetrics(int glyphIndex, out int advanceWidth, out int leftSideBearing)
+        {
+            TT.GetGlyphHMetrics(FontInfo, glyphIndex, out advanceWidth, out leftSideBearing);
         }
 
         public void GetFontVMetrics(out int ascent, out int descent, out int lineGap)

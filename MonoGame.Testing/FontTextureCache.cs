@@ -8,7 +8,7 @@ namespace MonoGame.Testing
 {
     public class FontTextureCache
     {
-        public class Glyph
+        public class FontGlyph
         {
             public GlyphHeightMap HeightMap { get; }
             public Texture2D Texture { get; }
@@ -17,7 +17,7 @@ namespace MonoGame.Testing
 
             public Vector2 Scale => HeightMap.Scale;
 
-            public Glyph(
+            public FontGlyph(
                 GlyphHeightMap heightMap, Texture2D texture, Rectangle textureRect, RectangleF glyphRect)
             {
                 HeightMap = heightMap ?? throw new ArgumentNullException(nameof(heightMap));
@@ -31,8 +31,8 @@ namespace MonoGame.Testing
         {
             public Font Font { get; }
 
-            public Dictionary<int, Glyph?> Glyphs { get; } =
-                new Dictionary<int, Glyph?>();
+            public Dictionary<int, FontGlyph?> Glyphs { get; } =
+                new Dictionary<int, FontGlyph?>();
 
             public GlyphLookup(Font font)
             {
@@ -55,7 +55,7 @@ namespace MonoGame.Testing
             }
         }
 
-        public class TextureArray
+        public class FontTextureArray
         {
             public Texture2D Texture { get; }
             public int Width => Texture.Width;
@@ -70,7 +70,7 @@ namespace MonoGame.Testing
             public int CurrentY;
             public int TotalY;
 
-            public TextureArray(Texture2D texture)
+            public FontTextureArray(Texture2D texture)
             {
                 Texture = texture ?? throw new ArgumentNullException(nameof(texture));
             }
@@ -101,7 +101,7 @@ namespace MonoGame.Testing
         }
 
         private Dictionary<float, GlyphHeightMap> _map = new Dictionary<float, GlyphHeightMap>();
-        public List<TextureArray> _textureStates = new List<TextureArray>();
+        public List<FontTextureArray> _textureStates = new List<FontTextureArray>();
 
         public GraphicsDevice GraphicsDevice { get; }
         public int TextureSize { get; }
@@ -117,7 +117,7 @@ namespace MonoGame.Testing
             Format = format;
         }
 
-        public Glyph? GetGlyph(
+        public FontGlyph? GetGlyph(
             Font font, int pixelHeight, int glyphIndex)
         {
             if (font == null)
@@ -125,7 +125,7 @@ namespace MonoGame.Testing
             if (pixelHeight <= 0)
                 throw new ArgumentOutOfRangeException(nameof(pixelHeight));
 
-            pixelHeight = Math.Max(pixelHeight - pixelHeight % 2, 2);
+            //pixelHeight = Math.Max(pixelHeight - pixelHeight % 2, 2);
 
             if (!_map.TryGetValue(pixelHeight, out var heightMap))
             {
@@ -149,7 +149,7 @@ namespace MonoGame.Testing
                 {
                     var texRect = new Rectangle(0, 0, image.Width, image.Height);
 
-                    TextureArray? array = null;
+                    FontTextureArray? array = null;
                     for (int i = 0; i < _textureStates.Count; i++)
                     {
                         if (_textureStates[i].Insert(texRect.Size, out Point position))
@@ -165,7 +165,7 @@ namespace MonoGame.Testing
                         var texture = new Texture2D(
                             GraphicsDevice, TextureSize, TextureSize, mipmap: false, Format);
 
-                        array = new TextureArray(texture);
+                        array = new FontTextureArray(texture);
                         _textureStates.Add(array);
 
                         if (!array.Insert(texRect.Size, out Point position))
@@ -177,7 +177,7 @@ namespace MonoGame.Testing
                     }
 
                     font.GetGlyphBox(glyphIndex, out var glyphRect);
-                    var region = new Glyph(heightMap, array.Texture, texRect, glyphRect);
+                    var region = new FontGlyph(heightMap, array.Texture, texRect, glyphRect);
                     region.Texture.SetData(image, texRect);
                     state = region;
                 }

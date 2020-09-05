@@ -122,7 +122,7 @@ namespace MonoGame.Framework
 
         public bool IsRunningSlowly => _isRunningSlowly;
 
-        public GameWindow? Window => Platform.Window;
+        public GameWindow Window => Platform.Window;
         public bool IsActive => Platform.IsActive;
 
         public bool IsMouseVisible

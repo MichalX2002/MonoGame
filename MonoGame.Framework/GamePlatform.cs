@@ -35,6 +35,8 @@ namespace MonoGame.Framework
         /// </summary>
         public abstract GameRunBehavior DefaultRunBehavior { get; }
 
+        public abstract GameWindow Window { get; }
+
         /// <summary>
         /// Gets the Game instance that owns this GamePlatform instance.
         /// </summary>
@@ -68,8 +70,6 @@ namespace MonoGame.Framework
                 }
             }
         }
-
-        public abstract GameWindow? Window { get; }
 
         #endregion
 

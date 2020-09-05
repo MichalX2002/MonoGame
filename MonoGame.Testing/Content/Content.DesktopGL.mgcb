@@ -20,6 +20,13 @@
 /processorParam:TextureFormat=Compressed
 /build:arial.spritefont
 
+#begin consolas.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:consolas.spritefont
+
 #begin retro level 1.ogg
 /importer:OggImporter
 /processor:SongProcessor
