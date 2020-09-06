@@ -3,7 +3,6 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -312,20 +311,35 @@ namespace MonoGame.Framework.Graphics
             // If both drawRectangle and position are null,
             // or if both have been assigned a value, raise an error
             if (destinationRectangle.HasValue == position.HasValue)
+            {
                 throw new ArgumentException(
                     "Expected drawRectangle or position, but received neither or both.");
+            }
 
             if (position.HasValue) // Call Draw() using position
             {
                 Draw(
-                    texture, position.Value, sourceRectangle, color.Value,
-                    rotation, origin.Value, scale.Value, flip, layerDepth);
+                    texture,
+                    position.GetValueOrDefault(),
+                    sourceRectangle,
+                    color.GetValueOrDefault(),
+                    rotation,
+                    origin.GetValueOrDefault(),
+                    scale.GetValueOrDefault(),
+                    flip,
+                    layerDepth);
             }
             else // Call Draw() using drawRectangle
             {
                 Draw(
-                    texture, destinationRectangle!.Value, sourceRectangle, color.Value,
-                    rotation, origin.Value, flip, layerDepth);
+                    texture,
+                    destinationRectangle.GetValueOrDefault(),
+                    sourceRectangle,
+                    color.GetValueOrDefault(),
+                    rotation,
+                    origin.GetValueOrDefault(),
+                    flip,
+                    layerDepth);
             }
         }
 
@@ -359,14 +373,16 @@ namespace MonoGame.Framework.Graphics
             float w, h;
             if (sourceRectangle.HasValue)
             {
-                RectangleF srcRect = sourceRectangle.Value;
+                RectangleF srcRect = sourceRectangle.GetValueOrDefault();
                 w = srcRect.Width * scale.X;
                 h = srcRect.Height * scale.Y;
+
+                var texelSize = texture.TexelSize;
                 texCoord = new Vector4(
-                    srcRect.X * texture.Texel.X,
-                    srcRect.Y * texture.Texel.Y,
-                    (srcRect.X + srcRect.Width) * texture.Texel.X,
-                    (srcRect.Y + srcRect.Height) * texture.Texel.Y);
+                    srcRect.X * texelSize.Width,
+                    srcRect.Y * texelSize.Height,
+                    (srcRect.X + srcRect.Width) * texelSize.Width,
+                    (srcRect.Y + srcRect.Height) * texelSize.Height);
             }
             else
             {
@@ -452,31 +468,32 @@ namespace MonoGame.Framework.Graphics
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, layerDepth);
 
+            var texelSize = texture.TexelSize;
             float originX, originY;
             Vector4 texCoord;
             if (sourceRectangle.HasValue)
             {
-                RectangleF srcRect = sourceRectangle.Value;
+                RectangleF srcRect = sourceRectangle.GetValueOrDefault();
                 texCoord = new Vector4(
-                    srcRect.X * texture.Texel.X,
-                    srcRect.Y * texture.Texel.Y,
-                    (srcRect.X + srcRect.Width) * texture.Texel.X,
-                    (srcRect.Y + srcRect.Height) * texture.Texel.Y);
+                    srcRect.X * texelSize.Width,
+                    srcRect.Y * texelSize.Height,
+                    (srcRect.X + srcRect.Width) * texelSize.Width,
+                    (srcRect.Y + srcRect.Height) * texelSize.Height);
 
                 originX = srcRect.Width != 0
                     ? origin.X * destinationRectangle.Width / srcRect.Width
-                    : origin.X * destinationRectangle.Width * texture.Texel.X;
+                    : origin.X * destinationRectangle.Width * texelSize.Width;
 
                 originY = srcRect.Height != 0
                     ? origin.Y * destinationRectangle.Height / srcRect.Height
-                    : origin.Y * destinationRectangle.Height * texture.Texel.Y;
+                    : origin.Y * destinationRectangle.Height * texelSize.Height;
             }
             else
             {
                 texCoord = new Vector4(0, 0, 1, 1);
 
-                originX = origin.X * destinationRectangle.Width * texture.Texel.X;
-                originY = origin.Y * destinationRectangle.Height * texture.Texel.Y;
+                originX = origin.X * destinationRectangle.Width * texelSize.Width;
+                originY = origin.Y * destinationRectangle.Height * texelSize.Height;
             }
 
             FlipTexCoords(ref texCoord, flip);
@@ -519,14 +536,16 @@ namespace MonoGame.Framework.Graphics
             float h;
             if (sourceRectangle.HasValue)
             {
-                RectangleF srcRect = sourceRectangle.Value;
+                RectangleF srcRect = sourceRectangle.GetValueOrDefault();
+                var texelSize = texture.TexelSize;
+
                 w = srcRect.Width;
                 h = srcRect.Height;
                 texCoord = new Vector4(
-                    srcRect.X * texture.Texel.X,
-                    srcRect.Y * texture.Texel.Y,
-                    (srcRect.X + srcRect.Width) * texture.Texel.X,
-                    (srcRect.Y + srcRect.Height) * texture.Texel.Y);
+                    srcRect.X * texelSize.Width,
+                    srcRect.Y * texelSize.Height,
+                    (srcRect.X + srcRect.Width) * texelSize.Width,
+                    (srcRect.Y + srcRect.Height) * texelSize.Height);
             }
             else
             {
@@ -556,12 +575,14 @@ namespace MonoGame.Framework.Graphics
             Vector4 texCoord;
             if (sourceRectangle.HasValue)
             {
-                RectangleF srcRect = sourceRectangle.Value;
+                RectangleF srcRect = sourceRectangle.GetValueOrDefault();
+                var texelSize = texture.TexelSize;
+
                 texCoord = new Vector4(
-                    srcRect.X * texture.Texel.X,
-                    srcRect.Y * texture.Texel.Y,
-                    (srcRect.X + srcRect.Width) * texture.Texel.X,
-                    (srcRect.Y + srcRect.Height) * texture.Texel.Y);
+                    srcRect.X * texelSize.Width,
+                    srcRect.Y * texelSize.Height,
+                    (srcRect.X + srcRect.Width) * texelSize.Width,
+                    (srcRect.Y + srcRect.Height) * texelSize.Height);
             }
             else
             {
@@ -671,11 +692,12 @@ namespace MonoGame.Framework.Graphics
                 var item = GetBatchItem(spriteFont.Texture);
                 item.SortKey = sortKey;
 
+                var texelSize = spriteFont.Texture.TexelSize;
                 var texCoord = new Vector4(
-                    glyph.BoundsInTexture.X * spriteFont.Texture.Texel.X,
-                    glyph.BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
-                    (glyph.BoundsInTexture.X + glyph.BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
-                    (glyph.BoundsInTexture.Y + glyph.BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
+                    glyph.BoundsInTexture.X * texelSize.Width,
+                    glyph.BoundsInTexture.Y * texelSize.Height,
+                    (glyph.BoundsInTexture.X + glyph.BoundsInTexture.Width) *  texelSize.Width,
+                    (glyph.BoundsInTexture.Y + glyph.BoundsInTexture.Height) * texelSize.Height);
 
                 item.Set(
                     p.X, p.Y, glyph.BoundsInTexture.Width, glyph.BoundsInTexture.Height,
@@ -822,11 +844,12 @@ namespace MonoGame.Framework.Graphics
                 var item = GetBatchItem(spriteFont.Texture);
                 item.SortKey = sortKey;
 
+                var texelSize = spriteFont.Texture.TexelSize;
                 var texCoord = new Vector4(
-                    glyph.BoundsInTexture.X * spriteFont.Texture.Texel.X,
-                    glyph.BoundsInTexture.Y * spriteFont.Texture.Texel.Y,
-                    (glyph.BoundsInTexture.X + glyph.BoundsInTexture.Width) * spriteFont.Texture.Texel.X,
-                    (glyph.BoundsInTexture.Y + glyph.BoundsInTexture.Height) * spriteFont.Texture.Texel.Y);
+                    glyph.BoundsInTexture.X * texelSize.Width,
+                    glyph.BoundsInTexture.Y * texelSize.Height,
+                    (glyph.BoundsInTexture.X + glyph.BoundsInTexture.Width) *  texelSize.Width,
+                    (glyph.BoundsInTexture.Y + glyph.BoundsInTexture.Height) * texelSize.Height);
 
                 FlipTexCoords(ref texCoord, flip);
 

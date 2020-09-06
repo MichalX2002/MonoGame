@@ -39,7 +39,7 @@ namespace MonoGame.Framework.Graphics
             return other == this;
         }
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             return obj is VertexPositionColorTexture other && Equals(other);
         }

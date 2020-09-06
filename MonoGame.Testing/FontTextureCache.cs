@@ -12,18 +12,18 @@ namespace MonoGame.Testing
         {
             public GlyphHeightMap HeightMap { get; }
             public Texture2D Texture { get; }
+            public int GlyphIndex { get; }
             public Rectangle TextureRect { get; }
-            public RectangleF GlyphRect { get; }
 
             public Vector2 Scale => HeightMap.Scale;
 
             public FontGlyph(
-                GlyphHeightMap heightMap, Texture2D texture, Rectangle textureRect, RectangleF glyphRect)
+                GlyphHeightMap heightMap, Texture2D texture, int glyphIndex, Rectangle textureRect)
             {
                 HeightMap = heightMap ?? throw new ArgumentNullException(nameof(heightMap));
                 Texture = texture ?? throw new ArgumentNullException(nameof(texture));
+                GlyphIndex = glyphIndex;
                 TextureRect = textureRect;
-                GlyphRect = glyphRect;
             }
         }
 
@@ -118,7 +118,7 @@ namespace MonoGame.Testing
         }
 
         public FontGlyph? GetGlyph(
-            Font font, int pixelHeight, int glyphIndex)
+            Font font, float pixelHeight, int glyphIndex)
         {
             if (font == null)
                 throw new ArgumentNullException(nameof(font));
@@ -176,8 +176,7 @@ namespace MonoGame.Testing
                         texRect.Position = position;
                     }
 
-                    font.GetGlyphBox(glyphIndex, out var glyphRect);
-                    var region = new FontGlyph(heightMap, array.Texture, texRect, glyphRect);
+                    var region = new FontGlyph(heightMap, array.Texture, glyphIndex, texRect);
                     region.Texture.SetData(image, texRect);
                     state = region;
                 }

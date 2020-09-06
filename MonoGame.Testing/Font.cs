@@ -36,7 +36,7 @@ namespace MonoGame.Testing
         {
             return TT.FindGlyphIndex(FontInfo, codepoint);
         }
-        
+
         public float GetScaleByPixel(float pixelHeight)
         {
             return TT.ScaleForPixelHeight(FontInfo, pixelHeight);
@@ -49,7 +49,7 @@ namespace MonoGame.Testing
 
         public bool GetGlyphBox(int glyphIndex, out RectangleF glyphBox)
         {
-            if( TT.GetGlyphBox(FontInfo, glyphIndex, out var rectBox))
+            if (TT.GetGlyphBox(FontInfo, glyphIndex, out var rectBox))
             {
                 glyphBox = new RectangleF(
                     rectBox.X, rectBox.Y,
@@ -67,7 +67,7 @@ namespace MonoGame.Testing
                 FontInfo, glyphIndex, scale, shift, out var glyphBox))
             {
                 var image = Image<Alpha8>.Create(glyphBox.W, glyphBox.H);
-                
+
                 float pixelFlatness = 0.35f;
                 var gbm = GetBitmap(image, glyphBox.W, glyphBox.H);
 

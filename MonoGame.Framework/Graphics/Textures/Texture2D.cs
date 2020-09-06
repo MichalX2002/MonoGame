@@ -5,7 +5,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MonoGame.Framework.Memory;
@@ -31,9 +30,19 @@ namespace MonoGame.Framework.Graphics
         #region Properties
 
         /// <summary>
-        /// Gets the multiplicative inverse (1/x) of the width and height as a <see cref="Vector2"/>.
+        /// Gets the multiplicative inverse (1/x) of the width.
         /// </summary>
-        public Vector2 Texel { get; }
+        public float TexelWidth => 1f / Bounds.Width;
+
+        /// <summary>
+        /// Gets the multiplicative inverse (1/x) of the height.
+        /// </summary>
+        public float TexelHeight => 1f / Bounds.Height;
+
+        /// <summary>
+        /// Gets the multiplicative inverse (1/x) of the width and height as a <see cref="SizeF"/>.
+        /// </summary>
+        public SizeF TexelSize => new SizeF(TexelWidth, TexelHeight);
 
         /// <summary>
         /// Gets the dimensions of the texture.
@@ -100,8 +109,7 @@ namespace MonoGame.Framework.Graphics
 
             GraphicsDevice = graphicsDevice;
             Bounds = new Rectangle(0, 0, width, height);
-            Texel = new Vector2(1f / width, 1f / height);
-
+            
             Format = format;
             LevelCount = mipmap ? CalculateMipLevels(width, height) : 1;
             ArraySize = arraySize;
