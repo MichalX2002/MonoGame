@@ -79,8 +79,8 @@ namespace MonoGame.Testing
             {
                 position = default;
 
-                int availableX = Width - CurrentX;
-                if (size.Width > availableX)
+                if (size.Width > Width - CurrentX ||
+                    size.Height > Height - TotalY)
                 {
                     TotalY += CurrentY + Padding;
 
@@ -118,14 +118,19 @@ namespace MonoGame.Testing
         }
 
         public FontGlyph? GetGlyph(
-            Font font, float pixelHeight, int glyphIndex)
+            Font font, int pixelHeight, int glyphIndex)
         {
             if (font == null)
                 throw new ArgumentNullException(nameof(font));
             if (pixelHeight <= 0)
                 throw new ArgumentOutOfRangeException(nameof(pixelHeight));
 
-            //pixelHeight = Math.Max(pixelHeight - pixelHeight % 2, 2);
+            int maxSize = 256;
+            int stepSize = 2;
+            int minSize = 4;
+
+            pixelHeight = Math.Max(pixelHeight - pixelHeight % stepSize, minSize);
+            pixelHeight = Math.Min(pixelHeight, maxSize);
 
             if (!_map.TryGetValue(pixelHeight, out var heightMap))
             {
@@ -177,7 +182,7 @@ namespace MonoGame.Testing
                     }
 
                     var region = new FontGlyph(heightMap, array.Texture, glyphIndex, texRect);
-                    region.Texture.SetData(image, texRect);
+                    region.Texture.SetData(image, texRect, flush: false);
                     state = region;
                 }
 

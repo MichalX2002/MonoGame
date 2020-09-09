@@ -128,13 +128,6 @@ namespace MonoGame.Framework.Graphics
             }
             GL.CheckError();
 
-#if !ANDROID
-            // Required to make sure that any texture uploads on a thread are 
-            // completed before the main thread tries to use the texture.
-            GL.Finish();
-            GL.CheckError();
-#endif
-
             // Restore the bound texture.
             if (prevTexture != _glTexture)
             {

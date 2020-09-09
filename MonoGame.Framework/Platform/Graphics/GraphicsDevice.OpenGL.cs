@@ -350,6 +350,7 @@ namespace MonoGame.Framework.Graphics
         private void PlatformFlush()
         {
             GL.Flush();
+            GL.CheckError();
         }
 
         private void PlatformReset()

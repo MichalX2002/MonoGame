@@ -825,15 +825,13 @@ namespace MonoGame.Framework.Graphics
             }
 
             // Set the current viewport.
-            Viewport = new Viewport
-            {
-                X = 0,
-                Y = 0,
-                Width = targetSize.X,
-                Height = targetSize.Y,
-                MinDepth = 0.0f,
-                MaxDepth = 1.0f
-            };
+            Viewport = new Viewport(
+                x: 0,
+                y: 0,
+                width: targetSize.X,
+                height: targetSize.Y,
+                minDepth: 0.0f,
+                maxDepth: 1.0f);
         }
 
         internal void RefreshAdapter()
@@ -1060,7 +1058,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         // Only implemented for DirectX right now, so not in GraphicsDevice.cs
-        public void SetRenderTarget(RenderTarget2D renderTarget, int arraySlice)
+        public void SetRenderTarget(RenderTarget2D? renderTarget, int arraySlice)
         {
             if (!Capabilities.SupportsTextureArrays)
                 throw new InvalidOperationException(
@@ -1076,7 +1074,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         // Only implemented for DirectX right now, so not in GraphicsDevice.cs
-        public void SetRenderTarget(RenderTarget3D renderTarget, int arraySlice)
+        public void SetRenderTarget(RenderTarget3D? renderTarget, int arraySlice)
         {
             if (renderTarget == null)
                 SetRenderTarget(null);

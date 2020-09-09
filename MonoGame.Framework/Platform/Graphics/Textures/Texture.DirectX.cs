@@ -26,6 +26,10 @@ namespace MonoGame.Framework.Graphics
                 return resource.SharedHandle;
         }
 
+        protected void PlatformFlush()
+        {
+        }
+
         internal abstract Resource CreateTexture();
 
         internal Resource GetTexture()

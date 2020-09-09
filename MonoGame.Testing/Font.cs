@@ -66,7 +66,7 @@ namespace MonoGame.Testing
             if (TT.GetGlyphBitmapBoxSubpixel(
                 FontInfo, glyphIndex, scale, shift, out var glyphBox))
             {
-                var image = Image<Alpha8>.Create(glyphBox.W, glyphBox.H);
+                var image = Image<Alpha8>.CreateUninitialized(glyphBox.W, glyphBox.H);
 
                 float pixelFlatness = 0.35f;
                 var gbm = GetBitmap(image, glyphBox.W, glyphBox.H);

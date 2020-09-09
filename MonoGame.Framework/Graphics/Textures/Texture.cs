@@ -10,7 +10,7 @@ namespace MonoGame.Framework.Graphics
 {
     public abstract partial class Texture : GraphicsResource
     {
-        private static int _lastSortingKey = 0;
+        private static int _lastSortingKey;
 
         public SurfaceFormat Format { get; internal set; }
         public int LevelCount { get; internal set; }
@@ -19,16 +19,26 @@ namespace MonoGame.Framework.Graphics
         ///   Gets a unique identifier of this texture for sorting purposes.
         /// </summary>
         /// <remarks>
-        ///   The value is an implementation detail and may change between application launches or MonoGame versions.
+        ///   The value is an implementation detail and may
+        ///   change between application launches or MonoGame versions.
         ///   It is only guaranteed to stay consistent during application lifetime.
         /// </remarks>
         /// <remarks>
-        ///   Example; this value is used by <see cref="SpriteBatch"/> when drawing with <see cref="SpriteSortMode.Texture"/>.
+        ///   Example; this value is used by <see cref="SpriteBatch"/> when 
+        ///   drawing with <see cref="SpriteSortMode.Texture"/>.
         /// </remarks>
         public int SortingKey { get; } = Interlocked.Increment(ref _lastSortingKey);
 
         public Texture(GraphicsDevice graphicsDevice) : base(graphicsDevice)
         {
+        }
+
+        /// <summary>
+        /// Flushes the graphics device if needed by the platform.
+        /// </summary>
+        public void Flush()
+        {
+            PlatformFlush();
         }
 
         internal static void ValidateSizes(int elementCount, int elementSize, int minimumByteSize)
@@ -51,7 +61,8 @@ namespace MonoGame.Framework.Graphics
             return levels;
         }
 
-        internal static void GetSizeForLevel(int width, int height, int level, out int w, out int h)
+        internal static void GetSizeForLevel(
+            int width, int height, int level, out int w, out int h)
         {
             w = width;
             h = height;
@@ -67,7 +78,8 @@ namespace MonoGame.Framework.Graphics
                 h = 1;
         }
 
-        internal static void GetSizeForLevel(int width, int height, int depth, int level, out int w, out int h, out int d)
+        internal static void GetSizeForLevel(
+            int width, int height, int depth, int level, out int w, out int h, out int d)
         {
             w = width;
             h = height;

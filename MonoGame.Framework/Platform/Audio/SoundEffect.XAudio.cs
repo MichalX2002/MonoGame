@@ -3,21 +3,19 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Buffers.Binary;
 using System.IO;
-
 using SharpDX;
-using SharpDX.XAudio2;
 using SharpDX.Multimedia;
 using SharpDX.X3DAudio;
-using MonoGame.Framework.Memory;
-using System.Buffers.Binary;
+using SharpDX.XAudio2;
 
 namespace MonoGame.Framework.Audio
 {
     partial class SoundEffect
     {
         // These platforms are only limited by memory.
-        internal const int MAX_PLAYING_INSTANCES = int.MaxValue;
+        internal const int MaxPlayingInstances = int.MaxValue;
 
         #region Static Fields & Properties
 
@@ -95,7 +93,7 @@ namespace MonoGame.Framework.Audio
         /// </summary>
         internal static void PlatformInitialize()
         {
-            ALController.EnsureInitialized();
+            ALController.InitializeInstance();
 
             try
             {

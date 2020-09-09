@@ -109,7 +109,7 @@ namespace MonoGame.Framework.Graphics
 
             GraphicsDevice = graphicsDevice;
             Bounds = new Rectangle(0, 0, width, height);
-            
+
             Format = format;
             LevelCount = mipmap ? CalculateMipLevels(width, height) : 1;
             ArraySize = arraySize;
@@ -137,16 +137,24 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
         /// <param name="level">Layer of the texture to modify.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
+        /// <param name="flush">Whether to flush the device after setting data.</param>
         /// <exception cref="ArgumentException">
         ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
         public void SetData<T>(
-            ReadOnlySpan<T> data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+            ReadOnlySpan<T> data,
+            Rectangle? rectangle = null,
+            int level = 0,
+            int arraySlice = 0,
+            bool flush = true)
             where T : unmanaged
         {
             if (rectangle.HasValue)
-                if (rectangle.Value.Width == 0 || rectangle.Value.Height == 0)
+            {
+                var rect = rectangle.GetValueOrDefault();
+                if (rect.Width == 0 || rect.Height == 0)
                     return;
+            }
 
             ValidateParams<T>(level, arraySlice, rectangle, data.Length, out Rectangle checkedRect);
 
@@ -156,6 +164,9 @@ namespace MonoGame.Framework.Graphics
                 PlatformSetData(level, arraySlice, checkedRect, data);
             else
                 PlatformSetData(level, arraySlice, rect: null, data);
+
+            if (flush)
+                Flush();
         }
 
         /// <summary>
@@ -166,14 +177,19 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
         /// <param name="level">Layer of the texture to modify.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
+        /// <param name="flush">Whether to flush the device after setting data.</param>
         /// <exception cref="ArgumentException">
         ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
         public void SetData<T>(
-            Span<T> data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+            Span<T> data,
+            Rectangle? rectangle = null,
+            int level = 0,
+            int arraySlice = 0,
+            bool flush = true)
             where T : unmanaged
         {
-            SetData((ReadOnlySpan<T>)data, rectangle, level, arraySlice);
+            SetData((ReadOnlySpan<T>)data, rectangle, level, arraySlice, flush);
         }
 
         /// <summary>
@@ -184,11 +200,16 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
         /// <param name="level">Layer of the texture to modify.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
+        /// <param name="flush">Whether to flush the device after setting data.</param>
         /// <exception cref="ArgumentException">
         ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
         public void SetData<T>(
-            ReadOnlyMemory<T> data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+            ReadOnlyMemory<T> data,
+            Rectangle? rectangle = null,
+            int level = 0,
+            int arraySlice = 0,
+            bool flush = true)
             where T : unmanaged
         {
             if (rectangle.HasValue)
@@ -203,6 +224,9 @@ namespace MonoGame.Framework.Graphics
                     PlatformSetData(level, arraySlice, checkedRect, data.Span);
                 else
                     PlatformSetData(level, arraySlice, rect: null, data.Span);
+
+                if (flush)
+                    Flush();
             }
 
             if (IsValidThreadContext)
@@ -219,14 +243,19 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
         /// <param name="level">Layer of the texture to modify.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
+        /// <param name="flush">Whether to flush the device after setting data.</param>
         /// <exception cref="ArgumentException">
         ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
         public void SetData<T>(
-            Memory<T> data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+            Memory<T> data,
+            Rectangle? rectangle = null,
+            int level = 0,
+            int arraySlice = 0,
+            bool flush = true)
             where T : unmanaged
         {
-            SetData((ReadOnlyMemory<T>)data, rectangle, level, arraySlice);
+            SetData((ReadOnlyMemory<T>)data, rectangle, level, arraySlice, flush);
         }
 
         /// <summary>
@@ -237,14 +266,19 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
         /// <param name="level">Layer of the texture to modify.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
+        /// <param name="flush">Whether to flush the device after setting data.</param>
         /// <exception cref="ArgumentException">
         ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
         public void SetData<T>(
-            T[] data, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+            T[] data,
+            Rectangle? rectangle = null,
+            int level = 0,
+            int arraySlice = 0,
+            bool flush = true)
             where T : unmanaged
         {
-            SetData(data.AsMemory(), rectangle, level, arraySlice);
+            SetData(data.AsMemory(), rectangle, level, arraySlice, flush);
         }
 
         #endregion
@@ -261,11 +295,16 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">Area to modify; defaults to texture bounds.</param>
         /// <param name="level">Layer of the texture to modify.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
+        /// <param name="flush">Whether to flush the device after setting data.</param>
         /// <exception cref="ArgumentException">
         ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
         public void SetData(
-            Image image, Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
+            Image image,
+            Rectangle? rectangle = null,
+            int level = 0,
+            int arraySlice = 0,
+            bool flush = true)
         {
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
@@ -285,7 +324,7 @@ namespace MonoGame.Framework.Graphics
                     int rowStride = checkedRect.Width * vectorType.ElementSize;
                     if (image.ByteStride == rowStride)
                     {
-                        SetData(image.GetPixelByteSpan(), checkedRect, level, arraySlice);
+                        SetData(image.GetPixelByteSpan(), checkedRect, level, arraySlice, flush);
                     }
                     else
                     {
@@ -297,8 +336,11 @@ namespace MonoGame.Framework.Graphics
                             textureRect.Y += y;
                             textureRect.Height = 1;
 
-                            SetData(row, textureRect, level, arraySlice);
+                            SetData(row, textureRect, level, arraySlice, flush: false);
                         }
+
+                        if (flush)
+                            Flush();
                     }
                     return;
                 }
@@ -328,13 +370,17 @@ namespace MonoGame.Framework.Graphics
                         checkedRect.Y + y,
                         width: count,
                         height: 1);
-                    SetData(dstSlice, textureRect, level, arraySlice);
+
+                    SetData(dstSlice, textureRect, level, arraySlice, flush: false);
 
                     vectorRow = vectorRow.Slice(srcSlice.Length);
                     offsetX += count;
-
-                } while (!vectorRow.IsEmpty);
+                }
+                while (!vectorRow.IsEmpty);
             }
+
+            if (flush)
+                Flush();
         }
 
         #endregion
