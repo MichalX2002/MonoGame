@@ -162,7 +162,7 @@ namespace MonoGame.Testing
             //_font = new Font(File.ReadAllBytes("C:/Windows/Fonts/times.ttf"));
             //_font = new Font(File.ReadAllBytes("C:/Windows/Fonts/comic.ttf"));
 
-            _fontCache = new FontTextureCache(GraphicsDevice, 4096, SurfaceFormat.Rgba32);
+            _fontCache = new FontTextureCache(GraphicsDevice, 2048, SurfaceFormat.Rgba32);
         }
 
         protected override void UnloadContent()
@@ -192,28 +192,24 @@ namespace MonoGame.Testing
                 blendState: BlendState.NonPremultiplied,
                 transformMatrix: Matrix4x4.CreateScale(_renderScale * 1f));
             {
-                string sicc = "#h€jio? h½llå ön you dis is the cool fönt cäche thing";
-                //string sicc = "@";
+                //string sicc = "#h€jio? h½llå ön you dis is the fönt cäche thing workin";
+                string sicc = "@";
 
                 var span = sicc.AsSpan();
 
+                float spriteScale = (float)(Math.Sin(time.Total.TotalSeconds * 0.5)) * 128f;
+                float requestedPixelHeight = Math.Max(spriteScale + 64f, 0f) + 8f;
+                 
+                float actualScaleF = _font.GetScaleByPixel(requestedPixelHeight);
+                var actualScale = new Vector2(actualScaleF);
+
                 float x = 10;
-                float y = 300;
+                float y = _lastViewport.Height / 2;
                 do
                 {
                     if (Rune.DecodeFromUtf16(span, out Rune rune, out int consumed) !=
                         System.Buffers.OperationStatus.Done)
                         break;
-
-                    // TODO: fix jittery transitions as the "glyph origin" can move between pixel heights
-
-                    float spriteScale = (float)(Math.Sin(time.Total.TotalSeconds * 0.5) + 1) * 256f;
-                    float actualPixelSize = spriteScale + 32f;
-                    int requestedPixelHeight = (int)Math.Ceiling(actualPixelSize);
-                    //float requestedPixelHeight = MathF.Round(actualPixelSize, 1);
-
-                    float actualScaleF = _font.GetScaleByPixel(actualPixelSize);
-                    var actualScale = new Vector2(actualScaleF);
 
                     int glyphIndex = _font.GetGlyphIndex(rune.Value);
 
@@ -264,10 +260,13 @@ namespace MonoGame.Testing
 
                         var drawPos = pos + new Vector2(actualGlyphBox.Width / 2, actualGlyphBox.Height / 2);
 
-                        _spriteBatch.DrawRectangle(
-                            new RectangleF(pos, actualGlyphBox.Size) +
-                            new RectangleF(-1, -1, 2, 2), Color.Red);
-                        
+                        if (requestedPixelHeight > 16)
+                        {
+                            _spriteBatch.DrawRectangle(
+                                new RectangleF(pos, actualGlyphBox.Size) +
+                                new RectangleF(-1, -1, 2, 2), Color.Red);
+                        }
+
                         //_spriteBatch.DrawRectangle(
                         //    new RectangleF(pos.X, pos.Y, cachedIntGlyphBox.W, cachedIntGlyphBox.H) +
                         //    new RectangleF(-1, -1, 2, 2), Color.Green);
@@ -294,6 +293,9 @@ namespace MonoGame.Testing
                     span = span.Slice(consumed);
                 }
                 while (!span.IsEmpty);
+
+                if (requestedPixelHeight > 16)
+                    _spriteBatch.DrawLine(new Vector2(10, _lastViewport.Height / 2), new Vector2(x, y), Color.Green);
             }
             _spriteBatch.End();
             GraphicsDevice.SetRenderTarget(null);

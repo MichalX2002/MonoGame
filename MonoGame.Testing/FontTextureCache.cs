@@ -117,26 +117,39 @@ namespace MonoGame.Testing
             Format = format;
         }
 
+        public float RoundPixelHeight(float pixelHeight)
+        {
+            if (pixelHeight < 0)
+                throw new ArgumentOutOfRangeException(nameof(pixelHeight));
+
+            float minHeight = 4;
+            float maxHeight = 256;
+
+            int log2 = BitOperations.Log2((uint)MathF.Round(pixelHeight));
+            if (pixelHeight <= 8)
+                log2--;
+
+            float nextPowOf2 = 1 << (log2 + 1);
+
+            pixelHeight = MathHelper.Clamp(nextPowOf2, minHeight, maxHeight);
+            return pixelHeight;
+        }
+
         public FontGlyph? GetGlyph(
-            Font font, int pixelHeight, int glyphIndex)
+            Font font, float pixelHeight, int glyphIndex)
         {
             if (font == null)
                 throw new ArgumentNullException(nameof(font));
-            if (pixelHeight <= 0)
-                throw new ArgumentOutOfRangeException(nameof(pixelHeight));
 
-            int maxSize = 256;
-            int stepSize = 2;
-            int minSize = 4;
-
-            pixelHeight = Math.Max(pixelHeight - pixelHeight % stepSize, minSize);
-            pixelHeight = Math.Min(pixelHeight, maxSize);
+            pixelHeight = RoundPixelHeight(pixelHeight);
 
             if (!_map.TryGetValue(pixelHeight, out var heightMap))
             {
                 float scale = font.GetScaleByPixel(pixelHeight);
                 heightMap = new GlyphHeightMap(pixelHeight, new Vector2(scale));
                 _map.Add(pixelHeight, heightMap);
+
+                Console.WriteLine("New height: " + heightMap.PixelHeight);
             }
 
             var lookups = heightMap.Lookups;
