@@ -1093,7 +1093,7 @@ namespace MonoGame.Framework.Graphics
             Context.SwapInterval = PresentationParameters.PresentationInterval.GetSwapInterval();
 #endif
 
-            ApplyRenderTargets(null);
+            ApplyRenderTargets(null, null);
         }
 
         // Holds information for caching

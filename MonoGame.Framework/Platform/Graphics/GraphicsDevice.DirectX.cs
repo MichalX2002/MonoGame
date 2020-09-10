@@ -865,7 +865,7 @@ namespace MonoGame.Framework.Graphics
         internal void OnPresentationChanged()
         {
             CreateSizeDependentResources();
-            ApplyRenderTargets(null);
+            ApplyRenderTargets(null, null);
         }
 #endif // WINDOWS
 
@@ -1039,7 +1039,7 @@ namespace MonoGame.Framework.Graphics
 #endif
         }
 
-        private void PlatformSetViewport(Viewport value)
+        private void PlatformSetViewport(in Viewport value)
         {
             if (_d3dContext != null)
             {
@@ -1058,30 +1058,17 @@ namespace MonoGame.Framework.Graphics
         }
 
         // Only implemented for DirectX right now, so not in GraphicsDevice.cs
-        public void SetRenderTarget(RenderTarget2D? renderTarget, int arraySlice)
+        public void SetRenderTarget(
+            RenderTarget3D? renderTarget, int arraySlice, Color? clearColor = null)
         {
-            if (!Capabilities.SupportsTextureArrays)
-                throw new InvalidOperationException(
-                    "Texture arrays are not supported on this graphics device.");
-
             if (renderTarget == null)
-                SetRenderTarget(null);
-            else
             {
-                _tempRenderTargetBinding[0] = new RenderTargetBinding(renderTarget, arraySlice);
-                SetRenderTargets(_tempRenderTargetBinding);
+                SetRenderTarget(null, clearColor);
             }
-        }
-
-        // Only implemented for DirectX right now, so not in GraphicsDevice.cs
-        public void SetRenderTarget(RenderTarget3D? renderTarget, int arraySlice)
-        {
-            if (renderTarget == null)
-                SetRenderTarget(null);
             else
             {
-                _tempRenderTargetBinding[0] = new RenderTargetBinding(renderTarget, arraySlice);
-                SetRenderTargets(_tempRenderTargetBinding);
+                _tmpRenderTargetBinding[0] = new RenderTargetBinding(renderTarget, arraySlice);
+                SetRenderTargets(_tmpRenderTargetBinding, clearColor);
             }
         }
 

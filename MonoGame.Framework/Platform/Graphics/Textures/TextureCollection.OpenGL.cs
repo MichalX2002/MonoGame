@@ -10,36 +10,35 @@ namespace MonoGame.Framework.Graphics
     {
         private TextureTarget[] _targets;
 
-        void PlatformInit()
+        private void PlatformInit()
         {
             _targets = new TextureTarget[_textures.Length];
         }
 
-        void PlatformClear()
+        private void PlatformClear()
         {
-            for (var i = 0; i < _targets.Length; i++)
+            for (int i = 0; i < _targets.Length; i++)
                 _targets[i] = 0;
         }
 
-        void PlatformSetTextures(GraphicsDevice device)
+        private void PlatformSetTextures(GraphicsDevice device)
         {
             // Skip out if nothing has changed.
             if (_dirty == 0)
                 return;
 
-            for (var i = 0; i < _textures.Length; i++)
+            for (int i = 0; i < _textures.Length; i++)
             {
-                var mask = 1 << i;
+                int mask = 1 << i;
                 if ((_dirty & mask) == 0)
                     continue;
-
-                var tex = _textures[i];
 
                 GL.ActiveTexture(TextureUnit.Texture0 + i);
                 GL.CheckError();
 
                 // Clear the previous binding if the 
                 // target is different from the new one.
+                var tex = _textures[i];
                 if (_targets[i] != 0 && (tex == null || _targets[i] != tex._glTarget))
                 {
                     GL.BindTexture(_targets[i], 0);

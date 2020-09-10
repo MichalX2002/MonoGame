@@ -56,7 +56,7 @@ namespace MonoGame.Framework.Graphics
         private bool _indexBufferDirty;
 
         private readonly RenderTargetBinding[] _currentRenderTargetBindings = new RenderTargetBinding[4];
-        private readonly RenderTargetBinding[] _tempRenderTargetBinding = new RenderTargetBinding[1];
+        private readonly RenderTargetBinding[] _tmpRenderTargetBinding = new RenderTargetBinding[1];
 
         /// <summary>
         /// On Intel Integrated graphics, there is a fast hardware unit for doing
@@ -67,7 +67,7 @@ namespace MonoGame.Framework.Graphics
 #if DEBUG
         private static Color DiscardColor { get; } = new Color(68, 34, 136, 255);
 #else
-        private static Color DiscardColor { get; } = new Color(0, 0, 0, 255);
+        private static Color DiscardColor { get; } = new Color(0, 0, 0, 0);
 #endif
 
         private Shader _vertexShader;
@@ -479,7 +479,7 @@ namespace MonoGame.Framework.Graphics
             ScissorRectangle = _viewport.Bounds;
 
             // Set the default render target.
-            ApplyRenderTargets(null);
+            ApplyRenderTargets(null, null);
         }
 
         #endregion
@@ -623,42 +623,43 @@ namespace MonoGame.Framework.Graphics
 
         #region RenderTargets
 
-        public void SetRenderTarget(RenderTarget2D? renderTarget)
+        public void SetRenderTarget(
+            RenderTarget2D? renderTarget, int arraySlice, Color? clearColor = null)
         {
             if (renderTarget == null)
             {
-                SetRenderTargets(null);
+                SetRenderTargets(null, clearColor);
             }
             else
             {
-                _tempRenderTargetBinding[0] = new RenderTargetBinding(renderTarget);
-                SetRenderTargets(_tempRenderTargetBinding);
+                _tmpRenderTargetBinding[0] = new RenderTargetBinding(renderTarget, arraySlice);
+                SetRenderTargets(_tmpRenderTargetBinding, clearColor);
             }
         }
 
-        public void SetRenderTarget(RenderTargetCube? renderTarget, CubeMapFace cubeMapFace)
+        public void SetRenderTarget(RenderTarget2D? renderTarget, Color? clearColor = null)
+        {
+            SetRenderTarget(renderTarget, 0, clearColor);
+        }
+
+        public void SetRenderTarget(
+            RenderTargetCube? renderTarget, CubeMapFace cubeMapFace, Color? clearColor = null)
         {
             if (renderTarget == null)
             {
-                SetRenderTargets(null);
+                SetRenderTargets(null, clearColor);
             }
             else
             {
-                _tempRenderTargetBinding[0] = new RenderTargetBinding(renderTarget, cubeMapFace);
-                SetRenderTargets(_tempRenderTargetBinding);
+                _tmpRenderTargetBinding[0] = new RenderTargetBinding(renderTarget, cubeMapFace);
+                SetRenderTargets(_tmpRenderTargetBinding, clearColor);
             }
         }
 
-        public void SetRenderTargets(ReadOnlySpan<RenderTargetBinding> renderTargets)
+        public void SetRenderTargets(
+            ReadOnlySpan<RenderTargetBinding> renderTargets, Color? clearColor = null)
         {
-            // Avoid having to check for null and zero length.
-            int renderTargetCount = 0;
-            if (renderTargets != null)
-            {
-                renderTargetCount = renderTargets.Length;
-                if (renderTargetCount == 0)
-                    renderTargets = null;
-            }
+            int renderTargetCount = renderTargets.Length;
 
             // Try to early out if the current and new bindings are equal.
             if (RenderTargetCount == renderTargetCount)
@@ -679,7 +680,7 @@ namespace MonoGame.Framework.Graphics
                     return;
             }
 
-            ApplyRenderTargets(renderTargets);
+            ApplyRenderTargets(renderTargets, clearColor);
 
             unchecked
             {
@@ -690,12 +691,18 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        public void SetRenderTargets(params RenderTargetBinding[]? renderTargets)
+        public void SetRenderTargets(Color? clearColor, params RenderTargetBinding[]? renderTargets)
         {
-            SetRenderTargets(renderTargets.AsSpan());
+            SetRenderTargets(renderTargets.AsSpan(), clearColor);
         }
 
-        internal void ApplyRenderTargets(ReadOnlySpan<RenderTargetBinding> renderTargets)
+        public void SetRenderTargets(params RenderTargetBinding[]? renderTargets)
+        {
+            SetRenderTargets(renderTargets.AsSpan(), null);
+        }
+
+        internal void ApplyRenderTargets(
+            ReadOnlySpan<RenderTargetBinding> renderTargets, Color? clearColor)
         {
             PlatformResolveRenderTargets();
 
@@ -740,8 +747,8 @@ namespace MonoGame.Framework.Graphics
             // In XNA 4, because of hardware limitations on Xbox, when
             // a render target doesn't have PreserveContents as its usage
             // it is cleared before being rendered to.
-            if (clearTarget)
-                Clear(DiscardColor);
+            if (clearTarget || clearColor.HasValue)
+                Clear(clearColor ?? DiscardColor);
         }
 
         public ReadOnlySpan<RenderTargetBinding> GetRenderTargets()

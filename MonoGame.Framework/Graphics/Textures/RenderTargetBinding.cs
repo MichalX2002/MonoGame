@@ -18,7 +18,7 @@ namespace MonoGame.Framework.Graphics
         public RenderTargetBinding(RenderTarget2D renderTarget)
         {
             RenderTarget = renderTarget ?? throw new ArgumentNullException(nameof(renderTarget));
-            ArraySlice = (int)CubeMapFace.PositiveX;
+            ArraySlice = 0;
             DepthFormat = renderTarget.DepthStencilFormat;
         }
 
@@ -33,8 +33,6 @@ namespace MonoGame.Framework.Graphics
             DepthFormat = renderTarget.DepthStencilFormat;
         }
 
-#if DIRECTX
-
         public RenderTargetBinding(RenderTarget2D renderTarget, int arraySlice)
         {
             if (renderTarget == null)
@@ -43,13 +41,18 @@ namespace MonoGame.Framework.Graphics
             if (arraySlice < 0 || arraySlice >= renderTarget.ArraySize)
                 throw new ArgumentOutOfRangeException(nameof(arraySlice));
 
-            if (!renderTarget.GraphicsDevice.Capabilities.SupportsTextureArrays)
-                throw new InvalidOperationException("Texture arrays are not supported on this graphics device.");
+            if (arraySlice > 0 && !renderTarget.GraphicsDevice.Capabilities.SupportsTextureArrays)
+            {
+                throw new InvalidOperationException(
+                    "Texture arrays are not supported on this graphics device.");
+            }
 
             RenderTarget = renderTarget;
             ArraySlice = arraySlice;
             DepthFormat = renderTarget.DepthStencilFormat;
         }
+
+#if DIRECTX
 
         public RenderTargetBinding(RenderTarget3D renderTarget)
         {

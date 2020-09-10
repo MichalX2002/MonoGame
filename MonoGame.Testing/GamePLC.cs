@@ -72,7 +72,12 @@ namespace MonoGame.Testing
             _fontTarget = new RenderTarget2D(
                 GraphicsDevice,
                 (int)(viewport.Width * _renderScale),
-                (int)(viewport.Height * _renderScale));
+                (int)(viewport.Height * _renderScale),
+                false,
+                SurfaceFormat.Rgba32,
+                DepthFormat.None,
+                0,
+                RenderTargetUsage.PlatformContents);
         }
 
         protected override void LoadContent()
@@ -186,14 +191,14 @@ namespace MonoGame.Testing
                 _lastViewport = currentViewport;
             }
 
-            GraphicsDevice.SetRenderTarget(_fontTarget);
-            GraphicsDevice.Clear(Color.Transparent);
+            GraphicsDevice.SetRenderTarget(_fontTarget, Color.Transparent);
+
             _spriteBatch.Begin(
                 blendState: BlendState.NonPremultiplied,
                 transformMatrix: Matrix4x4.CreateScale(_renderScale * 1f));
             {
-                //string sicc = "#h€jio? h½llå ön you dis is the fönt cäche thing workin";
-                string sicc = "@";
+                string sicc = "#h€jio? h½llå ön you dis is the fönt cäche thing workin";
+                //string sicc = "@";
 
                 var span = sicc.AsSpan();
 
@@ -298,9 +303,9 @@ namespace MonoGame.Testing
                     _spriteBatch.DrawLine(new Vector2(10, _lastViewport.Height / 2), new Vector2(x, y), Color.Green);
             }
             _spriteBatch.End();
-            GraphicsDevice.SetRenderTarget(null);
 
-            GraphicsDevice.Clear(Color.MediumPurple);
+            GraphicsDevice.SetRenderTarget(null, Color.MediumPurple);
+
             _spriteBatch.Begin(blendState: BlendState.AlphaBlend);
             _spriteBatch.Draw(_fontTarget, currentViewport.Bounds, _fontTarget.Bounds, Color.White);
             _spriteBatch.End();
