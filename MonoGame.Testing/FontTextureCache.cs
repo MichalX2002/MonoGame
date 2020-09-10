@@ -122,17 +122,17 @@ namespace MonoGame.Testing
             if (pixelHeight < 0)
                 throw new ArgumentOutOfRangeException(nameof(pixelHeight));
 
-            float minHeight = 4;
-            float maxHeight = 256;
+            int minHeight = 4;
+            int maxHeight = 256;
 
             int log2 = BitOperations.Log2((uint)MathF.Round(pixelHeight));
             if (pixelHeight <= 8)
                 log2--;
 
-            float nextPowOf2 = 1 << (log2 + 1);
+            int nextPowOf2 = 1 << (log2 + 1);
 
-            pixelHeight = MathHelper.Clamp(nextPowOf2, minHeight, maxHeight);
-            return pixelHeight;
+            float clampedHeight = MathHelper.Clamp(nextPowOf2, minHeight, maxHeight);
+            return clampedHeight;
         }
 
         public FontGlyph? GetGlyph(

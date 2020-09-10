@@ -197,110 +197,125 @@ namespace MonoGame.Testing
                 blendState: BlendState.NonPremultiplied,
                 transformMatrix: Matrix4x4.CreateScale(_renderScale * 1f));
             {
-                string sicc = "#h€jio? h½llå ön you dis is the fönt cäche thing workin";
+                string sicc = 
+                    //"#h€jio? h½llå ön you dis\nis the fönt cäche thing workin\n" +
+                    "\u4E00\u4E01\u4E02\u4E03\u4E04\u4E05\u4E06\u4E07\u4E08\u4E09 \\n\n" +
+                    "\u4E10\u4E11\u4E12\u4E13\u4E14\u4E15\u4E16\u4E17\u4E18\u4E19 \\n\n";
+                
                 //string sicc = "@";
 
                 var span = sicc.AsSpan();
 
-                float spriteScale = (float)(Math.Sin(time.Total.TotalSeconds * 0.5)) * 128f;
-                float requestedPixelHeight = Math.Max(spriteScale + 64f, 0f) + 8f;
+                float spriteScale = (float)(Math.Sin(time.Total.TotalSeconds * 0.5)) * 4;
+                float requestedPixelHeight = Math.Max(spriteScale + 62f, 0f) + 8f;
                  
                 float actualScaleF = _font.GetScaleByPixel(requestedPixelHeight);
                 var actualScale = new Vector2(actualScaleF);
 
-                float x = 10;
-                float y = _lastViewport.Height / 2;
+                var basePos = new Vector2(10, _lastViewport.Height / 2f);
+
+                float x = basePos.X;
+                float y = basePos.Y;
+                _font.GetFontVMetrics(out int ascent, out int descent, out int lineGap);
+
                 do
                 {
                     if (Rune.DecodeFromUtf16(span, out Rune rune, out int consumed) !=
                         System.Buffers.OperationStatus.Done)
                         break;
 
-                    int glyphIndex = _font.GetGlyphIndex(rune.Value);
-
-                    if (false)
+                    if (rune.Value == '\n')
                     {
-                        using var tmpImg = _font.GetGlyphBitmap(glyphIndex, actualScale);
-                        var tmpTex = Texture2D.FromImage(tmpImg, GraphicsDevice, false, SurfaceFormat.Rgba32);
-
-                        var offsetRect = new RectangleF(
-                            50,
-                            50,
-                            0,
-                            0);
-
-                        _spriteBatch.Draw(
-                            tmpTex,
-                            tmpTex.Bounds + offsetRect,
-                            null,
-                            Color.Red,
-                            0,
-                            tmpTex.Bounds.Size / 2f,
-                            SpriteFlip.None,
-                            0);
+                        x = basePos.X;
+                        y += requestedPixelHeight + lineGap * actualScale.Y;
                     }
-
-                    _font.GetGlyphHMetrics(glyphIndex, out int advanceWidth, out int leftSideBearing);
-                    _font.GetFontVMetrics(out int ascent, out int descent, out int lineGap);
-
-                    var glyph = _fontCache.GetGlyph(_font, requestedPixelHeight, glyphIndex);
-                    if (glyph != null)
+                    else
                     {
-                        var scaleFactor = actualScale / glyph.Scale;
+                        int glyphIndex = _font.GetGlyphIndex(rune.Value);
 
-                        var texRect = glyph.TextureRect;
-
-                        _font.GetGlyphBox(glyph.GlyphIndex, out var rawGlyphBox);
-                        //GetGlyphBoxSubpixel(rawGlyphBox, glyph.Scale, default, out var cachedGlyphBox);
-                        GetGlyphBoxSubpixel(rawGlyphBox, actualScale, default, out var actualGlyphBox);
-
-                        TrueType.GetGlyphBitmapBox(_font.FontInfo, glyph.GlyphIndex, glyph.Scale, out var cachedIntGlyphBox);
-                        //TrueType.GetGlyphBitmapBox(_font.FontInfo, glyph.GlyphIndex, actualScale, out var actualIntGlyphBox);
-
-                        var drawOrig = new Vector2(cachedIntGlyphBox.W, cachedIntGlyphBox.H) / 2;
-
-                        var pos = new Vector2(
-                            x + leftSideBearing * actualScale.X,
-                            y + actualGlyphBox.Y);
-
-                        var drawPos = pos + new Vector2(actualGlyphBox.Width / 2, actualGlyphBox.Height / 2);
-
-                        if (requestedPixelHeight > 16)
+                        if (false)
                         {
-                            _spriteBatch.DrawRectangle(
-                                new RectangleF(pos, actualGlyphBox.Size) +
-                                new RectangleF(-1, -1, 2, 2), Color.Red);
+                            using var tmpImg = _font.GetGlyphBitmap(glyphIndex, actualScale);
+                            var tmpTex = Texture2D.FromImage(tmpImg, GraphicsDevice, false, SurfaceFormat.Rgba32);
+
+                            var offsetRect = new RectangleF(
+                                50,
+                                50,
+                                0,
+                                0);
+
+                            _spriteBatch.Draw(
+                                tmpTex,
+                                tmpTex.Bounds + offsetRect,
+                                null,
+                                Color.Red,
+                                0,
+                                tmpTex.Bounds.Size / 2f,
+                                SpriteFlip.None,
+                                0);
                         }
 
-                        //_spriteBatch.DrawRectangle(
-                        //    new RectangleF(pos.X, pos.Y, cachedIntGlyphBox.W, cachedIntGlyphBox.H) +
-                        //    new RectangleF(-1, -1, 2, 2), Color.Green);
+                        _font.GetGlyphHMetrics(glyphIndex, out int advanceWidth, out int leftSideBearing);
+                        
+                        var glyph = _fontCache.GetGlyph(_font, requestedPixelHeight, glyphIndex);
+                        if (glyph != null)
+                        {
+                            var scaleFactor = actualScale / glyph.Scale;
 
-                        _spriteBatch.Draw(
-                            glyph.Texture, drawPos, texRect, Color.White,
-                            0, drawOrig, scaleFactor, SpriteFlip.None, 0);
+                            var texRect = glyph.TextureRect;
 
-                        //_spriteBatch.Draw(
-                        //    _pixel, pos - new Vector2(1, 0), null, Color.Red,
-                        //    0, Vector2.Zero, new Vector2(1, texRect.Height), SpriteFlip.None, 0);
-                        //
-                        //_spriteBatch.Draw(
-                        //    _pixel, new Vector2(x, y + 1), null, Color.Green,
-                        //    0, Vector2.Zero, new Vector2(advanceWidth * actualScale.X, 1), SpriteFlip.None, 0);
-                        //
-                        //_spriteBatch.Draw(
-                        //    _pixel, new Vector2(pos.X, y + 2), null, Color.Lime,
-                        //    0, Vector2.Zero, new Vector2(leftSideBearing * actualScale.X, 1), SpriteFlip.None, 0);
+                            _font.GetGlyphBox(glyph.GlyphIndex, out var rawGlyphBox);
+                            //GetGlyphBoxSubpixel(rawGlyphBox, glyph.Scale, default, out var cachedGlyphBox);
+                            GetGlyphBoxSubpixel(rawGlyphBox, actualScale, default, out var actualGlyphBox);
+
+                            TrueType.GetGlyphBitmapBox(_font.FontInfo, glyph.GlyphIndex, glyph.Scale, out var cachedIntGlyphBox);
+                            //TrueType.GetGlyphBitmapBox(_font.FontInfo, glyph.GlyphIndex, actualScale, out var actualIntGlyphBox);
+
+                            var drawOrig = new Vector2(cachedIntGlyphBox.W, cachedIntGlyphBox.H) / 2;
+
+                            var pos = new Vector2(
+                                x + leftSideBearing * actualScale.X,
+                                y + actualGlyphBox.Y);
+
+                            var drawPos = pos + new Vector2(actualGlyphBox.Width / 2, actualGlyphBox.Height / 2);
+
+                            if (requestedPixelHeight > 24)
+                            {
+                                _spriteBatch.DrawRectangle(
+                                    new RectangleF(pos, actualGlyphBox.Size) +
+                                    new RectangleF(-1, -1, 2, 2), Color.Red);
+                            }
+
+                            //_spriteBatch.DrawRectangle(
+                            //    new RectangleF(pos.X, pos.Y, cachedIntGlyphBox.W, cachedIntGlyphBox.H) +
+                            //    new RectangleF(-1, -1, 2, 2), Color.Green);
+
+                            _spriteBatch.Draw(
+                                glyph.Texture, drawPos, texRect, Color.White,
+                                0, drawOrig, scaleFactor, SpriteFlip.None, 0);
+
+                            //_spriteBatch.Draw(
+                            //    _pixel, pos - new Vector2(1, 0), null, Color.Red,
+                            //    0, Vector2.Zero, new Vector2(1, texRect.Height), SpriteFlip.None, 0);
+                            //
+                            //_spriteBatch.Draw(
+                            //    _pixel, new Vector2(x, y + 1), null, Color.Green,
+                            //    0, Vector2.Zero, new Vector2(advanceWidth * actualScale.X, 1), SpriteFlip.None, 0);
+                            //
+                            //_spriteBatch.Draw(
+                            //    _pixel, new Vector2(pos.X, y + 2), null, Color.Lime,
+                            //    0, Vector2.Zero, new Vector2(leftSideBearing * actualScale.X, 1), SpriteFlip.None, 0);
+                        }
+
+                        x += advanceWidth * actualScale.X;
                     }
-
-                    x += advanceWidth * actualScale.X;
 
                     span = span.Slice(consumed);
                 }
                 while (!span.IsEmpty);
 
-                if (requestedPixelHeight > 16)
-                    _spriteBatch.DrawLine(new Vector2(10, _lastViewport.Height / 2), new Vector2(x, y), Color.Green);
+                if (requestedPixelHeight > 24)
+                    _spriteBatch.DrawLine(basePos, new Vector2(x, y), Color.Green);
             }
             _spriteBatch.End();
 
