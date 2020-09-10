@@ -92,16 +92,9 @@ namespace MonoGame.Framework
         /// <returns>The clamped value.</returns>
         public static byte Clamp(int value, byte min, byte max)
         {
-            if (Sse.IsSupported)
-            {
-                return (byte)SseClamp(value, min, max);
-            }
-            else
-            {
-                value = (value > max) ? max : value;
-                value = (value < min) ? min : value;
-                return (byte)value;
-            }
+            value = (value > max) ? max : value;
+            value = (value < min) ? min : value;
+            return (byte)value;
         }
 
         /// <summary>
@@ -113,16 +106,9 @@ namespace MonoGame.Framework
         /// <returns>The clamped value.</returns>
         public static short Clamp(int value, short min, short max)
         {
-            if (Sse.IsSupported)
-            {
-                return (short)SseClamp(value, min, max);
-            }
-            else
-            {
-                value = (value > max) ? max : value;
-                value = (value < min) ? min : value;
-                return (short)value;
-            }
+            value = (value > max) ? max : value;
+            value = (value < min) ? min : value;
+            return (short)value;
         }
 
         /// <summary>
@@ -134,16 +120,9 @@ namespace MonoGame.Framework
         /// <returns>The clamped value.</returns>
         public static int Clamp(int value, int min, int max)
         {
-            if (Sse2.IsSupported)
-            {
-                return (int)Sse2Clamp(value, min, max);
-            }
-            else
-            {
-                value = (value > max) ? max : value;
-                value = (value < min) ? min : value;
-                return value;
-            }
+            value = (value > max) ? max : value;
+            value = (value < min) ? min : value;
+            return value;
         }
 
         #endregion
