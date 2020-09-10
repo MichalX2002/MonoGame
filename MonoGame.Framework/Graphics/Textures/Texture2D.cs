@@ -146,7 +146,7 @@ namespace MonoGame.Framework.Graphics
             Rectangle? rectangle = null,
             int level = 0,
             int arraySlice = 0,
-            bool flush = true)
+            bool flush = false)
             where T : unmanaged
         {
             if (rectangle.HasValue)
@@ -186,7 +186,7 @@ namespace MonoGame.Framework.Graphics
             Rectangle? rectangle = null,
             int level = 0,
             int arraySlice = 0,
-            bool flush = true)
+            bool flush = false)
             where T : unmanaged
         {
             SetData((ReadOnlySpan<T>)data, rectangle, level, arraySlice, flush);
@@ -209,7 +209,7 @@ namespace MonoGame.Framework.Graphics
             Rectangle? rectangle = null,
             int level = 0,
             int arraySlice = 0,
-            bool flush = true)
+            bool flush = false)
             where T : unmanaged
         {
             if (rectangle.HasValue)
@@ -252,7 +252,7 @@ namespace MonoGame.Framework.Graphics
             Rectangle? rectangle = null,
             int level = 0,
             int arraySlice = 0,
-            bool flush = true)
+            bool flush = false)
             where T : unmanaged
         {
             SetData((ReadOnlyMemory<T>)data, rectangle, level, arraySlice, flush);
@@ -275,7 +275,7 @@ namespace MonoGame.Framework.Graphics
             Rectangle? rectangle = null,
             int level = 0,
             int arraySlice = 0,
-            bool flush = true)
+            bool flush = false)
             where T : unmanaged
         {
             SetData(data.AsMemory(), rectangle, level, arraySlice, flush);
@@ -304,7 +304,7 @@ namespace MonoGame.Framework.Graphics
             Rectangle? rectangle = null,
             int level = 0,
             int arraySlice = 0,
-            bool flush = true)
+            bool flush = false)
         {
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
