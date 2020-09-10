@@ -22,6 +22,11 @@ namespace MonoGame.Testing
             return TT.GetGlyphRightSideBearing(FontInfo, glyphIndex, out rightSideBearing);
         }
 
+        public int? GetGlyphKernAdvance(int glyphIndex1, int glyphIndex2)
+        {
+            return TT.GetGlyphKernAdvance(FontInfo, glyphIndex1, glyphIndex2);
+        }
+
         public void GetGlyphHMetrics(int glyphIndex, out int advanceWidth, out int leftSideBearing)
         {
             TT.GetGlyphHMetrics(FontInfo, glyphIndex, out advanceWidth, out leftSideBearing);
