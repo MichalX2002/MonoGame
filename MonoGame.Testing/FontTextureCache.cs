@@ -195,7 +195,7 @@ namespace MonoGame.Testing
                     }
 
                     var region = new FontGlyph(heightMap, array.Texture, glyphIndex, texRect);
-                    region.Texture.SetData(image, texRect, flush: false);
+                    region.Texture.SetData(image, texRect);
                     state = region;
                 }
 
