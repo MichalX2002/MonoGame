@@ -4,11 +4,10 @@ using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Threading;
 
-namespace StbSharp
+namespace StbSharp.ImageResize
 {
-    public static unsafe partial class StbImageResize
+    public static unsafe partial class ImageResize
     {
         private const int MAX_COLORSPACES = 2;
 

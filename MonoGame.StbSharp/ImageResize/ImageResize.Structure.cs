@@ -2,9 +2,9 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace StbSharp
+namespace StbSharp.ImageResize
 {
-    public static unsafe partial class StbImageResize
+    public static partial class ImageResize
     {
         public delegate void ResizeProgressCallback(float progress, Rect? rectangle);
 
