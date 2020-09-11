@@ -5,7 +5,7 @@ using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.Vectors;
 using MonoGame.Imaging.Coders.Decoding;
-using StbSharp;
+using StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coders.Detection
 {
@@ -13,9 +13,9 @@ namespace MonoGame.Imaging.Coders.Detection
     {
         public class InfoResult
         {
-            public ImageRead.ReadState ReadState { get; }
+            public ReadState ReadState { get; }
 
-            public InfoResult(ImageRead.ReadState readState)
+            public InfoResult(ReadState readState)
             {
                 ReadState = readState ?? throw new ArgumentNullException(nameof(readState));
             }
@@ -25,9 +25,9 @@ namespace MonoGame.Imaging.Coders.Detection
 
         public abstract ImageFormat Format { get; }
 
-        protected abstract InfoResult GetInfo(IImagingConfig config, ImageRead.BinReader reader);
+        protected abstract InfoResult GetInfo(IImagingConfig config, BinReader reader);
 
-        private ImageInfo Identify(IImagingConfig config, ImageRead.BinReader reader)
+        private ImageInfo Identify(IImagingConfig config, BinReader reader)
         {
             var info = GetInfo(config, reader);
             var readState = info.ReadState;
@@ -48,7 +48,7 @@ namespace MonoGame.Imaging.Coders.Detection
             var buffer = RecyclableMemoryManager.Default.GetBlock();
             try
             {
-                using var reader = new ImageRead.BinReader(stream, buffer, leaveOpen: true, cancellationToken);
+                using var reader = new BinReader(stream, buffer, leaveOpen: true, cancellationToken);
                 return Identify(config, reader);
             }
             finally
@@ -100,8 +100,8 @@ namespace MonoGame.Imaging.Coders.Detection
 
                 case 3:
                     tuple.Type =
-                        depth == 8 ? VectorType.Get<Rgb24>() :
-                        depth == 16 ? VectorType.Get<Rgb48>() :
+                        depth == 8 ? VectorType.Get<Framework.Vectors.Rgb24>() :
+                        depth == 16 ? VectorType.Get<Framework.Vectors.Rgb48>() :
                         depth == 32 ? VectorType.Get<RgbVector>() :
                         null;
                     break;

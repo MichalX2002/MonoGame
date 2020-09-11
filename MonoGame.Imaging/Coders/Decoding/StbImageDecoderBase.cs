@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
-using StbSharp;
+using StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coders.Decoding
 {
@@ -36,7 +36,6 @@ namespace MonoGame.Imaging.Coders.Decoding
             state.FrameIndex++;
         }
 
-        protected abstract void Read(
-            StbImageDecoderState decoderState, ImageRead.ReadState readState);
+        protected abstract void Read(StbImageDecoderState decoderState, ReadState readState);
     }
 }

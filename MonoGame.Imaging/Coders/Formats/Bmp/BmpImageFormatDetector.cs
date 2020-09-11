@@ -1,17 +1,16 @@
 ﻿using System;
 using MonoGame.Imaging.Coders.Detection;
-using StbSharp;
 
 namespace MonoGame.Imaging.Coders.Formats.Bmp
 {
     public class BmpImageFormatDetector : StbImageFormatDetectorBase
     {
         public override ImageFormat Format => ImageFormat.Bmp;
-        public override int HeaderSize => ImageRead.Bmp.HeaderSize;
+        public override int HeaderSize => StbSharp.ImageRead.Bmp.HeaderSize;
 
         protected override bool TestFormat(IImagingConfig config, ReadOnlySpan<byte> header)
         {
-            return ImageRead.Bmp.Test(header);
+            return StbSharp.ImageRead.Bmp.Test(header);
         }
     }
 }

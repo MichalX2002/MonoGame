@@ -1,6 +1,7 @@
-﻿using MonoGame.Framework.Memory;
+﻿using System;
+using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Coders.Decoding;
-using StbSharp;
+using StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coders.Formats.Png
 {
@@ -9,11 +10,14 @@ namespace MonoGame.Imaging.Coders.Formats.Png
         public override ImageFormat Format => ImageFormat.Png;
         public override DecoderOptions DefaultOptions => DecoderOptions.Default;
 
-        protected override void Read(
-            StbImageDecoderState decoderState, ImageRead.ReadState readState)
+        protected override void Read(StbImageDecoderState decoderState, ReadState readState)
         {
-            ImageRead.Png.Load(
-                decoderState.Reader, readState, ImageRead.ScanMode.Load, RecyclableArrayPool.Shared);
+            if (decoderState == null)
+                throw new ArgumentNullException(nameof(decoderState));
+
+            StbSharp.ImageRead.Png.Load(
+                decoderState.Reader, readState, 
+                ScanMode.Load, RecyclableArrayPool.Shared);
         }
     }
 }

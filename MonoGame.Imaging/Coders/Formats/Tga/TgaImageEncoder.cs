@@ -2,7 +2,7 @@
 using MonoGame.Imaging.Attributes.Coder;
 using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Pixels;
-using StbSharp;
+using StbSharp.ImageWrite;
 
 namespace MonoGame.Imaging.Coders.Formats
 {
@@ -33,7 +33,7 @@ namespace MonoGame.Imaging.Coders.Formats
             protected override void Write(
                 StbImageEncoderState encoderState,
                 IReadOnlyPixelRows image,
-                ImageWrite.WriteState writeState)
+                WriteState writeState)
             {
                 if (encoderState == null) throw new ArgumentNullException(nameof(encoderState));
                 if (image == null) throw new ArgumentNullException(nameof(image));
@@ -41,7 +41,7 @@ namespace MonoGame.Imaging.Coders.Formats
 
                 var options = encoderState.GetCoderOptionsOrDefault<TgaEncoderOptions>();
                 
-                ImageWrite.Tga.Write(writeState, options.UseRunLengthEncoding);
+                StbSharp.ImageWrite.Tga.Write(writeState, options.UseRunLengthEncoding);
             }
         }
     }

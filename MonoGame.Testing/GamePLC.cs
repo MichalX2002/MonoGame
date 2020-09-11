@@ -290,7 +290,7 @@ namespace MonoGame.Testing
 
                             _font.GetGlyphBox(glyph.GlyphIndex, out var rawGlyphBox);
                             GetGlyphBoxSubpixel(rawGlyphBox, actualScale, default, out var actualGlyphBox);
-                            
+
                             var drawOrig = new Vector2(texRect.Width, texRect.Height) / 2;
 
                             var pos = new Vector2(

@@ -4,7 +4,7 @@ using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Utilities;
 using StbSharp;
-using static StbSharp.ImageWrite;
+using StbSharp.ImageWrite;
 
 namespace MonoGame.Imaging.Coders.Encoding
 {

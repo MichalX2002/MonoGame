@@ -1,7 +1,7 @@
 ﻿using MonoGame.Imaging.Attributes.Coder;
 using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Pixels;
-using StbSharp;
+using StbSharp.ImageWrite;
 
 namespace MonoGame.Imaging.Coders.Formats.Bmp
 {
@@ -13,11 +13,11 @@ namespace MonoGame.Imaging.Coders.Formats.Bmp
         protected override void Write(
             StbImageEncoderState encoderState,
             IReadOnlyPixelRows image,
-            ImageWrite.WriteState writeState)
+            WriteState writeState)
         {
             // TODO: allow different bit depths
 
-            ImageWrite.Bmp.Write(writeState);
+            StbSharp.ImageWrite.Bmp.Write(writeState);
         }
     }
 }

@@ -1,17 +1,16 @@
 ﻿using System;
 using MonoGame.Imaging.Coders.Detection;
-using StbSharp;
 
 namespace MonoGame.Imaging.Coders.Formats.Png
 {
     public class PngImageFormatDetector : StbImageFormatDetectorBase
     {
         public override ImageFormat Format => ImageFormat.Png;
-        public override int HeaderSize => 8;
+        public override int HeaderSize => StbSharp.ImageRead.Png.HeaderSize;
 
         protected override bool TestFormat(IImagingConfig config, ReadOnlySpan<byte> header)
         {
-            return ImageRead.Png.Test(header);
+            return StbSharp.ImageRead.Png.Test(header);
         }
     }
 }

@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using MonoGame.Framework.Vectors;
 using MonoGame.Imaging.Pixels;
-using StbSharp;
+using StbSharp.ImageWrite;
 
 namespace MonoGame.Imaging.Coders.Encoding
 {
@@ -17,7 +17,7 @@ namespace MonoGame.Imaging.Coders.Encoding
         protected abstract void Write(
             StbImageEncoderState encoderState,
             IReadOnlyPixelRows image,
-            ImageWrite.WriteState writeState);
+            WriteState writeState);
 
         public ImageEncoderState CreateState(
             IImagingConfig imagingConfig,

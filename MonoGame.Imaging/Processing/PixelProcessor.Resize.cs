@@ -5,6 +5,7 @@ using MonoGame.Framework.Vectors;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Utilities;
 using StbSharp;
+using StbSharp.ImageResize;
 
 namespace MonoGame.Imaging.Processing
 {
@@ -80,10 +81,10 @@ namespace MonoGame.Imaging.Processing
             var source = context.ToImage<Color>();
             var output = Image<Color>.CreateUninitialized(size);
 
-            var progressCallback = onProgress == null ? (StbImageResize.ResizeProgressCallback?)null :
+            var progressCallback = onProgress == null ? (ResizeProgressCallback?)null :
                 (p, r) => onProgress!.Invoke(state, p, r.ToMGRect());
 
-            StbImageResize.Resize(
+            ImageResize.Resize(
                 MemoryMarshal.AsBytes(source.GetPixelSpan()), source.Width, source.Height, source.ByteStride,
                 MemoryMarshal.AsBytes(output.GetPixelSpan()), output.Width, output.Height, output.ByteStride,
                 numChannels: 4,

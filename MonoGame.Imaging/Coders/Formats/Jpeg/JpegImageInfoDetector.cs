@@ -1,5 +1,5 @@
 ﻿using MonoGame.Imaging.Coders.Detection;
-using StbSharp;
+using StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coders.Formats.Jpeg
 {
@@ -7,10 +7,9 @@ namespace MonoGame.Imaging.Coders.Formats.Jpeg
     {
         public override ImageFormat Format => ImageFormat.Jpeg;
 
-        protected override InfoResult GetInfo(
-            IImagingConfig config, ImageRead.BinReader reader)
+        protected override InfoResult GetInfo(IImagingConfig config, BinReader reader)
         {
-            ImageRead.Jpeg.Info(reader, out var readState);
+            StbSharp.ImageRead.Jpeg.Info(reader, out var readState);
 
             return new InfoResult(readState);
         }

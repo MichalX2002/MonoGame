@@ -1,5 +1,5 @@
 ﻿using System;
-using static StbSharp.ImageRead;
+using StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coders.Identification
 {/*

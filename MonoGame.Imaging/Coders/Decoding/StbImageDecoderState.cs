@@ -5,7 +5,7 @@ using MonoGame.Framework;
 using MonoGame.Framework.Memory;
 using MonoGame.Framework.Vectors;
 using MonoGame.Imaging.Coders.Detection;
-using static StbSharp.ImageRead;
+using StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coders.Decoding
 {

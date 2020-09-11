@@ -1,6 +1,5 @@
-﻿using System.Threading.Tasks;
-using MonoGame.Imaging.Coders.Detection;
-using StbSharp;
+﻿using MonoGame.Imaging.Coders.Detection;
+using StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coders.Formats.Png
 {
@@ -8,10 +7,9 @@ namespace MonoGame.Imaging.Coders.Formats.Png
     {
         public override ImageFormat Format => ImageFormat.Png;
 
-        protected override InfoResult GetInfo(
-            IImagingConfig config, ImageRead.BinReader reader)
+        protected override InfoResult GetInfo(IImagingConfig config, BinReader reader)
         {
-            ImageRead.Png.Info(reader, out var readState);
+            StbSharp.ImageRead.Png.Info(reader, out var readState);
             
             return new InfoResult(readState);
         }

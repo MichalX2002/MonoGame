@@ -1,6 +1,6 @@
 ﻿using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Coders.Decoding;
-using StbSharp;
+using StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coders.Formats.Tga
 {
@@ -9,10 +9,9 @@ namespace MonoGame.Imaging.Coders.Formats.Tga
         public override ImageFormat Format => ImageFormat.Tga;
         public override DecoderOptions DefaultOptions => DecoderOptions.Default;
 
-        protected override void Read(
-            StbImageDecoderState decoderState, ImageRead.ReadState readState)
+        protected override void Read(StbImageDecoderState decoderState, ReadState readState)
         {
-            var tgaInfo = ImageRead.Tga.Load(
+            var tgaInfo = StbSharp.ImageRead.Tga.Load(
                 decoderState.Reader, readState, RecyclableArrayPool.Shared);
         }
     }
