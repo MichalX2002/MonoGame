@@ -289,7 +289,7 @@ namespace MonoGame.Testing
                             Rectangle texRect = glyph.TextureRect;
 
                             _font.GetGlyphBox(glyph.GlyphIndex, out var rawGlyphBox);
-                            GetGlyphBoxSubpixel(rawGlyphBox, actualScale, default, out var actualGlyphBox);
+                            var actualGlyphBox = GetGlyphBoxSubpixel(rawGlyphBox, actualScale, default);
 
                             var drawOrig = new Vector2(texRect.Width, texRect.Height) / 2;
 
@@ -298,7 +298,6 @@ namespace MonoGame.Testing
                                 y + actualGlyphBox.Y);
 
                             var drawPos = pos + new Vector2(actualGlyphBox.Width / 2, actualGlyphBox.Height / 2);
-
 
                             //if (requestedPixelHeight > 24)
                             //    _spriteBatch.DrawRectangle(
@@ -373,25 +372,14 @@ namespace MonoGame.Testing
             _debugBuilder.Clear();
         }
 
-        public static void GetGlyphBoxSubpixel(
-            RectangleF rawGlyphBox, Vector2 scale, Vector2 shift, out RectangleF glyphBox)
-        {
-            var br = rawGlyphBox.BottomRight;
-
-            glyphBox = FromEdgePoints(
-                tlX: rawGlyphBox.X * scale.X + shift.X,
-                tlY: -br.Y * scale.Y + shift.Y,
-                brX: br.X * scale.X + shift.X,
-                brY: -rawGlyphBox.Y * scale.Y + shift.Y);
-        }
-
-        public static RectangleF FromEdgePoints(float tlX, float tlY, float brX, float brY)
+        public static RectangleF GetGlyphBoxSubpixel(
+            RectangleF rawGlyphBox, Vector2 scale, Vector2 shift)
         {
             return new RectangleF(
-                tlX,
-                tlY,
-                brX - tlX,
-                brY - tlY);
+                rawGlyphBox.X * scale.X,
+                (-rawGlyphBox.Y - rawGlyphBox.Height) * scale.Y,
+                rawGlyphBox.Width * scale.X,
+                rawGlyphBox.Height * scale.Y);
         }
 
         private void DrawShadedString(
