@@ -77,8 +77,7 @@ namespace MonoGame.Framework.Graphics
                 if (_pixelShader == null)
                     return _vertexShader.HashKey;
 
-                int hash = 17 * 23 + _vertexShader.HashKey;
-                return hash * 23 + _pixelShader.HashKey;
+                return HashCode.Combine(_pixelShader.HashKey, _vertexShader.HashKey);
             }
         }
 
@@ -899,7 +898,7 @@ namespace MonoGame.Framework.Graphics
         {
             ApplyState(true);
             ApplyAttribs(_vertexShader, baseVertex);
-            
+
             int elementCount = GetElementCountForType(primitiveType, primitiveCount);
             var elementType = _indexBuffer!.ElementType.ToGLElementType();
             var indexOffsetInBytes = new IntPtr(startIndex * (int)elementType);
