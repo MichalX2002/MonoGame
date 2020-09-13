@@ -65,6 +65,11 @@ namespace MonoGame.Testing
             //    state.Texture.Save("state_" + i + ".png");
             //}
 
+
+            _graphicsManager.PreferredBackBufferWidth = 1000;
+            _graphicsManager.PreferredBackBufferHeight = 1000;
+            _graphicsManager.ApplyChanges();
+
             _lastViewport = GraphicsDevice.Viewport;
             ViewportChanged(_lastViewport);
         }
@@ -166,8 +171,8 @@ namespace MonoGame.Testing
                 }
             }
 
-            //_font = new Font(File.ReadAllBytes("C:/Windows/Fonts/consola.ttf"));
-            _font = new Font(File.ReadAllBytes("C:/Windows/Fonts/times.ttf"));
+            _font = new Font(File.ReadAllBytes("C:/Windows/Fonts/consola.ttf"));
+            //_font = new Font(File.ReadAllBytes("C:/Windows/Fonts/times.ttf"));
             //_font = new Font(File.ReadAllBytes("C:/Windows/Fonts/calibri.ttf"));
             //_font = new Font(File.ReadAllBytes("C:/Windows/Fonts/comic.ttf"));
 
@@ -236,97 +241,135 @@ namespace MonoGame.Testing
                 _lastViewport = currentViewport;
             }
 
-            GraphicsDevice.SetRenderTarget(_fontTarget, Color.Transparent);
-
-            _spriteBatch.Begin(
-                blendState: BlendState.NonPremultiplied,
-                transformMatrix: Matrix4x4.CreateScale(_renderScale * 1f));
+            Directory.CreateDirectory("frames");
+            for (float jj = 0; jj < 360 * 2; jj++)
             {
-                string sicc =
-                    //"#h€jio? h½llå ön you dis\nis the fönt cäche thing workin\n" +
-                    //"\u4E00\u4E01\u4E02\u4E03\u4E04\u4E05\u4E06\u4E07\u4E08\u4E09 \\n\n" +
-                    //"\u4E10\u4E11\u4E12\u4E13\u4E14\u4E15\u4E16\u4E17\u4E18\u4E19 \\n\n"
-                    "AWAY TO To Yo \n what / is dis \nnewline time";
+                GraphicsDevice.SetRenderTarget(_fontTarget, Color.Transparent);
 
-                //string sicc = "@";
+                float t = 0.0174532925f * jj / 2f; // (float)time.Total.TotalSeconds;
 
-                var span = sicc.AsSpan();
-
-                float spriteScale = (float)(Math.Sin(time.Total.TotalSeconds * 0.5)) * 48;
-                float requestedPixelHeight = 130; // Math.Max(spriteScale + 62f, 0f) + 8f;
-
-                float actualScaleF = _font.GetScaleByPixel(requestedPixelHeight);
-                var actualScale = new Vector2(actualScaleF);
-
-                _font.GetFontVMetrics(out int ascent, out int descent, out int lineGap);
-                float lineHeight = (ascent - descent + lineGap) * actualScale.Y;
-
-                int lineCount = GetLineCount(span);
-                var basePos = new Vector2(10, _lastViewport.Height / 2f - lineHeight * (lineCount - 1) / 2f);
-
-                float x = basePos.X;
-                float y = basePos.Y;
-
-                while (Rune.DecodeFromUtf16(span, out Rune rune, out int consumed) == OperationStatus.Done)
+                _spriteBatch.Begin(
+                    sortMode: SpriteSortMode.FrontToBack,
+                    blendState: BlendState.NonPremultiplied,
+                    rasterizerState: RasterizerState.CullNone,
+                    transformMatrix:
+                    Matrix4x4.CreateTranslation(-250, 0, 0) *
+                    Matrix4x4.CreateRotationX(t * 3f) *
+                    Matrix4x4.CreateRotationY(t * 5f) *
+                    Matrix4x4.CreateRotationZ(t * 3f) *
+                    Matrix4x4.CreateTranslation(1000, 500, 0) *
+                    Matrix4x4.CreateScale(_renderScale * 0.5f));
                 {
-                    span = span.Slice(consumed);
+                    string sicc =
+                        //"#h€jio? h½llå ön you dis\nis the fönt cäche thing workin\n" +
+                        //"\u4E00\u4E01\u4E02\u4E03\u4E04\u4E05\u4E06\u4E07\u4E08\u4E09 \\n\n" +
+                        //"\u4E10\u4E11\u4E12\u4E13\u4E14\u4E15\u4E16\u4E17\u4E18\u4E19 \\n\n" +
+                        "\uFFFD what \uFFFD"
+                        //"AWAY TO To Yo \n what / is dis \nnewline time"
+                        ;
 
-                    if (rune.Value == '\n')
+                    //string sicc = "@";
+
+                    for (int i = 0; i < 1; i++)
                     {
-                        x = basePos.X;
-                        y += lineHeight;
-                    }
-                    else
-                    {
-                        int glyphIndex = _font.GetGlyphIndex(rune.Value);
 
-                        _font.GetGlyphHMetrics(glyphIndex, out int advanceWidth, out int leftSideBearing);
+                        var span = sicc.AsSpan();
 
-                        var glyph = _fontCache.GetGlyph(_font, requestedPixelHeight, glyphIndex);
-                        if (glyph != null)
+                        float spriteScale = (float)(Math.Sin(time.Total.TotalSeconds * 0.5)) * 48;
+                        float requestedPixelHeight = 130; // Math.Max(spriteScale + 62f, 0f) + 8f;
+
+                        float actualScaleF = _font.GetScaleByPixel(requestedPixelHeight);
+                        var actualScale = new Vector2(actualScaleF);
+
+                        _font.GetFontVMetrics(out int ascent, out int descent, out int lineGap);
+                        float lineHeight = (ascent - descent + lineGap) * actualScale.Y;
+
+                        int lineCount = GetLineCount(span);
+                        var basePos = new Vector2(10, _lastViewport.Height / 2f - lineHeight * (lineCount - 1) / 2f);
+
+                        float x = basePos.X;
+                        float y = basePos.Y;
+
+                        while (Rune.DecodeFromUtf16(span, out Rune rune, out int consumed) == OperationStatus.Done)
                         {
-                            Vector2 scaleFactor = actualScale / glyph.Scale;
-                            Rectangle texRect = glyph.TextureRect;
+                            span = span.Slice(consumed);
 
-                            _font.GetGlyphBox(glyph.GlyphIndex, out var rawGlyphBox);
-                            var actualGlyphBox = GetGlyphBoxSubpixel(rawGlyphBox, actualScale, default);
+                            if (rune.Value == '\n')
+                            {
+                                x = basePos.X;
+                                y += lineHeight;
+                            }
+                            else
+                            {
+                                int glyphIndex = _font.GetGlyphIndex(rune.Value);
 
-                            var drawOrig = new Vector2(texRect.Width, texRect.Height) / 2;
+                                _font.GetGlyphHMetrics(glyphIndex, out int advanceWidth, out int leftSideBearing);
 
-                            var pos = new Vector2(
-                                x + leftSideBearing * actualScale.X,
-                                y + actualGlyphBox.Y);
+                                var glyph = _fontCache.GetGlyph(_font, requestedPixelHeight, glyphIndex);
+                                if (glyph != null)
+                                {
+                                    Vector2 scaleFactor = actualScale / glyph.Scale;
+                                    Rectangle texRect = glyph.TextureRect;
 
-                            var drawPos = pos + new Vector2(actualGlyphBox.Width / 2, actualGlyphBox.Height / 2);
+                                    _font.GetGlyphBoxSubpixel(glyph.GlyphIndex, actualScale, default, out var actualGlyphBox);
 
-                            //if (requestedPixelHeight > 24)
-                            //    _spriteBatch.DrawRectangle(
-                            //        new RectangleF(pos, actualGlyphBox.Size) +
-                            //        new RectangleF(-1, -1, 2, 2), Color.Red);
+                                    var drawOrig = new Vector2(texRect.Width, texRect.Height) / 2;
 
-                            _spriteBatch.Draw(
-                                glyph.Texture, drawPos, texRect, Color.White,
-                                0, drawOrig, scaleFactor, SpriteFlip.None, 0);
+                                    var pos = new Vector2(
+                                        x + leftSideBearing * actualScale.X,
+                                        y + actualGlyphBox.Y);
+
+                                    var drawPos = pos + new Vector2(actualGlyphBox.Width / 2, actualGlyphBox.Height / 2);
+
+                                    //if (requestedPixelHeight > 24)
+                                    //    _spriteBatch.DrawRectangle(
+                                    //        new RectangleF(pos, actualGlyphBox.Size) +
+                                    //        new RectangleF(-1, -1, 2, 2), Color.Red);
+
+                                    //var str = glyphIndex.ToString();
+                                    //_spriteBatch.DrawString(_spriteFont, str, pos + new Vector2(-1, -1), Color.Black, 0, Vector2.Zero, 1, SpriteFlip.None, 0);
+                                    //_spriteBatch.DrawString(_spriteFont, str, pos + new Vector2(1, 0), Color.Black, 0, Vector2.Zero, 1, SpriteFlip.None, 0);
+                                    //_spriteBatch.DrawString(_spriteFont, str, pos + new Vector2(1, 1), Color.Black, 0, Vector2.Zero, 1, SpriteFlip.None, 0);
+                                    //_spriteBatch.DrawString(_spriteFont, str, pos + new Vector2(-1, 0), Color.Black, 0, Vector2.Zero, 1, SpriteFlip.None, 0);
+                                    //_spriteBatch.DrawString(_spriteFont, str, pos, Color.Red, 0, Vector2.Zero, 1, SpriteFlip.None, 10f);
+
+                                    _spriteBatch.Draw(
+                                        glyph.Texture, drawPos, texRect, Color.White,
+                                        0, drawOrig, scaleFactor, SpriteFlip.None, 20f);
+                                }
+
+                                x += advanceWidth * actualScale.X;
+
+                                var nextRuneStatus = Rune.DecodeFromUtf16(span, out Rune nextRune, out int _);
+                                if (nextRuneStatus == OperationStatus.Done)
+                                {
+                                    int glyphIndex2 = _font.GetGlyphIndex(nextRune.Value);
+                                    int? kernAdvance = _font.GetGlyphKernAdvance(glyphIndex, glyphIndex2);
+
+                                    if (kernAdvance.HasValue)
+                                        x += kernAdvance.GetValueOrDefault() * actualScale.X;
+                                }
+                            }
                         }
 
-                        x += advanceWidth * actualScale.X;
+                        //if (requestedPixelHeight > 24)
+                        //    _spriteBatch.DrawLine(basePos, new Vector2(x, y), Color.Green);
 
-                        var nextRuneStatus = Rune.DecodeFromUtf16(span, out Rune nextRune, out int _);
-                        if (nextRuneStatus == OperationStatus.Done)
-                        {
-                            int glyphIndex2 = _font.GetGlyphIndex(nextRune.Value);
-                            int? kernAdvance = _font.GetGlyphKernAdvance(glyphIndex, glyphIndex2);
-
-                            if (kernAdvance.HasValue)
-                                x += kernAdvance.GetValueOrDefault() * actualScale.X;
-                        }
                     }
                 }
+                _spriteBatch.End();
 
-                //if (requestedPixelHeight > 24)
-                //    _spriteBatch.DrawLine(basePos, new Vector2(x, y), Color.Green);
+                GraphicsDevice.SetRenderTarget(null, Color.MediumPurple);
+
+                _spriteBatch.Begin(blendState: BlendState.AlphaBlend);
+                _spriteBatch.Draw(_fontTarget, currentViewport.Bounds, _fontTarget.Bounds, Color.White);
+                _spriteBatch.End();
+
+                GraphicsDevice.Present();
+                _fontTarget.Save("frames/" + jj + ".png", rectangle: new Rectangle(150, 150, 650, 450));
             }
-            _spriteBatch.End();
+            Exit();
+            return;
 
             GraphicsDevice.SetRenderTarget(null, Color.MediumPurple);
 
@@ -370,16 +413,6 @@ namespace MonoGame.Testing
             _spriteBatch.DrawString(_spriteFont, e, position + new Vector2(1, 1), Color.Black);
             _spriteBatch.DrawString(_spriteFont, e, position + new Vector2(0, 0), Color.Cyan);
             _debugBuilder.Clear();
-        }
-
-        public static RectangleF GetGlyphBoxSubpixel(
-            RectangleF rawGlyphBox, Vector2 scale, Vector2 shift)
-        {
-            return new RectangleF(
-                rawGlyphBox.X * scale.X,
-                (-rawGlyphBox.Y - rawGlyphBox.Height) * scale.Y,
-                rawGlyphBox.Width * scale.X,
-                rawGlyphBox.Height * scale.Y);
         }
 
         private void DrawShadedString(

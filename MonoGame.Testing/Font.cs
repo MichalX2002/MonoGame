@@ -3,6 +3,7 @@ using System.Numerics;
 using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
 using MonoGame.Imaging;
+using MonoGame.Imaging.Pixels;
 using TT = StbSharp.TrueType;
 
 namespace MonoGame.Testing
@@ -15,6 +16,16 @@ namespace MonoGame.Testing
         {
             FontInfo = new TT.FontInfo();
             TT.InitFont(FontInfo, fontData, fontIndex);
+        }
+
+        public static RectangleF GetGlyphBoxSubpixel(
+            RectangleF rawGlyphBox, Vector2 scale, Vector2 shift)
+        {
+            return new RectangleF(
+                rawGlyphBox.X * scale.X + shift.X,
+                (-rawGlyphBox.Y - rawGlyphBox.Height) * scale.Y + shift.Y,
+                rawGlyphBox.Width * scale.X + shift.X,
+                rawGlyphBox.Height * scale.Y + shift.Y);
         }
 
         public bool GetGlyphRightSideBearing(int glyphIndex, out float rightSideBearing)
@@ -65,6 +76,18 @@ namespace MonoGame.Testing
             return false;
         }
 
+        public bool GetGlyphBoxSubpixel(
+            int glyphIndex, Vector2 scale, Vector2 shift, out RectangleF glyphBox)
+        {
+            if (GetGlyphBox(glyphIndex, out var rawGlyphBox))
+            {
+                glyphBox = GetGlyphBoxSubpixel(rawGlyphBox, scale, shift);
+                return true;
+            }
+            glyphBox = default;
+            return false;
+        }
+
         public Image<Alpha8>? GetGlyphBitmap(
             int glyphIndex, Vector2 scale, Vector2 shift = default)
         {
@@ -74,7 +97,7 @@ namespace MonoGame.Testing
                 var image = Image<Alpha8>.CreateUninitialized(glyphBox.W, glyphBox.H);
 
                 float pixelFlatness = 0.35f;
-                var gbm = GetBitmap(image, glyphBox.W, glyphBox.H);
+                var gbm = GetTTBitmap(image, glyphBox.W, glyphBox.H);
 
                 int num_verts = TT.GetGlyphShape(FontInfo, glyphIndex, out TT.Vertex[]? vertices);
 
@@ -88,7 +111,7 @@ namespace MonoGame.Testing
             return null;
         }
 
-        public static TT.Bitmap GetBitmap(Image image, int width, int height)
+        public static TT.Bitmap GetTTBitmap(IPixelMemory image, int width, int height)
         {
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
@@ -102,12 +125,12 @@ namespace MonoGame.Testing
             };
         }
 
-        public static TT.Bitmap GetBitmap(Image image)
+        public static TT.Bitmap GetTTBitmap(IPixelMemory image)
         {
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
 
-            return GetBitmap(image, image.Width, image.Height);
+            return GetTTBitmap(image, image.Width, image.Height);
         }
     }
 }
