@@ -38,6 +38,16 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
+        public ReadOnlyMemory<Texture?> GetTextures()
+        {
+            return _textures.AsMemory();
+        }
+
+        public ReadOnlySpan<Texture?> GetTexturesSpan()
+        {
+            return _textures.AsSpan();
+        }
+
         internal void Clear()
         {
             for (var i = 0; i < _textures.Length; i++)

@@ -4,6 +4,7 @@
 //
 // Author: Kenneth James Pouncey
 
+using System;
 using MonoGame.OpenGL;
 
 namespace MonoGame.Framework.Graphics
@@ -24,12 +25,20 @@ namespace MonoGame.Framework.Graphics
 
         internal void PlatformSetSamplers(GraphicsDevice device)
         {
-            for (var i = 0; i < _actualSamplers.Length; i++)
-            {
-                var sampler = _actualSamplers[i];
-                var texture = device.Textures[i];
+            var samplers = _actualSamplers.AsSpan();
+            var textures = device.Textures.GetTexturesSpan().Slice(0, samplers.Length);
 
-                if (sampler != null && texture != null && sampler != texture._glLastSamplerState)
+            for (int i = 0; i < samplers.Length; i++)
+            {
+                var sampler = samplers[i];
+                if (sampler == null)
+                    continue;
+
+                var texture = textures[i];
+                if (texture == null)
+                    continue;
+
+                if (sampler != texture._glLastSamplerState)
                 {
                     // TODO: Avoid doing this redundantly (see TextureCollection.SetTextures())
                     // However, I suspect that rendering from the same texture with different sampling modes
