@@ -1,5 +1,4 @@
 ﻿using System;
-using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
 using MonoGame.Imaging.Pixels;
 
@@ -14,8 +13,9 @@ namespace MonoGame.Imaging.Processing
         public int Length => Pixels.Length;
         public int ElementSize => Pixels.ElementSize;
 
+        public int Width => Pixels.Width;
+        public int Height => Pixels.Height;
         public VectorType PixelType => Pixels.PixelType;
-        public Size Size => Pixels.Size;
 
         public ReadOnlyPixelRowsContext(IImagingConfig imagingConfig, IReadOnlyPixelRows pixels)
         {

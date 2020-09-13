@@ -50,14 +50,14 @@ namespace MonoGame.Imaging
             // Rectangle.Contains would suffice, but exception details would suffer
             AssertNonEmptyRectangle(rectangle, rectParamName);
 
-            if (rectangle.Width > source.Size.Width)
+            if (rectangle.Width > source.Width)
                 throw new ArgumentOutOfRangeException(rectParamName + ".Width");
-            if (rectangle.Height > source.Size.Height)
+            if (rectangle.Height > source.Height)
                 throw new ArgumentOutOfRangeException(rectParamName + ".Height");
 
-            if (rectangle.X + rectangle.Width > source.Size.Width)
+            if (rectangle.X + rectangle.Width > source.Width)
                 throw new ArgumentOutOfRangeException(rectParamName + ".X");
-            if (rectangle.Y + rectangle.Height > source.Size.Height)
+            if (rectangle.Y + rectangle.Height > source.Height)
                 throw new ArgumentOutOfRangeException(rectParamName + ".Y");
         }
 

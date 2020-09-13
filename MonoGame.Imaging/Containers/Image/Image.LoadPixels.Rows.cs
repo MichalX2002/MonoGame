@@ -95,7 +95,7 @@ namespace MonoGame.Imaging
                 pixels is IReadOnlyPixelMemory typeEqualMemory &&
                 typeEqualMemory.IsPixelContiguous() &&
                 rect.Position == Point.Zero &&
-                rect.Size == pixels.Size)
+                rect.Size == pixels.GetSize())
             {
                 typeEqualMemory.GetPixelByteSpan().CopyTo(dstImage.GetPixelByteSpan());
             }

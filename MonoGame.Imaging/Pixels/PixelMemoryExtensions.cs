@@ -32,7 +32,7 @@ namespace MonoGame.Imaging.Pixels
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
 
-            return buffer.Size.Width * buffer.ElementSize == buffer.ByteStride;
+            return buffer.Width * buffer.ElementSize == buffer.ByteStride;
         }
 
         public static int GetPixelStride(this IReadOnlyPixelMemory buffer)

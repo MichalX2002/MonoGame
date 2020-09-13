@@ -62,7 +62,7 @@ namespace MonoGame.Imaging.Processing
         /// </summary>
         public static IPixelRows Crop(this IPixelRowsContext context, Rectangle sourceRectangle)
         {
-            return new CropRows(context.Pixels, sourceRectangle);
+            return new CropRows(context?.Pixels, sourceRectangle);
         }
 
         /// <summary>
@@ -105,15 +105,16 @@ namespace MonoGame.Imaging.Processing
             protected IReadOnlyPixelRows Pixels { get; }
             public Rectangle SourceRectangle { get; }
 
-            public Size Size => SourceRectangle.Size;
-            public int Length => Size.Area;
-
+            public int Length => Width * Height;
             public int ElementSize => Pixels.ElementSize;
+
+            public int Width => SourceRectangle.Width;
+            public int Height => SourceRectangle.Height;
             public VectorType PixelType => Pixels.PixelType;
 
             public ReadOnlyCropRows(IReadOnlyPixelRows pixels, Rectangle sourceRectangle)
             {
-                Pixels = pixels;
+                Pixels = pixels ?? throw new ArgumentNullException(nameof(pixels));
                 SourceRectangle = sourceRectangle;
             }
 

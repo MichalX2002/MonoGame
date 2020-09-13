@@ -14,12 +14,12 @@ namespace MonoGame.Imaging.Pixels
 
         public int Components { get; }
         public int Depth { get; }
-        public int Width => _pixelRows.Size.Width;
-        public int Height => _pixelRows.Size.Height;
+        public int Width => _pixelRows.Width;
+        public int Height => _pixelRows.Height;
 
         public PixelRowProvider(IReadOnlyPixelRows pixelRows, int components, int depth)
         {
-            _pixelRows = pixelRows;
+            _pixelRows = pixelRows ?? throw new ArgumentNullException(nameof(pixelRows));
             Components = components;
             Depth = depth;
 
@@ -34,7 +34,7 @@ namespace MonoGame.Imaging.Pixels
             else
             {
                 _pixelBuffer = null;
-                _rowBuffer = new byte[pixelRows.Size.Width * pixelRows.ElementSize];
+                _rowBuffer = new byte[pixelRows.Width * pixelRows.ElementSize];
             }
 
             _convertPixels = Image.GetConvertPixelsDelegate(pixelRows.PixelType, resultType);

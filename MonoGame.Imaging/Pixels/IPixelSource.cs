@@ -1,5 +1,4 @@
 ﻿using System;
-using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
 
 namespace MonoGame.Imaging.Pixels
@@ -10,9 +9,14 @@ namespace MonoGame.Imaging.Pixels
     public interface IPixelSource : IDisposable
     {
         /// <summary>
-        /// Gets the size of the source in pixels.
+        /// Gets the width of the source in pixels.
         /// </summary>
-        Size Size { get; }
+        int Width { get; }
+
+        /// <summary>
+        /// Gets the height of the source in pixels.
+        /// </summary>
+        int Height { get; }
 
         /// <summary>
         /// Gets info about the pixel type of the source.
