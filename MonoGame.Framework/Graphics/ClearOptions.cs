@@ -17,7 +17,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Color buffer.
         /// </summary>
-        Target = 1,
+        Color = 1,
 
         /// <summary>
         /// Depth buffer.
@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// All buffers.
         /// </summary>
-        Full = Target | DepthBuffer | Stencil
+        Full = Color | DepthBuffer | Stencil
     }
 }
 

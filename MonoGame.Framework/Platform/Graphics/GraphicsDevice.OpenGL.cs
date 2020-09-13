@@ -299,7 +299,7 @@ namespace MonoGame.Framework.Graphics
             ApplyState(false);
 
             ClearBufferMask bufferMask = 0;
-            if ((options & ClearOptions.Target) == ClearOptions.Target)
+            if ((options & ClearOptions.Color) == ClearOptions.Color)
             {
                 if (color != _lastClearColor)
                 {
@@ -707,6 +707,7 @@ namespace MonoGame.Framework.Graphics
                     renderTargetBinding = _currentRenderTargetBindings[i];
                     renderTarget = (IRenderTarget)renderTargetBinding.RenderTarget;
                     var attachement = (int)(FramebufferAttachment.ColorAttachment0 + i);
+
                     if (renderTarget.GLColorBuffer != renderTarget.GLTexture)
                         _framebufferHelper.FramebufferRenderbuffer(attachement, renderTarget.GLColorBuffer, 0);
                     else

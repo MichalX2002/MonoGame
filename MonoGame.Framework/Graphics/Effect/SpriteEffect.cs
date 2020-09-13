@@ -18,6 +18,23 @@ namespace MonoGame.Framework.Graphics
         private Viewport _lastViewport;
         private Matrix4x4 _projection;
 
+        // Current behavior:
+        // Normal 3D cameras look into the -z direction (z = 1 is in front of z = 0).
+
+        // Old behavior:
+        // The sprite batch layer depth is the opposite (z = 0 is in front of z = 1).
+        // --> We get the correct matrix with near plane 0 and far plane -1.
+
+        /// <summary>
+        /// The minimum Z-value of the view volume.
+        /// </summary>
+        public float ZNearPlane { get; set; } = -1000;
+
+        /// <summary>
+        /// The maximum Z-value of the view volume.
+        /// </summary>
+        public float ZFarPlane { get; set; } = 1000;
+
         /// <summary>
         /// Creates a new SpriteEffect.
         /// </summary>
@@ -60,11 +77,8 @@ namespace MonoGame.Framework.Graphics
             if ((vp.Width != _lastViewport.Width) ||
                 (vp.Height != _lastViewport.Height))
             {
-                // Normal 3D cameras look into the -z direction (z = 1 is in front of z = 0).
-                // The sprite batch layer depth is the opposite (z = 0 is in front of z = 1).
-                // --> We get the correct matrix with near plane 0 and far plane -1.
                 _projection = Matrix4x4.CreateOrthographicOffCenter(
-                    0, vp.Width, vp.Height, 0, 0, -1);
+                    0, vp.Width, vp.Height, 0, ZNearPlane, ZFarPlane);
 
                 _lastViewport = vp;
             }

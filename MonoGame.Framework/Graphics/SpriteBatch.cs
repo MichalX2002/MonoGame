@@ -16,7 +16,6 @@ namespace MonoGame.Framework.Graphics
     public class SpriteBatch : GraphicsResource
     {
         private SpriteBatcher _batcher;
-        private SpriteEffect _spriteEffect;
         private EffectPass _spritePass;
 
         private bool _beginCalled;
@@ -30,6 +29,11 @@ namespace MonoGame.Framework.Graphics
         private RasterizerState _rasterizerState = RasterizerState.CullCounterClockwise;
 #pragma warning restore CA2213
 
+        /// <summary>
+        /// Gets the default effect used by this <see cref="SpriteBatch"/>.
+        /// </summary>
+        public SpriteEffect SpriteEffect { get; }
+
         #region Constructors
 
         /// <summary>
@@ -40,8 +44,8 @@ namespace MonoGame.Framework.Graphics
         public SpriteBatch(GraphicsDevice graphicsDevice) : base(graphicsDevice)
         {
             _batcher = new SpriteBatcher(GraphicsDevice);
-            _spriteEffect = new SpriteEffect(GraphicsDevice);
-            _spritePass = _spriteEffect.CurrentTechnique.Passes[0];
+            SpriteEffect = new SpriteEffect(GraphicsDevice);
+            _spritePass = SpriteEffect.CurrentTechnique.Passes[0];
 
             _beginCalled = false;
         }
@@ -85,7 +89,7 @@ namespace MonoGame.Framework.Graphics
             _depthStencilState = depthStencilState ?? DepthStencilState.None;
             _rasterizerState = rasterizerState ?? RasterizerState.CullCounterClockwise;
             _effect = effect;
-            _spriteEffect.TransformMatrix = transformMatrix;
+            SpriteEffect.TransformMatrix = transformMatrix;
 
             // Setup things now so a user can change them.
             if (sortMode == SpriteSortMode.Immediate)
@@ -889,7 +893,7 @@ namespace MonoGame.Framework.Graphics
             {
                 if (disposing)
                 {
-                    _spriteEffect?.Dispose();
+                    SpriteEffect?.Dispose();
                     _batcher?.Dispose();
                 }
             }
