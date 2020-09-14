@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using MonoGame.Framework.Memory;
 
 namespace MonoGame.Framework.Graphics
@@ -23,7 +24,7 @@ namespace MonoGame.Framework.Graphics
 
         /// <summary>
         /// The maximum number of batch items that can be 
-        /// drawn at once with <see cref="FlushVertexArray"/>.
+        /// drawn at once with <see cref="FlushQuads"/>.
         /// </summary>
         private const int MaxBatchSize = ushort.MaxValue / 4;
 
@@ -32,8 +33,10 @@ namespace MonoGame.Framework.Graphics
         private int _itemCount;
         private SpriteBatchItem[] _batchItems;
 
+        // Using unmanaged memory removes GC pinning costs.
+
         // TODO: allocate on Pinned Object Heap instead
-        private UnmanagedMemory<VertexPositionColorTexture> _vertexBuffer;
+        private UnmanagedMemory<SpriteQuad> _quadBuffer;
 
         /// <summary>
         /// The index buffer values are constant and more indices are added as needed.
@@ -46,7 +49,7 @@ namespace MonoGame.Framework.Graphics
         {
             _device = device ?? throw new ArgumentNullException(nameof(device));
 
-            _vertexBuffer = new UnmanagedMemory<VertexPositionColorTexture>();
+            _quadBuffer = new UnmanagedMemory<SpriteQuad>();
             _indexBuffer = new UnmanagedMemory<ushort>();
 
             _batchItems = new SpriteBatchItem[InitialBatchSize];
@@ -62,8 +65,8 @@ namespace MonoGame.Framework.Graphics
         private void SetupBuffers(int itemCount, int oldItemCount)
         {
             int minVertices = itemCount * 4; // 4 vertices per item
-            if (minVertices > _vertexBuffer.Length)
-                _vertexBuffer.Length = minVertices;
+            if (minVertices > _quadBuffer.Length)
+                _quadBuffer.Length = minVertices;
 
             int minIndices = itemCount * 6; // 6 indices per item
             if (minIndices > _indexBuffer.Length)
@@ -142,54 +145,48 @@ namespace MonoGame.Framework.Graphics
             }
 
             // iterate through the batches, doing clamped sets of vertices at the time
-            var dstVertexSpan = _vertexBuffer.Span;
+            var dstQuadSpan = _quadBuffer.Span;
             var indexSpan = _indexBuffer.Span;
             int itemIndex = 0;
             int itemsLeft = _itemCount;
 
-            fixed (VertexPositionColorTexture* dstVertexPtr = dstVertexSpan)
+            while (itemsLeft > 0)
             {
-                while (itemsLeft > 0)
+                int itemsToProcess = itemsLeft;
+                if (itemsToProcess > MaxBatchSize)
+                    itemsToProcess = MaxBatchSize;
+
+                int count = 0;
+                Texture2D? tex = null;
+
+                // TODO: create a path with sort-by-texture that does less ref-equality checks
+                // (having such a path allows copying multiple items at once)
+
+                // draw the batches
+                for (int i = 0; i < itemsToProcess; i++, count++)
                 {
-                    int itemsToProcess = itemsLeft;
-                    if (itemsToProcess > MaxBatchSize)
-                        itemsToProcess = MaxBatchSize;
+                    var item = _batchItems[itemIndex++];
 
-                    int count = 0;
-                    Texture2D? tex = null;
-
-                    // TODO: create a path with sort-by-texture that does less ref-equality checks
-                    // (having such a path allows copying multiple items at once)
-
-                    // draw the batches
-                    for (int i = 0; i < itemsToProcess; i++, count += 4)
+                    // if the texture changed, we need to flush and bind the new texture
+                    if (!ReferenceEquals(item.Texture, tex))
                     {
-                        var item = _batchItems[itemIndex++];
+                        Debug.Assert(item.Texture != null);
 
-                        // if the texture changed, we need to flush and bind the new texture
-                        if (!ReferenceEquals(item.Texture, tex))
-                        {
-                            Debug.Assert(item.Texture != null);
+                        FlushQuads(dstQuadSpan.Slice(0, count), indexSpan, effect, tex);
+                        count = 0;
 
-                            FlushVertexArray(dstVertexSpan.Slice(0, count), indexSpan, effect, tex);
-                            count = 0;
-
-                            tex = item.Texture;
-                            _device.Textures[0] = tex;
-                        }
-                        item.Texture = null; // release texture from item
-
-                        dstVertexPtr[count + 0] = item.VertexTL;
-                        dstVertexPtr[count + 1] = item.VertexTR;
-                        dstVertexPtr[count + 2] = item.VertexBL;
-                        dstVertexPtr[count + 3] = item.VertexBR;
+                        tex = item.Texture;
+                        _device.Textures[0] = tex;
                     }
+                    item.Texture = null; // release texture from item
 
-                    // flush the remaining data
-                    FlushVertexArray(dstVertexSpan.Slice(0, count), indexSpan, effect, tex);
-
-                    itemsLeft -= itemsToProcess;
+                    dstQuadSpan[count] = item.Quad;
                 }
+
+                // flush the remaining data
+                FlushQuads(dstQuadSpan.Slice(0, count), indexSpan, effect, tex);
+
+                itemsLeft -= itemsToProcess;
             }
 
             unchecked
@@ -202,21 +199,21 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Sends the triangle list to the graphics device. Here is where the actual drawing starts.
         /// </summary>
-        /// <param name="vertices">The vertices to draw.</param>
+        /// <param name="quads">The vertices to draw.</param>
         /// <param name="indices">The indices used to draw.</param>
         /// <param name="effect">The custom effect to apply to the geometry.</param>
         /// <param name="texture">The texture to draw.</param>
-        private void FlushVertexArray(
-            ReadOnlySpan<VertexPositionColorTexture> vertices, ReadOnlySpan<ushort> indices,
-            Effect? effect, Texture? texture)
+        private void FlushQuads(
+            ReadOnlySpan<SpriteQuad> quads, ReadOnlySpan<ushort> indices,
+            Effect? effect, Texture texture)
         {
-            if (vertices.IsEmpty)
+            if (quads.IsEmpty)
                 return;
 
-            Debug.Assert(texture != null);
+            var vertices = MemoryMarshal.Cast<SpriteQuad, VertexPositionColorTexture>(quads);
 
             const PrimitiveType primitiveType = PrimitiveType.TriangleList;
-            
+
             // If the effect is not null, then apply each pass and render the geometry
             if (effect == null)
             {
@@ -242,7 +239,7 @@ namespace MonoGame.Framework.Graphics
         {
             if (!IsDisposed)
             {
-                _vertexBuffer.Dispose();
+                _quadBuffer.Dispose();
                 IsDisposed = true;
             }
         }

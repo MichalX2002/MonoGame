@@ -143,7 +143,7 @@ namespace MonoGame.Framework.Graphics
         #region Helpers
 
         /// <summary>
-        /// Reuse a previously allocated <see cref="SpriteBatchItem"/> from the item pool. 
+        /// Rent a <see cref="SpriteBatchItem"/> from the item pool. 
         /// The pool grows and initializes new items if none are available.
         /// </summary>
         public SpriteBatchItem GetBatchItem(Texture2D texture)
@@ -248,11 +248,10 @@ namespace MonoGame.Framework.Graphics
         {
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, depth);
-
-            item.VertexTL = vertexTL;
-            item.VertexTR = vertexTR;
-            item.VertexBL = vertexBL;
-            item.VertexBR = vertexBR;
+            item.Quad.VertexTL = vertexTL;
+            item.Quad.VertexTR = vertexTR;
+            item.Quad.VertexBL = vertexBL;
+            item.Quad.VertexBR = vertexBR;
 
             FlushIfNeeded();
         }
@@ -399,13 +398,13 @@ namespace MonoGame.Framework.Graphics
 
             if (rotation == 0f)
             {
-                item.Set(
+                item.Quad.Set(
                     position.X - origin.X, position.Y - origin.Y, w, h,
                     color, texCoord, layerDepth);
             }
             else
             {
-                item.Set(
+                item.Quad.Set(
                     position.X, position.Y, -origin.X, -origin.Y, w, h,
                     MathF.Sin(rotation), MathF.Cos(rotation),
                     color, texCoord, layerDepth);
@@ -504,14 +503,14 @@ namespace MonoGame.Framework.Graphics
 
             if (rotation == 0f)
             {
-                item.Set(
+                item.Quad.Set(
                     destinationRectangle.X - originX, destinationRectangle.Y - originY,
                     destinationRectangle.Width, destinationRectangle.Height,
                     color, texCoord, layerDepth);
             }
             else
             {
-                item.Set(
+                item.Quad.Set(
                     destinationRectangle.X, destinationRectangle.Y, -originX, -originY,
                     destinationRectangle.Width, destinationRectangle.Height,
                     MathF.Sin(rotation), MathF.Cos(rotation),
@@ -558,7 +557,7 @@ namespace MonoGame.Framework.Graphics
                 texCoord = new Vector4(0, 0, 1, 1);
             }
 
-            item.Set(position.X, position.Y, w, h, color, texCoord, 0);
+            item.Quad.Set(position.X, position.Y, w, h, color, texCoord, 0);
             FlushIfNeeded();
         }
 
@@ -593,7 +592,7 @@ namespace MonoGame.Framework.Graphics
                 texCoord = new Vector4(0, 0, 1, 1);
             }
 
-            item.Set(
+            item.Quad.Set(
                 destinationRectangle.X, destinationRectangle.Y,
                 destinationRectangle.Width, destinationRectangle.Height,
                 color, texCoord, 0);
@@ -614,7 +613,7 @@ namespace MonoGame.Framework.Graphics
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, 0);
 
-            item.Set(
+            item.Quad.Set(
                 position.X, position.Y,
                 texture.Width, texture.Height,
                 color, new Vector4(0, 0, 1, 1), 0);
@@ -635,7 +634,7 @@ namespace MonoGame.Framework.Graphics
             var item = GetBatchItem(texture);
             item.SortKey = GetSortKey(texture, 0);
 
-            item.Set(
+            item.Quad.Set(
                 destinationRectangle.X, destinationRectangle.Y,
                 destinationRectangle.Width, destinationRectangle.Height,
                 color, new Vector4(0, 0, 1, 1), 0);
@@ -656,6 +655,7 @@ namespace MonoGame.Framework.Graphics
             float sortKey = GetSortKey(spriteFont.Texture, 0);
 
             var offset = Vector2.Zero;
+            var texelSize = spriteFont.Texture.TexelSize;
             bool firstGlyphOfLine = true;
             var glyphs = spriteFont.GetGlyphSpan();
 
@@ -696,14 +696,13 @@ namespace MonoGame.Framework.Graphics
                 var item = GetBatchItem(spriteFont.Texture);
                 item.SortKey = sortKey;
 
-                var texelSize = spriteFont.Texture.TexelSize;
                 var texCoord = new Vector4(
                     glyph.BoundsInTexture.X * texelSize.Width,
                     glyph.BoundsInTexture.Y * texelSize.Height,
                     (glyph.BoundsInTexture.X + glyph.BoundsInTexture.Width) *  texelSize.Width,
                     (glyph.BoundsInTexture.Y + glyph.BoundsInTexture.Height) * texelSize.Height);
 
-                item.Set(
+                item.Quad.Set(
                     p.X, p.Y, glyph.BoundsInTexture.Width, glyph.BoundsInTexture.Height,
                     color, texCoord, 0);
 
@@ -753,8 +752,8 @@ namespace MonoGame.Framework.Graphics
             float sortKey = GetSortKey(spriteFont.Texture, layerDepth);
 
             var flipAdjustment = Vector2.Zero;
-            var flippedVert = (flip & SpriteFlip.Vertical) == SpriteFlip.Vertical;
-            var flippedHorz = (flip & SpriteFlip.Horizontal) == SpriteFlip.Horizontal;
+            bool flippedVert = (flip & SpriteFlip.Vertical) == SpriteFlip.Vertical;
+            bool flippedHorz = (flip & SpriteFlip.Horizontal) == SpriteFlip.Horizontal;
 
             if (flippedVert || flippedHorz)
             {
@@ -801,6 +800,7 @@ namespace MonoGame.Framework.Graphics
             }
 
             var offset = Vector2.Zero;
+            var texelSize = spriteFont.Texture.TexelSize;
             var firstGlyphOfLine = true;
             var glyphs = spriteFont.GetGlyphSpan();
 
@@ -848,7 +848,6 @@ namespace MonoGame.Framework.Graphics
                 var item = GetBatchItem(spriteFont.Texture);
                 item.SortKey = sortKey;
 
-                var texelSize = spriteFont.Texture.TexelSize;
                 var texCoord = new Vector4(
                     glyph.BoundsInTexture.X * texelSize.Width,
                     glyph.BoundsInTexture.Y * texelSize.Height,
@@ -859,7 +858,7 @@ namespace MonoGame.Framework.Graphics
 
                 if (rotation == 0f)
                 {
-                    item.Set(
+                    item.Quad.Set(
                         pos.X, pos.Y,
                         glyph.BoundsInTexture.Width * scale.X,
                         glyph.BoundsInTexture.Height * scale.Y,
@@ -869,7 +868,7 @@ namespace MonoGame.Framework.Graphics
                 }
                 else
                 {
-                    item.Set(
+                    item.Quad.Set(
                         pos.X, pos.Y, 0, 0,
                         glyph.BoundsInTexture.Width * scale.X,
                         glyph.BoundsInTexture.Height * scale.Y,

@@ -109,7 +109,7 @@ namespace MonoGame.Framework
             Span<char> textEditingBuffer = stackalloc char[SDL.Keyboard.TextEditingEvent.TextSize];
 
             while (SDL.PollEvent(out SDL.Event ev) == 1)
-            {
+            { 
                 switch (ev.Type)
                 {
                     case SDL.EventType.Quit:
@@ -145,8 +145,8 @@ namespace MonoGame.Framework
                     #region Mouse
 
                     case SDL.EventType.MouseWheel:
-                        _window.Mouse.ScrollY += ev.MouseWheel.Y * MouseWheelDelta;
                         _window.Mouse.ScrollX += ev.MouseWheel.X * MouseWheelDelta;
+                        _window.Mouse.ScrollY += ev.MouseWheel.Y * MouseWheelDelta;
                         break;
 
                     case SDL.EventType.MouseMotion:

@@ -5,11 +5,6 @@
 using System;
 using System.Collections.Generic;
 
-#if WINDOWS_UAP
-using System.Threading.Tasks;
-using Windows.ApplicationModel.Activation;
-#endif
-
 namespace MonoGame.Framework
 {
     public partial class Game

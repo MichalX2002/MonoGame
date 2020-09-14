@@ -9,6 +9,7 @@ using System.Runtime;
 using MonoGame.Framework.Audio;
 using MonoGame.Framework.Content;
 using MonoGame.Framework.Graphics;
+using MonoGame.Framework.Input;
 using MonoGame.Framework.Input.Touch;
 using MonoGame.Framework.Utilities;
 
@@ -122,8 +123,10 @@ namespace MonoGame.Framework
 
         public bool IsRunningSlowly => _isRunningSlowly;
 
-        public GameWindow Window => Platform.Window;
         public bool IsActive => Platform.IsActive;
+
+        public GameWindow Window => Platform.Window;
+        public Mouse Mouse => Window.Mouse;
 
         public bool IsMouseVisible
         {

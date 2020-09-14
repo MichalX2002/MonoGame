@@ -922,7 +922,7 @@ namespace MonoGame.Framework.Graphics
             lock (_d3dContext)
             {
                 // Clear the diffuse render buffer.
-                if ((options & ClearOptions.Target) == ClearOptions.Target)
+                if ((options & ClearOptions.Color) == ClearOptions.Color)
                 {
                     foreach (var view in CurrentRenderTargets)
                     {
