@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -43,6 +44,11 @@ namespace MonoGame.Testing
 
         private string _loremIpsum;
         private string _loremIpsumSlice;
+
+        private DateTime _lastWriteDate;
+        private List<TextGlyph> _textGlyphs = new List<TextGlyph>();
+        private Vector2 _textPos = new Vector2(0, 0);
+        private SizeF _textSize;
 
         public GamePLC()
         {
@@ -172,12 +178,118 @@ namespace MonoGame.Testing
                 }
             }
 
-            //_font = new Font(File.ReadAllBytes("C:/Windows/Fonts/consola.ttf"));
+            _font = new Font(File.ReadAllBytes("C:/Windows/Fonts/consola.ttf"));
             //_font = new Font(File.ReadAllBytes("C:/Windows/Fonts/times.ttf"));
-            _font = new Font(File.ReadAllBytes("C:/Windows/Fonts/calibri.ttf"));
+            //_font = new Font(File.ReadAllBytes("C:/Windows/Fonts/calibri.ttf"));
             //_font = new Font(File.ReadAllBytes("C:/Windows/Fonts/comic.ttf"));
 
             _fontCache = new FontTextureCache(GraphicsDevice, 2048, SurfaceFormat.Rgba32);
+        }
+
+        private void BuildText(string code)
+        {
+            var tokens = new PLCTokenizer("#");
+            var codeSpan = code.AsSpan();
+            PLCToken token;
+
+            float requestedPixelHeight = 24; // Math.Max(spriteScale + 2f, 0f) + 6f;
+            float actualScaleF = _font.GetScaleByPixel(requestedPixelHeight);
+            var actualScale = new Vector2(actualScaleF);
+
+            _font.GetFontVMetrics(out int ascent, out int descent, out int lineGap);
+            float lineHeight = (ascent - descent + lineGap) * actualScale.Y;
+
+            Vector2 position = new Vector2(_textPos.X, _textPos.Y + ascent * actualScale.Y);
+            float maxX = 0;
+
+            _textGlyphs.Clear();
+
+            while ((token = tokens.ReadToken(codeSpan, out int consumed)).Type != PLCTokenType.EndOfData)
+            {
+                codeSpan = codeSpan.Slice(consumed);
+
+                //if (token.Type == PLCTokenType.Spacing)
+                //    Console.WriteLine();
+                //else
+                //    Console.WriteLine(token.Type + ": " + token.Value.ToString());
+
+                Color color = token.Type switch
+                {
+                    PLCTokenType.Instruction => Color.OrangeRed,
+                    PLCTokenType.Argument => Color.LightBlue,
+                    PLCTokenType.Comment => Color.Green,
+                    _ => Color.Yellow
+                };
+
+                var span = token.Value;
+                while (Rune.DecodeFromUtf16(span, out Rune rune, out int consumedChars) == OperationStatus.Done)
+                {
+                    span = span.Slice(consumedChars);
+
+                    if (rune.Value == '\n')
+                    {
+                        if (position.X > maxX)
+                            maxX = position.X;
+
+                        position.X = _textPos.X;
+                        position.Y += lineHeight;
+                    }
+                    else
+                    {
+                        int glyphIndex = _font.GetGlyphIndex(rune.Value);
+                        _font.GetGlyphHMetrics(glyphIndex, out int advanceWidth, out int leftSideBearing);
+
+                        var glyph = _fontCache.GetGlyph(_font, requestedPixelHeight, glyphIndex);
+                        if (glyph != null)
+                        {
+                            Vector2 scaleFactor = actualScale / glyph.Scale;
+                            Rectangle texRect = glyph.TextureRect;
+
+                            _font.GetGlyphBoxSubpixel(glyph.GlyphIndex, actualScale, default, out var actualGlyphBox);
+
+                            var drawOrig = new Vector2(texRect.Width, texRect.Height) / 2;
+                            drawOrig *= scaleFactor;
+
+                            var pos = position + new Vector2(
+                                leftSideBearing * actualScale.X,
+                                actualGlyphBox.Y);
+
+                            var drawPos = pos + new Vector2(actualGlyphBox.Width / 2, actualGlyphBox.Height / 2);
+
+                            var texelSize = glyph.Texture.TexelSize;
+                            var srcRect = glyph.TextureRect;
+                            var texCoord = SpriteQuad.GetTexCoord(texelSize, srcRect);
+                            float w = srcRect.Width * scaleFactor.X;
+                            float h = srcRect.Height * scaleFactor.Y;
+
+                            var quad = new SpriteQuad();
+                            quad.Set(
+                                drawPos.X - drawOrig.X,
+                                drawPos.Y - drawOrig.Y,
+                                w,
+                                h,
+                                color,
+                                texCoord,
+                                0);
+
+                            _textGlyphs.Add(new TextGlyph(glyph, quad));
+                        }
+
+                        position.X += advanceWidth * actualScale.X;
+
+                        var nextRuneStatus = Rune.DecodeFromUtf16(span, out Rune nextRune, out int _);
+                        if (nextRuneStatus == OperationStatus.Done)
+                        {
+                            int glyphIndex2 = _font.GetGlyphIndex(nextRune.Value);
+                            int? kernAdvance = _font.GetGlyphKernAdvance(glyphIndex, glyphIndex2);
+
+                            if (kernAdvance.HasValue)
+                                position.X += kernAdvance.GetValueOrDefault() * actualScale.X;
+                        }
+                    }
+                }
+            }
+            _textSize = new SizeF(maxX, position.Y);
         }
 
         protected override void UnloadContent()
@@ -193,9 +305,9 @@ namespace MonoGame.Testing
             var scrollDiff = mouseState.Scroll - _lastScroll;
             scrollDiff.X = -scrollDiff.X;
             _lastScroll = mouseState.Scroll;
-            
+
             _scroll += scrollDiff * 0.1f;
-            
+
             base.Update(time);
         }
 
@@ -245,6 +357,27 @@ namespace MonoGame.Testing
 
         protected override void Draw(in FrameTime time)
         {
+            string path = @"C:\Users\Michal\Desktop\prc.txt";
+            var writeDate = File.GetLastWriteTimeUtc(path);
+            if (writeDate != _lastWriteDate)
+            {
+                string? code = null;
+                try
+                {
+                    using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    code = new StreamReader(stream).ReadToEnd();
+                }
+                catch
+                {
+                }
+
+                if (code != null)
+                {
+                    BuildText(code);
+                    _lastWriteDate = writeDate;
+                }
+            }
+
             var currentViewport = GraphicsDevice.Viewport;
             if (_lastViewport != currentViewport)
             {
@@ -257,7 +390,24 @@ namespace MonoGame.Testing
             _spriteBatch.Begin(
                 //sortMode: SpriteSortMode.Deferred,
                 blendState: BlendState.NonPremultiplied,
-                transformMatrix: Matrix4x4.CreateScale(_renderScale * 1f));
+                transformMatrix:
+                Matrix4x4.CreateScale(_renderScale * 1f) *
+                Matrix4x4.CreateTranslation(_scroll.X, _scroll.Y, 0));
+
+            float rectPadding = 10;
+            _spriteBatch.DrawRectangle(
+                new RectangleF(
+                    _textPos - new Vector2(rectPadding), 
+                    _textSize + new SizeF(rectPadding * 2)),
+                Color.DarkBlue);
+
+            for (int i = 0; i < _textGlyphs.Count; i++)
+            {
+                var glyph = _textGlyphs[i];
+                _spriteBatch.Draw(glyph.FontGlyph.Texture, glyph.Quad);
+            }
+
+            if (false)
             {
                 string sicc = _loremIpsumSlice
                     //"#h€jio? h½llå ön you dis\nis the fönt cäche thing workin\n" +
@@ -355,7 +505,7 @@ namespace MonoGame.Testing
             }
             _spriteBatch.End();
 
-            GraphicsDevice.SetRenderTarget(null, Color.MediumPurple);
+            GraphicsDevice.SetRenderTarget(null, new Color(Color.MediumPurple * 0.255f, 255));
 
             _spriteBatch.Begin(blendState: BlendState.AlphaBlend);
             _spriteBatch.Draw(_fontTarget, currentViewport.Bounds, _fontTarget.Bounds, Color.White);
@@ -414,11 +564,10 @@ namespace MonoGame.Testing
 
             public TextGlyph(
                 FontGlyph fontGlyph,
-                float rotation,
-                float angle)
+                SpriteQuad quad)
             {
                 FontGlyph = fontGlyph ?? throw new ArgumentNullException(nameof(fontGlyph));
-                Quad = default;
+                Quad = quad;
             }
         }
 

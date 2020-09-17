@@ -55,6 +55,14 @@ namespace MonoGame.Framework
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="SizeF" /> structure from the specified dimensions.
+        /// </summary>
+        /// <param name="value">The width and height.</param>
+        public SizeF(float value) : this(value, value)
+        {
+        }
+
+        /// <summary>
         /// Gets a <see cref="Vector2"/> representation of this object.
         /// </summary>
         public readonly Vector2 ToVector2()

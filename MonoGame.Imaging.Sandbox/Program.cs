@@ -22,6 +22,7 @@ using System.Security.Cryptography;
 using System.Xml;
 using MonoGame.Imaging.Processing;
 using MonoGame.Imaging.Coders.Formats;
+using StbSharp.ImageResize;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -174,7 +175,7 @@ namespace MonoGame.Imaging.Tests
 
                 for (int i = 0; i < 1; i++)
                 {
-                    StbImageResize.Resize(
+                    ImageResize.Resize(
                         image.GetPixelByteSpan(), image.Width, image.Height, image.ByteStride,
                         resizeDst.GetPixelByteSpan(), resizeDst.Width, resizeDst.Height, resizeDst.ByteStride,
                         numChannels: 4);

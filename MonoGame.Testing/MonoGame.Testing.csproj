@@ -42,6 +42,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.$(MonoGamePlatform).csproj" />
+    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj" />
+    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\ThirdParty\Dependencies\MonoGame.Framework.dll.config">
       <Platforms>WindowsGL,Linux,MacOS</Platforms>
       <Link>MonoGame.Framework.dll.config</Link>
@@ -94,20 +100,6 @@
     </None>
   </ItemGroup>
 
-  <Choose>
-    <When Condition="'$(SolutionName)' == 'MonoGame.Framework.DesktopGL'">
-      <ItemGroup>
-        <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj" />
-      </ItemGroup>
-    </When>
-
-    <When Condition="'$(SolutionName)' == 'MonoGame.Framework.Windows'">
-      <ItemGroup>
-        <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.Windows.csproj" />
-      </ItemGroup>
-    </When>
-  </Choose>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
       <PrivateAssets>all</PrivateAssets>
@@ -117,11 +109,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj" />
-    <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>
