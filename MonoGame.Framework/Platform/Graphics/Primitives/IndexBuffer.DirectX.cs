@@ -20,7 +20,7 @@ namespace MonoGame.Framework.Graphics
         private void GenerateIfRequired()
         {
             if (_buffer != null)
-                SharpDX.Utilities.Dispose(ref _buffer);
+                return;
 
             // TODO: To use true Immutable resources we would need to delay creation of 
             // the Buffer until SetData() and recreate them if set more than once.
