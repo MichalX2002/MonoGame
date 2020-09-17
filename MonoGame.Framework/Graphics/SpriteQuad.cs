@@ -1,8 +1,10 @@
 ﻿using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
 {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct SpriteQuad
     {
         public VertexPositionColorTexture VertexTL;
@@ -78,6 +80,44 @@ namespace MonoGame.Framework.Graphics
             VertexBR.Position = new Vector3(x + w, y + h, depth);
             VertexBR.Color = color;
             VertexBR.TexCoord = new Vector2(texCoord.Z, texCoord.W);
+        }
+
+        public static Vector4 GetTexCoord(SizeF texelSize, RectangleF sourceRectangle)
+        {
+            return new Vector4(
+                sourceRectangle.X * texelSize.Width,
+                sourceRectangle.Y * texelSize.Height,
+                (sourceRectangle.X + sourceRectangle.Width) * texelSize.Width,
+                (sourceRectangle.Y + sourceRectangle.Height) * texelSize.Height);
+        }
+
+        public static Vector4 GetTexCoord(SizeF texelSize, RectangleF? sourceRectangle)
+        {
+            if (sourceRectangle.HasValue)
+                return GetTexCoord(texelSize, sourceRectangle.GetValueOrDefault());
+            return new Vector4(0, 0, 1, 1);
+        }
+
+        public static Vector2 RemapOrigin(
+            Vector2 origin, SizeF texelSize, RectangleF destinationRectangle, RectangleF sourceRectangle)
+        {
+            float originX = sourceRectangle.Width != 0
+                ? origin.X * destinationRectangle.Width / sourceRectangle.Width
+                : origin.X * destinationRectangle.Width * texelSize.Width;
+
+            float originY = sourceRectangle.Height != 0
+                ? origin.Y * destinationRectangle.Height / sourceRectangle.Height
+                : origin.Y * destinationRectangle.Height * texelSize.Height;
+
+            return new Vector2(originX, originY);
+        }
+
+        public static Vector2 RemapOrigin(
+            Vector2 origin, SizeF texelSize, RectangleF destinationRectangle)
+        {
+            float originX = origin.X * destinationRectangle.Width * texelSize.Width;
+            float originY = origin.Y * destinationRectangle.Height * texelSize.Height;
+            return new Vector2(originX, originY);
         }
     }
 }

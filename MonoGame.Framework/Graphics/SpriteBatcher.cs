@@ -210,9 +210,9 @@ namespace MonoGame.Framework.Graphics
             if (quads.IsEmpty)
                 return;
 
-            var vertices = MemoryMarshal.Cast<SpriteQuad, VertexPositionColorTexture>(quads);
-
             const PrimitiveType primitiveType = PrimitiveType.TriangleList;
+
+            var vertices = MemoryMarshal.Cast<SpriteQuad, VertexPositionColorTexture>(quads);
 
             // If the effect is not null, then apply each pass and render the geometry
             if (effect == null)
