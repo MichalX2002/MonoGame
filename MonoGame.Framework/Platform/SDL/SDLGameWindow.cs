@@ -351,14 +351,14 @@ namespace MonoGame.Framework
             SDL.Keyboard.StartTextInput();
         }
 
-        public override void SetTextInputPosition(Point position)
+        public override void SetTextInputRectangle(Rectangle rectangle)
         {
             SDL.Keyboard.SetTextInputRect(new SDL.Rect()
             {
-                X = position.X,
-                Y = position.Y,
-                //Width = rectangle.Width,
-                //Height = rectangle.Height
+                X = rectangle.X,
+                Y = rectangle.Y,
+                Width = rectangle.Width,
+                Height = rectangle.Height
             });
         }
 

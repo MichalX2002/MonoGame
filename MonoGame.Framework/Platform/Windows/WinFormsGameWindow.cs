@@ -197,9 +197,10 @@ namespace MonoGame.Framework
             throw new NotImplementedException();
         }
 
-        public override void SetTextInputPosition(Point position)
+        public override void SetTextInputRectangle(Rectangle rectangle)
         {
-            Form.Ime.SetTextInputPosition(position);
+            // TODO
+            throw new NotImplementedException();
         }
 
         public override void StopTextInput()

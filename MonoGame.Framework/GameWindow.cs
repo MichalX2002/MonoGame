@@ -280,7 +280,7 @@ namespace MonoGame.Framework
 
         public abstract void StartTextInput();
 
-        public abstract void SetTextInputPosition(Point position);
+        public abstract void SetTextInputRectangle(Rectangle rectangle);
 
         public abstract void StopTextInput();
 

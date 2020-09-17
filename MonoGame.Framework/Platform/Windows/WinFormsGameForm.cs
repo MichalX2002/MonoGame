@@ -35,8 +35,7 @@ namespace MonoGame.Framework.Windows
     internal partial class WinFormsGameForm : Form
     {
         public WinFormsGameWindow Window { get; }
-        public ImeState Ime { get; }
-
+        
         public event DataEvent<WinFormsGameForm, HorizontalMouseWheelEvent>? MouseHorizontalWheel;
 
         internal bool IsResizing { get; set; }
@@ -44,7 +43,6 @@ namespace MonoGame.Framework.Windows
         public WinFormsGameForm(WinFormsGameWindow window)
         {
             Window = window ?? throw new ArgumentNullException(nameof(window));
-            Ime = new ImeState(this);
         }
 
         public void CenterOnPrimaryMonitor()
@@ -121,24 +119,6 @@ namespace MonoGame.Framework.Windows
                     HandleKeyMessage(ref m);
                     break;
 #endif
-
-                case WM.INPUTLANGCHANGE:
-                    Ime.ClearComposition();
-                    break;
-
-                case WM.IME_SETCONTEXT:
-                    m.LParam = IntPtr.Zero;
-                    break;
-
-                case WM.IME_COMPOSITION:
-                    HandleImeComposition(ref m);
-                    break;
-
-                case WM.IME_ENDCOMPOSITION:
-                    Ime.ime_composition[0] = '\0';
-                    Ime.ime_cursor = 0;
-                    SendTextEditing(default, 0, 0);
-                    break;
 
                 case WM.SYSCOMMAND:
                     int wParam = m.WParam.ToInt32();
@@ -228,52 +208,6 @@ namespace MonoGame.Framework.Windows
             }
         }
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr GetKeyboardLayout(int idThread);
-
-        [DllImport("Imm32.dll", SetLastError = true)]
-        private static extern IntPtr ImmGetContext(IntPtr hWnd);
-
-        [DllImport("Imm32.dll")]
-        private static extern bool ImmReleaseContext(IntPtr hWnd, IntPtr hIMC);
-
-        [DllImport("Imm32.dll")]
-        private static extern bool ImmNotifyIME(IntPtr hIMC, int action, int index, int value);
-
-        [DllImport("Imm32.dll")]
-        private static extern unsafe bool ImmSetCompositionString(
-            IntPtr hIMC, int index, void* comp, int compLen, void* read, int readLen);
-
-        [DllImport("Imm32.dll")]
-        private static extern unsafe int ImmGetCompositionStringW(
-            IntPtr hIMC, int word, void* buf, int bufLen);
-
-        [DllImport("Imm32.dll")]
-        private static extern bool ImmSetCompositionWindow(IntPtr hIMC, in COMPOSITIONFORM form);
-
-        private void HandleImeComposition(ref Message m)
-        {
-            IntPtr himc = ImmGetContext(m.HWnd);
-            try
-            {
-                if ((m.LParam.ToInt32() & (int)GCS.RESULTSTR) != 0)
-                {
-                    Ime.GetCompositionString(himc, (int)GCS.RESULTSTR);
-                    Ime.SendInputEvent();
-                }
-
-                if ((m.LParam.ToInt32() & (int)GCS.COMPSTR) != 0)
-                {
-                    Ime.GetCompositionString(himc, (int)GCS.COMPSTR);
-                    Ime.SendEditingEvent();
-                }
-            }
-            finally
-            {
-                ImmReleaseContext(m.HWnd, himc);
-            }
-        }
-
         private static Input.Keys KeyCodeTranslate(
             Keys keyCode, bool extended, long scancode)
         {
@@ -335,17 +269,7 @@ namespace MonoGame.Framework.Windows
             EXITSIZEMOVE = 0x0232,
 
             SYSCOMMAND = 0x0112,
-            INPUTLANGCHANGE = 0x0051,
-
-            IME_STARTCOMPOSITION = 0x010D,
-            IME_ENDCOMPOSITION = 0x010E,
-            IME_COMPOSITION = 0x010F,
-            IME_SETCONTEXT = 0x0281,
-            IME_NOTIFY = 0x0282,
-            IME_CONTROL = 0x0283,
-            IME_COMPOSITIONFULL = 0x0284,
-            IME_SELECT = 0x0285,
-            IME_CHAR = 0x0286,
+            INPUTLANGCHANGE = 0x0051
         }
 
         public enum GCS
