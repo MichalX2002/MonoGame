@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -103,7 +104,7 @@ namespace MonoGame.Framework.Graphics
         #region End, Flush
 
         /// <summary>
-        /// Flushes all batched text and sprites to the screen
+        /// Flushes all batched sprites to the graphics device 
         /// without ending the current state.
         /// </summary>
         public void Flush()
@@ -116,10 +117,14 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Flushes if the sort mode is <see cref="SpriteSortMode.Immediate"/>.
         /// </summary>
-        public void FlushIfNeeded()
+        public bool FlushIfNeeded()
         {
             if (_sortMode == SpriteSortMode.Immediate)
+            {
                 Flush();
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -142,41 +147,17 @@ namespace MonoGame.Framework.Graphics
 
         #region Helpers
 
-        /// <summary>
-        /// Rent a <see cref="SpriteBatchItem"/> from the item pool. 
-        /// The pool grows and initializes new items if none are available.
-        /// </summary>
-        public SpriteBatchItem GetBatchItem(Texture2D texture)
+        /// <inheritdoc/>
+        public ref SpriteQuad GetBatchQuad(Texture2D texture, float sortKey)
         {
             var item = _batcher.GetBatchItem();
             item.Texture = texture;
-            return item;
+            item.SortKey = sortKey;
+            return ref item.Quad;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void FlipTexCoords(ref Vector4 texCoord, SpriteFlip flip)
-        {
-            if ((flip & SpriteFlip.Vertical) != 0)
-            {
-                var tmp = texCoord.W;
-                texCoord.W = texCoord.Y;
-                texCoord.Y = tmp;
-            }
-
-            if ((flip & SpriteFlip.Horizontal) != 0)
-            {
-                var tmp = texCoord.Z;
-                texCoord.Z = texCoord.X;
-                texCoord.X = tmp;
-            }
-        }
-
-        /// <summary>
-        /// Gets a value used to sort a sprite, 
-        /// based on the current sort mode and the given parameters.
-        /// </summary>
-        [SuppressMessage("Design", "CA1062", Justification = "Performance")]
-        public float GetSortKey(Texture2D texture, float depth)
+        /// <inheritdoc/>
+        public float GetSortKey(Texture2D texture, float sortDepth)
         {
             // set SortKey based on SpriteSortMode.
             switch (_sortMode)
@@ -187,14 +168,14 @@ namespace MonoGame.Framework.Graphics
 
                 // Comparison of Depth
                 case SpriteSortMode.FrontToBack:
-                    return depth;
+                    return sortDepth;
 
                 // Comparison of Depth in reverse
                 case SpriteSortMode.BackToFront:
-                    return -depth;
+                    return -sortDepth;
 
                 default:
-                    return depth;
+                    return sortDepth;
             }
         }
 
@@ -236,35 +217,6 @@ namespace MonoGame.Framework.Graphics
         }
 
         #endregion
-    
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Draw(
-            Texture2D texture,
-            in VertexPositionColorTexture vertexTL,
-            in VertexPositionColorTexture vertexTR,
-            in VertexPositionColorTexture vertexBL,
-            in VertexPositionColorTexture vertexBR,
-            float sortDepth)
-        {
-            var item = GetBatchItem(texture);
-            item.SortKey = GetSortKey(texture, sortDepth);
-            item.Quad.VertexTL = vertexTL;
-            item.Quad.VertexTR = vertexTR;
-            item.Quad.VertexBL = vertexBL;
-            item.Quad.VertexBR = vertexBR;
-
-            FlushIfNeeded();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Draw(Texture2D texture, in SpriteQuad quad, float sortDepth)
-        {
-            var item = GetBatchItem(texture);
-            item.SortKey = GetSortKey(texture, sortDepth);
-            item.Quad = quad;
-
-            FlushIfNeeded();
-        }
 
         /// <summary>
         /// Submit a sprite for drawing in the current batch.
@@ -359,15 +311,12 @@ namespace MonoGame.Framework.Graphics
         /// <param name="origin">Center of the rotation. 0,0 by default.</param>
         /// <param name="scale">A scaling of this sprite.</param>
         /// <param name="flip">Sprite mirroring flags. Can be combined.</param>
-        /// <param name="layerDepth">A depth of the layer of this sprite.</param>
+        /// <param name="sortDepth">A depth of the layer of this sprite.</param>
         public void Draw(
             Texture2D texture, Vector2 position, RectangleF? sourceRectangle, Color color,
-            float rotation, Vector2 origin, Vector2 scale, SpriteFlip flip, float layerDepth)
+            float rotation, Vector2 origin, Vector2 scale, SpriteFlip flip, float sortDepth)
         {
             AssertValidArguments(texture, nameof(Draw));
-
-            var item = GetBatchItem(texture);
-            item.SortKey = GetSortKey(texture, layerDepth);
 
             origin *= scale;
 
@@ -378,9 +327,7 @@ namespace MonoGame.Framework.Graphics
                 RectangleF srcRect = sourceRectangle.GetValueOrDefault();
                 w = srcRect.Width * scale.X;
                 h = srcRect.Height * scale.Y;
-
-                var texelSize = texture.TexelSize;
-                texCoord = SpriteQuad.GetTexCoord(texelSize, srcRect);
+                texCoord = SpriteQuad.GetTexCoord(texture.TexelSize, srcRect);
             }
             else
             {
@@ -388,21 +335,22 @@ namespace MonoGame.Framework.Graphics
                 h = texture.Height * scale.Y;
                 texCoord = new Vector4(0, 0, 1, 1);
             }
+            SpriteQuad.FlipTexCoords(ref texCoord, flip);
 
-            FlipTexCoords(ref texCoord, flip);
-
+            float sortKey = GetSortKey(texture, sortDepth);
+            ref var quad = ref GetBatchQuad(texture, sortKey);
             if (rotation == 0f)
             {
-                item.Quad.Set(
+                quad.Set(
                     position.X - origin.X, position.Y - origin.Y, w, h,
-                    color, texCoord, layerDepth);
+                    color, texCoord, sortDepth);
             }
             else
             {
-                item.Quad.Set(
+                quad.Set(
                     position.X, position.Y, -origin.X, -origin.Y, w, h,
                     MathF.Sin(rotation), MathF.Cos(rotation),
-                    color, texCoord, layerDepth);
+                    color, texCoord, sortDepth);
             }
 
             FlushIfNeeded();
@@ -450,7 +398,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rotation">A rotation of this sprite.</param>
         /// <param name="origin">Center of the rotation. 0,0 by default.</param>
         /// <param name="flip">Sprite mirroring flags. Can be combined.</param>
-        /// <param name="layerDepth">A depth of the layer of this sprite.</param>
+        /// <param name="sortDepth">A depth of the layer of this sprite.</param>
         public void Draw(
             Texture2D texture,
             RectangleF destinationRectangle,
@@ -459,12 +407,9 @@ namespace MonoGame.Framework.Graphics
             float rotation,
             Vector2 origin,
             SpriteFlip flip,
-            float layerDepth)
+            float sortDepth)
         {
             AssertValidArguments(texture, nameof(Draw));
-
-            var item = GetBatchItem(texture);
-            item.SortKey = GetSortKey(texture, layerDepth);
 
             var texelSize = texture.TexelSize;
             Vector4 texCoord;
@@ -479,23 +424,24 @@ namespace MonoGame.Framework.Graphics
                 texCoord = new Vector4(0, 0, 1, 1);
                 origin = SpriteQuad.RemapOrigin(origin, texelSize, destinationRectangle);
             }
+            SpriteQuad.FlipTexCoords(ref texCoord, flip);
 
-            FlipTexCoords(ref texCoord, flip);
-
+            float sortKey = GetSortKey(texture, sortDepth);
+            ref var quad = ref GetBatchQuad(texture, sortKey);
             if (rotation == 0f)
             {
-                item.Quad.Set(
+                quad.Set(
                     destinationRectangle.X - origin.X, destinationRectangle.Y - origin.Y,
                     destinationRectangle.Width, destinationRectangle.Height,
-                    color, texCoord, layerDepth);
+                    color, texCoord, sortDepth);
             }
             else
             {
-                item.Quad.Set(
+                quad.Set(
                     destinationRectangle.X, destinationRectangle.Y, -origin.X, -origin.Y,
                     destinationRectangle.Width, destinationRectangle.Height,
                     MathF.Sin(rotation), MathF.Cos(rotation),
-                    color, texCoord, layerDepth);
+                    color, texCoord, sortDepth);
             }
 
             FlushIfNeeded();
@@ -511,9 +457,6 @@ namespace MonoGame.Framework.Graphics
         public void Draw(Texture2D texture, Vector2 position, RectangleF? sourceRectangle, Color color)
         {
             AssertValidArguments(texture, nameof(Draw));
-
-            var item = GetBatchItem(texture);
-            item.SortKey = GetSortKey(texture, 0);
 
             Vector4 texCoord;
             float w;
@@ -534,7 +477,8 @@ namespace MonoGame.Framework.Graphics
                 texCoord = new Vector4(0, 0, 1, 1);
             }
 
-            item.Quad.Set(position.X, position.Y, w, h, color, texCoord, 0);
+            float sortKey = GetSortKey(texture, 0);
+            GetBatchQuad(texture, sortKey).Set(position.X, position.Y, w, h, color, texCoord, 0);
             FlushIfNeeded();
         }
 
@@ -543,28 +487,28 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         /// <param name="texture">A texture.</param>
         /// <param name="destinationRectangle">The drawing bounds on screen.</param>
-        /// <param name="sourceRectangle">An optional region on the texture which will be rendered. If null - draws full texture.</param>
+        /// <param name="sourceRectangle">
+        /// An optional region on the texture which will be rendered. If null - draws full texture.
+        /// </param>
         /// <param name="color">A color mask.</param>
-        public void Draw(Texture2D texture, RectangleF destinationRectangle, RectangleF? sourceRectangle, Color color)
+        public void Draw(
+            Texture2D texture, RectangleF destinationRectangle, RectangleF? sourceRectangle, Color color)
         {
             AssertValidArguments(texture, nameof(Draw));
-
-            var item = GetBatchItem(texture);
-            item.SortKey = GetSortKey(texture, 0);
 
             Vector4 texCoord;
             if (sourceRectangle.HasValue)
             {
                 RectangleF srcRect = sourceRectangle.GetValueOrDefault();
-                var texelSize = texture.TexelSize;
-                texCoord = SpriteQuad.GetTexCoord(texelSize, srcRect);
+                texCoord = SpriteQuad.GetTexCoord(texture.TexelSize, srcRect);
             }
             else
             {
                 texCoord = new Vector4(0, 0, 1, 1);
             }
 
-            item.Quad.Set(
+            float sortKey = GetSortKey(texture, 0);
+            GetBatchQuad(texture, sortKey).Set(
                 destinationRectangle.X, destinationRectangle.Y,
                 destinationRectangle.Width, destinationRectangle.Height,
                 color, texCoord, 0);
@@ -582,10 +526,8 @@ namespace MonoGame.Framework.Graphics
         {
             AssertValidArguments(texture, nameof(Draw));
 
-            var item = GetBatchItem(texture);
-            item.SortKey = GetSortKey(texture, 0);
-
-            item.Quad.Set(
+            float sortKey = GetSortKey(texture, 0);
+            GetBatchQuad(texture, sortKey).Set(
                 position.X, position.Y,
                 texture.Width, texture.Height,
                 color, new Vector4(0, 0, 1, 1), 0);
@@ -603,10 +545,8 @@ namespace MonoGame.Framework.Graphics
         {
             AssertValidArguments(texture, nameof(Draw));
 
-            var item = GetBatchItem(texture);
-            item.SortKey = GetSortKey(texture, 0);
-
-            item.Quad.Set(
+            float sortKey = GetSortKey(texture, 0);
+            GetBatchQuad(texture, sortKey).Set(
                 destinationRectangle.X, destinationRectangle.Y,
                 destinationRectangle.Width, destinationRectangle.Height,
                 color, new Vector4(0, 0, 1, 1), 0);
@@ -621,7 +561,8 @@ namespace MonoGame.Framework.Graphics
         /// <param name="text">The text which will be drawn.</param>
         /// <param name="position">The drawing location on screen.</param>
         /// <param name="color">A color mask.</param>
-        public unsafe void DrawString(SpriteFont spriteFont, RuneEnumerator text, Vector2 position, Color color)
+        public void DrawString(
+            SpriteFont spriteFont, RuneEnumerator text, Vector2 position, Color color)
         {
             AssertValidArguments(spriteFont, nameof(DrawString));
             float sortKey = GetSortKey(spriteFont.Texture, 0);
@@ -665,19 +606,15 @@ namespace MonoGame.Framework.Graphics
                 p.Y += glyph.Cropping.Y;
                 p += position;
 
-                var item = GetBatchItem(spriteFont.Texture);
-                item.SortKey = sortKey;
-
                 var texCoord = SpriteQuad.GetTexCoord(texelSize, glyph.BoundsInTexture);
 
-                item.Quad.Set(
+                GetBatchQuad(spriteFont.Texture, sortKey).Set(
                     p.X, p.Y, glyph.BoundsInTexture.Width, glyph.BoundsInTexture.Height,
                     color, texCoord, 0);
 
                 offset.X += glyph.Width + glyph.RightSideBearing;
             }
 
-            // We need to flush if we're using Immediate sort mode.
             FlushIfNeeded();
         }
 
@@ -712,7 +649,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="scale">A scaling of this string.</param>
         /// <param name="flip">Sprite mirroring flags. Can be combined.</param>
         /// <param name="layerDepth">A depth of the layer of this string.</param>
-        public unsafe void DrawString(
+        public void DrawString(
             SpriteFont spriteFont, RuneEnumerator text, Vector2 position, Color color,
             float rotation, Vector2 origin, Vector2 scale, SpriteFlip flip, float layerDepth)
         {
@@ -753,7 +690,7 @@ namespace MonoGame.Framework.Graphics
                 sin = MathF.Sin(rotation);
                 transformation.M11 = (flippedHorz ? -scale.X : scale.X) * cos;
                 transformation.M12 = (flippedHorz ? -scale.X : scale.X) * sin;
-                transformation.M21 = (flippedVert ? -scale.Y : scale.Y) * (-sin);
+                transformation.M21 = (flippedVert ? -scale.Y : scale.Y) * -sin;
                 transformation.M22 = (flippedVert ? -scale.Y : scale.Y) * cos;
 
                 transformation.M41 =
@@ -813,16 +750,13 @@ namespace MonoGame.Framework.Graphics
 
                 pos = Vector2.Transform(pos, transformation);
 
-                var item = GetBatchItem(spriteFont.Texture);
-                item.SortKey = sortKey;
-
                 var texCoord = SpriteQuad.GetTexCoord(texelSize, glyph.BoundsInTexture);
+                SpriteQuad.FlipTexCoords(ref texCoord, flip);
 
-                FlipTexCoords(ref texCoord, flip);
-
+                ref var quad = ref GetBatchQuad(spriteFont.Texture, sortKey);
                 if (rotation == 0f)
                 {
-                    item.Quad.Set(
+                    quad.Set(
                         pos.X, pos.Y,
                         glyph.BoundsInTexture.Width * scale.X,
                         glyph.BoundsInTexture.Height * scale.Y,
@@ -832,7 +766,7 @@ namespace MonoGame.Framework.Graphics
                 }
                 else
                 {
-                    item.Quad.Set(
+                    quad.Set(
                         pos.X, pos.Y, 0, 0,
                         glyph.BoundsInTexture.Width * scale.X,
                         glyph.BoundsInTexture.Height * scale.Y,
@@ -845,7 +779,6 @@ namespace MonoGame.Framework.Graphics
                 offset.X += glyph.Width + glyph.RightSideBearing;
             }
 
-            // We need to flush if we're using Immediate sort mode.
             FlushIfNeeded();
         }
 

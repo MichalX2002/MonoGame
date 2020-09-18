@@ -25,6 +25,11 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Reverse the sprite along the Y axis.
         /// </summary>
-        Vertical = 2
+        Vertical = 2,
+
+        /// <summary>
+        /// Reverse along all axes.
+        /// </summary>
+        All = Horizontal | Vertical
     }
 }

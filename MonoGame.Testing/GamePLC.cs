@@ -289,6 +289,10 @@ namespace MonoGame.Testing
                     }
                 }
             }
+
+            if (position.X > maxX)
+                maxX = position.X;
+
             _textSize = new SizeF(maxX, position.Y);
         }
 
@@ -357,14 +361,16 @@ namespace MonoGame.Testing
 
         protected override void Draw(in FrameTime time)
         {
-            string path = @"C:\Users\Michal\Desktop\prc.txt";
+            string path = @"plc il.txt";
             var writeDate = File.GetLastWriteTimeUtc(path);
             if (writeDate != _lastWriteDate)
             {
                 string? code = null;
                 try
                 {
-                    using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    using var stream = new FileStream(
+                        path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+
                     code = new StreamReader(stream).ReadToEnd();
                 }
                 catch

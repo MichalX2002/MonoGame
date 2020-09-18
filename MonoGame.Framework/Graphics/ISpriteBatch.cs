@@ -6,14 +6,18 @@ namespace MonoGame.Framework.Graphics
 {
     public interface ISpriteBatch
     {
-        void Draw(
-            Texture2D texture,
-            in VertexPositionColorTexture vertexTL,
-            in VertexPositionColorTexture vertexTR,
-            in VertexPositionColorTexture vertexBL,
-            in VertexPositionColorTexture vertexBR,
-            float sortDepth);
+        /// <summary>
+        /// Gets a value used to sort a sprite, 
+        /// based on the current sort mode and the given parameters.
+        /// </summary>
+        float GetSortKey(Texture2D texture, float sortDepth);
 
-        void Draw(Texture2D texture, in SpriteQuad quad, float sortDepth);
+        /// <summary>
+        /// Get a unique <see cref="SpriteQuad"/> reference from the batch.
+        /// The reference shall remain unique as long as the batch is not flushed.
+        /// </summary>
+        ref SpriteQuad GetBatchQuad(Texture2D texture, float sortKey);
+
+        bool FlushIfNeeded();
     }
 }

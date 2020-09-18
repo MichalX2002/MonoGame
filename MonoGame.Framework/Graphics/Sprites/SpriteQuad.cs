@@ -119,5 +119,22 @@ namespace MonoGame.Framework.Graphics
             float originY = origin.Y * destinationRectangle.Height * texelSize.Height;
             return new Vector2(originX, originY);
         }
+
+        public static void FlipTexCoords(ref Vector4 texCoord, SpriteFlip flip)
+        {
+            if ((flip & SpriteFlip.Vertical) != 0)
+            {
+                var tmp = texCoord.W;
+                texCoord.W = texCoord.Y;
+                texCoord.Y = tmp;
+            }
+
+            if ((flip & SpriteFlip.Horizontal) != 0)
+            {
+                var tmp = texCoord.Z;
+                texCoord.Z = texCoord.X;
+                texCoord.X = tmp;
+            }
+        }
     }
 }
