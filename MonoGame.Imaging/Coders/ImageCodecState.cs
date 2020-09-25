@@ -49,7 +49,7 @@ namespace MonoGame.Imaging.Coders
         protected void AssertNotDisposed()
         {
             if (IsDisposed)
-                throw new ObjectDisposedException(GetType().Name);
+                throw new ObjectDisposedException(GetType().FullName);
         }
 
         protected virtual void Dispose(bool disposing)

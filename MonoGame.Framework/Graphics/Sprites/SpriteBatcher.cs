@@ -128,7 +128,8 @@ namespace MonoGame.Framework.Graphics
         public unsafe void DrawBatch(SpriteSortMode sortMode, Effect? effect)
         {
             if (effect != null && effect.IsDisposed)
-                throw new ObjectDisposedException(nameof(effect));
+                throw new ArgumentException(
+                    nameof(effect), new ObjectDisposedException(effect.GetType().FullName));
 
             // nothing to do
             if (_itemCount == 0)

@@ -270,7 +270,7 @@ namespace MonoGame.Framework.Media
             if (Reader == null)
             {
                 if (_stream == null)
-                    throw new ObjectDisposedException(GetType().Name);
+                    throw new ObjectDisposedException(GetType().FullName);
 
                 Reader = new VorbisReader(_stream, _leaveStreamOpen);
             }

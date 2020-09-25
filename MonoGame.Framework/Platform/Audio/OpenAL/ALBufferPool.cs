@@ -21,9 +21,9 @@ namespace MonoGame.Framework.Audio
         {
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
-
             if (buffer.IsDisposed)
-                throw new ObjectDisposedException(nameof(ALBuffer));
+                throw new ArgumentException(
+                    nameof(buffer), new ObjectDisposedException(buffer.GetType().FullName));
 
             lock (_pool)
             {

@@ -222,7 +222,7 @@ namespace MonoGame.Framework.Media
         private void AssertNotDisposed()
         {
             if (IsDisposed)
-                throw new ObjectDisposedException(nameof(Song));
+                throw new ObjectDisposedException(GetType().FullName);
         }
 
         private void Dispose(bool disposing)

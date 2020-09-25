@@ -194,7 +194,7 @@ namespace MonoGame.Framework.Content
                 throw new ArgumentNullException(nameof(assetName));
 
             if (IsDisposed)
-                throw new ObjectDisposedException(nameof(ContentManager));
+                throw new ObjectDisposedException(GetType().FullName);
 
             // On some platforms, name and slash direction matter.
             // We store the asset by a /-seperating key rather than how the
@@ -383,7 +383,7 @@ namespace MonoGame.Framework.Content
                 throw new ArgumentNullException(nameof(assetName));
 
             if (IsDisposed)
-                throw new ObjectDisposedException(nameof(ContentManager));
+                throw new ObjectDisposedException(GetType().FullName);
 
             if (_graphicsDeviceService == null)
                 _graphicsDeviceService = ServiceProvider.GetService<IGraphicsDeviceService>()

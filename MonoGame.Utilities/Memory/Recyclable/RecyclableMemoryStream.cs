@@ -719,6 +719,7 @@ namespace MonoGame.Framework.Memory
         {
             if (IsDisposed)
                 throw new ObjectDisposedException(
+                    GetType().FullName,
                     $"The stream with Id {_id} and Tag {_tag} is disposed.");
         }
 

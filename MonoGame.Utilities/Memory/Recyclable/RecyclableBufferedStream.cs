@@ -91,11 +91,12 @@ namespace MonoGame.Framework.Memory
         public RecyclableBufferedStream(RecyclableMemoryManager manager, Stream stream, bool leaveOpen)
         {
             _stream = stream ?? throw new ArgumentNullException(nameof(stream));
-            if (!_stream.CanRead && !_stream.CanWrite)
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
-
             _manager = manager ?? throw new ArgumentNullException(nameof(manager));
             _leaveOpen = leaveOpen;
+
+            if (!_stream.CanRead && !_stream.CanWrite)
+                throw new ArgumentException(
+                    "The stream is not readable nor writable." ,nameof(stream));
 
             // Allocate _buffer on its first use - it will not be used if all reads
             // & writes are greater than or equal to buffer size.
@@ -104,14 +105,17 @@ namespace MonoGame.Framework.Memory
         internal SemaphoreSlim LazyEnsureAsyncActiveSemaphoreInitialized()
         {
             // Lazily-initialize _asyncActiveSemaphore.  
-            // As we're never accessing the SemaphoreSlim's WaitHandle, we don't need to worry about Disposing it.
-            return LazyInitializer.EnsureInitialized(ref _asyncActiveSemaphore, () => new SemaphoreSlim(1, 1));
+            // As we're never accessing the SemaphoreSlim's WaitHandle, 
+            // we don't need to worry about Disposing it.
+            return LazyInitializer.EnsureInitialized(
+                ref _asyncActiveSemaphore, () => new SemaphoreSlim(1, 1));
         }
 
         private void EnsureNotClosed()
         {
             if (_stream == null)
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
+                throw new ObjectDisposedException(
+                    GetType().FullName, SR.ObjectDisposed_StreamClosed);
         }
 
         private void EnsureCanSeek()

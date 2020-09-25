@@ -113,7 +113,7 @@ namespace MonoGame.Framework.Audio
         private void AssertNotDisposed()
         {
             if (IsDisposed)
-                throw new ObjectDisposedException(nameof(ALBuffer));
+                throw new ObjectDisposedException(GetType().FullName);
         }
 
         public void ClearBuffer()

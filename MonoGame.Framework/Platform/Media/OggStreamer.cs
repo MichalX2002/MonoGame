@@ -82,11 +82,15 @@ namespace MonoGame.Framework.Media
 
         public bool TryFillBuffer(OggStream stream, [MaybeNullWhen(false)] out ALBuffer buffer)
         {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+
             lock (FillMutex)
             {
                 var reader = stream.Reader;
                 if (reader == null)
-                    throw new ObjectDisposedException(stream.GetType().Name);
+                    throw new ArgumentException(
+                        "The OggStream is missing a VorbisReader.", nameof(stream));
 
                 int readSamples = reader.ReadSamples(_readBuffer);
                 if (readSamples > 0)

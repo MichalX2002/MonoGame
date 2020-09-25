@@ -143,7 +143,7 @@ namespace MonoGame.Framework.Audio
         public virtual void Play()
         {
             if (IsDisposed)
-                throw new ObjectDisposedException(nameof(SoundEffectInstance));
+                throw new ObjectDisposedException(GetType().FullName);
 
             if (State == SoundState.Playing)
                 return;

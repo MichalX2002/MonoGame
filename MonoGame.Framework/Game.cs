@@ -100,7 +100,7 @@ namespace MonoGame.Framework
         private void AssertNotDisposed()
         {
             if (_isDisposed)
-                throw new ObjectDisposedException(GetType().Name);
+                throw new ObjectDisposedException(GetType().FullName);
         }
 
         #region Properties

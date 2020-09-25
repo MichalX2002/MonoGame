@@ -161,11 +161,10 @@ namespace MonoGame.Framework.Memory
 
         #region IDisposable
 
-        [DebuggerHidden]
         protected void AssertNotDisposed()
         {
             if (IsDisposed)
-                throw new ObjectDisposedException(nameof(UnmanagedMemory<T>));
+                throw new ObjectDisposedException(GetType().FullName);
         }
 
         protected virtual void Dispose(bool disposing)
