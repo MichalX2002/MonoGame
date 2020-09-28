@@ -150,7 +150,7 @@ namespace MonoGame.Imaging
         protected void AssertNotDisposed()
         {
             if (IsDisposed)
-                throw new ObjectDisposedException(GetType().FullNam);
+                throw new ObjectDisposedException(GetType().FullName);
         }
 
         protected virtual void Dispose(bool disposing)
