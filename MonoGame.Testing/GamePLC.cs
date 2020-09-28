@@ -400,17 +400,38 @@ namespace MonoGame.Testing
                 Matrix4x4.CreateScale(_renderScale * 1f) *
                 Matrix4x4.CreateTranslation(_scroll.X, _scroll.Y, 0));
 
-            float rectPadding = 10;
-            _spriteBatch.DrawRectangle(
-                new RectangleF(
-                    _textPos - new Vector2(rectPadding), 
-                    _textSize + new SizeF(rectPadding * 2)),
-                Color.DarkBlue);
-
-            for (int i = 0; i < _textGlyphs.Count; i++)
+            if (false)
             {
-                var glyph = _textGlyphs[i];
-                _spriteBatch.Draw(glyph.FontGlyph.Texture, glyph.Quad);
+                float rectPadding = 10;
+                _spriteBatch.DrawRectangle(
+                    new RectangleF(
+                        _textPos - new Vector2(rectPadding),
+                        _textSize + new SizeF(rectPadding * 2)),
+                    Color.DarkBlue);
+
+                for (int i = 0; i < _textGlyphs.Count; i++)
+                {
+                    var glyph = _textGlyphs[i];
+                    _spriteBatch.Draw(glyph.FontGlyph.Texture, glyph.Quad);
+                }
+            }
+
+            {
+                var center = currentViewport.Bounds.Size.ToVector2() / 2f;
+
+                float t = (float)time.Total.TotalSeconds * 0.01f;
+                float range = 1000 * 100;
+
+                int lines = 500;
+                for (int i = 0; i < lines; i++)
+                {
+                    float t1 = t + (i / (float)lines) * MathF.PI;
+                    float t2 = t1 - MathF.PI;
+
+                    var exter = center + new Vector2(MathF.Cos(t1), MathF.Sin(t1)) * range;
+                    var inter = center + new Vector2(MathF.Cos(t2), MathF.Sin(t2)) * range;
+                    _spriteBatch.DrawLine(inter, exter, Color.Red);
+                }
             }
 
             if (false)

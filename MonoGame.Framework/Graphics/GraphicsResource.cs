@@ -32,18 +32,18 @@ namespace MonoGame.Framework.Graphics
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or sets the tag of this <see cref="GraphicsResource"/>.
+        /// Gets or sets the tag object of this <see cref="GraphicsResource"/>.
         /// </summary>
         public object Tag { get; set; }
 
         /// <summary>
-        /// Gets whether various operations are supported outside the main thread.
+        /// Gets whether graphics operations are supported when not called on the main thread.
         /// </summary>
         public virtual bool SupportsAsync => GraphicsDevice.Capabilities.SupportsAsync;
 
         /// <summary>
-        /// Gets whether the caller is on the main thread or whether operations 
-        /// are supported outside the main thread and are therefore always in a valid context.
+        /// Gets whether the caller is on the main thread or 
+        /// whether graphics operations are supported when not called on the main thread.
         /// </summary>
         protected bool IsValidThreadContext => Threading.IsOnMainThread || SupportsAsync;
 
@@ -93,10 +93,10 @@ namespace MonoGame.Framework.Graphics
         /// <summary>
         /// Called before the device is reset. Allows graphics resources to 
         /// invalidate their state so they can be recreated after the device resets.
-        /// <para>
-        /// This may be called after <see cref="Dispose()"/> up until the resource is garbage collected.
-        /// </para>
         /// </summary>
+        /// <remarks>
+        /// This may be called after <see cref="Dispose()"/> up until the resource is garbage collected.
+        /// </remarks>
         protected virtual void GraphicsDeviceResetting()
         {
         }
@@ -105,8 +105,8 @@ namespace MonoGame.Framework.Graphics
         /// Throws an exception if the caller is not running on the main thread
         /// and the resource does not support asynchronous operations.
         /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// The caller is not running on the main thread.
+        /// <exception cref="OffThreadNotSupportedException">
+        /// The caller is not on the main thread.
         /// </exception>
         protected void AssertMainThread(bool isSpanOverload)
         {
@@ -137,19 +137,19 @@ namespace MonoGame.Framework.Graphics
         /// </remarks>
         protected virtual void Dispose(bool disposing)
         {
-            if (!IsDisposed)
-            {
-                // Do not trigger the event if called from the finalizer
-                if (disposing)
-                    Disposing?.Invoke(this);
+            if (IsDisposed)
+                return;
+            
+            // Do not trigger the event if called from the finalizer
+            if (disposing)
+                Disposing?.Invoke(this);
 
-                // Remove from the global list of graphics resources
-                _graphicsDevice?.RemoveResourceReference(_selfReference);
+            // Remove from the global list of graphics resources
+            _graphicsDevice?.RemoveResourceReference(_selfReference);
+            _graphicsDevice = null!;
+            _selfReference = null!;
 
-                _graphicsDevice = null!;
-                _selfReference = null!;
-                IsDisposed = true;
-            }
+            IsDisposed = true;
         }
 
         /// <summary>
