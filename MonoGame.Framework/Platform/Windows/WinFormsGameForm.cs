@@ -35,7 +35,7 @@ namespace MonoGame.Framework.Windows
     internal partial class WinFormsGameForm : Form
     {
         public WinFormsGameWindow Window { get; }
-        
+
         public event DataEvent<WinFormsGameForm, HorizontalMouseWheelEvent>? MouseHorizontalWheel;
 
         internal bool IsResizing { get; set; }
@@ -50,11 +50,6 @@ namespace MonoGame.Framework.Windows
             Location = new System.Drawing.Point(
                 (Screen.PrimaryScreen.WorkingArea.Width - Width) / 2,
                 (Screen.PrimaryScreen.WorkingArea.Height - Height) / 2);
-        }
-
-        public void SendTextEditing(ReadOnlySpan<char> text, int cursor, int selectionLength)
-        {
-            Window.OnTextEditing(new TextEditingEventArgs(text, cursor, selectionLength));
         }
 
         [DllImport("user32.dll")]
@@ -78,7 +73,7 @@ namespace MonoGame.Framework.Windows
         protected override void WndProc(ref Message m)
         {
             var state = TouchLocationState.Invalid;
-
+            
             switch ((WM)m.Msg)
             {
                 case WM.TABLET_QUERYSYSTEMGESTURESTA:
@@ -119,10 +114,12 @@ namespace MonoGame.Framework.Windows
                     HandleKeyMessage(ref m);
                     break;
 #endif
-
                 case WM.SYSCOMMAND:
                     int wParam = m.WParam.ToInt32();
-                    if (!Window.AllowAltF4 && wParam == 0xF060 && m.LParam.ToInt32() == 0 && Focused)
+                    if (!Window.AllowAltF4 && 
+                        wParam == 0xF060 &&
+                        m.LParam.ToInt32() == 0 &&
+                        Focused)
                     {
                         m.Result = IntPtr.Zero;
                         return;
@@ -238,21 +235,6 @@ namespace MonoGame.Framework.Windows
             }
         }
 
-        public struct RECT
-        {
-            public int left;
-            public int top;
-            public int right;
-            public int bottom;
-        }
-
-        public struct COMPOSITIONFORM
-        {
-            public int dwStyle;
-            public Point ptCurrentPos;
-            public RECT rcArea;
-        }
-
         public enum WM
         {
             MOUSEHWHEEL = 0x020E,
@@ -263,6 +245,8 @@ namespace MonoGame.Framework.Windows
             KEYUP = 0x0101,
             SYSKEYDOWN = 0x0104,
             SYSKEYUP = 0x0105,
+            GESTURE = 0x0119,
+            GESTURENOTIFY = 0x011A,   
             TABLET_QUERYSYSTEMGESTURESTA = 0x02C0 + 12,
 
             ENTERSIZEMOVE = 0x0231,

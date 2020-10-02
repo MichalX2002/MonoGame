@@ -104,8 +104,16 @@ namespace MonoGame.Framework.Graphics
                 throw new ArgumentException(
                     "Texture arrays are not supported on this graphics device", nameof(arraySize));
 
+            int maxTexSize = GraphicsDevice.Capabilities.MaxTexture2DSize;
             ArgumentGuard.AssertGreaterThanZero(width, nameof(width));
+            if (width > maxTexSize)
+                throw new ArgumentOutOfRangeException(
+                    nameof(width), "The width exceeds device capability.");
+
             ArgumentGuard.AssertGreaterThanZero(height, nameof(height));
+            if (height > maxTexSize)
+                throw new ArgumentOutOfRangeException(
+                    nameof(height), "The height exceeds device capability.");
 
             GraphicsDevice = graphicsDevice;
             Bounds = new Rectangle(0, 0, width, height);

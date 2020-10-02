@@ -150,7 +150,7 @@ namespace MonoGame.Framework
             Form.Resize += OnResize;
             Form.ResizeBegin += OnResizeBegin;
             Form.ResizeEnd += OnResizeEnd;
-
+            
             Form.HandleCreated += OnHandleCreated;
             Form.HandleDestroyed += OnHandleDestroyed;
 

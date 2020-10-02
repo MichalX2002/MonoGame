@@ -422,7 +422,7 @@ namespace MonoGame.Testing
                 float t = (float)time.Total.TotalSeconds * 0.01f;
                 float range = 1000 * 100;
 
-                int lines = 500;
+                int lines = 1000;
                 for (int i = 0; i < lines; i++)
                 {
                     float t1 = t + (i / (float)lines) * MathF.PI;
