@@ -118,13 +118,17 @@ namespace MonoGame.Framework
             return new RuneEnumerator(text.Span.EnumerateRunes());
         }
 
-        public static implicit operator RuneEnumerator(string text)
+        public static implicit operator RuneEnumerator(string? text)
         {
+            if (text == null)
+                return default;
             return new RuneEnumerator(text.EnumerateRunes());
         }
 
-        public static implicit operator RuneEnumerator(StringBuilder text)
+        public static implicit operator RuneEnumerator(StringBuilder? text)
         {
+            if (text == null)
+                return default;
             return new RuneEnumerator(text.GetChunks());
         }
     }
