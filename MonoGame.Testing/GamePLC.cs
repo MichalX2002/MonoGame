@@ -21,6 +21,7 @@ using MonoGame.Framework.Vectors;
 using MonoGame.Imaging;
 using MonoGame.Imaging.Coders.Encoding;
 using StbSharp;
+using MathHelper = MonoGame.Framework.MathHelper;
 
 namespace MonoGame.Testing
 {
@@ -38,7 +39,7 @@ namespace MonoGame.Testing
 
         private Stopwatch _watch;
 
-        private float _renderScale = 1f;
+        private float _renderScale = 2f;
         private RenderTarget2D _fontTarget;
         private Viewport _lastViewport;
 
@@ -49,6 +50,17 @@ namespace MonoGame.Testing
         private List<TextGlyph> _textGlyphs = new List<TextGlyph>();
         private Vector2 _textPos = new Vector2(0, 0);
         private SizeF _textSize;
+
+        private Vector2 _lastScroll;
+        private Vector2 _scrollDelta;
+
+        private Vector2 _lastMousePos;
+        private Vector2 _mousePosDelta;
+
+        private float _scale = 1;
+        private Vector2 _scrollOffset;
+        private Vector2 _mouseOffset;
+        private Vector2 ViewPosition => _scrollOffset + _mouseOffset;
 
         public GamePLC()
         {
@@ -76,6 +88,10 @@ namespace MonoGame.Testing
 
             _lastViewport = GraphicsDevice.Viewport;
             ViewportChanged(_lastViewport);
+
+            var mouseState = Mouse.GetState();
+            _lastScroll = mouseState.Scroll;
+            _lastMousePos = mouseState.Position;
         }
 
         private void ViewportChanged(in Viewport viewport)
@@ -188,13 +204,15 @@ namespace MonoGame.Testing
 
         private void BuildText(string code)
         {
-            var tokens = new PLCTokenizer("#");
+            var tokens = new PLCTokenizer(commentPrefix: "#");
             var codeSpan = code.AsSpan();
             PLCToken token;
 
-            float requestedPixelHeight = 24; // Math.Max(spriteScale + 2f, 0f) + 6f;
-            float actualScaleF = _font.GetScaleByPixel(requestedPixelHeight);
-            var actualScale = new Vector2(actualScaleF);
+            float requestedPixelHeight = 24;
+            float virtualPixelHeight = requestedPixelHeight * _scale * _renderScale;
+
+            float actualScaleValue = _font.GetScaleByPixel(requestedPixelHeight);
+            var actualScale = new Vector2(actualScaleValue);
 
             _font.GetFontVMetrics(out int ascent, out int descent, out int lineGap);
             float lineHeight = (ascent - descent + lineGap) * actualScale.Y;
@@ -207,11 +225,6 @@ namespace MonoGame.Testing
             while ((token = tokens.ReadToken(codeSpan, out int consumed)).Type != PLCTokenType.EndOfData)
             {
                 codeSpan = codeSpan.Slice(consumed);
-
-                //if (token.Type == PLCTokenType.Spacing)
-                //    Console.WriteLine();
-                //else
-                //    Console.WriteLine(token.Type + ": " + token.Value.ToString());
 
                 Color color = token.Type switch
                 {
@@ -239,7 +252,7 @@ namespace MonoGame.Testing
                         int glyphIndex = _font.GetGlyphIndex(rune.Value);
                         _font.GetGlyphHMetrics(glyphIndex, out int advanceWidth, out int leftSideBearing);
 
-                        var glyph = _fontCache.GetGlyph(_font, requestedPixelHeight, glyphIndex);
+                        var glyph = _fontCache.GetGlyph(_font, glyphIndex, virtualPixelHeight);
                         if (glyph != null)
                         {
                             Vector2 scaleFactor = actualScale / glyph.Scale;
@@ -302,15 +315,34 @@ namespace MonoGame.Testing
 
         protected override void Update(in FrameTime time)
         {
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
+            var keyboard = Keyboard.GetState();
+            if (keyboard.IsKeyDown(Keys.Escape))
                 Exit();
 
-            var mouseState = Mouse.GetState();
-            var scrollDiff = mouseState.Scroll - _lastScroll;
-            scrollDiff.X = -scrollDiff.X;
-            _lastScroll = mouseState.Scroll;
+            var mouse = Mouse.GetState();
 
-            _scroll += scrollDiff * 0.1f;
+            _scrollDelta = mouse.Scroll - _lastScroll;
+            _scrollDelta.X = -_scrollDelta.X;
+            _lastScroll = mouse.Scroll;
+
+            _mousePosDelta = mouse.Position - _lastMousePos;
+            _lastMousePos = mouse.Position;
+
+            if (Keyboard.Modifiers.HasAnyFlag(KeyModifiers.Control))
+            {
+                float scaleDelta = _scrollDelta.Y * 0.001f * ((_scale + 1) / 2f);
+                _scale = MathHelper.Clamp(_scale + scaleDelta, 0.2f, 4f);
+
+                if (mouse.LeftButton.HasAnyFlag(ButtonState.Pressed))
+                    _mouseOffset += _mousePosDelta;
+            }
+            else
+            {
+                _scrollOffset += _scrollDelta * 0.1f;
+
+                if (mouse.MiddleButton.HasAnyFlag(ButtonState.Pressed))
+                    _mouseOffset += _mousePosDelta;
+            }
 
             base.Update(time);
         }
@@ -356,31 +388,31 @@ namespace MonoGame.Testing
                 0);
         }
 
-        private Vector2 _lastScroll;
-        private Vector2 _scroll;
-
         protected override void Draw(in FrameTime time)
         {
             string path = @"plc il.txt";
-            var writeDate = File.GetLastWriteTimeUtc(path);
-            if (writeDate != _lastWriteDate)
+            if (File.Exists(path))
             {
-                string? code = null;
-                try
+                DateTime writeDate = File.GetLastWriteTimeUtc(path);
+                if (writeDate != _lastWriteDate)
                 {
-                    using var stream = new FileStream(
-                        path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    string? code = null;
+                    try
+                    {
+                        using var stream = new FileStream(
+                            path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 
-                    code = new StreamReader(stream).ReadToEnd();
-                }
-                catch
-                {
-                }
+                        code = new StreamReader(stream).ReadToEnd();
+                    }
+                    catch
+                    {
+                    }
 
-                if (code != null)
-                {
-                    BuildText(code);
-                    _lastWriteDate = writeDate;
+                    if (code != null)
+                    {
+                        BuildText(code);
+                        _lastWriteDate = writeDate;
+                    }
                 }
             }
 
@@ -393,14 +425,15 @@ namespace MonoGame.Testing
 
             GraphicsDevice.SetRenderTarget(_fontTarget, Color.Transparent);
 
+            var viewPos = ViewPosition * _renderScale;
             _spriteBatch.Begin(
                 //sortMode: SpriteSortMode.Deferred,
                 blendState: BlendState.NonPremultiplied,
                 transformMatrix:
-                Matrix4x4.CreateScale(_renderScale * 1f) *
-                Matrix4x4.CreateTranslation(_scroll.X, _scroll.Y, 0));
+                Matrix4x4.CreateScale(_renderScale * _scale) *
+                Matrix4x4.CreateTranslation(viewPos.X, viewPos.Y, 0));
 
-            if (false)
+            if (true)
             {
                 float rectPadding = 10;
                 _spriteBatch.DrawRectangle(
@@ -416,6 +449,7 @@ namespace MonoGame.Testing
                 }
             }
 
+            if (false)
             {
                 var center = currentViewport.Bounds.Size.ToVector2() / 2f;
 
@@ -458,7 +492,7 @@ namespace MonoGame.Testing
 
                 //int lineCount = GetLineCount(span);
                 //var basePos = new Vector2(10, _lastViewport.Height / 2f - lineHeight * (lineCount - 1) / 2f);
-                var basePos = new Vector2(10, 10) + _scroll;
+                var basePos = new Vector2(10, 10) + _scrollOffset;
 
                 float x = basePos.X;
                 float y = basePos.Y + ascent * actualScale.Y;
@@ -478,7 +512,7 @@ namespace MonoGame.Testing
 
                         _font.GetGlyphHMetrics(glyphIndex, out int advanceWidth, out int leftSideBearing);
 
-                        var glyph = _fontCache.GetGlyph(_font, requestedPixelHeight, glyphIndex);
+                        var glyph = _fontCache.GetGlyph(_font, glyphIndex, requestedPixelHeight);
                         if (glyph != null)
                         {
                             Vector2 scaleFactor = actualScale / glyph.Scale;

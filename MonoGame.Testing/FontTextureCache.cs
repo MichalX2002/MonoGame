@@ -135,7 +135,7 @@ namespace MonoGame.Testing
         }
 
         public FontGlyph? GetGlyph(
-            Font font, float pixelHeight, int glyphIndex)
+            Font font, int glyphIndex, float pixelHeight)
         {
             if (font == null)
                 throw new ArgumentNullException(nameof(font));
