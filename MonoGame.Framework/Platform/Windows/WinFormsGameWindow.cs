@@ -276,7 +276,7 @@ namespace MonoGame.Framework
 
         [DllImport("user32.dll", ExactSpelling = true, CharSet = CharSet.Auto)]
         internal static extern int MapWindowPoints(
-            HandleRef hWndFrom, HandleRef hWndTo, out POINTSTRUCT pt, int cPoints);
+            HandleRef hWndFrom, HandleRef hWndTo, ref POINTSTRUCT pt, int cPoints);
 
         private void SetIcon()
         {
@@ -357,17 +357,15 @@ namespace MonoGame.Framework
             if (!Form.Visible)
                 return;
 
-            GetCursorPos(out _);
-            MapWindowPoints(new HandleRef(null, IntPtr.Zero), new HandleRef(Form, Form.Handle), out POINTSTRUCT pos, 1);
+            GetCursorPos(out POINTSTRUCT pos);
+            MapWindowPoints(new HandleRef(null, IntPtr.Zero), new HandleRef(Form, Form.Handle), ref pos, 1);
 
-            var clientPos = new DrawingPoint(pos.X, pos.Y);
-            var withinClient = Form.ClientRectangle.Contains(clientPos);
+            bool withinClient = Form.ClientRectangle.Contains(pos.X, pos.Y);
             var buttons = Control.MouseButtons;
-
             var previousLeftButton = Mouse.State.LeftButton;
 
-            Mouse.State.X = clientPos.X;
-            Mouse.State.Y = clientPos.Y;
+            Mouse.State.X = pos.X;
+            Mouse.State.Y = pos.Y;
             Mouse.State.LeftButton = buttons.HasFlags(MouseButtons.Left) ? ButtonState.Pressed : ButtonState.Released;
             Mouse.State.MiddleButton = buttons.HasFlags(MouseButtons.Middle) ? ButtonState.Pressed : ButtonState.Released;
             Mouse.State.RightButton = buttons.HasFlags(MouseButtons.Right) ? ButtonState.Pressed : ButtonState.Released;
@@ -454,6 +452,7 @@ namespace MonoGame.Framework
                 // we may need to restore full screen when coming back from a minimized window
                 if (_lastFormState == FormWindowState.Minimized)
                     _platform.Game.GraphicsDevice.SetHardwareFullscreen();
+
                 UpdateBackBufferSize();
             }
 
