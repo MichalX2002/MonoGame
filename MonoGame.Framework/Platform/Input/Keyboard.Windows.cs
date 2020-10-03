@@ -43,20 +43,20 @@ namespace MonoGame.Framework.Input
 
         private static KeyModifiers PlatformGetModifiers()
         {
-            UpdateState(onlyModifiers: true, out _, out _);
+            UpdateState(onlyModifiers: true);
             return _modifiers;
         }
 
         private static ReadOnlyList<Keys> PlatformGetKeysDown()
         {
-            UpdateState(onlyModifiers: false, out _, out _);
+            UpdateState(onlyModifiers: false);
             return KeysDownROList;
         }
 
         private static KeyboardState PlatformGetState()
         {
-            UpdateState(onlyModifiers: false, out bool capsLock, out bool numberLock);
-            return new KeyboardState(KeysDownList, capsLock, numberLock);
+            UpdateState(onlyModifiers: false);
+            return new KeyboardState(KeysDownList, _modifiers);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,16 +75,14 @@ namespace MonoGame.Framework.Input
         [DllImport("user32.dll")]
         private static extern bool GetKeyboardState(ref byte lpKeyState);
 
-        private static void UpdateState(bool onlyModifiers, out bool capsLock, out bool numberLock)
+        private static void UpdateState(bool onlyModifiers)
         {
             _modifiers = KeyModifiers.None;
 
-            capsLock = Console.CapsLock;
-            if (capsLock)
+            if (Console.CapsLock)
                 _modifiers |= KeyModifiers.CapsLock;
 
-            numberLock = Console.NumberLock;
-            if (numberLock)
+            if (Console.NumberLock)
                 _modifiers |= KeyModifiers.NumLock;
 
             if (_isActive)

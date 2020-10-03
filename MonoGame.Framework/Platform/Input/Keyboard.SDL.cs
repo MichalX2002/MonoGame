@@ -26,10 +26,7 @@ namespace MonoGame.Framework.Input
 
         private static KeyboardState PlatformGetState()
         {
-            return new KeyboardState(
-                _keysDown,
-                (_modifiers & KeyModifiers.CapsLock) == KeyModifiers.CapsLock,
-                (_modifiers & KeyModifiers.NumLock) == KeyModifiers.NumLock);
+            return new KeyboardState(_keysDown, _modifiers);
         }
     }
 }

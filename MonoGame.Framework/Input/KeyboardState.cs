@@ -32,14 +32,19 @@ namespace MonoGame.Framework.Input
         public readonly KeyState this[Keys key] => GetKey(key) ? KeyState.Down : KeyState.Up;
 
         /// <summary>
+        /// Gets the active key modifiers.
+        /// </summary>
+        public KeyModifiers Modifiers { get; }
+
+        /// <summary>
         /// Gets the state of the Caps Lock key.
         /// </summary>
-        public bool CapsLock { get; }
+        public readonly bool CapsLock => Modifiers.HasAnyFlag(KeyModifiers.CapsLock);
 
         /// <summary>
         /// Gets the state of the Num Lock key.
         /// </summary>
-        public bool NumberLock { get; }
+        public readonly bool NumberLock => Modifiers.HasAnyFlag(KeyModifiers.NumLock);
 
         /// <summary>
         /// Gets the amount of pressed keys.
@@ -69,13 +74,11 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyboardState"/> class.
         /// </summary>
-        /// <param name="keys">List of keys to be flagged as pressed on initialization.</param>
-        /// <param name="capsLock">Caps Lock state.</param>
-        /// <param name="numberLock">Number Lock state.</param>
-        public KeyboardState(IEnumerable<Keys> keys, bool capsLock = false, bool numberLock = false) : this()
+        /// <param name="keys">List of keys to be flagged as pressed.</param>
+        /// <param name="modifiers">Active key modifiers.</param>
+        public KeyboardState(IEnumerable<Keys> keys, KeyModifiers modifiers) : this()
         {
-            CapsLock = capsLock;
-            NumberLock = numberLock;
+            Modifiers = modifiers;
 
             if (keys != null)
             {
@@ -95,13 +98,11 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyboardState"/> class.
         /// </summary>
-        /// <param name="keys">List of keys to be flagged as pressed on initialization.</param>
-        /// <param name="capsLock">Caps Lock state.</param>
-        /// <param name="numberLock">Num Lock state.</param>
-        public KeyboardState(ReadOnlySpan<Keys> keys, bool capsLock = false, bool numberLock = false) : this()
+        /// <param name="keys">List of keys to be flagged as pressed.</param>
+        /// <param name="modifiers">Active key modifiers.</param>
+        public KeyboardState(ReadOnlySpan<Keys> keys, KeyModifiers modifiers) : this()
         {
-            CapsLock = capsLock;
-            NumberLock = numberLock;
+            Modifiers = modifiers;
 
             for (int i = 0; i < keys.Length; i++)
                 SetKey(keys[i]);
@@ -110,8 +111,9 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyboardState"/> class.
         /// </summary>
-        /// <param name="keys">List of keys to be flagged as pressed on initialization.</param>
-        public KeyboardState(params Keys[] keys) : this(keys.AsSpan())
+        /// <param name="keys">List of keys to be flagged as pressed.</param>
+        /// <param name="modifiers">Active key modifiers.</param>
+        public KeyboardState(KeyModifiers modifiers, params Keys[] keys) : this(keys.AsSpan(), modifiers)
         {
         }
 
@@ -252,8 +254,7 @@ namespace MonoGame.Framework.Input
 
         public static bool operator ==(in KeyboardState a, in KeyboardState b)
         {
-            return a.CapsLock == b.CapsLock
-                && a.NumberLock == b.NumberLock
+            return a.Modifiers == b.Modifiers
                 && a._key0 == b._key0
                 && a._key1 == b._key1
                 && a._key2 == b._key2
@@ -279,7 +280,7 @@ namespace MonoGame.Framework.Input
         public override readonly int GetHashCode()
         {
             return HashCode.Combine(
-                HashCode.Combine(CapsLock, NumberLock),
+                Modifiers,
                 HashCode.Combine(_key0, _key1, _key2, _key3, _key4, _key5, _key6, _key7));
         }
 

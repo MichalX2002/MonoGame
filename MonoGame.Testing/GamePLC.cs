@@ -328,7 +328,7 @@ namespace MonoGame.Testing
             _mousePosDelta = mouse.Position - _lastMousePos;
             _lastMousePos = mouse.Position;
 
-            if (Keyboard.Modifiers.HasAnyFlag(KeyModifiers.Control))
+            if (keyboard.Modifiers.HasAnyFlag(KeyModifiers.Control))
             {
                 float scaleDelta = _scrollDelta.Y * 0.001f * ((_scale + 1) / 2f);
                 _scale = MathHelper.Clamp(_scale + scaleDelta, 0.2f, 4f);
