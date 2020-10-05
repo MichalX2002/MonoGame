@@ -2,6 +2,7 @@
 #Random stuff
 MonoGame.Testing/Content/Ending.ogg
 MonoGame.Testing/Content/Title Screen.ogg
+MonoGame.Testing/Content/Cards/*.png
 
 [Bb]in/
 [Oo]bj/
