@@ -44,7 +44,17 @@ namespace MonoGame.Framework.Input
         /// <summary>
         /// Gets the state of the Num Lock key.
         /// </summary>
-        public readonly bool NumberLock => Modifiers.HasAnyFlag(KeyModifiers.NumLock);
+        public readonly bool NumLock => Modifiers.HasAnyFlag(KeyModifiers.NumLock);
+
+        /// <summary>
+        /// Gets the combined state of left and right Control key.
+        /// </summary>
+        public readonly bool Control => Modifiers.HasAnyFlag(KeyModifiers.Control);
+
+        /// <summary>
+        /// Gets the combined state of left and right Alt key.
+        /// </summary>
+        public readonly bool Alt => Modifiers.HasAnyFlag(KeyModifiers.Alt);
 
         /// <summary>
         /// Gets the amount of pressed keys.
