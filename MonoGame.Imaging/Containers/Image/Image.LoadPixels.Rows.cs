@@ -8,8 +8,11 @@ namespace MonoGame.Imaging
 {
     public partial class Image
     {
+        // TODO: move these out of Image class 
+        // AND ALSO make them into extenions for Image class
+        
         public static void LoadPixels<TPixelFrom, TPixelTo>(
-            IReadOnlyPixelRows pixels, Image<TPixelTo> destination, Rectangle? sourceRectangle = null)
+            IReadOnlyPixelRows pixels, IPixelBuffer<TPixelTo> destination, Rectangle? sourceRectangle = null)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
@@ -21,7 +24,7 @@ namespace MonoGame.Imaging
             var rect = sourceRectangle ?? pixels.GetBounds();
             ImagingArgumentGuard.AssertNonEmptyRectangle(rect, nameof(sourceRectangle));
 
-            Span<byte> rowByteBuffer = stackalloc byte[400];
+            Span<byte> rowByteBuffer = stackalloc byte[4096];
             var rowBuffer = MemoryMarshal.Cast<byte, TPixelFrom>(rowByteBuffer);
 
             for (int y = 0; y < rect.Height; y++)
@@ -46,7 +49,7 @@ namespace MonoGame.Imaging
         }
 
         public static void LoadPixels(
-            IReadOnlyPixelRows pixels, Image destination, Rectangle? sourceRectangle = null)
+            IReadOnlyPixelRows pixels, IPixelBuffer destination, Rectangle? sourceRectangle = null)
         {
             if (pixels == null)
                 throw new ArgumentNullException(nameof(pixels));

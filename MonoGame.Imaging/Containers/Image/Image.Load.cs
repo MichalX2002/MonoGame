@@ -78,7 +78,7 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        public Stream OpenReadStream(string filePath)
+        private static Stream OpenReadStream(string filePath)
         {
             // All Stb decoders read file sequentially, so there's nothing to lose.
             var options = FileOptions.SequentialScan;

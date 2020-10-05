@@ -4,30 +4,32 @@ using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging.Processing
 {
-    public delegate IReadOnlyPixelRows ViewProjectorCallback(ReadOnlyPixelRowsContext context);
+    public delegate IReadOnlyPixelRows PixelRowsProjectorCallback(ReadOnlyPixelRowsContext context);
 
-    public delegate IReadOnlyPixelRows<TPixel> ViewProjectorCallback<TPixel>(
+    public delegate IReadOnlyPixelRows<TPixel> PixelRowsProjectorCallback<TPixel>(
         ReadOnlyPixelRowsContext<TPixel> context)
         where TPixel : unmanaged, IPixel;
 
     public static class PixelRowsProjectionExtensions
     {
-        public static IReadOnlyPixelRows Project(this IReadOnlyPixelRows pixels,
-            ImagingConfig imagingConfig, ViewProjectorCallback projector)
+        public static IReadOnlyPixelRows ProjectRows(this IReadOnlyPixelRows pixels,
+            ImagingConfig imagingConfig, PixelRowsProjectorCallback projector)
         {
             if (projector == null)
                 throw new ArgumentNullException(nameof(projector));
             return projector.Invoke(new ReadOnlyPixelRowsContext(imagingConfig, pixels));
         }
 
-        public static IReadOnlyPixelRows Project(this IReadOnlyPixelRows pixels,
-            ViewProjectorCallback projector)
+        public static IReadOnlyPixelRows ProjectRows(this IReadOnlyPixelRows pixels,
+            PixelRowsProjectorCallback projector)
         {
-            return Project(pixels, ImagingConfig.Default, projector);
+            return ProjectRows(pixels, ImagingConfig.Default, projector);
         }
 
-        public static IReadOnlyPixelRows<TPixel> Project<TPixel>(
-            this IReadOnlyPixelRows<TPixel> pixels, ImagingConfig imagingConfig, ViewProjectorCallback<TPixel> projector)
+        public static IReadOnlyPixelRows<TPixel> ProjectRows<TPixel>(
+            this IReadOnlyPixelRows<TPixel> pixels,
+            ImagingConfig imagingConfig,
+            PixelRowsProjectorCallback<TPixel> projector)
             where TPixel : unmanaged, IPixel
         {
             if (projector == null)
@@ -35,11 +37,12 @@ namespace MonoGame.Imaging.Processing
             return projector.Invoke(new ReadOnlyPixelRowsContext<TPixel>(imagingConfig, pixels));
         }
 
-        public static IReadOnlyPixelRows<TPixel> Project<TPixel>(
-            this IReadOnlyPixelRows<TPixel> pixels, ViewProjectorCallback<TPixel> projector)
+        public static IReadOnlyPixelRows<TPixel> ProjectRows<TPixel>(
+            this IReadOnlyPixelRows<TPixel> pixels,
+            PixelRowsProjectorCallback<TPixel> projector)
             where TPixel : unmanaged, IPixel
         {
-            return Project(pixels, ImagingConfig.Default, projector);
+            return ProjectRows(pixels, ImagingConfig.Default, projector);
         }
     }
 }

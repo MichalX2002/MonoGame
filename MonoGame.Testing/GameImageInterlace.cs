@@ -122,7 +122,7 @@ namespace MonoGame.Testing
                             return;
 
                             var newSize = new Size(img.Width, img.Height / 3);
-                            var procsed = img.Process(c => c.Resize(newSize, newSize, OnResizeProgress));
+                            var procsed = img.ProcessRows(c => c.Resize(newSize, newSize, OnResizeProgress));
 
                             if (false)
                             {

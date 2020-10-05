@@ -4,9 +4,9 @@ using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging.Processing
 {
-    public static partial class PixelProjector
+    public static partial class PixelRowsProjector
     {
-        private static bool CheckBounds(IReadOnlyPixelRowsContext context, Rectangle sourceRectangle)
+        internal static bool CheckBounds(this IReadOnlyPixelRowsContext context, Rectangle sourceRectangle)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -17,6 +17,5 @@ namespace MonoGame.Imaging.Processing
             ImagingArgumentGuard.AssertRectangleInSource(context, sourceRectangle, nameof(sourceRectangle));
             return false;
         }
-
     }
 }

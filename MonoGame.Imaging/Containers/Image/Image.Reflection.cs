@@ -151,7 +151,7 @@ namespace MonoGame.Imaging
         #region LoadPixelRows
 
         private delegate void LoadPixelRowsDelegate(
-            IReadOnlyPixelRows pixels, Image destination, Rectangle? sourceRectangle);
+            IReadOnlyPixelRows pixels, IPixelBuffer destination, Rectangle? sourceRectangle);
 
         private static MethodInfo? _loadPixelsMethod;
         private static ConcurrentDictionary<SrcDstTypePair, LoadPixelRowsDelegate> LoadPixelsDelegateCache { get; } =
@@ -160,11 +160,11 @@ namespace MonoGame.Imaging
         [DebuggerHidden]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ReflectionLoadPixelRows<TPixelFrom, TPixelTo>(
-            IReadOnlyPixelRows pixels, Image destination, Rectangle? sourceRectangle)
+            IReadOnlyPixelRows pixels, IPixelBuffer destination, Rectangle? sourceRectangle)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
-            LoadPixels<TPixelFrom, TPixelTo>(pixels, (Image<TPixelTo>)destination, sourceRectangle);
+            LoadPixels<TPixelFrom, TPixelTo>(pixels, (IPixelBuffer<TPixelTo>)destination, sourceRectangle);
         }
 
         private static void SetupReflection_LoadPixelRows()

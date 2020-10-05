@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
+using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging
 {
@@ -10,7 +11,7 @@ namespace MonoGame.Imaging
         #region LoadPixelData<TFrom, TTo>(ReadOnlySpan<byte>)
 
         public static void LoadPixelData<TPixelFrom, TPixelTo>(
-            ReadOnlySpan<byte> pixelData, Rectangle sourceRectangle, Image<TPixelTo> destination, int? byteStride)
+            ReadOnlySpan<byte> pixelData, Rectangle sourceRectangle, IPixelBuffer destination, int? byteStride)
             where TPixelFrom : unmanaged, IPixel
             where TPixelTo : unmanaged, IPixel<TPixelTo>
         {
@@ -20,13 +21,10 @@ namespace MonoGame.Imaging
             int srcOffsetX = sourceRectangle.X * Unsafe.SizeOf<TPixelFrom>();
             int srcByteStride = byteStride ?? (sourceRectangle.Width * Unsafe.SizeOf<TPixelFrom>());
 
-            int dstByteStride = destination.ByteStride;
-            var dstBytes = destination.GetPixelByteSpan();
-
             for (int y = 0; y < sourceRectangle.Height; y++)
             {
                 var srcByteRow = pixelData.Slice(srcOffsetX + (sourceRectangle.Y + y) * srcByteStride, srcByteStride);
-                var dstByteRow = dstBytes.Slice(y * dstByteStride, dstByteStride);
+                var dstByteRow = destination.GetPixelByteRowSpan(y);
 
                 ConvertPixelData<TPixelFrom, TPixelTo>(srcByteRow, dstByteRow);
             }

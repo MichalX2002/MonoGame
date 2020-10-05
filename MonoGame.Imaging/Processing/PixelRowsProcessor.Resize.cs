@@ -9,7 +9,7 @@ using StbSharp.ImageResize;
 
 namespace MonoGame.Imaging.Processing
 {
-    public static partial class PixelProcessor
+    public static partial class PixelRowsProcessor
     {
         // TODO: FIXME:
 

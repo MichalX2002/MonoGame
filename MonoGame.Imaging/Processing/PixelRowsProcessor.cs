@@ -10,7 +10,7 @@ namespace MonoGame.Imaging.Processing
         float percentage,
         Rectangle? rectangle);
 
-    public static partial class PixelProcessor
+    public static partial class PixelRowsProcessor
     {
     }
 }

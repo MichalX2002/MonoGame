@@ -1,15 +1,18 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
+using MonoGame.Imaging.Pixels;
 
 namespace MonoGame.Imaging
 {
     public partial class Image
     {
+        // TODO: move these out of Image class 
+        // AND ALSO make them into extenions for Image class
+
         public static void LoadPixels<TPixelFrom, TPixelTo>(
             ReadOnlySpan<TPixelFrom> pixels,
-            Image<TPixelTo> destination,
+            IPixelBuffer<TPixelTo> destination,
             Rectangle sourceRectangle,
             int? pixelStride = null)
             where TPixelFrom : unmanaged, IPixel
@@ -22,15 +25,10 @@ namespace MonoGame.Imaging
 
             int srcStride = pixelStride ?? sourceRectangle.Width;
 
-            int dstByteStride = destination.ByteStride;
-            var dstBytes = destination.GetPixelByteSpan();
-
             for (int y = 0; y < sourceRectangle.Height; y++)
             {
                 var srcRow = pixels.Slice(sourceRectangle.X + (sourceRectangle.Y + y) * srcStride, srcStride);
-                var dstByteRow = dstBytes.Slice(y * dstByteStride, dstByteStride);
-
-                var dstRow = MemoryMarshal.Cast<byte, TPixelTo>(dstByteRow);
+                var dstRow = destination.GetPixelRow(y);
                 ConvertPixels(srcRow, dstRow);
             }
         }

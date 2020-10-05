@@ -31,8 +31,8 @@ namespace MonoGame.Framework.Graphics
         {
         }
 
-        public TextureRegion2D(Texture2D texture, RectangleF region)
-            : this(texture, null, region)
+        public TextureRegion2D(Texture2D texture, RectangleF bounds)
+            : this(texture, null, bounds)
         {
         }
 

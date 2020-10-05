@@ -146,7 +146,7 @@ namespace MonoGame.Framework.Input
                 }
                 else
                 {
-                    pixelBuffer = Image.LoadPixels<Color>(pixels.Project(x => x.Crop(rect)));
+                    pixelBuffer = Image.LoadPixels<Color>(pixels.ProjectRows(x => x.Crop(rect)));
                 }
 
                 return PlatformFromPixels(pixelBuffer, rect.Width, rect.Height, origin);
