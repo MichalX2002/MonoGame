@@ -318,7 +318,7 @@ namespace MonoGame.Testing
             var keyboard = Keyboard.GetState();
             if (keyboard.IsKeyDown(Keys.Escape))
                 Exit();
-
+            
             var mouse = Mouse.GetState();
 
             _scrollDelta = mouse.Scroll - _lastScroll;
