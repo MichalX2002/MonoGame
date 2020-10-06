@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace MonoGame.Framework
 {
-    public static class EnumExtensions
+    public static class EnumFlagsExtensions
     {
         #region HasFlags
 
