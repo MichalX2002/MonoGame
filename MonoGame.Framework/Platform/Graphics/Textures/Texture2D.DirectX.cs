@@ -16,7 +16,6 @@ namespace MonoGame.Framework.Graphics
         protected bool Shared { get; private set; }
         protected bool Mipmap { get; private set; }
 
-        [CLSCompliant(false)]
         private SampleDescription SampleDescription { get; set; }
 
         private SharpDX.Direct3D11.Texture2D _cachedStagingTexture;

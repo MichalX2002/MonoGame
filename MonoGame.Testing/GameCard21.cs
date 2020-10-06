@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
+using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Framework.Audio;
 using MonoGame.Framework.Graphics;
@@ -48,6 +50,9 @@ namespace MonoGame.Testing
         {
         }
 
+        private int _loadCount;
+        private int _loadTotal;
+        
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -57,10 +62,21 @@ namespace MonoGame.Testing
 
             _spriteFont = Content.Load<SpriteFont>("consolas");
 
-            var textures = CreateCardAtlas(out var plainMap, out var hdMap);
+            Task.Run(() =>
+            {
+                var textures = CreateCardAtlas(
+                    (count, total) =>
+                    {
+                        _loadCount = count;
+                        _loadTotal = total;
+                    },
+                    out var plainMap, out var hdMap);
 
-            _plainCardRegions = GetCardRegions(plainMap, textures);
-            _hdCardRegions = GetCardRegions(hdMap, textures);
+                _loadTotal = 0;
+
+                _plainCardRegions = GetCardRegions(plainMap, textures);
+                _hdCardRegions = GetCardRegions(hdMap, textures);
+            });
         }
 
         private static Dictionary<string, TextureRegion2D> GetCardRegions(
@@ -81,7 +97,10 @@ namespace MonoGame.Testing
             return regions;
         }
 
+        public delegate void AtlasProgressDelegate(int count, int total);
+
         private (PackState State, Texture2D Texture)[] CreateCardAtlas(
+            AtlasProgressDelegate? progress,
             out Dictionary<string, string> plainMap,
             out Dictionary<string, string> hdMap)
         {
@@ -114,6 +133,7 @@ namespace MonoGame.Testing
             var packStates = new List<PackState>();
             int stateIndex = 0;
 
+            int index = 0;
             using var cardImages = GetImages(cardFiles).GetEnumerator();
             bool hasValue = false;
             do
@@ -147,6 +167,9 @@ namespace MonoGame.Testing
 
                         using (image)
                             Image.LoadPixels(image, buffer.Crop(x, y));
+
+                        index++;
+                        progress?.Invoke(index, cardFiles.Length);
 
                         state.Entries.Add(file, new Rectangle(x, y, image.Width, image.Height));
 
@@ -281,6 +304,16 @@ namespace MonoGame.Testing
 
             var mouse = Mouse.GetState();
 
+            if (_loadTotal != 0)
+            {
+                Window.TaskbarList.ProgressState = Framework.Utilities.TaskbarProgressState.Normal;
+                Window.TaskbarList.SetProgressValue(_loadCount, _loadTotal);
+            }
+            else
+            {
+                Window.TaskbarList.ProgressState = Framework.Utilities.TaskbarProgressState.None;
+            }
+
             base.Update(time);
         }
 
@@ -295,22 +328,131 @@ namespace MonoGame.Testing
 
             GraphicsDevice.Clear(new Color(Color.DarkGreen * 0.333f, byte.MaxValue));
 
-            var cardRegions = _hdCardRegions;
+            if (_loadTotal != 0)
+            {
+                _spriteBatch.Begin();
+
+                float progress = _loadCount / (float)_loadTotal;
+                _spriteBatch.FillRectangle(
+                    0, 0, currentViewport.Width * progress, 50, Color.Blue);
+
+                _spriteBatch.End();
+            }
 
             float seconds = (float)time.Total.TotalSeconds;
 
-            var region = cardRegions["queen_of_diamonds"];
-
             _spriteBatch.Begin(
+                sortMode: SpriteSortMode.FrontToBack,
                 blendState: BlendState.NonPremultiplied);
 
-            _spriteBatch.Draw(
-                region, new Vector2(0, 0), Color.White,
-                0, new Vector2(region.Width / 2, region.Height / 2), Vector2.One, SpriteFlip.None, 0);
+            var cardRegions = _hdCardRegions;
+            if (cardRegions != null)
+            {
+                float totalLength = 1000;
+                float padding = totalLength / cards.Length;
+                float length = totalLength - padding;
+
+                for (int i = 0; i < cards.Length; i++)
+                {
+                    ref CardSprite card = ref cards[i];
+
+                    card.lastTime = card.time;
+                    card.time = (seconds / 1f + i / (float)cards.Length) % 1f;
+
+                    if (card.time < card.lastTime)
+                    {
+                        card.name = cardNames[rng.Next(cardNames.Length)];
+                    }
+
+                    if (card.name == null)
+                        continue;
+
+                    var region = cardRegions[card.name];
+                    var origin = new Vector2(region.Width / 2, region.Height / 2);
+
+                    float offset = card.time * totalLength;
+                    float clampedOffset = MathHelper.Clamp(offset, padding, length);
+
+                    float alpha = offset / length;
+
+                    _spriteBatch.Draw(
+                        region,
+                        new Vector2(clampedOffset + 200, clampedOffset % 200f + 200),
+                        new Color(Color.White, alpha),
+                        0,
+                        origin,
+                        new Vector2(0.5f),
+                        SpriteFlip.None,
+                        offset);
+                }
+            }
 
             _spriteBatch.End();
 
             base.Draw(time);
+        }
+
+        string[] cardNames = new string[]
+        {
+            "10_of_clubs",
+            "10_of_diamonds",
+            "10_of_hearts",
+            "10_of_spades",
+
+            "9_of_clubs",
+            "9_of_diamonds",
+            "9_of_hearts",
+            "9_of_spades",
+
+            "8_of_clubs",
+            "8_of_diamonds",
+            "8_of_hearts",
+            "8_of_spades",
+
+            "7_of_clubs",
+            "7_of_diamonds",
+            "7_of_hearts",
+            "7_of_spades",
+
+            "6_of_clubs",
+            "6_of_diamonds",
+            "6_of_hearts",
+            "6_of_spades",
+
+            "5_of_clubs",
+            "5_of_diamonds",
+            "5_of_hearts",
+            "5_of_spades",
+
+            "4_of_clubs",
+            "4_of_diamonds",
+            "4_of_hearts",
+            "4_of_spades",
+
+            "3_of_clubs",
+            "3_of_diamonds",
+            "3_of_hearts",
+            "3_of_spades",
+
+            "2_of_clubs",
+            "2_of_diamonds",
+            "2_of_hearts",
+            "2_of_spades",
+
+            "ace_of_clubs",
+            "ace_of_diamonds",
+            "ace_of_hearts",
+            "ace_of_spades"
+        };
+
+        Random rng = new Random();
+        CardSprite[] cards = new CardSprite[60];
+
+        struct CardSprite
+        {
+            public string name;
+            public float time;
+            public float lastTime;
         }
     }
 }
