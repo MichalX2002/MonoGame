@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Threading;
 using System.Threading.Tasks;
 using MonoGame.Framework;
 using MonoGame.Framework.Audio;
@@ -52,7 +51,7 @@ namespace MonoGame.Testing
 
         private int _loadCount;
         private int _loadTotal;
-        
+
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -64,18 +63,25 @@ namespace MonoGame.Testing
 
             Task.Run(() =>
             {
-                var textures = CreateCardAtlas(
-                    (count, total) =>
-                    {
-                        _loadCount = count;
-                        _loadTotal = total;
-                    },
-                    out var plainMap, out var hdMap);
+                try
+                {
+                    var textures = CreateCardAtlas(
+                        (count, total) =>
+                        {
+                            _loadCount = count;
+                            _loadTotal = total;
+                        },
+                        out var plainMap, out var hdMap);
 
-                _loadTotal = 0;
+                    _loadTotal = 0;
 
-                _plainCardRegions = GetCardRegions(plainMap, textures);
-                _hdCardRegions = GetCardRegions(hdMap, textures);
+                    _plainCardRegions = GetCardRegions(plainMap, textures);
+                    _hdCardRegions = GetCardRegions(hdMap, textures);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
             });
         }
 
@@ -152,30 +158,37 @@ namespace MonoGame.Testing
                     while (hasValue || cardImages.MoveNext())
                     {
                         hasValue = true;
-                        var (file, image) = cardImages.Current;
+                        var (file, rawImage) = cardImages.Current;
+
+                        int width = rawImage.Width / 2;
+                        int height = rawImage.Height / 2;
 
                         int remainingHeight = buffer.Height - y;
-                        if (remainingHeight < image.Height)
+                        if (remainingHeight < height)
                         {
                             stateIndex++;
                             break;
                         }
 
                         int remainingWidth = buffer.Width - x;
-                        if (remainingWidth < image.Width)
+                        if (remainingWidth < width)
                             goto NextRow;
 
-                        using (image)
+                        using (rawImage)
+                        using (var image = rawImage.ProcessRows(
+                            x => x.Resize<Color, int>(new Size(width, height), 0, null)))
+                        {
                             Image.LoadPixels(image, buffer.Crop(x, y));
+                        }
 
                         index++;
                         progress?.Invoke(index, cardFiles.Length);
 
-                        state.Entries.Add(file, new Rectangle(x, y, image.Width, image.Height));
+                        state.Entries.Add(file, new Rectangle(x, y, width, height));
 
-                        x += image.Width + padding;
-                        if (image.Height > largestHeight)
-                            largestHeight = image.Height;
+                        x += width + padding;
+                        if (height > largestHeight)
+                            largestHeight = height;
 
                         hasValue = false;
                         if (x < buffer.Width)
@@ -348,7 +361,7 @@ namespace MonoGame.Testing
             var cardRegions = _hdCardRegions;
             if (cardRegions != null)
             {
-                float totalLength = 1000;
+                float totalLength = 2000;
                 float padding = totalLength / cards.Length;
                 float length = totalLength - padding;
 
@@ -357,7 +370,7 @@ namespace MonoGame.Testing
                     ref CardSprite card = ref cards[i];
 
                     card.lastTime = card.time;
-                    card.time = (seconds / 1f + i / (float)cards.Length) % 1f;
+                    card.time = ((seconds * 50) / (float)cards.Length + i / (float)cards.Length) % 1f;
 
                     if (card.time < card.lastTime)
                     {
@@ -371,17 +384,19 @@ namespace MonoGame.Testing
                     var origin = new Vector2(region.Width / 2, region.Height / 2);
 
                     float offset = card.time * totalLength;
-                    float clampedOffset = MathHelper.Clamp(offset, padding, length);
+                    float clampedOffsetX = MathHelper.Clamp(offset, padding, length) / 2;
+                    float clampedOffsetY = MathHelper.Clamp((offset * 3) % 300f, padding, length);
 
                     float alpha = offset / length;
 
+                    var scale = new Vector2(1f);
                     _spriteBatch.Draw(
                         region,
-                        new Vector2(clampedOffset + 200, clampedOffset % 200f + 200),
+                        new Vector2(clampedOffsetX, clampedOffsetY) + origin * scale,
                         new Color(Color.White, alpha),
                         0,
                         origin,
-                        new Vector2(0.5f),
+                        scale,
                         SpriteFlip.None,
                         offset);
                 }
@@ -391,6 +406,9 @@ namespace MonoGame.Testing
 
             base.Draw(time);
         }
+
+        Random rng = new Random();
+        CardSprite[] cards = new CardSprite[300];
 
         string[] cardNames = new string[]
         {
@@ -444,9 +462,6 @@ namespace MonoGame.Testing
             "ace_of_hearts",
             "ace_of_spades"
         };
-
-        Random rng = new Random();
-        CardSprite[] cards = new CardSprite[60];
 
         struct CardSprite
         {
