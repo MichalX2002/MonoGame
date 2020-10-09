@@ -129,7 +129,7 @@ namespace MonoGame.Imaging.Coders.Decoding
             AssertValidStateForOutput();
 
             if (HasProgressListener)
-                InvokeProgress(0, new Rectangle(new Point(start, line), CurrentImage!.Size));
+                InvokeProgress(line / (float)CurrentImage!.Height, new Rectangle(new Point(start, line), CurrentImage.Size));
 
             if (spacing == 1)
             {
