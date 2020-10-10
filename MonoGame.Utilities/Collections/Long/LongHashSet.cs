@@ -189,13 +189,14 @@ namespace MonoGame.Framework.Collections
                 Entry[]? entries = _entries;
                 Debug.Assert(entries != null, "Expected _entries to be initialized");
 
+                ILongEqualityComparer<T> comparer = Comparer;
                 uint collisionCount = 0;
-                long hashCode = item != null ? Comparer.GetLongHashCode(item) : 0;
+                long hashCode = item != null ? comparer.GetLongHashCode(item) : 0;
                 int i = GetBucketRef(hashCode) - 1; // Value in _buckets is 1-based
                 while (i >= 0)
                 {
                     ref Entry entry = ref entries[i];
-                    if (entry.HashCode == hashCode && Comparer.Equals(entry.Value, item))
+                    if (entry.HashCode == hashCode && comparer.Equals(entry.Value, item))
                         return i;
 
                     i = entry.Next;
@@ -229,9 +230,10 @@ namespace MonoGame.Framework.Collections
                 Entry[]? entries = _entries;
                 Debug.Assert(entries != null, "entries should be non-null");
 
+                ILongEqualityComparer<T> comparer = Comparer;
                 uint collisionCount = 0;
                 int last = -1;
-                long hashCode = item != null ? Comparer.GetLongHashCode(item) : 0;
+                long hashCode = item != null ? comparer.GetLongHashCode(item) : 0;
 
                 ref int bucket = ref GetBucketRef(hashCode);
                 int i = bucket - 1; // Value in buckets is 1-based
@@ -240,7 +242,7 @@ namespace MonoGame.Framework.Collections
                 {
                     ref Entry entry = ref entries[i];
 
-                    if (entry.HashCode == hashCode && Comparer.Equals(entry.Value, item))
+                    if (entry.HashCode == hashCode && comparer.Equals(entry.Value, item))
                     {
                         if (last < 0)
                             bucket = entry.Next + 1; // Value in buckets is 1-based
@@ -950,14 +952,15 @@ namespace MonoGame.Framework.Collections
             Entry[]? entries = _entries;
             Debug.Assert(entries != null, "expected entries to be non-null");
 
+            ILongEqualityComparer<T> comparer = Comparer;
             uint collisionCount = 0;
-            long hashCode = value != null ? Comparer.GetLongHashCode(value) : 0;
+            long hashCode = value != null ? comparer.GetLongHashCode(value) : 0;
             ref int bucket = ref GetBucketRef(hashCode);
             int i = bucket - 1; // Value in _buckets is 1-based
             while (i >= 0)
             {
                 ref Entry entry = ref entries[i];
-                if (entry.HashCode == hashCode && Comparer.Equals(entry.Value, value))
+                if (entry.HashCode == hashCode && comparer.Equals(entry.Value, value))
                 {
                     location = i;
                     return false;
@@ -1007,7 +1010,7 @@ namespace MonoGame.Framework.Collections
 
             if (!typeof(T).IsValueType && // Value types never rehash
                 collisionCount > LongHashHelpers.HashCollisionThreshold &&
-                Comparer is NonRandomLongStringComparer)
+                comparer is NonRandomLongStringComparer)
             {
                 // If we hit the collision threshold we'll need to
                 // switch to the comparer which is using randomized string hashing
