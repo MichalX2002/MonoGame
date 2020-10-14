@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using MonoGame.Framework;
 using MonoGame.Framework.Audio;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Input;
+using MonoGame.Imaging;
 
 namespace MonoGame.Testing
 {
@@ -64,14 +66,22 @@ namespace MonoGame.Testing
             {
                 try
                 {
-                    var atlas = new TextureAtlas(this);
-                    var packStates = atlas.CreateCardAtlas(
+                    string[] cardFiles = GetCardFileNames(
+                        Path.Combine(Content.RootDirectory, "Cards"),
+                        out var plainMap, out var hdMap);
+
+                    string cachePath = Path.Combine(Content.RootDirectory, "TextureCache");
+
+                    var packStates = TextureAtlas.GetAtlas(
+                        cardFiles,
+                        cachePath,
+                        Math.Min(GraphicsDevice.Capabilities.MaxTexture2DSize, 4096),
+                        ImageFormat.Tga,
                         (count, total) =>
                         {
                             _loadCount = count;
                             _loadTotal = total;
-                        },
-                        out var plainMap, out var hdMap);
+                        });
 
                     _loadTotal = 0;
 
@@ -86,8 +96,8 @@ namespace MonoGame.Testing
                         }
                     }).ToArray();
 
-                    _plainCardRegions = TextureAtlas.GetCardRegions(plainMap, textures);
-                    _hdCardRegions = TextureAtlas.GetCardRegions(hdMap, textures);
+                    _plainCardRegions = GetCardRegions(plainMap, textures);
+                    _hdCardRegions = GetCardRegions(hdMap, textures);
                 }
                 catch (Exception ex)
                 {
@@ -281,5 +291,55 @@ namespace MonoGame.Testing
             "ace_of_hearts",
             "ace_of_spades"
         };
+
+        public static Dictionary<string, TextureRegion2D> GetCardRegions(
+            Dictionary<string, string> map, (TextureAtlas.PackState State, Texture2D Texture)[] textures)
+        {
+            var regions = new Dictionary<string, TextureRegion2D>(map.Count);
+            foreach (var (key, value) in map)
+            {
+                foreach (var (state, texture) in textures)
+                {
+                    if (state.Entries.TryGetValue(value, out Rectangle bounds))
+                    {
+                        regions.Add(key, new TextureRegion2D(texture, bounds));
+                        break;
+                    }
+                }
+            }
+            return regions;
+        }
+
+        public string[] GetCardFileNames(
+            string directory,
+            out Dictionary<string, string> plainMap,
+            out Dictionary<string, string> hdMap)
+        {
+            string[] cardFiles = Directory.GetFiles(directory);
+
+            // plainMap will contain all basic textures at first.
+            plainMap = new Dictionary<string, string>();
+            foreach (string cardFile in cardFiles)
+            {
+                var fileName = Path.GetFileNameWithoutExtension(cardFile);
+                plainMap.Add(fileName, cardFile);
+            }
+
+            // hdMap will contain a mix of basic and HD textures.
+            // plainMap will not contain HD textures.
+            hdMap = new Dictionary<string, string>(plainMap);
+            foreach (string key in plainMap.Keys.ToArray())
+            {
+                string hdKey = key + "2";
+                if (hdMap.Remove(hdKey, out string? hdFile))
+                {
+                    plainMap.Remove(hdKey);
+                    hdMap.Remove(key);
+                    hdMap.Add(key, hdFile);
+                }
+            }
+
+            return cardFiles;
+        }
     }
 }
