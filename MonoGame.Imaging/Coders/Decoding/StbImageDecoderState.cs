@@ -129,7 +129,13 @@ namespace MonoGame.Imaging.Coders.Decoding
             AssertValidStateForOutput();
 
             if (HasProgressListener)
-                InvokeProgress(line / (float)CurrentImage!.Height, new Rectangle(new Point(start, line), CurrentImage.Size));
+            {
+                int pline = state.Orientation.HasFlag(ImageOrientation.BottomToTop) ? (state.Height - line) : line;
+                
+                InvokeProgress(
+                    pline / (float)state.Height, 
+                    new Rectangle(start, line, state.Width - start, 1));
+            }
 
             if (spacing == 1)
             {
