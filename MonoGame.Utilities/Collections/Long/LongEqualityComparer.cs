@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Collections
             }
 
             if (typeof(T) == typeof(string))
-                // LongStringComparer is "randomized" by default
+                // LongStringComparer is randomized by default
                 return (LongEqualityComparer<T>)(object)new LongStringComparer();
 
             if (typeof(T) == typeof(long))

@@ -16,7 +16,7 @@ namespace MonoGame.Framework.Collections
         /// <summary>
         /// Cutoff point for stackallocs. This corresponds to the number of ints.
         /// </summary>
-        public const int StackAllocThreshold = 100;
+        public const int StackAllocThreshold = 256;
 
         /// <summary>
         /// When constructing a hashset from an existing collection, it may contain duplicates,
@@ -51,7 +51,8 @@ namespace MonoGame.Framework.Collections
         {
             if (comparer == null && typeof(T) == typeof(string))
             {
-                // To start, move off default comparer for string which is randomized.
+                // The default comparer for string is randomized.
+                // Start of with non-random and switch later on if it creates too many collisions.
                 comparer = (ILongEqualityComparer<T>)NonRandomLongStringComparer.Default;
             }
             Comparer = comparer ?? LongEqualityComparer<T>.Default;
@@ -70,7 +71,8 @@ namespace MonoGame.Framework.Collections
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection));
 
-            if (collection is LongHashSet<T> otherAsHashSet && EqualityComparersAreEqual(this, otherAsHashSet))
+            if (collection is LongHashSet<T> otherAsHashSet && 
+                EqualityComparersAreEqual(this, otherAsHashSet))
             {
                 ConstructFrom(otherAsHashSet);
             }
@@ -603,9 +605,7 @@ namespace MonoGame.Framework.Collections
             {
                 // If other is the empty set then this is a superset.
                 if (otherAsCollection.Count == 0)
-                {
                     return true;
-                }
 
                 // Try to compare based on counts alone if other is a hashset with same equality comparer.
                 if (other is LongHashSet<T> otherAsSet &&
@@ -651,9 +651,7 @@ namespace MonoGame.Framework.Collections
                 if (other is LongHashSet<T> otherAsSet && EqualityComparersAreEqual(this, otherAsSet))
                 {
                     if (otherAsSet.Count >= Count)
-                    {
                         return false;
-                    }
 
                     // Now perform element check.
                     return ContainsAllElements(otherAsSet);
@@ -1085,7 +1083,7 @@ namespace MonoGame.Framework.Collections
         /// This attempts to allocate on the stack, if below <see cref="StackAllocThreshold"/>.
         /// </remarks>
         /// </summary>
-        private unsafe void IntersectWithEnumerable(IEnumerable<T> other)
+        private void IntersectWithEnumerable(IEnumerable<T> other)
         {
             Debug.Assert(_buckets != null, "_buckets shouldn't be null; callers should check first");
 
@@ -1150,7 +1148,7 @@ namespace MonoGame.Framework.Collections
         ///
         /// </summary>
         /// <param name="other"></param>
-        private unsafe void SymmetricExceptWithEnumerable(IEnumerable<T> other)
+        private void SymmetricExceptWithEnumerable(IEnumerable<T> other)
         {
             int originalCount = _count;
             int intArrayLength = BitHelper.ToIntArrayLength(originalCount);
@@ -1200,23 +1198,32 @@ namespace MonoGame.Framework.Collections
         /// other has no duplicates.
         ///
         /// The following count checks are performed by callers:
+        /// <list>
+        /// <item>
         /// 1. Equals: checks if unfoundCount = 0 and uniqueFoundCount = _count; i.e. everything
         /// in other is in this and everything in this is in other
+        /// </item>
+        /// <item>
         /// 2. Subset: checks if unfoundCount >= 0 and uniqueFoundCount = _count; i.e. other may
         /// have elements not in this and everything in this is in other
+        /// </item>
+        /// <item>
         /// 3. Proper subset: checks if unfoundCount > 0 and uniqueFoundCount = _count; i.e
         /// other must have at least one element not in this and everything in this is in other
+        /// </item>
+        /// <item>
         /// 4. Proper superset: checks if unfound count = 0 and uniqueFoundCount strictly less
         /// than _count; i.e. everything in other was in this and this had at least one element
         /// not contained in other.
-        ///
-        /// An earlier implementation used delegates to perform these checks rather than returning
-        /// an ElementCount struct; however this was changed due to the perf overhead of delegates.
+        /// </item>
+        /// </list>
         /// </summary>
         /// <param name="other"></param>
-        /// <param name="returnIfUnfound">Allows us to finish faster for equals and proper superset
-        /// because unfoundCount must be 0.</param>
-        private unsafe (int UniqueCount, int UnfoundCount) CheckUniqueAndUnfoundElements(
+        /// <param name="returnIfUnfound">
+        /// Allows us to finish faster for equals and proper superset
+        /// because unfoundCount must be 0.
+        /// </param>
+        private (int UniqueCount, int UnfoundCount) CheckUniqueAndUnfoundElements(
             IEnumerable<T> other, bool returnIfUnfound)
         {
             // Need special case in case this has no elements.

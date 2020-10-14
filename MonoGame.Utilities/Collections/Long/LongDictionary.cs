@@ -81,7 +81,8 @@ namespace MonoGame.Framework.Collections
 
             if (comparer == null && typeof(TKey) == typeof(string))
             {
-                // To start, move off default comparer for string which is randomised
+                // The default comparer for string is randomized.
+                // Start of with non-random and switch later on if it creates too many collisions.
                 comparer = (ILongEqualityComparer<TKey>)NonRandomLongStringComparer.Default;
             }
             Comparer = comparer ?? LongEqualityComparer<TKey>.Default;
