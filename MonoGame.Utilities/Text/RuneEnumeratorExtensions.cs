@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace MonoGame.Framework
@@ -23,6 +24,16 @@ namespace MonoGame.Framework
         public static RuneEnumerator GetRuneEnumerator(this StringBuilder text)
         {
             return text;
+        }
+
+        public static RuneEnumerator GetRuneEnumerator(this IEnumerator<Rune> text)
+        {
+            return new RuneEnumerator(text);
+        }
+
+        public static RuneEnumerator GetRuneEnumerator(this IEnumerable<Rune> text)
+        {
+            return GetRuneEnumerator(text?.GetEnumerator());
         }
     }
 }

@@ -26,27 +26,28 @@ namespace MonoGame.Framework
 
         public Rune Current { get; private set; }
 
-        public RuneEnumerator(SpanRuneEnumerator spanEnumerator) : this()
+        private RuneEnumerator(MoveNextDelegate moveNext) : this()
         {
-            _moveNext = CachedSpanMoveNext;
+            _moveNext = moveNext;
+        }
+
+        public RuneEnumerator(SpanRuneEnumerator spanEnumerator) : this(CachedSpanMoveNext)
+        {
             _spanEnumerator = spanEnumerator;
         }
 
-        public RuneEnumerator(StringRuneEnumerator stringEnumerator) : this()
+        public RuneEnumerator(StringRuneEnumerator stringEnumerator) : this(CachedStringMoveNext)
         {
-            _moveNext = CachedStringMoveNext;
             _stringEnumerator = stringEnumerator;
         }
 
-        public RuneEnumerator(StringBuilder.ChunkEnumerator builderEnumerator) : this()
+        public RuneEnumerator(StringBuilder.ChunkEnumerator builderEnumerator) : this(CachedBuilderMoveNext)
         {
-            _moveNext = CachedBuilderMoveNext;
             _builderEnumerator = builderEnumerator;
         }
 
-        public RuneEnumerator(IEnumerator<Rune> interfaceEnumerator) : this()
+        public RuneEnumerator(IEnumerator<Rune> interfaceEnumerator) : this(CachedInterfaceMoveNext)
         {
-            _moveNext = CachedInterfaceMoveNext;
             _interfaceEnumerator = interfaceEnumerator;
         }
 
@@ -100,7 +101,8 @@ namespace MonoGame.Framework
 
         private static bool InterfaceMoveNext(ref RuneEnumerator e)
         {
-            if (e._interfaceEnumerator.MoveNext())
+            if (e._interfaceEnumerator != null &&
+                e._interfaceEnumerator.MoveNext())
             {
                 e.Current = e._interfaceEnumerator.Current;
                 return true;
