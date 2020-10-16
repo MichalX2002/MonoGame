@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Collections
 {
-    public sealed class LongStringComparer : LongEqualityComparer<string?>
+    internal sealed class LongStringComparer : LongEqualityComparer<string?>
     {
         public override bool IsRandomized => true;
 

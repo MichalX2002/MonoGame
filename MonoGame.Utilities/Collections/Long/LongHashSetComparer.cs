@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace MonoGame.Framework.Collections
 {
-    internal sealed class LongHashSetEqualityComparer<T> : ILongEqualityComparer<LongHashSet<T>?>
+    internal sealed class LongHashSetComparer<T> : ILongEqualityComparer<LongHashSet<T>?>
     {
         public bool Equals(LongHashSet<T>? x, LongHashSet<T>? y)
         {
@@ -67,10 +67,11 @@ namespace MonoGame.Framework.Collections
 
             long hashCode = 0; // default to 0 for empty set
 
+            var comparer = LongEqualityComparer<T>.Default;
             foreach (T t in obj)
             {
                 if (t != null)
-                    hashCode ^= t.GetHashCode(); // same hashcode as as default comparer
+                    hashCode ^= comparer.GetLongHashCode(t); // same hashcode as as default comparer
             }
 
             return hashCode;
@@ -79,7 +80,7 @@ namespace MonoGame.Framework.Collections
         // Equals method for the comparer itself.
         public override bool Equals(object? obj)
         {
-            return obj is LongHashSetEqualityComparer<T>;
+            return obj is LongHashSetComparer<T>;
         }
 
         public override int GetHashCode()

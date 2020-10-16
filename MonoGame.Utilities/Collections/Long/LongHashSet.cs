@@ -908,7 +908,7 @@ namespace MonoGame.Framework.Collections
         /// </summary>
         public static ILongEqualityComparer<LongHashSet<T>> CreateSetComparer()
         {
-            return new LongHashSetEqualityComparer<T>();
+            return new LongHashSetComparer<T>();
         }
 
         /// <summary>
