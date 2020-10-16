@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace MCServerSharp.Collections
+namespace MonoGame.Framework.Collections
 {
     public class LongDiffusedEqualityComparer<T> : ILongEqualityComparer<T>
     {
