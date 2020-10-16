@@ -15,13 +15,6 @@ namespace MonoGame.Framework.Collections
     /// </remarks>
     public sealed class NonRandomLongStringComparer : LongEqualityComparer<string?>
     {
-        public static new ILongEqualityComparer<string?> Default { get; } =
-            new NonRandomLongStringComparer();
-
-        private NonRandomLongStringComparer()
-        {
-        }
-
         /// <summary>
         /// Fast hash method but can cause many collisions if specially crafted by attackers.
         /// </summary>

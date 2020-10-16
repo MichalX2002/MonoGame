@@ -2,16 +2,19 @@
 
 namespace MonoGame.Framework.Collections
 {
-    public partial class LongEqualityComparer<T>
+    internal sealed class LongIntPtrComparer : LongEqualityComparer<IntPtr>
     {
-        private sealed class LongIntPtrComparer : LongEqualityComparer<IntPtr>
+        public override long GetLongHashCode(IntPtr obj)
         {
-            public override long GetLongHashCode(IntPtr obj) => obj.ToInt64();
+            return obj.ToInt64();
         }
+    }
 
-        private sealed class LongUIntPtrComparer : LongEqualityComparer<UIntPtr>
+    internal sealed class LongUIntPtrComparer : LongEqualityComparer<UIntPtr>
+    {
+        public override long GetLongHashCode(UIntPtr obj)
         {
-            public override long GetLongHashCode(UIntPtr obj) => unchecked((long)obj.ToUInt64());
+            return unchecked((long)obj.ToUInt64());
         }
     }
 }

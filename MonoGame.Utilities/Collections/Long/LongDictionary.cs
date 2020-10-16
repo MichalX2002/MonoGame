@@ -57,7 +57,7 @@ namespace MonoGame.Framework.Collections
             }
         }
 
-        #region
+        #region Constructors
 
         public LongDictionary() : this(0, null)
         {
@@ -79,13 +79,9 @@ namespace MonoGame.Framework.Collections
             if (capacity > 0)
                 Initialize(capacity);
 
-            if (comparer == null && typeof(TKey) == typeof(string))
-            {
-                // The default comparer for string is randomized.
-                // Start of with non-random and switch later on if it creates too many collisions.
-                comparer = (ILongEqualityComparer<TKey>)NonRandomLongStringComparer.Default;
-            }
-            Comparer = comparer ?? LongEqualityComparer<TKey>.Default;
+            // The default comparer for string is randomized.
+            // Start of with non-random and switch later on if it creates too many collisions.
+            Comparer = comparer ?? LongEqualityComparer<TKey>.NonRandomDefault;
         }
 
         public LongDictionary(IDictionary<TKey, TValue> dictionary) : this(dictionary, null)
@@ -399,7 +395,8 @@ namespace MonoGame.Framework.Collections
 
             if (!typeof(TKey).IsValueType && // Value types never rehash
                 collisionCount > LongHashHelpers.HashCollisionThreshold &&
-                comparer is NonRandomLongStringComparer)
+                comparer is LongEqualityComparer<TKey> longEC &&
+                !longEC.IsRandomized)
             {
                 // If we hit the collision threshold we'll need to 
                 // switch to the comparer which is using randomized string hashing

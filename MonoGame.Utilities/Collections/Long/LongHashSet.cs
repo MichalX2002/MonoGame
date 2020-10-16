@@ -49,13 +49,9 @@ namespace MonoGame.Framework.Collections
 
         public LongHashSet(ILongEqualityComparer<T>? comparer)
         {
-            if (comparer == null && typeof(T) == typeof(string))
-            {
-                // The default comparer for string is randomized.
-                // Start of with non-random and switch later on if it creates too many collisions.
-                comparer = (ILongEqualityComparer<T>)NonRandomLongStringComparer.Default;
-            }
-            Comparer = comparer ?? LongEqualityComparer<T>.Default;
+            // The default comparer for string is randomized.
+            // Start of with non-random and switch later on if it creates too many collisions.
+            Comparer = comparer ?? LongEqualityComparer<T>.NonRandomDefault;
         }
 
         public LongHashSet(int capacity) : this(capacity, null)
@@ -71,7 +67,7 @@ namespace MonoGame.Framework.Collections
             if (collection == null)
                 throw new ArgumentNullException(nameof(collection));
 
-            if (collection is LongHashSet<T> otherAsHashSet && 
+            if (collection is LongHashSet<T> otherAsHashSet &&
                 EqualityComparersAreEqual(this, otherAsHashSet))
             {
                 ConstructFrom(otherAsHashSet);
@@ -1008,7 +1004,8 @@ namespace MonoGame.Framework.Collections
 
             if (!typeof(T).IsValueType && // Value types never rehash
                 collisionCount > LongHashHelpers.HashCollisionThreshold &&
-                comparer is NonRandomLongStringComparer)
+                comparer is LongEqualityComparer<T> longEC &&
+                !longEC.IsRandomized)
             {
                 // If we hit the collision threshold we'll need to
                 // switch to the comparer which is using randomized string hashing

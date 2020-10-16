@@ -5,23 +5,35 @@ using System.Runtime.CompilerServices;
 
 namespace MonoGame.Framework.Collections
 {
-    public abstract partial class LongEqualityComparer<T> : EqualityComparer<T>, ILongEqualityComparer<T>
+    public abstract class LongEqualityComparer<T> : EqualityComparer<T>, ILongEqualityComparer<T>
     {
-        public static new LongEqualityComparer<T> Default { get; } = CreateComparer();
+        public static new LongEqualityComparer<T> Default { get; } =
+            CreateComparer(randomized: true);
+
+        public static LongEqualityComparer<T> NonRandomDefault { get; } =
+            CreateComparer(randomized: false);
+
+        public virtual bool IsRandomized => false;
 
         public LongEqualityComparer()
         {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals([AllowNull] T x, [AllowNull] T y) => EqualityComparer<T>.Default.Equals(x, y);
+        public override bool Equals([AllowNull] T x, [AllowNull] T y)
+        {
+            return EqualityComparer<T>.Default.Equals(x, y);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode([DisallowNull] T value) => EqualityComparer<T>.Default.GetHashCode(value);
+        public override int GetHashCode([DisallowNull] T value)
+        {
+            return EqualityComparer<T>.Default.GetHashCode(value);
+        }
 
         public abstract long GetLongHashCode([DisallowNull] T value);
 
-        private static LongEqualityComparer<T> CreateComparer()
+        private static LongEqualityComparer<T> CreateComparer(bool randomized)
         {
             if (typeof(T).IsGenericTypeDefinition &&
                 typeof(T).GetGenericTypeDefinition() == typeof(Nullable<>))
@@ -32,8 +44,10 @@ namespace MonoGame.Framework.Collections
             }
 
             if (typeof(T) == typeof(string))
-                // LongStringComparer is randomized by default
-                return (LongEqualityComparer<T>)(object)new LongStringComparer();
+            {
+                return (LongEqualityComparer<T>)(
+                    randomized ? (object)new LongStringComparer() : new NonRandomLongStringComparer());
+            }
 
             if (typeof(T) == typeof(long))
                 return (LongEqualityComparer<T>)(object)new LongInt64Comparer();
