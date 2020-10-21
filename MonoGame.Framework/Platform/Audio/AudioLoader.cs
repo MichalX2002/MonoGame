@@ -349,7 +349,7 @@ namespace MonoGame.Framework.Audio
 
                     var vResult = Vector.Narrow(vIntResult1, vIntResult2);
                     vResult.CopyTo(dst);
-                    dst = dst.Slice(Vector<float>.Count);
+                    dst = dst.Slice(Vector<short>.Count);
                 }
             }
 #endif

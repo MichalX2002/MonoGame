@@ -251,7 +251,8 @@ namespace MonoGame.Framework.Audio
         {
             AssertNotDisposed();
 
-            if (data.IsEmpty) throw new ArgumentEmptyException(nameof(data));
+            if (data.IsEmpty) 
+                throw new ArgumentEmptyException(nameof(data));
             SoundEffect.AssertValidAudioDepth(depth);
 
             if (sizeof(T) % ((int)depth / 8) != 0)
