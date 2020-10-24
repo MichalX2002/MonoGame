@@ -4,7 +4,6 @@ namespace MonoGame.Framework
     /// <summary>
     /// Allows for platform specific handling of the Back button. 
     /// </summary>
-    /// <a href="http://www.monogame.net/documentation/?page=Platform_Specific_Notes"/>
     public interface IPlatformBackButton
     {
         /// <summary>

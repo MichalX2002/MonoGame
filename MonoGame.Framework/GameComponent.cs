@@ -6,13 +6,21 @@ using System;
 
 namespace MonoGame.Framework
 {
+    /// <summary>
+    /// An object that can be attached to a <see cref="Microsoft.Xna.Framework.Game"/> and have its <see cref="Update"/>
+    /// method called when <see cref="Microsoft.Xna.Framework.Game.Update"/> is called.
+    /// </summary>
     public class GameComponent : IComparable<GameComponent>, IGameComponent, IUpdateable, IDisposable
     {
         private bool _enabled = true;
         private int _updateOrder;
 
+        /// <summary>
+        /// The <see cref="Game"/> that owns this <see cref="GameComponent"/>.
+        /// </summary>
         public Game Game { get; private set; }
 
+        /// <inheritdoc />
         public bool Enabled
         {
             get => _enabled;
@@ -26,6 +34,7 @@ namespace MonoGame.Framework
             }
         }
 
+        /// <inheritdoc />
         public int UpdateOrder
         {
             get => _updateOrder;
@@ -39,7 +48,10 @@ namespace MonoGame.Framework
             }
         }
 
+        /// <inheritdoc />
         public event Event<object>? EnabledChanged;
+
+        /// <inheritdoc />
         public event Event<object>? UpdateOrderChanged;
 
         public GameComponent(Game game)
@@ -51,15 +63,25 @@ namespace MonoGame.Framework
         {
         }
 
+        /// <summary>
+        /// Update the component.
+        /// </summary>
+        /// <param name="time"><see cref="FrameTime"/> of the <see cref="Game"/>.</param>
         public virtual void Update(in FrameTime time)
         {
         }
 
+        /// <summary>
+        /// Called when <see cref="UpdateOrder"/> changed. Raises the <see cref="UpdateOrderChanged"/> event.
+        /// </summary>
         protected virtual void OnUpdateOrderChanged()
         {
             UpdateOrderChanged?.Invoke(this);
         }
 
+        /// <summary>
+        /// Called when <see cref="Enabled"/> changed. Raises the <see cref="EnabledChanged"/> event.
+        /// </summary>
         protected virtual void OnEnabledChanged()
         {
             EnabledChanged?.Invoke(this);

@@ -1,13 +1,9 @@
 ﻿using System;
-
-#if WINDOWS && DIRECTX
 using SharpDX.DXGI;
 using SharpDX.Direct3D11;
-#endif
 
 namespace MonoGame.Framework.Graphics
 {
-#if WINDOWS && DIRECTX
 
     /// <summary>
     /// A swap chain used for rendering to a secondary GameWindow.
@@ -18,9 +14,11 @@ namespace MonoGame.Framework.Graphics
     /// </remarks>
     public class SwapChainRenderTarget : RenderTarget2D
     {
+        private IntPtr _windowHandle;
+        private SharpDX.Direct3D11.Texture2D _backBuffer;
         private SwapChain _swapChain;
 
-        public PresentInterval PresentInterval;
+        public PresentInterval PresentInterval { get; }
 
         public SwapChainRenderTarget(
             GraphicsDevice graphicsDevice, IntPtr windowHandle, int width, int height) :
@@ -44,14 +42,18 @@ namespace MonoGame.Framework.Graphics
             var dxgiFormat = surfaceFormat == SurfaceFormat.Rgba32
                 ? SharpDX.DXGI.Format.B8G8R8A8_UNorm : SharpDXHelper.ToFormat(surfaceFormat);
 
-            var multisampleDesc = new SampleDescription(1, 0);
-            if (preferredMultiSampleCount > 1)
-            {
-                multisampleDesc.Count = preferredMultiSampleCount;
-                multisampleDesc.Quality = (int)StandardMultisampleQualityLevels.StandardMultisamplePattern;
-            }
+            var multisampleDesc = GraphicsDevice.GetSupportedSampleDescription(dxgiFormat, MultiSampleCount);
+            _windowHandle = windowHandle;
+            PresentInterval = presentInterval;
 
-            var chainDesc = new SwapChainDescription()
+            SwapChainRenderTargetConstruct(depthFormat, ref dxgiFormat, ref multisampleDesc);
+        }
+
+        private SharpDX.Direct3D11.Texture2D CreateSwaipChainTexture(SharpDX.DXGI.Format dxgiFormat, SharpDX.DXGI.SampleDescription multisampleDesc)
+        {
+            var d3dDevice = GraphicsDevice._d3dDevice;
+
+            var desc = new SwapChainDescription()
             {
                 ModeDescription =
                 {
@@ -61,20 +63,14 @@ namespace MonoGame.Framework.Graphics
                     Height = height,
                 },
 
-                OutputHandle = windowHandle,
+                OutputHandle = _windowHandle,
                 SampleDescription = multisampleDesc,
                 Usage = Usage.RenderTargetOutput,
                 BufferCount = 2,
-                SwapEffect = SharpDXHelper.ToSwapEffect(presentInterval),
+                SwapEffect = SharpDXHelper.ToSwapEffect(PresentInterval),
                 IsWindowed = true,
             };
-
-            PresentInterval = presentInterval;
-
-            // Once the desired swap chain description is configured, it must 
-            // be created on the same adapter as our D3D Device
-            var d3dDevice = graphicsDevice._d3dDevice;
-
+            
             // First, retrieve the underlying DXGI Device from the D3D Device.
             // Creates the swap chain 
             using (var dxgiDevice = d3dDevice.QueryInterface<SharpDX.DXGI.Device1>())
@@ -85,7 +81,18 @@ namespace MonoGame.Framework.Graphics
             }
 
             // Obtain the backbuffer for this window which will be the final 3D rendertarget.
-            var backBuffer = SharpDX.Direct3D11.Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(_swapChain, 0);
+            _backBuffer = SharpDX.Direct3D11.Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(_swapChain, 0);
+
+            return _backBuffer;
+        }
+        
+        private void SwapChainRenderTargetConstruct(DepthFormat depthFormat, ref SharpDX.DXGI.Format dxgiFormat, ref SharpDX.DXGI.SampleDescription multisampleDesc)
+        {
+            var backBuffer = CreateSwaipChainTexture(dxgiFormat, multisampleDesc);
+
+            // Once the desired swap chain description is configured, it must 
+            // be created on the same adapter as our D3D Device
+            var d3dDevice = GraphicsDevice._d3dDevice;
 
             // Create a view interface on the rendertarget to use on bind.
             _renderTargetViews = new[] { new RenderTargetView(d3dDevice, backBuffer) };
@@ -94,13 +101,13 @@ namespace MonoGame.Framework.Graphics
             var backBufferDesc = backBuffer.Description;
             var targetSize = new Point(backBufferDesc.Width, backBufferDesc.Height);
 
-            _texture = backBuffer;
-
             // Create the depth buffer if we need it.
             if (depthFormat != DepthFormat.None)
             {
                 dxgiFormat = SharpDXHelper.ToFormat(depthFormat);
-                var texDesc = new Texture2DDescription()
+
+                // Allocate a 2-D surface as the depth/stencil buffer.
+                var textureDescription = new Texture2DDescription()
                 {
                     Format = dxgiFormat,
                     ArraySize = 1,
@@ -111,16 +118,24 @@ namespace MonoGame.Framework.Graphics
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.DepthStencil,
                 };
-
-                // Allocate a 2D surface as the depth/stencil buffer.
-                using (var depthBuffer = new SharpDX.Direct3D11.Texture2D(d3dDevice, texDesc))
+                using (var depthBuffer = new SharpDX.Direct3D11.Texture2D(d3dDevice, textureDescription))
                 {
                     // Create a DepthStencil view on this surface to use on bind.
                     _depthStencilView = new DepthStencilView(d3dDevice, depthBuffer);
                 }
             }
         }
+        
+        internal override SharpDX.Direct3D11.Resource CreateTexture()
+        {
+            return (MultiSampleCount > 1) ? base.CreateTexture() : _backBuffer;
+        }
 
+        internal override void ResolveSubresource()
+        {
+            // Using a multisampled SwapChainRenderTarget as a source Texture is not supported.
+            //base.ResolveSubresource();
+        }
 
         // TODO: We need to expose the other Present() overloads
         // for passing source/dest rectangles.
@@ -153,6 +168,4 @@ namespace MonoGame.Framework.Graphics
         }
 
     }
-
-#endif // WINDOWS && DIRECTX
 }

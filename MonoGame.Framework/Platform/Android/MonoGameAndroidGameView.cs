@@ -102,7 +102,13 @@ namespace MonoGame.Framework
             {
                 // can only be triggered when main loop is running, is unsafe to overwrite other states
                 if (_internalState == InternalState.Running_GameThread)
+                {
                     _internalState = InternalState.ForceRecreateSurface;
+                }
+                else
+                {
+                    needToForceRecreateSurface = true;
+                }
             }
         }
 
@@ -527,6 +533,11 @@ namespace MonoGame.Framework
 
             lock (_lockObject)
             {
+                if (needToForceRecreateSurface && _internalState == InternalState.Running_GameThread)
+                {
+                    _internalState = InternalState.ForceRecreateSurface;
+                    needToForceRecreateSurface = false;
+                }
                 currentState = _internalState;
             }
 

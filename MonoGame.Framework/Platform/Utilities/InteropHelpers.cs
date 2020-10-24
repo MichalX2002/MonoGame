@@ -21,7 +21,7 @@ namespace MonoGame.Framework
             while (*ptr != 0)
                 ptr++;
 
-            int len = (int)(ptr - (byte*)handle);
+            long len = ptr - (byte*)handle;
             if (len == 0)
                 return string.Empty;
 

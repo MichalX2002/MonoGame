@@ -16,6 +16,7 @@ namespace MonoGame.Framework
         // TODO: remove this static field
         public static SDLGameWindow Instance;
 
+        public uint? Id;
         public bool IsFullScreen;
         internal readonly Game _game;
         private IntPtr _windowHandle;
@@ -198,8 +199,13 @@ namespace MonoGame.Framework
                 winy |= GetMouseDisplay();
             }
 
+            _width = GraphicsDeviceManager.DefaultBackBufferWidth;
+            _height = GraphicsDeviceManager.DefaultBackBufferHeight;
+
             _windowHandle = SDL.Window.Create(
                 _defaultTitle, winx, winy, _width, _height, initflags);
+
+            Id = Sdl.Window.GetWindowId(_handle);
 
             if (_iconHandle != IntPtr.Zero)
                 SDL.Window.SetIcon(_windowHandle, _iconHandle);

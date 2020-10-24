@@ -134,7 +134,7 @@ namespace MonoGame.Framework.Graphics
             return _depthStencilView;
         }
 
-        internal void ResolveSubresource()
+        internal virtual void ResolveSubresource()
         {
             lock (GraphicsDevice._d3dContext)
             {

@@ -9,7 +9,7 @@ namespace MonoGame.Framework.Graphics
     /// <summary>
     /// Built-in effect for rendering skinned character models.
     /// </summary>
-    public class SkinnedEffect : Effect, IEffectMatrices, IEffectLights, IEffectFog
+    public class SkinnedEffect : Effect, IEffectMatrices, IEffectLights, IEffectFog, IEffectBones
     {
         public const int MaxBones = 72;
 

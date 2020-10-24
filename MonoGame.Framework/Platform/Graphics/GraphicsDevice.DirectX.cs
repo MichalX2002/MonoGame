@@ -892,7 +892,7 @@ namespace MonoGame.Framework.Graphics
 
         internal SampleDescription GetSupportedSampleDescription(Format format, int multiSampleCount)
         {
-            var multisampleDesc = new SampleDescription(1, 0);
+            var multisampleDesc = new SharpDX.DXGI.SampleDescription(1, 0);
 
             if (multiSampleCount > 1)
             {
@@ -910,7 +910,7 @@ namespace MonoGame.Framework.Graphics
             // Clear options for depth/stencil buffer if not attached.
             if (_currentDepthStencilView != null)
             {
-                if (_currentDepthStencilView.Description.Format != Format.D24_UNorm_S8_UInt)
+                if (_currentDepthStencilView.Description.Format != SharpDX.DXGI.Format.D24_UNorm_S8_UInt)
                     options &= ~ClearOptions.Stencil;
             }
             else
@@ -922,23 +922,21 @@ namespace MonoGame.Framework.Graphics
             lock (_d3dContext)
             {
                 // Clear the diffuse render buffer.
-                if ((options & ClearOptions.Color) == ClearOptions.Color)
+                if ((options & ClearOptions.Target) == ClearOptions.Target)
                 {
-                    foreach (var view in CurrentRenderTargets)
+                    foreach (var view in _currentRenderTargets)
                     {
                         if (view != null)
-                            _d3dContext.ClearRenderTargetView(
-                                view, new RawColor4(color.X, color.Y, color.Z, color.W));
+							_d3dContext.ClearRenderTargetView(view, new RawColor4(color.X, color.Y, color.Z, color.W));
                     }
                 }
 
                 // Clear the depth/stencil render buffer.
-                DepthStencilClearFlags flags = 0;
-                if (options.HasFlags(ClearOptions.DepthBuffer))
-                    flags |= DepthStencilClearFlags.Depth;
-
-                if (options.HasFlags(ClearOptions.Stencil))
-                    flags |= DepthStencilClearFlags.Stencil;
+                SharpDX.Direct3D11.DepthStencilClearFlags flags = 0;
+                if ((options & ClearOptions.DepthBuffer) == ClearOptions.DepthBuffer)
+                    flags |= SharpDX.Direct3D11.DepthStencilClearFlags.Depth;
+                if ((options & ClearOptions.Stencil) == ClearOptions.Stencil)
+                    flags |= SharpDX.Direct3D11.DepthStencilClearFlags.Stencil;
 
                 if (flags != 0)
                     _d3dContext.ClearDepthStencilView(_currentDepthStencilView, flags, depth, (byte)stencil);
@@ -954,36 +952,50 @@ namespace MonoGame.Framework.Graphics
             SharpDX.Utilities.Dispose(ref _renderTargetView);
             SharpDX.Utilities.Dispose(ref _depthStencilView);
 
-            _userIndexBuffer16?.Dispose();
-            _userIndexBuffer32?.Dispose();
+            if (_userIndexBuffer16 != null)
+                _userIndexBuffer16.Dispose();
+            if (_userIndexBuffer32 != null)
+                _userIndexBuffer32.Dispose();
 
             foreach (var vb in _userVertexBuffers.Values)
                 vb.Dispose();
 
-            SharpDX.Utilities.Dispose(ref _swapChain!);
+            SharpDX.Utilities.Dispose(ref _swapChain);
 
 #if WINDOWS_UAP
+
             if (_bitmapTarget != null)
             {
                 _bitmapTarget.Dispose();
                 _depthStencilView = null;
             }
+            if (_d2dDevice != null)
+            {
+                _d2dDevice.Dispose();
+                _d2dDevice = null;
+            }
+            if (_d2dContext != null)
+            {
+                _d2dContext.Target = null;
+                _d2dContext.Dispose();
+                _d2dContext = null;
+            }
+            if (_d2dFactory != null)
+            {
+                _d2dFactory.Dispose();
+                _d2dFactory = null;
+            }
+            if (_dwriteFactory != null)
+            {
+                _dwriteFactory.Dispose();
+                _dwriteFactory = null;
+            }
+            if (_wicFactory != null)
+            {
+                _wicFactory.Dispose();
+                _wicFactory = null;
+            }
 
-            _d2dDevice?.Dispose();
-            _d2dDevice = null;
-
-            _d2dContext?.Target = null;
-            _d2dContext?.Dispose();
-            _d2dContext = null;
-
-            _d2dFactory?.Dispose();
-            _d2dFactory = null;
-            
-            _dwriteFactory?.Dispose();
-            _dwriteFactory = null;
-
-            _wicFactory?.Dispose();
-            _wicFactory = null;
 #endif
 
             SharpDX.Utilities.Dispose(ref _d3dContext);
@@ -993,21 +1005,24 @@ namespace MonoGame.Framework.Graphics
         private void PlatformPresent()
         {
 #if WINDOWS_UAP
-            // The application may optionally specify "dirty" or "scroll" rects to improve efficiency
-            // in certain scenarios.  In this sample, however, we do not utilize those features.
-            var parameters = new SharpDX.DXGI.PresentParameters();
-            
             try
             {
-                // TODO: Hook in PresentationParameters here!
-
                 // The first argument instructs DXGI to block until VSync, putting the application
                 // to sleep until the next VSync. This ensures we don't waste any cycles rendering
                 // frames that will never be displayed to the screen.
                 lock (_d3dContext)
-                    _swapChain.Present(1, PresentFlags.None, parameters);
+                {
+                    if (PresentationParameters.PresentationInterval == PresentInterval.Immediate)
+                    {
+                        _swapChain.Present(0, PresentFlags.AllowTearing);
+                    }
+                    else
+                    {
+                        _swapChain.Present(1, PresentFlags.None);
+                    }
+                }
             }
-            catch (SharpDX.SharpDXException)
+            catch (SharpDX.SharpDXException ex)
             {
                 // TODO: How should we deal with a device lost case here?
                 /*               
@@ -1030,9 +1045,9 @@ namespace MonoGame.Framework.Graphics
 
                 // The first argument instructs DXGI to block n VSyncs before presenting.
                 lock (_d3dContext)
-                    _swapChain!.Present(syncInterval, PresentFlags.None);
+                    _swapChain.Present(syncInterval, PresentFlags.None);
             }
-            catch (SharpDXException)
+            catch (SharpDX.SharpDXException)
             {
                 // TODO: How should we deal with a device lost case here?
             }
@@ -1043,24 +1058,26 @@ namespace MonoGame.Framework.Graphics
         {
             if (_d3dContext != null)
             {
-                var rawViewport = new RawViewportF
-                {
-                    X = value.X,
-                    Y = value.Y,
-                    Width = value.Width,
-                    Height = value.Height,
-                    MinDepth = value.MinDepth,
-                    MaxDepth = value.MaxDepth
-                };
+				var viewport = new RawViewportF
+				{
+					X = _viewport.X,
+					Y = _viewport.Y,
+					Width = (float)_viewport.Width,
+					Height = (float)_viewport.Height,
+					MinDepth = _viewport.MinDepth,
+					MaxDepth = _viewport.MaxDepth
+				};
                 lock (_d3dContext)
-                    _d3dContext.Rasterizer.SetViewport(rawViewport);
+                    _d3dContext.Rasterizer.SetViewport(viewport);
             }
         }
 
         // Only implemented for DirectX right now, so not in GraphicsDevice.cs
-        public void SetRenderTarget(
-            RenderTarget3D? renderTarget, int arraySlice, Color? clearColor = null)
+        public void SetRenderTarget(RenderTarget2D renderTarget, int arraySlice)
         {
+            if (!GraphicsCapabilities.SupportsTextureArrays)
+                throw new InvalidOperationException("Texture arrays are not supported on this graphics device");
+
             if (renderTarget == null)
             {
                 SetRenderTarget(null, clearColor);

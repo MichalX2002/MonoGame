@@ -4,13 +4,35 @@
 
 namespace MonoGame.Framework.Graphics
 {
+    /// <summary>
+    /// Provider of a <see cref="Graphics.GraphicsDevice"/>.
+    /// </summary>
     public interface IGraphicsDeviceService
     {
-        GraphicsDevice? GraphicsDevice { get; }
-        
-        event Event<IGraphicsDeviceService>? DeviceCreated;
+		/// <summary>
+		/// The provided <see cref="Graphics.GraphicsDevice"/>.
+		/// </summary>
+		GraphicsDevice GraphicsDevice { get; }
+
+        /// <summary>
+        /// Raised when a new <see cref="Graphics.GraphicsDevice"/> has been created.
+        /// </summary>
+		event Event<IGraphicsDeviceService>? DeviceCreated;
+
+        /// <summary>
+        /// Raised when the <see cref="GraphicsDevice"/> is disposed.
+        /// </summary>
         event Event<IGraphicsDeviceService>? DeviceDisposing;
+
+        /// <summary>
+        /// Raised when the <see cref="GraphicsDevice"/> has reset.
+        /// </summary>
+        /// <seealso cref="Graphics.GraphicsDevice.Reset"/>
         event Event<IGraphicsDeviceService>? DeviceReset;
+
+        /// <summary>
+        /// Raised before the <see cref="GraphicsDevice"/> is resetting.
+        /// </summary>
         event Event<IGraphicsDeviceService>? DeviceResetting;
     }
 }

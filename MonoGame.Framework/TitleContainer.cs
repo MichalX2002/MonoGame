@@ -8,6 +8,9 @@ using MonoGame.Framework.Utilities;
 
 namespace MonoGame.Framework
 {
+    /// <summary>
+    /// Provides functionality for opening a stream in the title storage area.
+    /// </summary>
     public static partial class TitleContainer
     {
         static partial void PlatformInit();
@@ -63,7 +66,7 @@ namespace MonoGame.Framework
 
         internal static string NormalizeRelativePath(string name)
         {
-            var uri = new Uri("file:///" + name);
+            var uri = new Uri("file:///" + FileHelpers.UrlEncode(name));
             var path = uri.LocalPath;
             path = path.Substring(1);
             return path.Replace(FileHelpers.NotSeparator, FileHelpers.Separator);

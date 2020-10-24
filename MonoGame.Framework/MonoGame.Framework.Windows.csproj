@@ -6,13 +6,17 @@
     <UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
-    <Description>MonoGame is an open source implementation of the Microsoft XNA 4.x Framework. The goal is to make it easy for XNA developers to create cross-platform games with extremely high code reuse.
-
-This package provides you with MonoGame Framework that uses DirectX for rendering and works on Windows.</Description>
+    <Description>The MonoGame runtime for Windows using DirectX API's.</Description>
     <PackageTags>monogame;.net core;core;.net standard;standard;windowsdx</PackageTags>
     <PackageId>MonoGame.Framework.WindowsDX</PackageId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="MonoGame.bmp">
+      <LogicalName>MonoGame.bmp</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  
   <ItemGroup>
     <Compile Remove="Android\**" />
     <Compile Remove="bin\**" />
@@ -81,15 +85,6 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
     <Compile Remove="Media\SongPart.cs" />
   </ItemGroup>
 
-  <Import Project="Platform\DirectX.targets" />
-  <Import Project="Platform\XAudio.targets" /> 
-  
-  <ItemGroup>
-    <EmbeddedResource Include="MonoGame.bmp">
-      <LogicalName>MonoGame.bmp</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Version="4.0.1" Include="SharpDX" />
     <PackageReference Version="4.0.1" Include="SharpDX.Direct2D1" />
@@ -105,4 +100,7 @@ This package provides you with MonoGame Framework that uses DirectX for renderin
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
     <ProjectReference Include="..\ThirdParty\NVorbis\NVorbis\NVorbis.csproj" />
   </ItemGroup>
+
+  <Import Project="Platform\DirectX.targets" />
+  <Import Project="Platform\XAudio.targets" />
 </Project>

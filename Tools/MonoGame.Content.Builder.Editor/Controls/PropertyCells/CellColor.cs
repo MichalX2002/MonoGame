@@ -33,7 +33,7 @@ namespace MonoGame.Tools.Pipeline
                 Color = color
             };
 
-            if (dialog.ShowDialog(control) == DialogResult.Ok && _eventHandler != null && dialog.Color != color)
+            if (dialog.Show(control) == DialogResult.Ok && _eventHandler != null && dialog.Color != color)
             {
                 var col = new Framework.Color(dialog.Color.Rb, dialog.Color.Gb, dialog.Color.Bb, dialog.Color.Ab);
                 _eventHandler(col, EventArgs.Empty);

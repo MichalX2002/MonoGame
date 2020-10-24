@@ -5,9 +5,7 @@
     <DefineConstants>ANDROID;GLES</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <MGOpenGL>GLES</MGOpenGL>
-    <Description>MonoGame is an open source implementation of the Microsoft XNA 4.x Framework. The goal is to make it easy for XNA developers to create cross-platform games with extremely high code reuse.
-
-This package provides you with MonoGame Framework that works on Android.</Description>
+    <Description>The MonoGame runtime for Android which supports Android 4.2 and newer.</Description>
     <PackageTags>monogame;.net core;core;.net standard;standard;android</PackageTags>
     <PackageId>MonoGame.Framework.Android</PackageId>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
@@ -61,45 +59,27 @@ This package provides you with MonoGame Framework that works on Android.</Descri
     <Compile Include="Platform\Android\ResumeManager.cs" />
     <Compile Include="Platform\Android\ScreenReceiver.cs" />
     <Compile Include="Platform\GamePlatform.Mobile.cs" />
-    <Compile Include="Platform\GraphicsDeviceManager.Legacy.cs">
-      <SubType>Code</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Compile>
+    <Compile Include="Platform\GraphicsDeviceManager.Legacy.cs" />
     <Compile Include="Platform\Graphics\GraphicsAdapter.Legacy.cs" />
     <Compile Include="Platform\Graphics\OpenGL.Android.cs" />
-    <Compile Include="Platform\Graphics\RenderTargetBindingArrayComparer.cs">
-      <SubType>Code</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Compile>
-    <Compile Include="Platform\Graphics\Shader\Shader.Structure.cs">
-      <SubType>Code</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Compile>
+    <Compile Include="Platform\Graphics\RenderTargetBindingArrayComparer.cs" />
+    <Compile Include="Platform\Graphics\Shader\Shader.Structure.cs" />
     <Compile Include="Platform\Input\GamePad.Android.cs" />
     <Compile Include="Platform\Input\Joystick.Default.cs" />
     <Compile Include="Platform\Input\KeyboardInput.Android.cs" />
     <Compile Include="Platform\Input\MessageBox.Android.cs" />
     <Compile Include="Platform\Input\Mouse.Default.cs" />
     <Compile Include="Platform\Input\MouseCursor.Default.cs" />
-    <Compile Include="Platform\Input\Touch\TouchPanelCapabilities.Android.cs">
-      <SubType>Code</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Compile>
-    <Compile Include="Platform\Media\Song.NVorbis.cs">
-      <SubType>Code</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Compile>
+    <Compile Include="Platform\Input\Touch\TouchPanelCapabilities.Android.cs" />
+    <Compile Include="Platform\Media\Song.NVorbis.cs" />
     <Compile Include="Platform\PrimaryThreadLoader.cs" />
-    <Compile Include="Platform\TaskbarList.Default.cs">
-      <SubType>Code</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Compile>
+    <Compile Include="Platform\TaskbarList.Default.cs" />
     <Compile Include="Platform\TitleContainer.Android.cs" />
     <Compile Include="Platform\Utilities\FuncLoader.Android.cs" />
     <Compile Include="Platform\Utilities\InteropHelpers.cs" />
     
-    <Compile Include="..\ThirdParty\StbImageSharp\src\StbImageSharp\**\*.cs" LinkBase="Utilities\StbImageSharp" />
-    <Compile Include="..\ThirdParty\StbImageWriteSharp\src\StbImageWriteSharp\**\*.cs" LinkBase="Utilities\StbImageWriteSharp" />
+    <Compile Include="..\ThirdParty\StbImageSharp\src\StbImageSharp\**\*.cs" LinkBase="Utilities\StbImageSharp"/>
+    <Compile Include="..\ThirdParty\StbImageWriteSharp\src\StbImageWriteSharp\**\*.cs" LinkBase="Utilities\StbImageWriteSharp"/>
   </ItemGroup>
 
   <ItemGroup>
@@ -132,4 +112,3 @@ This package provides you with MonoGame Framework that works on Android.</Descri
   <Import Project="Platform\OpenAL.targets" />
   <Import Project="Platform\Microsoft.Devices.Sensors.targets" />
 </Project>
-

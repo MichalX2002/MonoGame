@@ -38,7 +38,7 @@ namespace MonoGame.Framework.Audio
             set
             {
                 if (value < 0f)
-                    throw new ArgumentOutOfRangeException(nameof(value), "must be greater than or equal to 0f");
+                    throw new ArgumentOutOfRangeException(nameof(value), "Value must be greater than or equal to zero.");
 
                 _dopplerScale = value;
             }

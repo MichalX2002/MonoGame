@@ -7,6 +7,9 @@ using System.Collections.ObjectModel;
 
 namespace MonoGame.Framework
 {
+    /// <summary>
+    /// A collection of <see cref="IGameComponent"/> instances.
+    /// </summary>
     public sealed class GameComponentCollection : Collection<IGameComponent>
     {
         /// <summary>

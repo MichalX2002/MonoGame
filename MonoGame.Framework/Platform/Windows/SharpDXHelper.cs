@@ -28,7 +28,11 @@ namespace MonoGame.Framework
                     break;
 
                 case PresentInterval.Immediate:
+#if WINDOWS_UAP
+                    effect = SharpDX.DXGI.SwapEffect.FlipSequential;
+#else
                     effect = SharpDX.DXGI.SwapEffect.Sequential;
+#endif
                     break;
             }
 

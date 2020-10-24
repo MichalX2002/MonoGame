@@ -305,6 +305,12 @@ namespace MonoGame.Framework
                     #region Window
 
                     case SDL.EventType.WindowEvent:
+                        // If the ID is not the same as our main window ID
+                        // that means that we received an event from the
+                        // dummy window, so don't process the event.
+                        if (ev.Window.WindowID != _window.Id)
+                            break;
+
                         switch (ev.Window.EventId)
                         {
                             case SDL.Window.EventId.Resized:

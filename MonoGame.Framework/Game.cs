@@ -19,6 +19,10 @@ using Windows.ApplicationModel.Activation;
 
 namespace MonoGame.Framework
 {
+    /// <summary>
+    /// This class is the entry point for most games. Handles setting up
+    /// a window and graphics and runs a game loop that calls <see cref="Update"/> and <see cref="Draw"/>.
+    /// </summary>
     public partial class Game : IDisposable
     {
         private delegate void ByRefAction<TSender, TData>(TSender sender, in TData time);
@@ -43,7 +47,7 @@ namespace MonoGame.Framework
                 (u, handler) => u.UpdateOrderChanged += handler,
                 (u, handler) => u.UpdateOrderChanged -= handler);
 
-        private GraphicsDeviceManager? _graphicsDeviceManager;
+        private IGraphicsDeviceManager? _graphicsDeviceManager;
         private IGraphicsDeviceService? _graphicsDeviceService;
 
         private TimeSpan _targetElapsedTime;
@@ -65,6 +69,9 @@ namespace MonoGame.Framework
 
         partial void PlatformConstruct();
 
+        /// <summary>
+        /// Create a <see cref="Game"/>.
+        /// </summary>
         public Game()
         {
             LaunchParameters = new LaunchParameters();
@@ -222,9 +229,24 @@ namespace MonoGame.Framework
 
         #region Events
 
+        /// <summary>
+        /// Raised when the game gains focus.
+        /// </summary>
         public event Event<Game>? Activated;
+
+        /// <summary>
+        /// Raised when the game loses focus.
+        /// </summary>
         public event Event<Game>? Deactivated;
+
+        /// <summary>
+        /// Raised when this game is being disposed.
+        /// </summary>
         public event Event<Game>? Disposed;
+
+        /// <summary>
+        /// Raised when this game is exiting.
+        /// </summary>
         public event Event<Game>? Exiting;
 
 #if WINDOWS_UAP
@@ -236,6 +258,9 @@ namespace MonoGame.Framework
 
         #region Public Methods
 
+        /// <summary>
+        /// Exit the game at the end of this tick.
+        /// </summary>
 #if IOS
         [Obsolete("This platform's policy does not allow programmatically closing.", true)]
 #endif
@@ -245,6 +270,9 @@ namespace MonoGame.Framework
             _suppressDraw = true;
         }
 
+        /// <summary>
+        /// Reset the elapsed game time to <see cref="TimeSpan.Zero"/>.
+        /// </summary>
         public void ResetElapsedTime()
         {
             Platform.ResetElapsedTime();
@@ -254,11 +282,17 @@ namespace MonoGame.Framework
             _previousTicks = 0;
         }
 
+        /// <summary>
+        /// Supress calling <see cref="Draw"/> in the game loop.
+        /// </summary>
         public void SuppressDraw()
         {
             _suppressDraw = true;
         }
 
+        /// <summary>
+        /// Run the game for one frame, then exit.
+        /// </summary>
         public void RunOneFrame()
         {
             if (Platform == null)
@@ -283,11 +317,18 @@ namespace MonoGame.Framework
 
         }
 
+        /// <summary>
+        /// Run the game using the default <see cref="GameRunBehavior"/> for the current platform.
+        /// </summary>
         public void Run()
         {
             Run(Platform.DefaultRunBehavior);
         }
 
+        /// <summary>
+        /// Run the game.
+        /// </summary>
+        /// <param name="runBehavior">Indicate if the game should be run synchronously or asynchronously.</param>
         public void Run(GameRunBehavior runBehavior)
         {
             AssertNotDisposed();
@@ -323,18 +364,16 @@ namespace MonoGame.Framework
 
                 case GameRunBehavior.Synchronous:
                     // XNA runs one Update even before showing the window
-                    DoUpdate(new FrameTime());
+                    DoUpdate(new GameTime());
 
-                    if (!_shouldExit)
-                        Platform.RunLoop();
-
+                    Platform.RunLoop();
                     EndRun();
                     DoExiting();
                     break;
 
                 default:
-                    throw new ArgumentException(
-                        $"Handling for the run behavior {runBehavior} is not implemented.");
+                    throw new ArgumentException(string.Format(
+                        "Handling for the run behavior {0} is not implemented.", runBehavior));
             }
         }
 
@@ -343,6 +382,14 @@ namespace MonoGame.Framework
             _previousTicks = Stopwatch.GetTimestamp();
         }
 
+        /// <summary>
+        /// Run one iteration of the game loop.
+        ///
+        /// Makes at least one call to <see cref="Update"/>
+        /// and exactly one call to <see cref="Draw"/> if drawing is not supressed.
+        /// When <see cref="IsFixedTimeStep"/> is set to <code>false</code> this will
+        /// make exactly one call to <see cref="Update"/>.
+        /// </summary>
         public void Tick()
         {
             // NOTE: This code is very sensitive and can break very badly
@@ -450,15 +497,49 @@ namespace MonoGame.Framework
 
         #region Protected Methods
 
-        protected virtual bool BeginDraw() => true;
-        protected virtual void EndDraw() => Platform.Present();
+        /// <summary>
+        /// Called right before <see cref="Draw"/> is normally called. Can return <code>false</code>
+        /// to let the game loop not call <see cref="Draw"/>.
+        /// </summary>
+        /// <returns>
+        ///   <code>true</code> if <see cref="Draw"/> should be called, <code>false</code> if it should not.
+        /// </returns>
+        protected virtual bool BeginDraw() { return true; }
 
+        /// <summary>
+        /// Called right after <see cref="Draw"/>. Presents the
+        /// rendered frame in the <see cref="GameWindow"/>.
+        /// </summary>
+        protected virtual void EndDraw()
+        {
+            Platform.Present();
+        }
+
+        /// <summary>
+        /// Called after <see cref="Initialize"/>, but before the first call to <see cref="Update"/>.
+        /// </summary>
         protected virtual void BeginRun() { }
+
+        /// <summary>
+        /// Called when the game loop has been terminated before exiting.
+        /// </summary>
         protected virtual void EndRun() { }
 
+        /// <summary>
+        /// Override this to load graphical resources required by the game.
+        /// </summary>
         protected virtual void LoadContent() { }
+
+        /// <summary>
+        /// Override this to unload graphical resources loaded by the game.
+        /// </summary>
         protected virtual void UnloadContent() { }
 
+        /// <summary>
+        /// Override this to initialize the game and load any needed non-graphical resources.
+        ///
+        /// Initializes attached <see cref="GameComponent"/> instances and calls <see cref="LoadContent"/>.
+        /// </summary>
         protected virtual void Initialize()
         {
             if (_shouldExit)
@@ -490,37 +571,60 @@ namespace MonoGame.Framework
                 drawable.Draw(time);
             };
 
+        /// <summary>
+        /// Called when the game should draw a frame.
+        ///
+        /// Draws the <see cref="DrawableGameComponent"/> instances attached to this game.
+        /// Override this to render your game.
+        /// </summary>
+        /// <param name="time">
+        /// A <see cref="FrameTime"/> instance containing the elapsed time since the last call to 
+        /// <see cref="Draw"/> and the total time elapsed since the game started.
+        /// </param>
+        protected virtual void Draw(in FrameTime time)
+        {
+
+            _drawables.ForEachFilteredItem(DrawAction, time);
+        }
+
         private static ByRefAction<IUpdateable, FrameTime> UpdateAction { get; } =
             delegate (IUpdateable updateable, in FrameTime time)
             {
                 updateable.Update(time);
             };
 
-        protected virtual void Draw(in FrameTime time)
-        {
-            _drawables.ForEachFilteredItem(DrawAction, time);
-        }
-
+        /// <summary>
+        /// Called when the game should update.
+        ///
+        /// Updates the <see cref="GameComponent"/> instances attached to this game.
+        /// Override this to update your game.
+        /// </summary>
+        /// <param name="time">The elapsed time since the last call to <see cref="Update"/>.</param>
         protected virtual void Update(in FrameTime time)
         {
             _updateables.ForEachFilteredItem(UpdateAction, time);
         }
 
-        protected virtual void OnExiting(Game sender)
+        /// <summary>
+        /// Called when the game is exiting. Raises the <see cref="Exiting"/> event.
+        /// </summary>
+        /// <param name="sender">This <see cref="Game"/>.</param>
+        /// <param name="args">The arguments to the <see cref="Exiting"/> event.</param>
+        protected virtual void OnExiting(object sender, EventArgs args)
         {
             Exiting?.Invoke(sender);
         }
 
-        protected virtual void OnActivated(Game sender)
+        protected virtual void OnActivated(object sender, EventArgs args)
         {
             AssertNotDisposed();
-            Activated?.Invoke(sender);
+            EventHelpers.Raise(sender, Activated, args);
         }
 
-        protected virtual void OnDeactivated(Game sender)
+        protected virtual void OnDeactivated(object sender, EventArgs args)
         {
             AssertNotDisposed();
-            Deactivated?.Invoke(sender);
+            EventHelpers.Raise(sender, Deactivated, args);
         }
 
         #endregion Protected Methods
@@ -551,11 +655,11 @@ namespace MonoGame.Framework
 
         #endregion Event Handlers
 
+        #region Internal Methods
+
         // TODO: We should work toward eliminating internal methods.  They
         //       break entirely the possibility that additional platforms could
         //       be added by third parties without changing MonoGame itself.
-
-        #region Internal Methods
 
 #if !(WINDOWS && DIRECTX)
         internal void InternalApplyChanges()
