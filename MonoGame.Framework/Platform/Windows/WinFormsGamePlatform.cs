@@ -72,12 +72,12 @@ namespace MonoGame.Framework
             }
         }
 
-        public override bool BeforeUpdate(in FrameTime gameTime)
+        public override bool BeforeUpdate(in FrameTime time)
         {
             return true;
         }
 
-        public override bool BeforeDraw(in FrameTime gameTime)
+        public override bool BeforeDraw(in FrameTime time)
         {
             return true;
         }

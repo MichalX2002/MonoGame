@@ -85,8 +85,8 @@ namespace MonoGame.Tools.Pipeline
 
         public static void Unassociate()
         {
-            if (File.Exists(startMenuLink))
-                File.Delete(startMenuLink);
+            if (File.Exists(StartMenuLink))
+                File.Delete(StartMenuLink);
 
             UnsetWindowsAssociation(extension, progId);
             RefreshEnvironment();

@@ -25,7 +25,7 @@ namespace MonoGame.Framework
             if (len == 0)
                 return string.Empty;
 
-            return Encoding.UTF8.GetString((byte*)handle, len);
+            return Encoding.UTF8.GetString((byte*)handle, (int)len);
         }
     }
 }

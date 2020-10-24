@@ -46,7 +46,7 @@ namespace MonoGame.Tools.Pipeline
                     if (_includes[i].IncludeType == IncludeType.Create ||
                         _includes[i].IncludeType == IncludeType.Link)
                     {
-                        item.OriginalPath = Util.GetRelativePath(_includes[i].SourcePath, _con.ProjectLocation);
+                        item.OriginalPath = Utils.GetRelativePath(_includes[i].SourcePath, _con.ProjectLocation);
                         item.DestinationPath = _includes[i].RelativeDestPath;
 
                         if (_includes[i].IncludeType == IncludeType.Create)

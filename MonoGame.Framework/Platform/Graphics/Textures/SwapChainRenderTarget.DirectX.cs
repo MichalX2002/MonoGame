@@ -4,7 +4,6 @@ using SharpDX.Direct3D11;
 
 namespace MonoGame.Framework.Graphics
 {
-
     /// <summary>
     /// A swap chain used for rendering to a secondary GameWindow.
     /// </summary>
@@ -49,18 +48,18 @@ namespace MonoGame.Framework.Graphics
             SwapChainRenderTargetConstruct(depthFormat, ref dxgiFormat, ref multisampleDesc);
         }
 
-        private SharpDX.Direct3D11.Texture2D CreateSwaipChainTexture(SharpDX.DXGI.Format dxgiFormat, SharpDX.DXGI.SampleDescription multisampleDesc)
+        private SharpDX.Direct3D11.Texture2D CreateSwaipChainTexture(Format dxgiFormat, SampleDescription multisampleDesc)
         {
             var d3dDevice = GraphicsDevice._d3dDevice;
 
-            var desc = new SwapChainDescription()
+            var chainDesc = new SwapChainDescription()
             {
                 ModeDescription =
                 {
                     Format = dxgiFormat,
                     Scaling = DisplayModeScaling.Stretched,
-                    Width = width,
-                    Height = height,
+                    Width = Width,
+                    Height = Height,
                 },
 
                 OutputHandle = _windowHandle,
@@ -86,7 +85,8 @@ namespace MonoGame.Framework.Graphics
             return _backBuffer;
         }
         
-        private void SwapChainRenderTargetConstruct(DepthFormat depthFormat, ref SharpDX.DXGI.Format dxgiFormat, ref SharpDX.DXGI.SampleDescription multisampleDesc)
+        private void SwapChainRenderTargetConstruct(
+            DepthFormat depthFormat, ref Format dxgiFormat, ref SampleDescription multisampleDesc)
         {
             var backBuffer = CreateSwaipChainTexture(dxgiFormat, multisampleDesc);
 

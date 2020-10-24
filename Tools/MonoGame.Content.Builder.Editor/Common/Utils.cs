@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace MonoGame.Tools.Pipeline
 {
-    public static class Util
+    public static class Utils
     {
         [DllImport("libc")]
         private static extern string realpath(string path, IntPtr resolved_path);

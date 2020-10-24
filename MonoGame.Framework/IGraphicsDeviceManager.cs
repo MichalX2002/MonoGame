@@ -2,12 +2,14 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+using System;
+
 namespace MonoGame.Framework
 {
     /// <summary>
     /// Used by the platform code to control the graphics device.
     /// </summary>
-    public interface IGraphicsDeviceManager
+    public interface IGraphicsDeviceManager : IDisposable
     {
         /// <summary>
         /// Called to create the graphics device.

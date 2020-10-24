@@ -49,10 +49,10 @@ namespace MonoGame.Framework
         }
 
         /// <inheritdoc />
-        public event Event<object>? EnabledChanged;
+        public event Event<IUpdateable>? EnabledChanged;
 
         /// <inheritdoc />
-        public event Event<object>? UpdateOrderChanged;
+        public event Event<IUpdateable>? UpdateOrderChanged;
 
         public GameComponent(Game game)
         {

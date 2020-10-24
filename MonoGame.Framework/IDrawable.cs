@@ -19,22 +19,22 @@ namespace MonoGame.Framework
         /// Indicates if <see cref="Draw"/> will be called.
         /// </summary>
         bool Visible { get; }
-		
+        
         /// <summary>
         /// Raised when <see cref="DrawOrder"/> changed.
         /// </summary>
-		event EventHandler<EventArgs> DrawOrderChanged;
+        event Event<IDrawable> DrawOrderChanged;
 
         /// <summary>
         /// Raised when <see cref="Visible"/> changed.
         /// </summary>
-        event EventHandler<EventArgs> VisibleChanged;
+        event Event<IDrawable> VisibleChanged;
 
         /// <summary>
         /// Called when this <see cref="IDrawable"/> should draw itself.
         /// </summary>
-        /// <param name="gameTime">The elapsed time since the last call to <see cref="Draw"/>.</param>
-        void Draw(GameTime gameTime);      
+        /// <param name="time">The elapsed time since the last call to <see cref="Draw"/>.</param>
+        void Draw(in FrameTime time);      
     }
 }
 

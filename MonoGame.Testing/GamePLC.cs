@@ -423,7 +423,7 @@ namespace MonoGame.Testing
                 _lastViewport = currentViewport;
             }
 
-            GraphicsDevice.SetRenderTarget(_fontTarget, Color.Transparent);
+            GraphicsDevice.SetRenderTarget(_fontTarget, Color.Transparent.ToVector4());
 
             var viewPos = ViewPosition * _renderScale;
             _spriteBatch.Begin(
@@ -566,7 +566,7 @@ namespace MonoGame.Testing
             }
             _spriteBatch.End();
 
-            GraphicsDevice.SetRenderTarget(null, new Color(Color.MediumPurple * 0.255f, 255));
+            GraphicsDevice.SetRenderTarget(null, new Color(Color.MediumPurple * 0.255f, 255).ToVector4());
 
             _spriteBatch.Begin(blendState: BlendState.AlphaBlend);
             _spriteBatch.Draw(_fontTarget, currentViewport.Bounds, _fontTarget.Bounds, Color.White);

@@ -53,7 +53,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="box">The box for testing.</param>
         /// <returns>The containment type.</returns>
-        public ContainmentType Contains(in BoundingBox box)
+        public readonly ContainmentType Contains(in BoundingBox box)
         {
             Span<Vector3> corners = stackalloc Vector3[BoundingBox.CornerCount];
             box.GetCorners(corners);
@@ -104,8 +104,11 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="frustum">The frustum for testing.</param>
         /// <returns>The containment type.</returns>
-        public ContainmentType Contains(BoundingFrustum frustum)
+        public readonly ContainmentType Contains(BoundingFrustum frustum)
         {
+            if (frustum == null)
+                throw new ArgumentNullException(nameof(frustum));
+
             //check if all corner is in sphere
             bool inside = true;
 
@@ -136,7 +139,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="sphere">The other sphere for testing.</param>
         /// <returns>The containment type.</returns>
-        public ContainmentType Contains(in BoundingSphere sphere)
+        public readonly ContainmentType Contains(in BoundingSphere sphere)
         {
             float sqDistance = Vector3.DistanceSquared(sphere.Center, Center);
             if (sqDistance > (sphere.Radius + Radius) * (sphere.Radius + Radius))
@@ -151,7 +154,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="point">The vector in 3D-space for testing.</param>
         /// <returns>The containment type.</returns>
-        public ContainmentType Contains(Vector3 point)
+        public readonly ContainmentType Contains(Vector3 point)
         {
             float sqRadius = Radius * Radius;
             float sqDistance = Vector3.DistanceSquared(point, Center);
@@ -194,6 +197,9 @@ namespace MonoGame.Framework
         /// <returns>The new <see cref="BoundingSphere"/>.</returns>
         public static BoundingSphere CreateFromFrustum(BoundingFrustum frustum)
         {
+            if (frustum == null)
+                throw new ArgumentNullException(nameof(frustum));
+
             return CreateFromPoints(frustum.Corners);
         }
 
@@ -397,26 +403,25 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="other">The <see cref="BoundingSphere"/> to compare.</param>
         /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
-        public bool Equals(BoundingSphere other) => this == other;
+        public readonly bool Equals(BoundingSphere other) => this == other;
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="object"/>.
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare.</param>
         /// <returns><see langword="true"/> if the instances are equal; <see langword="false"/> otherwise.</returns>
-        public override bool Equals(object obj) => obj is BoundingSphere other && Equals(other);
+        public readonly override bool Equals(object? obj)
+        {
+            return obj is BoundingSphere other && Equals(other);
+        }
 
         /// <summary>
         /// Gets the hash code of this <see cref="BoundingSphere"/>.
         /// </summary>
         /// <returns>Hash code of this <see cref="BoundingSphere"/>.</returns>
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
-            unchecked
-            {
-                int code = 7 + Center.GetHashCode();
-                return code * 31 + Radius.GetHashCode();
-            }
+            return HashCode.Combine(Center, Radius);
         }
 
         #region Intersects
@@ -425,8 +430,11 @@ namespace MonoGame.Framework
         /// Gets whether or not a specified box intersects with this sphere.
         /// </summary>
         /// <param name="box">The box for testing.</param>
-        /// <returns><see langword="true"/> if <see cref="BoundingBox"/> intersects with this sphere; <see langword="false"/> otherwise.</returns>
-        public bool Intersects(in BoundingBox box)
+        /// <returns>
+        /// <see langword="true"/> if <see cref="BoundingBox"/> intersects with this sphere; 
+        /// <see langword="false"/> otherwise.
+        /// </returns>
+        public readonly bool Intersects(in BoundingBox box)
         {
             return box.Intersects(this);
         }
@@ -443,7 +451,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="sphere">The other sphere for testing.</param>
         /// <returns><see langword="true"/> if other <see cref="BoundingSphere"/> intersects with this sphere; <see langword="false"/> otherwise.</returns>
-        public bool Intersects(in BoundingSphere sphere)
+        public readonly bool Intersects(in BoundingSphere sphere)
         {
             float sqDistance = Vector3.DistanceSquared(sphere.Center, Center);
             return !(sqDistance > (sphere.Radius + Radius) * (sphere.Radius + Radius));
@@ -454,7 +462,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="plane">The plane for testing.</param>
         /// <returns>Type of intersection.</returns>
-        public PlaneIntersectionType Intersects(Plane plane)
+        public readonly PlaneIntersectionType Intersects(Plane plane)
         {
             // TODO: we might want to inline this for performance reasons
             float distance = Vector3.Dot(plane.Normal, Center);
@@ -473,7 +481,7 @@ namespace MonoGame.Framework
         /// <param name="ray">The ray for testing.</param>
         /// <param name="distance">Distance of ray intersection.</param>
         /// <returns>Whether the ray intersects this sphere.</returns>
-        public bool Intersects(in Ray ray, out float distance)
+        public readonly bool Intersects(in Ray ray, out float distance)
         {
             return ray.Intersects(this, out distance);
         }
@@ -485,7 +493,7 @@ namespace MonoGame.Framework
         /// {Center:[<see cref="Center"/>] Radius:[<see cref="Radius"/>]}
         /// </summary>
         /// <returns>A <see cref="string"/> representation of this <see cref="BoundingSphere"/>.</returns>
-        public override string ToString()
+        public readonly override string ToString()
         {
             return "{Center:" + Center + " Radius:" + Radius + "}";
         }
@@ -495,7 +503,7 @@ namespace MonoGame.Framework
         /// </summary>
         /// <param name="matrix">The transformation <see cref="Matrix4x4"/>.</param>
         /// <returns>Transformed <see cref="BoundingSphere"/>.</returns>
-        public BoundingSphere Transform(in Matrix4x4 matrix)
+        public readonly BoundingSphere Transform(in Matrix4x4 matrix)
         {
             float v1 = (matrix.M11 * matrix.M11) + (matrix.M12 * matrix.M12) + (matrix.M13 * matrix.M13);
             float v2 = (matrix.M21 * matrix.M21) + (matrix.M22 * matrix.M22) + (matrix.M23 * matrix.M23);
@@ -539,7 +547,7 @@ namespace MonoGame.Framework
         /// <returns><see langword="true"/> if the instances are not equal; <see langword="false"/> otherwise.</returns>
         public static bool operator !=(in BoundingSphere a, in BoundingSphere b)
         {
-            return !a.Equals(b);
+            return !(a == b);
         }
 
         #endregion

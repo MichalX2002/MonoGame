@@ -500,7 +500,9 @@ namespace MonoGame.Framework
 
         private void UpdateBackBufferSize()
         {
-            var manager = Game.GraphicsDeviceManager;
+            if (!(Game.GraphicsDeviceManager is GraphicsDeviceManager manager))
+                throw new InvalidOperationException();
+
             if (manager.GraphicsDevice == null)
                 return;
 

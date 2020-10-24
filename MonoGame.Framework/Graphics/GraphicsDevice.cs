@@ -65,9 +65,9 @@ namespace MonoGame.Framework.Graphics
         /// performance warnings on Intel/Mesa.
         /// </summary>
 #if DEBUG
-        private static Color DiscardColor { get; } = new Color(68, 34, 136, 255);
+        private static Vector4 DiscardColor { get; } = new Color(68, 34, 136, 255).ToScaledVector4();
 #else
-        private static Color DiscardColor { get; } = new Color(0, 0, 0, 0);
+        private static Vector4 DiscardColor { get; } = new Color(0, 0, 0, 0).ToScaledVector4();
 #endif
 
         private Shader _vertexShader;
@@ -496,6 +496,11 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
+        public void Clear(Vector4 color)
+        {
+            Clear(ClearOptions.Full, color, _viewport.MaxDepth, 0);
+        }
+
         public void Clear(ClearOptions options, Color color, float depth, int stencil)
         {
             Clear(options, color.ToScaledVector4(), depth, stencil);
@@ -624,7 +629,7 @@ namespace MonoGame.Framework.Graphics
         #region RenderTargets
 
         public void SetRenderTarget(
-            RenderTarget2D? renderTarget, int arraySlice, Color? clearColor = null)
+            RenderTarget2D? renderTarget, int arraySlice, Vector4? clearColor = null)
         {
             if (renderTarget == null)
             {
@@ -637,13 +642,13 @@ namespace MonoGame.Framework.Graphics
             }
         }
 
-        public void SetRenderTarget(RenderTarget2D? renderTarget, Color? clearColor = null)
+        public void SetRenderTarget(RenderTarget2D? renderTarget, Vector4? clearColor = null)
         {
             SetRenderTarget(renderTarget, 0, clearColor);
         }
 
         public void SetRenderTarget(
-            RenderTargetCube? renderTarget, CubeMapFace cubeMapFace, Color? clearColor = null)
+            RenderTargetCube? renderTarget, CubeMapFace cubeMapFace, Vector4? clearColor = null)
         {
             if (renderTarget == null)
             {
@@ -657,12 +662,19 @@ namespace MonoGame.Framework.Graphics
         }
 
         public void SetRenderTargets(
-            ReadOnlySpan<RenderTargetBinding> renderTargets, Color? clearColor = null)
+            ReadOnlySpan<RenderTargetBinding> renderTargets, Vector4? clearColor = null)
         {
-            int renderTargetCount = renderTargets.Length;
+            if (!Capabilities.SupportsTextureArrays)
+            {
+                for (int i = 0; i < renderTargets.Length; i++)
+                {
+                    if (renderTargets[i].ArraySlice != 0)
+                        throw new InvalidOperationException("Texture arrays are not supported on this graphics device");
+                }
+            }
 
             // Try to early out if the current and new bindings are equal.
-            if (RenderTargetCount == renderTargetCount)
+            if (RenderTargetCount == renderTargets.Length)
             {
                 bool isEqual = true;
 
@@ -684,14 +696,14 @@ namespace MonoGame.Framework.Graphics
 
             unchecked
             {
-                if (renderTargetCount == 0)
+                if (renderTargets.Length == 0)
                     _graphicsMetrics._targetCount++;
                 else
-                    _graphicsMetrics._targetCount += renderTargetCount;
+                    _graphicsMetrics._targetCount += renderTargets.Length;
             }
         }
 
-        public void SetRenderTargets(Color? clearColor, params RenderTargetBinding[]? renderTargets)
+        public void SetRenderTargets(Vector4? clearColor, params RenderTargetBinding[]? renderTargets)
         {
             SetRenderTargets(renderTargets.AsSpan(), clearColor);
         }
@@ -702,7 +714,7 @@ namespace MonoGame.Framework.Graphics
         }
 
         internal void ApplyRenderTargets(
-            ReadOnlySpan<RenderTargetBinding> renderTargets, Color? clearColor)
+            ReadOnlySpan<RenderTargetBinding> renderTargets, Vector4? clearColor)
         {
             PlatformResolveRenderTargets();
 
@@ -1071,7 +1083,7 @@ namespace MonoGame.Framework.Graphics
             where TIndex : unmanaged
         {
             var elementType = IndexBuffer.ToIndexElementType(typeof(TIndex));
-                
+
             DrawUserIndexedPrimitives(
                 primitiveType,
                 elementType,

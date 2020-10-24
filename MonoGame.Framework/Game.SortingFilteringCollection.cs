@@ -24,18 +24,18 @@ namespace MonoGame.Framework
 
             private readonly Predicate<T> _filter;
             private readonly Comparison<T> _sort;
-            private readonly Action<T, Event<object>> _filterChangedSubscriber;
-            private readonly Action<T, Event<object>> _filterChangedUnsubscriber;
-            private readonly Action<T, Event<object>> _sortChangedSubscriber;
-            private readonly Action<T, Event<object>> _sortChangedUnsubscriber;
+            private readonly Action<T, Event<T>> _filterChangedSubscriber;
+            private readonly Action<T, Event<T>> _filterChangedUnsubscriber;
+            private readonly Action<T, Event<T>> _sortChangedSubscriber;
+            private readonly Action<T, Event<T>> _sortChangedUnsubscriber;
 
             public SortingFilteringCollection(
                 Predicate<T> filter,
-                Action<T, Event<object>> filterChangedSubscriber,
-                Action<T, Event<object>> filterChangedUnsubscriber,
+                Action<T, Event<T>> filterChangedSubscriber,
+                Action<T, Event<T>> filterChangedUnsubscriber,
                 Comparison<T> sort,
-                Action<T, Event<object>> sortChangedSubscriber,
-                Action<T, Event<object>> sortChangedUnsubscriber)
+                Action<T, Event<T>> sortChangedSubscriber,
+                Action<T, Event<T>> sortChangedUnsubscriber)
             {
                 _items = new List<T>();
                 _addJournal = new List<AddJournalEntry<T>>();
@@ -224,14 +224,13 @@ namespace MonoGame.Framework
                 _shouldRebuildCache = true;
             }
 
-            private void Item_FilterPropertyChanged(object sender)
+            private void Item_FilterPropertyChanged(T item)
             {
                 InvalidateCache();
             }
 
-            private void Item_SortPropertyChanged(object sender)
+            private void Item_SortPropertyChanged(T item)
             {
-                T item = (T)sender;
                 int index = _items.IndexOf(item);
 
                 _addJournal.Add(new AddJournalEntry<T>(_addJournal.Count, item));

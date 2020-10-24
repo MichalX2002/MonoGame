@@ -364,7 +364,7 @@ namespace MonoGame.Framework
 
                 case GameRunBehavior.Synchronous:
                     // XNA runs one Update even before showing the window
-                    DoUpdate(new GameTime());
+                    DoUpdate(default);
 
                     Platform.RunLoop();
                     EndRun();
@@ -609,22 +609,29 @@ namespace MonoGame.Framework
         /// Called when the game is exiting. Raises the <see cref="Exiting"/> event.
         /// </summary>
         /// <param name="sender">This <see cref="Game"/>.</param>
-        /// <param name="args">The arguments to the <see cref="Exiting"/> event.</param>
-        protected virtual void OnExiting(object sender, EventArgs args)
+        protected virtual void OnExiting(Game sender)
         {
             Exiting?.Invoke(sender);
         }
 
-        protected virtual void OnActivated(object sender, EventArgs args)
+        /// <summary>
+        /// Called when the game is activated (focused). Raises the <see cref="Activated"/> event.
+        /// </summary>
+        /// <param name="sender">This <see cref="Game"/>.</param>
+        protected virtual void OnActivated(Game sender)
         {
             AssertNotDisposed();
-            EventHelpers.Raise(sender, Activated, args);
+            Activated?.Invoke(sender);
         }
 
-        protected virtual void OnDeactivated(object sender, EventArgs args)
+        /// <summary>
+        /// Called when the game is deactivated (unfocused). Raises the <see cref="Deactivated"/> event.
+        /// </summary>
+        /// <param name="sender">This <see cref="Game"/>.</param>
+        protected virtual void OnDeactivated(Game sender)
         {
             AssertNotDisposed();
-            EventHelpers.Raise(sender, Deactivated, args);
+            Deactivated?.Invoke(sender);
         }
 
         #endregion Protected Methods
@@ -736,12 +743,12 @@ namespace MonoGame.Framework
 
         #endregion Internal Methods
 
-        internal GraphicsDeviceManager? GraphicsDeviceManager
+        internal IGraphicsDeviceManager? GraphicsDeviceManager
         {
             get
             {
                 if (_graphicsDeviceManager == null)
-                    _graphicsDeviceManager = Services.GetService<IGraphicsDeviceManager>() as GraphicsDeviceManager;
+                    _graphicsDeviceManager = Services.GetService<IGraphicsDeviceManager>();
 
                 return _graphicsDeviceManager;
             }

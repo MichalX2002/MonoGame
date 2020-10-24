@@ -910,7 +910,7 @@ namespace MonoGame.Framework.Graphics
             // Clear options for depth/stencil buffer if not attached.
             if (_currentDepthStencilView != null)
             {
-                if (_currentDepthStencilView.Description.Format != SharpDX.DXGI.Format.D24_UNorm_S8_UInt)
+                if (_currentDepthStencilView.Description.Format != Format.D24_UNorm_S8_UInt)
                     options &= ~ClearOptions.Stencil;
             }
             else
@@ -922,21 +922,21 @@ namespace MonoGame.Framework.Graphics
             lock (_d3dContext)
             {
                 // Clear the diffuse render buffer.
-                if ((options & ClearOptions.Target) == ClearOptions.Target)
+                if ((options & ClearOptions.Color) == ClearOptions.Color)
                 {
-                    foreach (var view in _currentRenderTargets)
+                    foreach (var view in CurrentRenderTargets)
                     {
                         if (view != null)
-							_d3dContext.ClearRenderTargetView(view, new RawColor4(color.X, color.Y, color.Z, color.W));
+                            _d3dContext.ClearRenderTargetView(view, new RawColor4(color.X, color.Y, color.Z, color.W));
                     }
                 }
 
                 // Clear the depth/stencil render buffer.
-                SharpDX.Direct3D11.DepthStencilClearFlags flags = 0;
+                DepthStencilClearFlags flags = 0;
                 if ((options & ClearOptions.DepthBuffer) == ClearOptions.DepthBuffer)
-                    flags |= SharpDX.Direct3D11.DepthStencilClearFlags.Depth;
+                    flags |= DepthStencilClearFlags.Depth;
                 if ((options & ClearOptions.Stencil) == ClearOptions.Stencil)
-                    flags |= SharpDX.Direct3D11.DepthStencilClearFlags.Stencil;
+                    flags |= DepthStencilClearFlags.Stencil;
 
                 if (flags != 0)
                     _d3dContext.ClearDepthStencilView(_currentDepthStencilView, flags, depth, (byte)stencil);
@@ -1004,89 +1004,51 @@ namespace MonoGame.Framework.Graphics
 
         private void PlatformPresent()
         {
-#if WINDOWS_UAP
-            try
-            {
-                // The first argument instructs DXGI to block until VSync, putting the application
-                // to sleep until the next VSync. This ensures we don't waste any cycles rendering
-                // frames that will never be displayed to the screen.
-                lock (_d3dContext)
-                {
-                    if (PresentationParameters.PresentationInterval == PresentInterval.Immediate)
-                    {
-                        _swapChain.Present(0, PresentFlags.AllowTearing);
-                    }
-                    else
-                    {
-                        _swapChain.Present(1, PresentFlags.None);
-                    }
-                }
-            }
-            catch (SharpDX.SharpDXException ex)
-            {
-                // TODO: How should we deal with a device lost case here?
-                /*               
-                // If the device was removed either by a disconnect or a driver upgrade, we 
-                // must completely reinitialize the renderer.
-                if (    ex.ResultCode == SharpDX.DXGI.DXGIError.DeviceRemoved ||
-                        ex.ResultCode == SharpDX.DXGI.DXGIError.DeviceReset)
-                    this.Initialize();
-                else
-                    throw;
-                */
-            }
-
-#endif
-#if WINDOWS
+            Debug.Assert(_swapChain != null);
 
             try
             {
                 var syncInterval = PresentationParameters.PresentationInterval.GetSyncInterval();
 
-                // The first argument instructs DXGI to block n VSyncs before presenting.
+                // The first argument instructs DXGI to block until VSync, putting the application
+                // to sleep until the next VSync. This ensures we don't waste any cycles rendering
+                // frames that will never be displayed to the screen.
                 lock (_d3dContext)
-                    _swapChain.Present(syncInterval, PresentFlags.None);
+                {
+                    _swapChain.Present(syncInterval, syncInterval == 0 ? PresentFlags.AllowTearing : PresentFlags.None);
+                }
             }
-            catch (SharpDX.SharpDXException)
+            catch (SharpDXException)
             {
-                // TODO: How should we deal with a device lost case here?
+                //// TODO: How should we deal with a device lost case here?
+                
+                //// If the device was removed either by a disconnect or a driver upgrade, we 
+                //// must completely reinitialize the renderer.
+                //if (    ex.ResultCode == SharpDX.DXGI.DXGIError.DeviceRemoved ||
+                //        ex.ResultCode == SharpDX.DXGI.DXGIError.DeviceReset)
+                //    this.Initialize();
+                //else
+                //    throw;
             }
-#endif
         }
 
         private void PlatformSetViewport(in Viewport value)
         {
-            if (_d3dContext != null)
+            if (_d3dContext == null)
+                return;
+            
+            var viewport = new RawViewportF
             {
-				var viewport = new RawViewportF
-				{
-					X = _viewport.X,
-					Y = _viewport.Y,
-					Width = (float)_viewport.Width,
-					Height = (float)_viewport.Height,
-					MinDepth = _viewport.MinDepth,
-					MaxDepth = _viewport.MaxDepth
-				};
-                lock (_d3dContext)
-                    _d3dContext.Rasterizer.SetViewport(viewport);
-            }
-        }
+                X = _viewport.X,
+                Y = _viewport.Y,
+                Width = _viewport.Width,
+                Height = _viewport.Height,
+                MinDepth = _viewport.MinDepth,
+                MaxDepth = _viewport.MaxDepth
+            };
 
-        // Only implemented for DirectX right now, so not in GraphicsDevice.cs
-        public void SetRenderTarget(RenderTarget2D renderTarget, int arraySlice)
-        {
-            if (!GraphicsCapabilities.SupportsTextureArrays)
-                throw new InvalidOperationException("Texture arrays are not supported on this graphics device");
-
-            if (renderTarget == null)
-            {
-                SetRenderTarget(null, clearColor);
-            }
-            else
-            {
-                _tmpRenderTargetBinding[0] = new RenderTargetBinding(renderTarget, arraySlice);
-                SetRenderTargets(_tmpRenderTargetBinding, clearColor);
-            }
+            lock (_d3dContext)
+                _d3dContext.Rasterizer.SetViewport(viewport);
         }
 
         private void PlatformApplyDefaultRenderTarget()

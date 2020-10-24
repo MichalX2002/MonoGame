@@ -4,9 +4,7 @@
 
 using System;
 using System.Diagnostics;
-using System.Reflection;
 using MonoGame.Framework.Graphics;
-using MonoGame.Framework.Memory;
 using MonoGame.OpenGL;
 
 namespace MonoGame.Framework
@@ -205,7 +203,7 @@ namespace MonoGame.Framework
             _windowHandle = SDL.Window.Create(
                 _defaultTitle, winx, winy, _width, _height, initflags);
 
-            Id = Sdl.Window.GetWindowId(_handle);
+            Id = SDL.Window.GetWindowId(_windowHandle);
 
             if (_iconHandle != IntPtr.Zero)
                 SDL.Window.SetIcon(_windowHandle, _iconHandle);
@@ -247,7 +245,8 @@ namespace MonoGame.Framework
 
         public override void EndScreenDeviceChange(string screenDeviceName, int clientWidth, int clientHeight)
         {
-            Debug.Assert(_game.GraphicsDeviceManager != null);
+            var manager = _game.GraphicsDeviceManager as GraphicsDeviceManager;
+            Debug.Assert(manager != null);
 
             _screenDeviceName = screenDeviceName;
 
@@ -257,21 +256,21 @@ namespace MonoGame.Framework
             SDL.Display.GetBounds(displayIndex, out SDL.Rect displayRect);
 
             if (_willBeFullScreen != IsFullScreen ||
-                _hardwareSwitch != _game.GraphicsDeviceManager.HardwareModeSwitch)
+                _hardwareSwitch != manager.HardwareModeSwitch)
             {
-                var fullscreenFlag = _game.GraphicsDeviceManager.HardwareModeSwitch
+                var fullscreenFlag = manager.HardwareModeSwitch
                     ? SDL.Window.State.Fullscreen
                     : SDL.Window.State.FullscreenDesktop;
 
                 SDL.Window.SetFullscreen(GetPlatformWindowHandle(), _willBeFullScreen ? fullscreenFlag : 0);
-                _hardwareSwitch = _game.GraphicsDeviceManager.HardwareModeSwitch;
+                _hardwareSwitch = manager.HardwareModeSwitch;
             }
 
             // If going to exclusive full-screen mode, force the window to minimize on focus loss (Windows only)
             if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
                 SDL.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", _willBeFullScreen && _hardwareSwitch ? "1" : "0");
 
-            if (!_willBeFullScreen || _game.GraphicsDeviceManager.HardwareModeSwitch)
+            if (!_willBeFullScreen || manager.HardwareModeSwitch)
             {
                 SDL.Window.SetSize(GetPlatformWindowHandle(), clientWidth, clientHeight);
                 _width = clientWidth;

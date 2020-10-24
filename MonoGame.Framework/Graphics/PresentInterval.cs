@@ -13,16 +13,24 @@ namespace MonoGame.Framework.Graphics
         /// Equivalent to <see cref="One"/>.
         /// </summary>
         Default,
+
         /// <summary>
-        /// The driver waits for the vertical retrace period, before updating window client area. Present operations are not affected more frequently than the screen refresh rate.
+        /// The driver waits for the vertical retrace period, 
+        /// before updating window client area. 
+        /// Present operations are not affected more frequently than the screen refresh rate.
         /// </summary>
         One,
+
         /// <summary>
-        /// The driver waits for the vertical retrace period, before updating window client area. Present operations are not affected more frequently than every second screen refresh. 
+        /// The driver waits for the vertical retrace period, 
+        /// before updating window client area. 
+        /// Present operations are not affected more frequently than every second screen refresh. 
         /// </summary>
         Two,
+
         /// <summary>
-        /// The driver updates the window client area immediately. Present operations might be affected immediately. There is no limit for framerate.
+        /// The driver updates the window client area immediately.
+        /// Present operations might be affected immediately. There is no limit for framerate.
         /// </summary>
         Immediate,
     }

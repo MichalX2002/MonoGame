@@ -621,7 +621,7 @@ namespace MonoGame.Tools.Pipeline
             if (PipelineController.Instance.SelectedItem != null)
             {
                 var filePath = PipelineController.Instance.GetFullPath(PipelineController.Instance.SelectedItem.Location);
-                OpenItemThroughShell(dir);
+                OpenItemThroughShell(filePath);
             }
         }
 

@@ -194,24 +194,5 @@ namespace MonoGame.Framework.Content.Pipeline
             FreeImage.Unload(r);
             FreeImage.Unload(b);
         }
-
-        // Loads BMP using StbSharp. This allows us to load BMP files containing BITMAPV4HEADER and BITMAPV5HEADER
-        // structures, which FreeImage does not support.
-        TextureContent LoadImage(string filename)
-        {
-            var output = new Texture2DContent { Identity = new ContentIdentity(filename) };
-
-            ImageResult result;
-            using (var stream = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                result = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
-            }
-
-            var face = new PixelBitmapContent<Color>(result.Width, result.Height);
-            face.SetPixelData(result.Data);
-            output.Faces[0].Add(face);
-
-            return output;
-        }
     }
 }

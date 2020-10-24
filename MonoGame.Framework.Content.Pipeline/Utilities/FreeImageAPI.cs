@@ -97,7 +97,8 @@ namespace FreeImageAPI
         private const string NativeLibName = "FreeImage";
 
         [DllImport(NativeLibName, EntryPoint = "FreeImage_ConvertFromRawBits")]
-        public static extern IntPtr ConvertFromRawBits(byte[] bits, int width, int height, int pitch, uint bpp, uint red_mask, uint green_mask, uint blue_mask, bool topdown);
+        public static extern IntPtr ConvertFromRawBits(
+            byte[] bits, int width, int height, int pitch, uint bpp, uint red_mask, uint green_mask, uint blue_mask, bool topdown);
 
         [DllImport(NativeLibName, EntryPoint = "FreeImage_Rescale")]
         public static extern IntPtr Rescale(IntPtr dib, int dst_width, int dst_height, FREE_IMAGE_FILTER filter);
@@ -106,7 +107,8 @@ namespace FreeImageAPI
         public static extern void Unload(IntPtr dib);
 
         [DllImport(NativeLibName, EntryPoint = "FreeImage_ConvertToRawBits")]
-        public static extern void ConvertToRawBits(byte[] bits, IntPtr dib, int pitch, uint bpp, uint red_mask, uint green_mask, uint blue_mask, bool topdown);
+        public static extern void ConvertToRawBits(
+            byte[] bits, IntPtr dib, int pitch, uint bpp, uint red_mask, uint green_mask, uint blue_mask, bool topdown);
 
         [DllImport(NativeLibName, CharSet = CharSet.Unicode, EntryPoint = "FreeImage_GetFileTypeU")]
         public static extern FREE_IMAGE_FORMAT GetFileTypeU(string filename, int size);
@@ -116,7 +118,7 @@ namespace FreeImageAPI
 
         public static FREE_IMAGE_FORMAT GetFileType(string filename, int size)
         {
-            if (CurrentPlatform.OS == OS.Windows)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
                 return GetFileTypeU(filename, size);
             else
                 return GetFileTypeS(filename, size);
@@ -130,7 +132,7 @@ namespace FreeImageAPI
 
         public static IntPtr Load(FREE_IMAGE_FORMAT fif, string filename, int flags)
         {
-            if (CurrentPlatform.OS == OS.Windows)
+            if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
                 return LoadU(fif, filename, flags);
             else
                 return LoadS(fif, filename, flags);

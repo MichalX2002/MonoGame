@@ -308,7 +308,7 @@ namespace MonoGame.Framework
                         // If the ID is not the same as our main window ID
                         // that means that we received an event from the
                         // dummy window, so don't process the event.
-                        if (ev.Window.WindowID != _window.Id)
+                        if (ev.Window.WindowId != _window.Id)
                             break;
 
                         switch (ev.Window.EventId)
