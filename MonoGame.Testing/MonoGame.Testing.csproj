@@ -38,8 +38,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <MonoGameContentReference Include="Content\Content.$(MonoGamePlatform).mgcb" />
-    <None Update="Content\Cards\*.png">
+    <MonoGameContentReference Include="Content/Content.$(MonoGamePlatform).mgcb" />
+    
+    <None Update="Content/Cards/*.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

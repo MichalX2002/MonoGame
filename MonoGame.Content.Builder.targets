@@ -3,11 +3,6 @@
   This file is subject to the terms and conditions defined in
   file 'LICENSE.txt', which is part of this source code package.
 -->
-<!--
-  MonoGame - Copyright (C) The MonoGame Team
-  This file is subject to the terms and conditions defined in
-  file 'LICENSE.txt', which is part of this source code package.
--->
 
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
@@ -17,27 +12,32 @@
   </PropertyGroup>
 
   <!--
-    Target flow
-      1. CollectContentReferences
-      2. PrepareContentBuilder
-      3. RunContentBuilder
-      4. IncludeContent
+    Target flow diagram
+    * - only run if necessary
+
+                                      InstallMGCB*
+                                           ^
+                                           |
+         GetInstalledMGCB*     ->     UpdateMGCB*
+                                                        \
+                                                          -> RunContentBuilder -> IncludeContent
+                                                        /
+      CollectContentReferences -> PrepareContentBuilder
   -->
 
   <!--
-    Calls 'dotnet tool' commands to parse information about any locally installed MGCB tools.
-
     Outputs:
       - MGCBCommand: the command to run the MGCB tool without any arguments
   -->
-  <Target Name="GetMGCB" Condition="'$(MGCBCommand)' == ''">
+  <Target Name="UpdateMGCB" Condition="'$(MGCBCommand)' == ''">
 
     <PropertyGroup>
       <MGCBExe Condition="'$(MGCBExe)' == ''">$(MSBuildThisFileDirectory)Tools\MGCB.exe</MGCBExe>
       <MGCBCommand>&quot;$(MGCBExe)&quot;</MGCBCommand>
     </PropertyGroup>
-	
+
   </Target>
+
 
   <!--
     Converts MonoGameContentReference items to ContentReference items, deriving the necessary metadata.
@@ -51,7 +51,7 @@
       - Given the following file setup:
         - C:\Game\Game.Shared\Content.mgcb
         - C:\Game\Game.DesktopGL\Game.DesktopGL.csproj
-          - MonoGameContentReference: ..\Game.Shared\Content.mgcb
+          - MonoGameContentReference: ..\Content\Content.mgcb
       - Output:
         - ContentReference
           - FullDir: C:/Game/Game.Shared/
@@ -85,8 +85,8 @@
       <!-- Assemble final metadata. -->
       <ContentReference>
         <ContentDir>%(ContentFolder)/</ContentDir>
-        <ContentOutputDir>%(FullDir)bin/$(MonoGamePlatform)/%(OutputFolder)</ContentOutputDir>
-        <ContentIntermediateOutputDir>%(FullDir)obj/$(MonoGamePlatform)/%(OutputFolder)</ContentIntermediateOutputDir>
+        <ContentOutputDir>$(IntermediateOutputPath)/Content/%(OutputFolder)</ContentOutputDir>
+        <ContentIntermediateOutputDir>$(IntermediateOutputPath)/MetaContent/%(OutputFolder)</ContentIntermediateOutputDir>
       </ContentReference>
 
     </ItemGroup>
@@ -158,7 +158,7 @@
       - ExtraContent: built content files
         - ContentDir: the relative path of the embedded folder to contain the content files
   -->
-  <Target Name="RunContentBuilder" DependsOnTargets="GetMGCB;PrepareContentBuilder">
+  <Target Name="RunContentBuilder" DependsOnTargets="UpdateMGCB;PrepareContentBuilder">
 
     <!-- Execute MGCB from the project directory so we use the correct manifest. -->
     <Exec
@@ -191,7 +191,7 @@
   <Target
     Name="IncludeContent"
     DependsOnTargets="RunContentBuilder"
-    BeforeTargets="PrepareForBuild"
+    AfterTargets="BeforeBuild"
     Condition="'@(MonoGameContentReference)' != ''"
     Outputs="%(ExtraContent.RecursiveDir)%(ExtraContent.Filename)%(ExtraContent.Extension)">
 
