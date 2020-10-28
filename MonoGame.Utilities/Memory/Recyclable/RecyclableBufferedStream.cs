@@ -1190,7 +1190,7 @@ namespace MonoGame.Framework.Memory
             if (destination == null)
                 throw new ArgumentNullException(nameof(destination));
 
-            StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
+            ValidateCopyToArgs(this, destination, bufferSize);
             Debug.Assert(_stream != null);
 
             int readBytes = _readLen - _readPos;
@@ -1218,7 +1218,7 @@ namespace MonoGame.Framework.Memory
             if (destination == null)
                 throw new ArgumentNullException(nameof(destination));
 
-            StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
+            ValidateCopyToArgs(this, destination, bufferSize);
 
             return cancellationToken.IsCancellationRequested ?
                 Task.FromCanceled<int>(cancellationToken) :

@@ -7,27 +7,28 @@ using System.Runtime.InteropServices;
 
 namespace MonoGame.OpenGL
 {
-    internal partial class GL
+    public static partial class GL
     {
-        static partial void LoadPlatformEntryPoints()
+        private static void LoadPlatformEntryPoints()
         {
-            BoundApi = RenderApi.GL;
+            BoundAPI = RenderAPI.GL;
         }
 
-        private static T? LoadFunction<T>(string function, bool throwIfNotFound = false)
+        private static T? TryLoadFunction<T>(string function)
             where T : Delegate
         {
             var ret = SDL.GL.GetProcAddress(function);
 
             if (ret == IntPtr.Zero)
-            {
-                if (throwIfNotFound)
-                    throw new EntryPointNotFoundException(function);
-
                 return default;
-            }
 
             return Marshal.GetDelegateForFunctionPointer<T>(ret);
+        }
+
+        private static T LoadFunction<T>(string function)
+            where T : Delegate
+        {
+            return TryLoadFunction<T>(function) ?? throw new EntryPointNotFoundException(function);
         }
 
         private static IGraphicsContext PlatformCreateContext(IWindowHandle window)

@@ -459,7 +459,7 @@ namespace MonoGame.Testing
                 int lines = 1000;
                 for (int i = 0; i < lines; i++)
                 {
-                    float t1 = t + (i / (float)lines) * MathF.PI;
+                    float t1 = t + i / (float)lines * MathF.PI;
                     float t2 = t1 - MathF.PI;
 
                     var exter = center + new Vector2(MathF.Cos(t1), MathF.Sin(t1)) * range;
@@ -481,7 +481,7 @@ namespace MonoGame.Testing
 
                 var span = sicc.AsSpan();
 
-                float spriteScale = (float)(Math.Sin(time.Total.TotalSeconds * 0.5)) * 2;
+                float spriteScale = (float)Math.Sin(time.Total.TotalSeconds * 0.5) * 2;
                 float requestedPixelHeight = 16; // Math.Max(spriteScale + 2f, 0f) + 6f;
 
                 float actualScaleF = _font.GetScaleByPixel(requestedPixelHeight);

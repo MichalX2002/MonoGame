@@ -10,12 +10,12 @@ namespace MonoGame.Framework.Graphics
 {
     public partial class VertexDeclaration
     {
-        private readonly Dictionary<int, AttributeInfo> _shaderAttributeInfo = 
+        private readonly Dictionary<int, AttributeInfo> _shaderAttributeInfo =
             new Dictionary<int, AttributeInfo>();
 
         internal AttributeInfo GetAttributeInfo(Shader shader, int programHash)
         {
-            if (_shaderAttributeInfo.TryGetValue(programHash, out AttributeInfo attrInfo))
+            if (_shaderAttributeInfo.TryGetValue(programHash, out AttributeInfo? attrInfo))
                 return attrInfo;
 
             // Get the vertex attribute info and cache it
@@ -49,10 +49,10 @@ namespace MonoGame.Framework.Graphics
         internal void Apply(Shader shader, IntPtr offset, int programHash)
         {
             var attrInfo = GetAttributeInfo(shader, programHash);
-            
+
             // Apply the vertex attribute info
-            foreach(var element in attrInfo.Elements.Span)
-            { 
+            foreach (var element in attrInfo.Elements.Span)
+            {
                 GL.VertexAttribPointer(
                     element.AttributeLocation,
                     element.NumberOfElements,
@@ -62,8 +62,8 @@ namespace MonoGame.Framework.Graphics
                     offset + element.Offset);
                 GL.CheckError();
 
-#if !(GLES || MONOMAC)
-                if (GraphicsDevice.Capabilities.SupportsInstancing)
+#if !MONOMAC
+                if (!GL.IsES && GraphicsDevice.Capabilities.SupportsInstancing)
                 {
                     GL.VertexAttribDivisor(element.AttributeLocation, 0);
                     GL.CheckError();
@@ -97,9 +97,9 @@ namespace MonoGame.Framework.Graphics
                 public bool Normalized { get; }
 
                 public Element(
-                    int offset, 
-                    int attributeLocation, 
-                    int numberOfElements, 
+                    int offset,
+                    int attributeLocation,
+                    int numberOfElements,
                     VertexAttribPointerType vertexAttribPointerType,
                     bool normalized)
                 {

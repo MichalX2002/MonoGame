@@ -15,11 +15,13 @@ namespace MonoGame.Framework.Graphics
             int offsetInBytes, Span<T> destination, int elementStride)
             where T : unmanaged
         {
-#if GLES
-            // Buffers are write-only on OpenGL ES 1.1 and 2.0.  See the GL_OES_mapbuffer extension for more information.
-            // http://www.khronos.org/registry/gles/extensions/OES/OES_mapbuffer.txt
-            throw new NotSupportedException("Vertex buffers are write-only on OpenGL ES platforms");
-#else
+            if (GL.IsES)
+            {
+                // Buffers are write-only on OpenGL ES 1.1 and 2.0.  See the GL_OES_mapbuffer extension for more information.
+                // http://www.khronos.org/registry/gles/extensions/OES/OES_mapbuffer.txt
+                throw new PlatformNotSupportedException("Vertex buffers are write-only on OpenGL ES platforms");
+            }
+
             GL.BindBuffer(BufferTarget.ArrayBuffer, _glBuffer);
             GL.CheckError();
 
@@ -29,7 +31,7 @@ namespace MonoGame.Framework.Graphics
 
             int bufferBytes = Capacity * VertexDeclaration.VertexStride;
             var src = new ReadOnlySpan<T>((void*)(mapPtr + offsetInBytes), bufferBytes);
-            
+
             if (sizeof(T) % elementStride == 0)
             {
                 // the source and destination use tightly packed data,
@@ -52,7 +54,6 @@ namespace MonoGame.Framework.Graphics
 
             GL.UnmapBuffer(BufferTarget.ArrayBuffer);
             GL.CheckError();
-#endif
         }
 
         private unsafe void PlatformSetData<T>(

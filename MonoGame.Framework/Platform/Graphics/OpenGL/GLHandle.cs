@@ -2,7 +2,7 @@
 
 namespace MonoGame.OpenGL
 {
-    internal enum GLHandleType
+    public enum GLHandleType
     {
         Null,
         Texture,
@@ -13,7 +13,7 @@ namespace MonoGame.OpenGL
         Framebuffer
     }
 
-    internal struct GLHandle : IEquatable<GLHandle>
+    public struct GLHandle : IEquatable<GLHandle>
     {
         public static GLHandle Null => new GLHandle(0, GLHandleType.Null);
 
@@ -78,14 +78,16 @@ namespace MonoGame.OpenGL
                     GL.DeleteFramebuffers(1, Value);
                     break;
 
-#if !GLES
                 case GLHandleType.Query:
-                    GL.DeleteQueries(1, Value);
-                    break;
-#endif
+                    if (!GL.IsES)
+                    {
+                        GL.DeleteQueries(1, Value);
+                        break;
+                    }
+                    goto default;
 
                 default:
-                    throw new NotSupportedException();
+                    throw new PlatformNotSupportedException();
             }
             GL.CheckError();
         }

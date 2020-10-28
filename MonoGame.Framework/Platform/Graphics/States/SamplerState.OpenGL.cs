@@ -38,7 +38,7 @@ namespace MonoGame.Framework.Graphics
                         GL.CheckError();
                     }
                     GL.TexParameter(
-                        target, ExtTextureFilterAnisotropic.TextureMinFilter, 
+                        target, ExtTextureFilterAnisotropic.TextureMinFilter,
                         (int)(useMipmaps ? TextureMinFilter.NearestMipmapNearest : TextureMinFilter.Nearest));
                     GL.CheckError();
 
@@ -54,7 +54,7 @@ namespace MonoGame.Framework.Graphics
                         GL.CheckError();
                     }
                     GL.TexParameter(
-                        target, ExtTextureFilterAnisotropic.TextureMinFilter, 
+                        target, ExtTextureFilterAnisotropic.TextureMinFilter,
                         (int)(useMipmaps ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
                     GL.CheckError();
 
@@ -72,7 +72,7 @@ namespace MonoGame.Framework.Graphics
                         GL.CheckError();
                     }
                     GL.TexParameter(
-                        target, ExtTextureFilterAnisotropic.TextureMinFilter, 
+                        target, ExtTextureFilterAnisotropic.TextureMinFilter,
                         (int)(useMipmaps ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
                     GL.CheckError();
 
@@ -88,7 +88,7 @@ namespace MonoGame.Framework.Graphics
                         GL.CheckError();
                     }
                     GL.TexParameter(
-                        target, ExtTextureFilterAnisotropic.TextureMinFilter, 
+                        target, ExtTextureFilterAnisotropic.TextureMinFilter,
                         (int)(useMipmaps ? TextureMinFilter.NearestMipmapLinear : TextureMinFilter.Nearest));
                     GL.CheckError();
 
@@ -104,7 +104,7 @@ namespace MonoGame.Framework.Graphics
                         GL.CheckError();
                     }
                     GL.TexParameter(
-                        target, ExtTextureFilterAnisotropic.TextureMinFilter, 
+                        target, ExtTextureFilterAnisotropic.TextureMinFilter,
                         (int)(useMipmaps ? TextureMinFilter.LinearMipmapNearest : TextureMinFilter.Linear));
                     GL.CheckError();
 
@@ -120,7 +120,7 @@ namespace MonoGame.Framework.Graphics
                         GL.CheckError();
                     }
                     GL.TexParameter(
-                        target, ExtTextureFilterAnisotropic.TextureMinFilter, 
+                        target, ExtTextureFilterAnisotropic.TextureMinFilter,
                         (int)(useMipmaps ? TextureMinFilter.LinearMipmapLinear : TextureMinFilter.Linear));
                     GL.CheckError();
 
@@ -136,7 +136,7 @@ namespace MonoGame.Framework.Graphics
                         GL.CheckError();
                     }
                     GL.TexParameter(
-                        target, ExtTextureFilterAnisotropic.TextureMinFilter, 
+                        target, ExtTextureFilterAnisotropic.TextureMinFilter,
                         (int)(useMipmaps ? TextureMinFilter.LinearMipmapNearest : TextureMinFilter.Linear));
                     GL.CheckError();
 
@@ -152,7 +152,7 @@ namespace MonoGame.Framework.Graphics
                         GL.CheckError();
                     }
                     GL.TexParameter(
-                        target, ExtTextureFilterAnisotropic.TextureMinFilter, 
+                        target, ExtTextureFilterAnisotropic.TextureMinFilter,
                         (int)(useMipmaps ? TextureMinFilter.NearestMipmapLinear : TextureMinFilter.Nearest));
                     GL.CheckError();
 
@@ -168,7 +168,7 @@ namespace MonoGame.Framework.Graphics
                         GL.CheckError();
                     }
                     GL.TexParameter(
-                        target, ExtTextureFilterAnisotropic.TextureMinFilter, 
+                        target, ExtTextureFilterAnisotropic.TextureMinFilter,
                         (int)(useMipmaps ? TextureMinFilter.NearestMipmapNearest : TextureMinFilter.Nearest));
                     GL.CheckError();
 
@@ -186,43 +186,46 @@ namespace MonoGame.Framework.Graphics
             GL.CheckError();
             GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureWrapT, GetWrapMode(AddressV));
             GL.CheckError();
-#if !GLES
-            // Border color is not supported by glTexParameter in OpenGL ES 2.0
-            BorderColor.ToScaledVector4().CopyTo(_openGLBorderColor);
-            GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureBorderColor, _openGLBorderColor);
-            GL.CheckError();
 
-            // LOD bias is not supported by glTexParameter in OpenGL ES 2.0
-            GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureLodBias, MipMapLevelOfDetailBias);
-            GL.CheckError();
-
-            // Comparison samplers are not supported in OpenGL ES 2.0 (without an extension, anyway)
-            switch (FilterMode)
+            if (!GL.IsES)
             {
-                case TextureFilterMode.Comparison:
-                    GL.TexParameter(
-                        target,
-                        ExtTextureFilterAnisotropic.TextureCompareMode,
-                        (int)TextureCompareMode.CompareRefToTexture);
-                    GL.CheckError();
+                // Border color is not supported by glTexParameter in OpenGL ES 2.0
+                BorderColor.ToScaledVector4().CopyTo(_openGLBorderColor);
+                GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureBorderColor, _openGLBorderColor);
+                GL.CheckError();
 
-                    GL.TexParameter(
-                        target,
-                        ExtTextureFilterAnisotropic.TextureCompareFunc,
-                        (int)ComparisonFunction.GetDepthFunction());
-                    GL.CheckError();
-                    break;
+                // LOD bias is not supported by glTexParameter in OpenGL ES 2.0
+                GL.TexParameter(target, ExtTextureFilterAnisotropic.TextureLodBias, MipMapLevelOfDetailBias);
+                GL.CheckError();
 
-                case TextureFilterMode.Default:
-                    GL.TexParameter(
-                        target, ExtTextureFilterAnisotropic.TextureCompareMode, (int)TextureCompareMode.None);
-                    GL.CheckError();
-                    break;
+                // Comparison samplers are not supported in OpenGL ES 2.0 (without an extension, anyway)
+                switch (FilterMode)
+                {
+                    case TextureFilterMode.Comparison:
+                        GL.TexParameter(
+                            target,
+                            ExtTextureFilterAnisotropic.TextureCompareMode,
+                            (int)TextureCompareMode.CompareRefToTexture);
+                        GL.CheckError();
 
-                default:
-                    throw new InvalidOperationException("Invalid filter mode!");
+                        GL.TexParameter(
+                            target,
+                            ExtTextureFilterAnisotropic.TextureCompareFunc,
+                            (int)ComparisonFunction.GetDepthFunction());
+                        GL.CheckError();
+                        break;
+
+                    case TextureFilterMode.Default:
+                        GL.TexParameter(
+                            target, ExtTextureFilterAnisotropic.TextureCompareMode, (int)TextureCompareMode.None);
+                        GL.CheckError();
+                        break;
+
+                    default:
+                        throw new InvalidOperationException("Invalid filter mode!");
+                }
             }
-#endif
+
             if (GraphicsDevice.Capabilities.SupportsTextureMaxLevel)
             {
                 if (MaxMipLevel > 0)
@@ -245,10 +248,12 @@ namespace MonoGame.Framework.Graphics
 
                 case TextureAddressMode.Mirror:
                     return (int)TextureWrapMode.MirroredRepeat;
-#if !GLES
+
                 case TextureAddressMode.Border:
+                    if (GL.IsES)
+                        throw new PlatformNotSupportedException();
                     return (int)TextureWrapMode.ClampToBorder;
-#endif
+
                 default:
                     throw new ArgumentException($"No support for {textureAddressMode}.");
             }

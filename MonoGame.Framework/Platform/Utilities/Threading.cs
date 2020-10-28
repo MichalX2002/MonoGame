@@ -63,10 +63,6 @@ namespace MonoGame.Framework
             if (action == null)
                 throw new ArgumentNullException(nameof(action));
 
-#if DIRECTX || PSM
-            // The platform supports async and doesn't need any special handling.
-            action.Invoke();
-#else
             // If we are already on the main thread, just call the action and be done with it.
             if (IsOnMainThread)
             {
@@ -79,7 +75,7 @@ namespace MonoGame.Framework
             {
 #if ANDROID
                 //if (!Game.Instance.Window.GraphicsContext.IsCurrent)
-                ((AndroidGameWindow)AndroidGameActivity.Instance.Game.Window).GameView.MakeCurrent();
+                    ((AndroidGameWindow)AndroidGameActivity.Instance.Game.Window).GameView.MakeCurrent();
 #endif
                 action.Invoke();
                 resetEvent.Set();
@@ -87,10 +83,8 @@ namespace MonoGame.Framework
 
             if (!resetEvent.Wait(MaxWaitForMainThread))
                 throw new TimeoutException();
-#endif
         }
 
-#if !(DIRECTX || PSM)
         private static List<Action> _actionList = new List<Action>();
 
         private static void Add(Action action)
@@ -118,6 +112,7 @@ namespace MonoGame.Framework
 
                 foreach (Action action in _actionList)
                     action.Invoke();
+
                 _actionList.Clear();
             }
 #if IOS
@@ -127,6 +122,5 @@ namespace MonoGame.Framework
             }
 #endif
         }
-#endif
     }
 }

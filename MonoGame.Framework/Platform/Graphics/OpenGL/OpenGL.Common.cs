@@ -29,7 +29,7 @@ namespace MonoGame.OpenGL
         }
     }
 
-    internal partial class GL
+    public static partial class GL
     {
         public static int GetBoundTexture2D()
         {
@@ -40,7 +40,7 @@ namespace MonoGame.OpenGL
 
         [Conditional("DEBUG")]
         [DebuggerHidden]
-        internal static void CheckError()
+        public static void CheckError()
         {
             var error = GetError();
             if (error != ErrorCode.NoError)
@@ -51,7 +51,7 @@ namespace MonoGame.OpenGL
         }
 
         [Conditional("DEBUG")]
-        internal static void LogError(string location)
+        public static void LogError(string location)
         {
             try
             {

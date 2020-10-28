@@ -15,14 +15,16 @@ namespace MonoGame.Framework.Graphics
             base.PlatformConstruct(BufferTarget.ElementArrayBuffer, (int)ElementType);
         }
 
-        private unsafe void PlatformGetData<T>(int byteOffset, Span<T> destination) 
+        private unsafe void PlatformGetData<T>(int byteOffset, Span<T> destination)
             where T : unmanaged
         {
-#if GLES
-            // Buffers are write-only on OpenGL ES 1.1 and 2.0. See the GL_OES_mapbuffer extension for more information.
-            // http://www.khronos.org/registry/gles/extensions/OES/OES_mapbuffer.txt
-            throw new NotSupportedException("Index buffers are write-only on OpenGL ES platforms");
-#else
+            if (GL.IsES)
+            {
+                // Buffers are write-only on OpenGL ES 1.1 and 2.0. See the GL_OES_mapbuffer extension for more information.
+                // http://www.khronos.org/registry/gles/extensions/OES/OES_mapbuffer.txt
+                throw new PlatformNotSupportedException("Index buffers are write-only on OpenGL ES platforms");
+            }
+
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, _glBuffer);
             GL.CheckError();
 
@@ -35,7 +37,6 @@ namespace MonoGame.Framework.Graphics
 
             GL.UnmapBuffer(BufferTarget.ElementArrayBuffer);
             GL.CheckError();
-#endif
         }
 
         private unsafe void PlatformSetData<T>(

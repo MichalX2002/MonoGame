@@ -2,10 +2,8 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-#if OPENGL
 using MonoGame.OpenGL;
 using GetParamName = MonoGame.OpenGL.GetPName;
-#endif
 
 namespace MonoGame.Framework.Graphics
 {
@@ -26,7 +24,6 @@ namespace MonoGame.Framework.Graphics
         /// </summary>
         internal bool SupportsFramebufferObjectIMG { get; private set; }
 
-
         private void PlatformInitialize(GraphicsDevice device)
         {
             GL.GetInteger(GetParamName.MaxTextureSize, out int maxTexture2DSize);
@@ -35,74 +32,86 @@ namespace MonoGame.Framework.Graphics
 
             GL.GetInteger(GetParamName.MaxTextureSize, out int maxTexture3DSize);
             GL.CheckError();
-            MaxTexture3DSize = maxTexture2DSize;
+            MaxTexture3DSize = maxTexture3DSize;
 
             GL.GetInteger(GetParamName.MaxTextureSize, out int maxTextureCubeSize);
             GL.CheckError();
             MaxTextureCubeSize = maxTextureCubeSize;
 
-#if GLES
-            SupportsNonPowerOfTwo = GL.Extensions.Contains("GL_OES_texture_npot") ||
-                GL.Extensions.Contains("GL_ARB_texture_non_power_of_two") ||
-                GL.Extensions.Contains("GL_IMG_texture_npot") ||
-                GL.Extensions.Contains("GL_NV_texture_npot_2D_mipmap");
-#else
-            // Unfortunately non PoT texture support is patchy even on desktop systems and we can't
-            // rely on the fact that GL2.0+ supposedly supports npot in the core.
-            // Reference: http://aras-p.info/blog/2012/10/17/non-power-of-two-textures/
-            SupportsNonPowerOfTwo = MaxTexture2DSize >= 8192;
-#endif
+            if (GL.IsES)
+            {
+                SupportsNonPowerOfTwo = GL.HasExtension("GL_OES_texture_npot") ||
+                    GL.HasExtension("GL_ARB_texture_non_power_of_two") ||
+                    GL.HasExtension("GL_IMG_texture_npot") ||
+                    GL.HasExtension("GL_NV_texture_npot_2D_mipmap");
+            }
+            else
+            {
+                // Unfortunately non PoT texture support is patchy even on desktop systems and we can't
+                // rely on the fact that GL2.0+ supposedly supports npot in the core.
+                // Reference: http://aras-p.info/blog/2012/10/17/non-power-of-two-textures/
+                SupportsNonPowerOfTwo = MaxTexture2DSize >= 8192;
+            }
 
-            SupportsTextureFilterAnisotropic = GL.Extensions.Contains("GL_EXT_texture_filter_anisotropic");
+            SupportsTextureFilterAnisotropic = GL.HasExtension("GL_EXT_texture_filter_anisotropic");
 
-#if GLES
-            SupportsDepth24 = GL.Extensions.Contains("GL_OES_depth24");
-            SupportsPackedDepthStencil = GL.Extensions.Contains("GL_OES_packed_depth_stencil");
-            SupportsDepthNonLinear = GL.Extensions.Contains("GL_NV_depth_nonlinear");
-            SupportsTextureMaxLevel = GL.Extensions.Contains("GL_APPLE_texture_max_level");
-#else
-            SupportsDepth24 = true;
-            SupportsPackedDepthStencil = true;
-            SupportsDepthNonLinear = false;
-            SupportsTextureMaxLevel = true;
-#endif
+            if (GL.IsES)
+            {
+                SupportsDepth24 = GL.HasExtension("GL_OES_depth24");
+                SupportsPackedDepthStencil = GL.HasExtension("GL_OES_packed_depth_stencil");
+                SupportsDepthNonLinear = GL.HasExtension("GL_NV_depth_nonlinear");
+                SupportsTextureMaxLevel = GL.HasExtension("GL_APPLE_texture_max_level");
+            }
+            else
+            {
+                SupportsDepth24 = true;
+                SupportsPackedDepthStencil = true;
+                SupportsDepthNonLinear = false;
+                SupportsTextureMaxLevel = true;
+            }
+
             // Texture compression
-            SupportsS3tc = GL.Extensions.Contains("GL_EXT_texture_compression_s3tc") ||
-                           GL.Extensions.Contains("GL_OES_texture_compression_S3TC") ||
-                           GL.Extensions.Contains("GL_EXT_texture_compression_dxt3") ||
-                           GL.Extensions.Contains("GL_EXT_texture_compression_dxt5");
+            SupportsS3tc =
+                GL.HasExtension("GL_EXT_texture_compression_s3tc") ||
+                GL.HasExtension("GL_OES_texture_compression_S3TC") ||
+                GL.HasExtension("GL_EXT_texture_compression_dxt3") ||
+                GL.HasExtension("GL_EXT_texture_compression_dxt5");
 
-            SupportsDxt1 = SupportsS3tc || GL.Extensions.Contains("GL_EXT_texture_compression_dxt1");
-            SupportsPvrtc = GL.Extensions.Contains("GL_IMG_texture_compression_pvrtc");
-            SupportsEtc1 = GL.Extensions.Contains("GL_OES_compressed_ETC1_RGB8_texture");
+            SupportsDxt1 = SupportsS3tc || GL.HasExtension("GL_EXT_texture_compression_dxt1");
+            SupportsPvrtc = GL.HasExtension("GL_IMG_texture_compression_pvrtc");
+            SupportsEtc1 = GL.HasExtension("GL_OES_compressed_ETC1_RGB8_texture");
             SupportsAtitc =
-                GL.Extensions.Contains("GL_ATI_texture_compression_atitc") ||
-                GL.Extensions.Contains("GL_AMD_compressed_ATC_texture");
+                GL.HasExtension("GL_ATI_texture_compression_atitc") ||
+                GL.HasExtension("GL_AMD_compressed_ATC_texture");
 
-            if (GL.BoundApi == GL.RenderApi.ES)
+            if (GL.IsES)
                 SupportsEtc2 = device._glMajorVersion >= 3;
-            
 
             // Framebuffer objects
-#if GLES
-            SupportsFramebufferObjectARB = 
-                GL.BoundApi == GL.RenderApi.ES && (device._glMajorVersion >= 2 || 
-                GL.Extensions.Contains("GL_ARB_framebuffer_object")); // always supported on GLES 2.0+
+            if (GL.IsES)
+            {
+                SupportsFramebufferObjectARB = 
+                    device._glMajorVersion >= 2 ||
+                    GL.HasExtension("GL_ARB_framebuffer_object"); // always supported on GLES 2.0+
 
-            SupportsFramebufferObjectEXT = GL.Extensions.Contains("GL_EXT_framebuffer_object");;
-            SupportsFramebufferObjectIMG = 
-                GL.Extensions.Contains("GL_IMG_multisampled_render_to_texture") |
-                GL.Extensions.Contains("GL_APPLE_framebuffer_multisample") |
-                GL.Extensions.Contains("GL_EXT_multisampled_render_to_texture") |
-                GL.Extensions.Contains("GL_NV_framebuffer_multisample");
-#else
-            // when on GL 3.0+, frame buffer extensions are guaranteed to be present, but extensions may be missing it
-            // is then safe to assume that GL_ARB_framebuffer_object is present so that the standard function are loaded
-            SupportsFramebufferObjectARB = 
-                device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_ARB_framebuffer_object");
-            
-            SupportsFramebufferObjectEXT = GL.Extensions.Contains("GL_EXT_framebuffer_object");
-#endif
+                SupportsFramebufferObjectEXT = GL.HasExtension("GL_EXT_framebuffer_object");
+                
+                SupportsFramebufferObjectIMG =
+                    GL.HasExtension("GL_IMG_multisampled_render_to_texture") |
+                    GL.HasExtension("GL_APPLE_framebuffer_multisample") |
+                    GL.HasExtension("GL_EXT_multisampled_render_to_texture") |
+                    GL.HasExtension("GL_NV_framebuffer_multisample");
+            }
+            else
+            {
+                // when on GL 3.0+, frame buffer extensions are guaranteed to be present, but extensions may be missing it
+                // is then safe to assume that GL_ARB_framebuffer_object is present so that the standard function are loaded
+                SupportsFramebufferObjectARB =
+                    device._glMajorVersion >= 3 || GL.HasExtension("GL_ARB_framebuffer_object");
+
+                SupportsFramebufferObjectEXT = GL.HasExtension("GL_EXT_framebuffer_object");
+            }
+
             // Anisotropic filtering
             int anisotropy = 0;
             if (SupportsTextureFilterAnisotropic)
@@ -113,42 +122,27 @@ namespace MonoGame.Framework.Graphics
             MaxTextureAnisotropy = anisotropy;
 
             // sRGB
-#if GLES
-            SupportsSRgb = GL.Extensions.Contains("GL_EXT_sRGB");
-            
-            SupportsFloatTextures = 
-                GL.BoundApi == GL.RenderApi.ES && 
-                (device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_EXT_color_buffer_float"));
-            
-            SupportsHalfFloatTextures = 
-                GL.BoundApi == GL.RenderApi.ES &&
-                (device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_EXT_color_buffer_half_float"));
-            
-            SupportsNormalized = 
-                GL.BoundApi == GL.RenderApi.ES && 
-                (device._glMajorVersion >= 3 && GL.Extensions.Contains("GL_EXT_texture_norm16"));
-#else
-            SupportsSRgb = 
-                GL.Extensions.Contains("GL_EXT_texture_sRGB") && GL.Extensions.Contains("GL_EXT_framebuffer_sRGB");
-            
-            SupportsFloatTextures = 
-                GL.BoundApi == GL.RenderApi.GL &&
-                (device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_ARB_texture_float"));
-            
-            SupportsHalfFloatTextures = 
-                GL.BoundApi == GL.RenderApi.GL &&
-                (device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_ARB_half_float_pixel"));
-            
-            SupportsNormalized = 
-                GL.BoundApi == GL.RenderApi.GL &&
-                (device._glMajorVersion >= 3 || GL.Extensions.Contains("GL_EXT_texture_norm16"));
-#endif
+            if (GL.IsES)
+            {
+                SupportsSRgb = GL.HasExtension("GL_EXT_sRGB");
+
+                SupportsFloatTextures = device._glMajorVersion >= 3 || GL.HasExtension("GL_EXT_color_buffer_float");
+                SupportsHalfFloatTextures = device._glMajorVersion >= 3 || GL.HasExtension("GL_EXT_color_buffer_half_float");
+                SupportsNormalized = device._glMajorVersion >= 3 && GL.HasExtension("GL_EXT_texture_norm16");
+            }
+            else
+            {
+                SupportsSRgb = GL.HasExtension("GL_EXT_texture_sRGB") && GL.HasExtension("GL_EXT_framebuffer_sRGB");
+                SupportsFloatTextures = device._glMajorVersion >= 3 || GL.HasExtension("GL_ARB_texture_float");
+                SupportsHalfFloatTextures = device._glMajorVersion >= 3 || GL.HasExtension("GL_ARB_half_float_pixel");
+                SupportsNormalized = device._glMajorVersion >= 3 || GL.HasExtension("GL_EXT_texture_norm16");
+            }
 
             // TODO: Implement OpenGL support for texture arrays
             // once we can author shaders that use texture arrays.
             SupportsTextureArrays = false;
 
-            SupportsDepthClamp = GL.Extensions.Contains("GL_ARB_depth_clamp");
+            SupportsDepthClamp = GL.HasExtension("GL_ARB_depth_clamp");
 
             SupportsVertexTextures = false; // For now, until we implement vertex textures in OpenGL.
 
@@ -159,12 +153,15 @@ namespace MonoGame.Framework.Graphics
 
             SupportsBaseIndexInstancing = GL.DrawElementsInstancedBaseInstance != null;
 
-#if GLES
-            SupportsSeparateBlendStates = false;
-#else
-            SupportsSeparateBlendStates =
-                device._glMajorVersion >= 4 || GL.Extensions.Contains("GL_ARB_draw_buffers_blend");
-#endif
+            if (GL.IsES)
+            {
+                SupportsSeparateBlendStates = false;
+            }
+            else
+            {
+                SupportsSeparateBlendStates =
+                    device._glMajorVersion >= 4 || GL.HasExtension("GL_ARB_draw_buffers_blend");
+            }
 
             SupportsAsync = false;
         }

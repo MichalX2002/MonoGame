@@ -36,12 +36,12 @@ namespace MonoGame.OpenGL
             {
                 GL.LoadEntryPoints();
             }
-            catch (EntryPointNotFoundException)
+            catch (EntryPointNotFoundException ex)
             {
                 throw new PlatformNotSupportedException(
                     "MonoGame requires OpenGL 3.0 compatible drivers, " +
                     "or either ARB_framebuffer_object or EXT_framebuffer_object extensions. " +
-                    "Try updating your graphics drivers.");
+                    "Try updating your graphics drivers.", ex);
             }
         }
 

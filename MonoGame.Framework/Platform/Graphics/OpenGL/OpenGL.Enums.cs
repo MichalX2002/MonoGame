@@ -2,67 +2,67 @@
 
 namespace MonoGame.OpenGL
 {
-    internal enum BufferAccess
+    public enum BufferAccess
     {
         ReadOnly = 0x88B8,
     }
 
-    internal enum BufferUsageHint
+    public enum BufferUsageHint
     {
         StreamDraw = 0x88E0,
         StaticDraw = 0x88E4,
     }
 
-    internal enum StencilFace
+    public enum StencilFace
     {
         Front = 0x0404,
         Back = 0x0405,
     }
 
-    internal enum DrawBuffersEnum
+    public enum DrawBuffersElementType
     {
         UnsignedShort,
         UnsignedInt,
     }
 
-    internal enum ShaderType
+    public enum ShaderType
     {
         VertexShader = 0x8B31,
         FragmentShader = 0x8B30,
     }
 
-    internal enum ShaderParameter
+    public enum ShaderParameter
     {
         LogLength = 0x8B84,
         CompileStatus = 0x8B81,
         SourceLength = 0x8B88,
     }
 
-    internal enum GetProgramParameterName
+    public enum GetProgramParameterName
     {
         LogLength = 0x8B84,
         LinkStatus = 0x8B82,
     }
 
-    internal enum IndexElementType
+    public enum IndexElementType
     {
         UnsignedShort = 0x1403,
         UnsignedInt = 0x1405,
     }
 
-    internal enum QueryTarget
+    public enum QueryTarget
     {
         SamplesPassed = 0x8914,
         SamplesPassedExt = 0x8C2F,
     }
 
-    internal enum GetQueryObjectParam
+    public enum GetQueryObjectParam
     {
         QueryResultAvailable = 0x8867,
         QueryResult = 0x8866,
     }
 
-    internal enum GenerateMipmapTarget
+    public enum GenerateMipmapTarget
     {
         Texture1D = 0x0DE0,
         Texture2D = 0x0DE1,
@@ -74,22 +74,22 @@ namespace MonoGame.OpenGL
         Texture2DMultisampleArray = 0x9102,
     }
 
-    internal enum BlitFramebufferFilter
+    public enum BlitFramebufferFilter
     {
         Nearest = 0x2600,
     }
 
-    internal enum ReadBufferMode
+    public enum ReadBufferMode
     {
         ColorAttachment0 = 0x8CE0,
     }
 
-    internal enum DrawBufferMode
+    public enum DrawBufferMode
     {
         ColorAttachment0 = 0x8CE0,
     }
 
-    internal enum FramebufferErrorCode
+    public enum FramebufferErrorCode
     {
         FramebufferUndefined = 0x8219,
         FramebufferComplete = 0x8CD5,
@@ -111,26 +111,26 @@ namespace MonoGame.OpenGL
         FramebufferIncompleteLayerCount = 0x8DA9,
     }
 
-    internal enum BufferTarget
+    public enum BufferTarget
     {
         ArrayBuffer = 0x8892,
         ElementArrayBuffer = 0x8893,
     }
 
-    internal enum RenderbufferTarget
+    public enum RenderbufferTarget
     {
         Renderbuffer = 0x8D41,
         RenderbufferExt = 0x8D41,
     }
 
-    internal enum FramebufferTarget
+    public enum FramebufferTarget
     {
         Framebuffer = 0x8D40,
         FramebufferExt = 0x8D40,
         ReadFramebuffer = 0x8CA8,
     }
 
-    internal enum RenderbufferStorage
+    public enum RenderbufferStorage
     {
         Rgba8 = 0x8058,
         DepthComponent16 = 0x81a5,
@@ -142,7 +142,7 @@ namespace MonoGame.OpenGL
         StencilIndex8 = 0x8D48,
     }
 
-    internal enum EnableCap : int
+    public enum EnableCap : int
     {
         PointSmooth = 0x0B10,
         LineSmooth = 0x0B20,
@@ -173,13 +173,13 @@ namespace MonoGame.OpenGL
         DebugOutput = 0x92E0,
     }
 
-    internal enum VertexPointerType
+    public enum VertexPointerType
     {
         Float = 0x1406,
         Short = 0x1402,
     }
 
-    internal enum VertexAttribPointerType
+    public enum VertexAttribPointerType
     {
         Float = 0x1406,
         Short = 0x1402,
@@ -187,30 +187,30 @@ namespace MonoGame.OpenGL
         HalfFloat = 0x140B,
     }
 
-    internal enum CullFaceMode
+    public enum CullFaceMode
     {
         Back = 0x0405,
         Front = 0x0404,
     }
 
-    internal enum FrontFaceDirection
+    public enum FrontFaceDirection
     {
         Cw = 0x0900,
         Ccw = 0x0901,
     }
 
-    internal enum MaterialFace
+    public enum MaterialFace
     {
         FrontAndBack = 0x0408,
     }
 
-    internal enum PolygonMode
+    public enum PolygonMode
     {
         Fill = 0x1B02,
         Line = 0x1B01,
     }
 
-    internal enum ColorPointerType
+    public enum ColorPointerType
     {
         Float = 0x1406,
         Short = 0x1402,
@@ -219,17 +219,7 @@ namespace MonoGame.OpenGL
         HalfFloat = 0x140B,
     }
 
-    internal enum NormalPointerType
-    {
-        Byte = 0x1400,
-        Float = 0x1406,
-        Short = 0x1402,
-        UnsignedShort = 0x1403,
-        UnsignedByte = 0x1401,
-        HalfFloat = 0x140B,
-    }
-
-    internal enum TexCoordPointerType
+    public enum NormalPointerType
     {
         Byte = 0x1400,
         Float = 0x1406,
@@ -239,7 +229,17 @@ namespace MonoGame.OpenGL
         HalfFloat = 0x140B,
     }
 
-    internal enum BlendEquationMode
+    public enum TexCoordPointerType
+    {
+        Byte = 0x1400,
+        Float = 0x1406,
+        Short = 0x1402,
+        UnsignedShort = 0x1403,
+        UnsignedByte = 0x1401,
+        HalfFloat = 0x140B,
+    }
+
+    public enum BlendEquationMode
     {
         FuncAdd = 0x8006,
         Max = 0x8008,  // ios MaxExt
@@ -248,7 +248,7 @@ namespace MonoGame.OpenGL
         FuncSubtract = 0x800A,
     }
 
-    internal enum BlendingFactorSrc
+    public enum BlendingFactorSrc
     {
         Zero = 0,
         SrcColor = 0x0300,
@@ -267,7 +267,7 @@ namespace MonoGame.OpenGL
         One = 1,
     }
 
-    internal enum BlendingFactorDest
+    public enum BlendingFactorDest
     {
         Zero = 0,
         SrcColor = 0x0300,
@@ -286,7 +286,7 @@ namespace MonoGame.OpenGL
         One = 1,
     }
 
-    internal enum DepthFunction
+    public enum DepthFunction
     {
         Always = 0x0207,
         Equal = 0x0202,
@@ -298,7 +298,7 @@ namespace MonoGame.OpenGL
         Notequal = 0x0205,
     }
 
-    internal enum GetPName : int
+    public enum GetPName : int
     {
         ArrayBufferBinding = 0x8894,
         MaxTextureImageUnits = 0x8872,
@@ -311,7 +311,7 @@ namespace MonoGame.OpenGL
         MaxSamples = 0x8D57,
     }
 
-    internal enum StringName
+    public enum StringName
     {
         Vendor = 0x1F00,
         Renderer = 0x1F01,
@@ -319,7 +319,7 @@ namespace MonoGame.OpenGL
         Extensions = 0x1F03,
     }
 
-    internal enum FramebufferAttachment
+    public enum FramebufferAttachment
     {
         ColorAttachment0 = 0x8CE0,
         ColorAttachment0Ext = 0x8CE0,
@@ -330,7 +330,7 @@ namespace MonoGame.OpenGL
         StencilAttachmentExt = 0x1802,
     }
 
-    internal enum GLPrimitiveType
+    public enum GLPrimitiveType
     {
         Lines = 0x0001,
         LineStrip = 0x0003,
@@ -339,24 +339,24 @@ namespace MonoGame.OpenGL
     }
 
     [Flags]
-    internal enum ClearBufferMask
+    public enum ClearBufferMask
     {
         DepthBufferBit = 0x00000100,
         StencilBufferBit = 0x00000400,
         ColorBufferBit = 0x00004000,
     }
 
-    internal enum ErrorCode
+    public enum ErrorCode
     {
         NoError = 0,
     }
 
-    internal enum TextureUnit
+    public enum TextureUnit
     {
         Texture0 = 0x84C0,
     }
 
-    internal enum TextureTarget
+    public enum TextureTarget
     {
         Texture2D = 0x0DE1,
         Texture3D = 0x806F,
@@ -369,7 +369,7 @@ namespace MonoGame.OpenGL
         TextureCubeMapNegativeZ = 0x851A,
     }
 
-    internal enum PixelInternalFormat
+    public enum PixelInternalFormat
     {
         Rgba = 0x1908,
         Rgb = 0x1907,
@@ -419,7 +419,7 @@ namespace MonoGame.OpenGL
         Etc2SRgb8A8Eac = 0x9279,
     }
 
-    internal enum PixelFormat
+    public enum PixelFormat
     {
         Rgba = 0x1908,
         Rgb = 0x1907,
@@ -429,7 +429,7 @@ namespace MonoGame.OpenGL
         Rg = 0x8227,
     }
 
-    internal enum PixelType
+    public enum PixelType
     {
         UnsignedByte = 0x1401,
         UnsignedShort565 = 0x8363,
@@ -443,13 +443,13 @@ namespace MonoGame.OpenGL
         UnsignedInt1010102 = 0x8036,
     }
 
-    internal enum PixelStoreParameter
+    public enum PixelStoreParameter
     {
         UnpackAlignment = 0x0CF5,
         PackAlignment = 0x0D05,
     }
 
-    internal enum GLStencilFunction
+    public enum GLStencilFunction
     {
         Always = 0x0207,
         Equal = 0x0202,
@@ -461,7 +461,7 @@ namespace MonoGame.OpenGL
         Notequal = 0x0205,
     }
 
-    internal enum StencilOp
+    public enum StencilOp
     {
         Keep = 0x1E00,
         DecrWrap = 0x8508,
@@ -473,7 +473,7 @@ namespace MonoGame.OpenGL
         Zero = 0,
     }
 
-    internal enum TextureParameterName
+    public enum TextureParameterName
     {
         TextureMaxAnisotropyExt = 0x84FE,
         TextureBaseLevel = 0x813C,
@@ -489,13 +489,13 @@ namespace MonoGame.OpenGL
         GenerateMipmap = 0x8191,
     }
 
-    internal enum Bool
+    public enum Bool
     {
         True = 1,
         False = 0,
     }
 
-    internal enum TextureMinFilter
+    public enum TextureMinFilter
     {
         LinearMipmapNearest = 0x2701,
         NearestMipmapLinear = 0x2702,
@@ -505,19 +505,19 @@ namespace MonoGame.OpenGL
         Nearest = 0x2600,
     }
 
-    internal enum TextureMagFilter
+    public enum TextureMagFilter
     {
         Linear = 0x2601,
         Nearest = 0x2600,
     }
 
-    internal enum TextureCompareMode
+    public enum TextureCompareMode
     {
         CompareRefToTexture = 0x884E,
         None = 0,
     }
 
-    internal enum TextureWrapMode
+    public enum TextureWrapMode
     {
         ClampToEdge = 0x812F,
         Repeat = 0x2901,

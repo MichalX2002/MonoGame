@@ -11,9 +11,9 @@ namespace MonoGame.Framework.Graphics
         private void PlatformConstruct(
             GraphicsDevice graphicsDevice, int width, int height, int depth, bool mipMap, SurfaceFormat format, bool renderTarget)
         {
-#if GLES
-            throw new NotSupportedException("OpenGL ES 2.0 doesn't support 3D textures.");
-#else
+            if (GL.IsES)
+                throw new PlatformNotSupportedException("OpenGL ES 2.0 doesn't support 3D textures.");
+            
             _glTarget = TextureTarget.Texture3D;
 
             if (mipMap)
@@ -29,7 +29,6 @@ namespace MonoGame.Framework.Graphics
 
             GL.TexImage3D(_glTarget, 0, _glInternalFormat, width, height, depth, 0, _glFormat, _glType, IntPtr.Zero);
             GL.CheckError();
-#endif
         }
 
         private unsafe void PlatformSetData<T>(
@@ -38,10 +37,6 @@ namespace MonoGame.Framework.Graphics
             int width, int height, int depth, ReadOnlySpan<T> data)
             where T : unmanaged
         {
-#if GLES
-            throw new NotSupportedException("OpenGL ES 2.0 doesn't support 3D textures.");
-#else
-
             fixed (T* ptr = data)
             {
                 GL.BindTexture(_glTarget, _glTexture);
@@ -50,11 +45,10 @@ namespace MonoGame.Framework.Graphics
                 GL.TexSubImage3D(_glTarget, level, left, top, front, width, height, depth, _glFormat, _glType, (IntPtr)ptr);
                 GL.CheckError();
             }
-#endif
         }
 
         private void PlatformGetData<T>(
-            int level, int left, int top, int right, int bottom, int front, int back, 
+            int level, int left, int top, int right, int bottom, int front, int back,
             Span<T> destination)
             where T : unmanaged
         {

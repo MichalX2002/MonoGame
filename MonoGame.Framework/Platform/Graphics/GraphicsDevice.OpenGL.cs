@@ -30,9 +30,7 @@ namespace MonoGame.Framework.Graphics
         internal IGraphicsContext Context { get; private set; }
 #endif
 
-#if !GLES
-        private DrawBuffersEnum[] _drawBuffers;
-#endif
+        private DrawBuffersElementType[] _drawBuffers;
 
         private List<GLHandle> _disposeThisFrame = new List<GLHandle>();
         private List<GLHandle> _resourceFreeQueue = new List<GLHandle>();
@@ -212,22 +210,26 @@ namespace MonoGame.Framework.Graphics
                 string? version = GL.GetString(StringName.Version);
                 if (string.IsNullOrEmpty(version))
                     throw new NoSuitableGraphicsDeviceException("Unable to retrieve OpenGL version.");
-#if GLES
-                string[] versionSplit = version.Split(' ');
-                if (versionSplit.Length > 2 && versionSplit[0].Equals("OpenGL") && versionSplit[1].Equals("ES"))
+
+                if (GL.IsES)
                 {
-                    _glMajorVersion = Convert.ToInt32(versionSplit[2].Substring(0, 1));
-                    _glMinorVersion = Convert.ToInt32(versionSplit[2].Substring(2, 1));
+                    string[] versionSplit = version.Split(' ');
+                    if (versionSplit.Length > 2 && versionSplit[0].Equals("OpenGL") && versionSplit[1].Equals("ES"))
+                    {
+                        _glMajorVersion = Convert.ToInt32(versionSplit[2].Substring(0, 1));
+                        _glMinorVersion = Convert.ToInt32(versionSplit[2].Substring(2, 1));
+                    }
+                    else
+                    {
+                        _glMajorVersion = 1;
+                        _glMinorVersion = 1;
+                    }
                 }
                 else
                 {
-                    _glMajorVersion = 1;
-                    _glMinorVersion = 1;
+                    _glMajorVersion = Convert.ToInt32(version.Substring(0, 1), CultureInfo.InvariantCulture);
+                    _glMinorVersion = Convert.ToInt32(version.Substring(2, 1), CultureInfo.InvariantCulture);
                 }
-#else
-                _glMajorVersion = Convert.ToInt32(version.Substring(0, 1), CultureInfo.InvariantCulture);
-                _glMinorVersion = Convert.ToInt32(version.Substring(2, 1), CultureInfo.InvariantCulture);
-#endif
             }
             catch (FormatException)
             {
@@ -236,15 +238,17 @@ namespace MonoGame.Framework.Graphics
                 _glMinorVersion = 1;
             }
 
-#if !GLES
-            // Initialize draw buffer attachment array
-            GL.GetInteger(GetPName.MaxDrawBuffers, out int maxDrawBuffers);
-            GL.CheckError();
 
-            _drawBuffers = new DrawBuffersEnum[maxDrawBuffers];
-            for (int i = 0; i < maxDrawBuffers; i++)
-                _drawBuffers[i] = (DrawBuffersEnum)(FramebufferAttachment.ColorAttachment0Ext + i);
-#endif
+            if (!GL.IsES)
+            {
+                // Initialize draw buffer attachment array
+                GL.GetInteger(GetPName.MaxDrawBuffers, out int maxDrawBuffers);
+                GL.CheckError();
+
+                _drawBuffers = new DrawBuffersElementType[maxDrawBuffers];
+                for (int i = 0; i < maxDrawBuffers; i++)
+                    _drawBuffers[i] = (DrawBuffersElementType)(FramebufferAttachment.ColorAttachment0Ext + i);
+            }
         }
 
         private void PlatformInitialize()
@@ -324,7 +328,11 @@ namespace MonoGame.Framework.Graphics
             {
                 if (depth != _lastClearDepth)
                 {
-                    GL.ClearDepth(depth);
+                    if (GL.ClearDepthF != null)
+                        GL.ClearDepthF(depth);
+                    else
+                        GL.ClearDepth(depth);
+
                     GL.CheckError();
                     _lastClearDepth = depth;
                 }
@@ -499,20 +507,9 @@ namespace MonoGame.Framework.Graphics
                         case DepthFormat.Depth16:
                             depthInternalFormat = RenderbufferStorage.DepthComponent16;
                             break;
-#if GLES
-                        case DepthFormat.Depth24:
-                            if (Capabilities.SupportsDepth24)
-                                depthInternalFormat = RenderbufferStorage.DepthComponent24Oes;
-                            else if (Capabilities.SupportsDepthNonLinear)
-                                depthInternalFormat = (RenderbufferStorage)0x8E2C;
-                            else
-                                depthInternalFormat = RenderbufferStorage.DepthComponent16;
-                            break;
 
-                        case DepthFormat.Depth24Stencil8:
-                            if (Capabilities.SupportsPackedDepthStencil)
-                                depthInternalFormat = RenderbufferStorage.Depth24Stencil8Oes;
-                            else
+                        case DepthFormat.Depth24:
+                            if (GL.IsES)
                             {
                                 if (Capabilities.SupportsDepth24)
                                     depthInternalFormat = RenderbufferStorage.DepthComponent24Oes;
@@ -520,19 +517,34 @@ namespace MonoGame.Framework.Graphics
                                     depthInternalFormat = (RenderbufferStorage)0x8E2C;
                                 else
                                     depthInternalFormat = RenderbufferStorage.DepthComponent16;
-                                stencilInternalFormat = RenderbufferStorage.StencilIndex8;
-                                break;
                             }
-                            break;
-#else
-                        case DepthFormat.Depth24:
-                            depthInternalFormat = RenderbufferStorage.DepthComponent24;
+                            else
+                            {
+                                depthInternalFormat = RenderbufferStorage.DepthComponent24;
+                            }
                             break;
 
                         case DepthFormat.Depth24Stencil8:
-                            depthInternalFormat = RenderbufferStorage.Depth24Stencil8;
+                            if (GL.IsES)
+                            {
+                                if (Capabilities.SupportsPackedDepthStencil)
+                                    depthInternalFormat = RenderbufferStorage.Depth24Stencil8Oes;
+                                else
+                                {
+                                    if (Capabilities.SupportsDepth24)
+                                        depthInternalFormat = RenderbufferStorage.DepthComponent24Oes;
+                                    else if (Capabilities.SupportsDepthNonLinear)
+                                        depthInternalFormat = (RenderbufferStorage)0x8E2C;
+                                    else
+                                        depthInternalFormat = RenderbufferStorage.DepthComponent16;
+                                    stencilInternalFormat = RenderbufferStorage.StencilIndex8;
+                                }
+                            }
+                            else
+                            {
+                                depthInternalFormat = RenderbufferStorage.Depth24Stencil8;
+                            }
                             break;
-#endif
                     }
 
                     if (depthInternalFormat != 0)
@@ -725,9 +737,9 @@ namespace MonoGame.Framework.Graphics
             {
                 _framebufferHelper.BindFramebuffer(glFramebuffer);
             }
-#if !GLES
-            GL.DrawBuffers(RenderTargetCount, _drawBuffers);
-#endif
+
+            if (!GL.IsES)
+                GL.DrawBuffers(RenderTargetCount, _drawBuffers);
 
             // Reset the raster state because we flip vertices
             // when rendering offscreen and hence the cull direction.
@@ -743,10 +755,10 @@ namespace MonoGame.Framework.Graphics
         {
             return primitiveType switch
             {
-                PrimitiveType.LineList => OpenGL.GLPrimitiveType.Lines,
-                PrimitiveType.LineStrip => OpenGL.GLPrimitiveType.LineStrip,
-                PrimitiveType.TriangleList => OpenGL.GLPrimitiveType.Triangles,
-                PrimitiveType.TriangleStrip => OpenGL.GLPrimitiveType.TriangleStrip,
+                PrimitiveType.LineList => GLPrimitiveType.Lines,
+                PrimitiveType.LineStrip => GLPrimitiveType.LineStrip,
+                PrimitiveType.TriangleList => GLPrimitiveType.Triangles,
+                PrimitiveType.TriangleStrip => GLPrimitiveType.TriangleStrip,
                 _ => throw new ArgumentOutOfRangeException(nameof(primitiveType)),
             };
         }

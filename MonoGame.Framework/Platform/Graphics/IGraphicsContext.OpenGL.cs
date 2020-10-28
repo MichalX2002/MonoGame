@@ -6,7 +6,7 @@ using System;
 
 namespace MonoGame.OpenGL
 {
-    internal interface IGraphicsContext : IDisposable
+    public interface IGraphicsContext : IDisposable
     {
         bool IsDisposed { get; }
         bool IsCurrent { get; }

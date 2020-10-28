@@ -115,7 +115,7 @@ namespace MonoGame.Framework.Graphics
                     if (_glFormat == GLPixelFormat.CompressedTextureFormats)
                     {
                         GL.CompressedTexImage2D(
-                            TextureTarget.Texture2D, level, _glInternalFormat, 
+                            TextureTarget.Texture2D, level, _glInternalFormat,
                             w, h, 0, bytes, (IntPtr)ptr);
                     }
                     else
@@ -140,91 +140,101 @@ namespace MonoGame.Framework.Graphics
             int level, int arraySlice, Rectangle rect, Span<T> destination)
             where T : unmanaged
         {
-#if GLES
-            // TODO: check for for non renderable formats (formats that can't be attached to FBO)
-            GL.GenFramebuffers(1, out int framebufferId);
-            GL.CheckError();
-
-            GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebufferId);
-            GL.CheckError();
-
-            GL.FramebufferTexture2D(
-                FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D,
-                _glTexture, 0);
-            GL.CheckError();
-
-            fixed (T* ptr = destination)
+            if (GL.IsES)
             {
-                GL.ReadPixels(rect.X, rect.Y, rect.Width, rect.Height, glFormat, glType, (IntPtr)ptr);
+                // TODO: check for for non renderable formats (formats that can't be attached to FBO)
+                GL.GenFramebuffers(1, out int framebufferId);
                 GL.CheckError();
-            }
-            GraphicsDevice.DisposeFramebuffer(framebufferId);
-#else
-            GL.BindTexture(TextureTarget.Texture2D, _glTexture);
-            GL.PixelStore(PixelStoreParameter.PackAlignment, Math.Min(sizeof(T), 8));
-
-            // TODO: optimize with stackalloc (will only work on certain sizes)
-
-            int dstSize = destination.Length * sizeof(T);
-            var dstBytes = MemoryMarshal.AsBytes(destination);
-            var buffer = IntPtr.Zero;
-            try
-            {
-                if (_glFormat == GLPixelFormat.CompressedTextureFormats)
+                var handle = GLHandle.Framebuffer(framebufferId);
+                try
                 {
-                    // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
-                    int pixelToT = Format.GetSize() / sizeof(T);
-                    int tFullWidth = Math.Max(Width >> level, 1) / 4 * pixelToT;
-                    int bufferBytes = Math.Max(Height >> level, 1) / 4 * tFullWidth * sizeof(T);
-                    buffer = Marshal.AllocHGlobal(bufferBytes);
-                    var bufferSpan = new ReadOnlySpan<byte>((void*)buffer, bufferBytes);
-
-                    GL.GetCompressedTexImage(TextureTarget.Texture2D, level, buffer);
+                    GL.BindFramebuffer(FramebufferTarget.Framebuffer, framebufferId);
                     GL.CheckError();
 
-                    int rows = rect.Height / 4;
-                    int tRectWidth = rect.Width / 4 * Format.GetSize() / sizeof(T);
-
-                    for (int row = 0; row < rows; row++)
-                    {
-                        int bufferStart = rect.X / 4 * pixelToT + (rect.Top / 4 + row) * tFullWidth;
-                        int dataStart = row * tRectWidth;
-
-                        var src = bufferSpan.Slice(bufferStart * sizeof(T), tRectWidth * sizeof(T));
-                        var dst = dstBytes.Slice(dataStart * sizeof(T), src.Length);
-                        src.CopyTo(dst);
-                    }
-                }
-                else
-                {
-                    // we need to convert from our format size to the size of T here
-                    int tFullWidth = Math.Max(Width >> level, 1) * Format.GetSize() / sizeof(T);
-                    int bufferBytes = Math.Max(Height >> level, 1) * tFullWidth * sizeof(T);
-                    buffer = Marshal.AllocHGlobal(bufferBytes);
-                    var bufferSpan = new ReadOnlySpan<byte>((void*)buffer, bufferBytes);
-
-                    GL.GetTexImage(TextureTarget.Texture2D, level, _glFormat, _glType, buffer);
+                    GL.FramebufferTexture2D(
+                        FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D,
+                        _glTexture, 0);
                     GL.CheckError();
 
-                    int pixelToT = Format.GetSize() / sizeof(T);
-                    int tRectWidth = rect.Width * pixelToT;
-
-                    for (int row = 0; row < rect.Height; row++)
+                    fixed (T* ptr = destination)
                     {
-                        int bufferStart = rect.X * pixelToT + (row + rect.Top) * tFullWidth;
-                        int dataStart = row * tRectWidth;
-
-                        var src = bufferSpan.Slice(bufferStart * sizeof(T), tRectWidth * sizeof(T));
-                        var dst = dstBytes.Slice(dataStart * sizeof(T), src.Length);
-                        src.CopyTo(dst);
+                        GL.ReadPixels(rect.X, rect.Y, rect.Width, rect.Height, _glFormat, _glType, (IntPtr)ptr);
+                        GL.CheckError();
                     }
+                    GraphicsDevice.DisposeResource(handle);
+                }
+                catch
+                {
+                    handle.Free();
                 }
             }
-            finally
+            else
             {
-                Marshal.FreeHGlobal(buffer);
+                GL.BindTexture(TextureTarget.Texture2D, _glTexture);
+                GL.PixelStore(PixelStoreParameter.PackAlignment, Math.Min(sizeof(T), 8));
+
+                // TODO: optimize with stackalloc (will only work on certain sizes)
+
+                int dstSize = destination.Length * sizeof(T);
+                var dstBytes = MemoryMarshal.AsBytes(destination);
+                var buffer = IntPtr.Zero;
+                try
+                {
+                    if (_glFormat == GLPixelFormat.CompressedTextureFormats)
+                    {
+                        // Note: for compressed format Format.GetSize() returns the size of a 4x4 block
+                        int pixelToT = Format.GetSize() / sizeof(T);
+                        int tFullWidth = Math.Max(Width >> level, 1) / 4 * pixelToT;
+                        int bufferBytes = Math.Max(Height >> level, 1) / 4 * tFullWidth * sizeof(T);
+                        buffer = Marshal.AllocHGlobal(bufferBytes);
+                        var bufferSpan = new ReadOnlySpan<byte>((void*)buffer, bufferBytes);
+
+                        GL.GetCompressedTexImage(TextureTarget.Texture2D, level, buffer);
+                        GL.CheckError();
+
+                        int rows = rect.Height / 4;
+                        int tRectWidth = rect.Width / 4 * Format.GetSize() / sizeof(T);
+
+                        for (int row = 0; row < rows; row++)
+                        {
+                            int bufferStart = rect.X / 4 * pixelToT + (rect.Top / 4 + row) * tFullWidth;
+                            int dataStart = row * tRectWidth;
+
+                            var src = bufferSpan.Slice(bufferStart * sizeof(T), tRectWidth * sizeof(T));
+                            var dst = dstBytes.Slice(dataStart * sizeof(T), src.Length);
+                            src.CopyTo(dst);
+                        }
+                    }
+                    else
+                    {
+                        // we need to convert from our format size to the size of T here
+                        int tFullWidth = Math.Max(Width >> level, 1) * Format.GetSize() / sizeof(T);
+                        int bufferBytes = Math.Max(Height >> level, 1) * tFullWidth * sizeof(T);
+                        buffer = Marshal.AllocHGlobal(bufferBytes);
+                        var bufferSpan = new ReadOnlySpan<byte>((void*)buffer, bufferBytes);
+
+                        GL.GetTexImage(TextureTarget.Texture2D, level, _glFormat, _glType, buffer);
+                        GL.CheckError();
+
+                        int pixelToT = Format.GetSize() / sizeof(T);
+                        int tRectWidth = rect.Width * pixelToT;
+
+                        for (int row = 0; row < rect.Height; row++)
+                        {
+                            int bufferStart = rect.X * pixelToT + (row + rect.Top) * tFullWidth;
+                            int dataStart = row * tRectWidth;
+
+                            var src = bufferSpan.Slice(bufferStart * sizeof(T), tRectWidth * sizeof(T));
+                            var dst = dstBytes.Slice(dataStart * sizeof(T), src.Length);
+                            src.CopyTo(dst);
+                        }
+                    }
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(buffer);
+                }
             }
-#endif
         }
 
         private void GenerateGLTextureIfRequired()
@@ -258,10 +268,12 @@ namespace MonoGame.Framework.Graphics
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrap);
             GL.CheckError();
 
-#if !GLES
-            // Set mipmap levels
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
-#endif
+            if (!GL.IsES)
+            {
+                // Set mipmap levels
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
+            }
+
             GL.CheckError();
             if (GraphicsDevice.Capabilities.SupportsTextureMaxLevel)
             {

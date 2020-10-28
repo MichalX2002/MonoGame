@@ -6,12 +6,12 @@ using System;
 using System.Diagnostics;
 
 #if OPENGL
-#if DESKTOPGL || GLES
+#if ANGLE
+using OpenTK.Graphics;
+#else
 using MonoGame.OpenGL;
 using GLPixelFormat = MonoGame.OpenGL.PixelFormat;
 using PixelFormat = MonoGame.OpenGL.PixelFormat;
-#elif ANGLE
-using OpenTK.Graphics;
 #endif
 #endif
 
@@ -440,10 +440,10 @@ namespace MonoGame.Framework.Graphics
 
 #if WINDOWS || DESKTOPGL || ANGLE
         /// <summary>
-        /// Convert a <see cref="SurfaceFormat"/> to an OpenTK.Graphics.ColorFormat.
+        /// Convert a <see cref="SurfaceFormat"/> to a <see cref="ColorFormat"/>.
         /// This is used for setting up the backbuffer format of the OpenGL context.
         /// </summary>
-        /// <returns>An OpenTK.Graphics.ColorFormat instance.</returns>
+        /// <returns>A <see cref="ColorFormat"/> instance.</returns>
         /// <param name="format">The <see cref="SurfaceFormat"/> to convert.</param>
         internal static ColorFormat GetColorFormat(this SurfaceFormat format)
         {
@@ -518,16 +518,16 @@ namespace MonoGame.Framework.Graphics
             glFormat = PixelFormat.Rgba;
             glType = PixelType.UnsignedByte;
 
-            var supportsSRgb = graphicsDevice.Capabilities.SupportsSRgb;
-            var supportsS3tc = graphicsDevice.Capabilities.SupportsS3tc;
-            var supportsPvrtc = graphicsDevice.Capabilities.SupportsPvrtc;
-            var supportsEtc1 = graphicsDevice.Capabilities.SupportsEtc1;
-            var supportsEtc2 = graphicsDevice.Capabilities.SupportsEtc2;
-            var supportsAtitc = graphicsDevice.Capabilities.SupportsAtitc;
-            var supportsFloat = graphicsDevice.Capabilities.SupportsFloatTextures;
-            var supportsHalfFloat = graphicsDevice.Capabilities.SupportsHalfFloatTextures;
-            var supportsNormalized = graphicsDevice.Capabilities.SupportsNormalized;
-            var isGLES2 = GL.BoundApi == GL.RenderApi.ES && graphicsDevice._glMajorVersion == 2;
+            bool supportsSRgb = graphicsDevice.Capabilities.SupportsSRgb;
+            bool supportsS3tc = graphicsDevice.Capabilities.SupportsS3tc;
+            bool supportsPvrtc = graphicsDevice.Capabilities.SupportsPvrtc;
+            bool supportsEtc1 = graphicsDevice.Capabilities.SupportsEtc1;
+            bool supportsEtc2 = graphicsDevice.Capabilities.SupportsEtc2;
+            bool supportsAtitc = graphicsDevice.Capabilities.SupportsAtitc;
+            bool supportsFloat = graphicsDevice.Capabilities.SupportsFloatTextures;
+            bool supportsHalfFloat = graphicsDevice.Capabilities.SupportsHalfFloatTextures;
+            bool supportsNormalized = graphicsDevice.Capabilities.SupportsNormalized;
+            bool isGLES2 = GL.IsES && graphicsDevice._glMajorVersion == 2;
 
             switch (format)
             {
