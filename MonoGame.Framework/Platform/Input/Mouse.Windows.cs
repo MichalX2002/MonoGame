@@ -21,7 +21,6 @@ namespace MonoGame.Framework.Input
         {
             _window = Control.FromHandle(Window.GetPlatformWindowHandle());
 
-            UpdateMousePosition(); // TODO: check if this is smart
             UpdateCursor();
         }
 
