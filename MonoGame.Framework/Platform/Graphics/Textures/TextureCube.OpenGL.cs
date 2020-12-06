@@ -137,7 +137,7 @@ namespace MonoGame.Framework.Graphics
                 {
                     int tmpStart = rect.X / 4 * pixelToT + (rect.Top / 4 + y) * tFullWidth;
                     var src = tmpSpan.Slice(tmpStart, tFullWidth);
-                    var dst = byteDst.Slice(y * tRectWidth);
+                    var dst = byteDst[(y * tRectWidth)..];
                     src.CopyTo(dst);
                 }
             }
@@ -157,7 +157,7 @@ namespace MonoGame.Framework.Graphics
                 {
                     int tmpStart = rect.X * pixelToT + (y + rect.Top) * tFullWidth;
                     var src = tmpSpan.Slice(tmpStart, tFullWidth);
-                    var dst = byteDst.Slice(y * tRectWidth);
+                    var dst = byteDst[(y * tRectWidth)..];
                     src.CopyTo(dst);
                 }
             }

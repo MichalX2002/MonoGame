@@ -34,7 +34,7 @@ namespace MonoGame.Framework.Memory
                     int read = stream.Read(resultM.Span);
                     if (read == 0)
                         break;
-                    resultM = resultM.Slice(read);
+                    resultM = resultM[read..];
                 }
 
                 if (!resultM.IsEmpty)

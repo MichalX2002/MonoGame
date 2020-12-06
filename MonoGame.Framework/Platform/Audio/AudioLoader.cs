@@ -336,20 +336,20 @@ namespace MonoGame.Framework.Audio
                 while (src.Length >= Vector<float>.Count * 2)
                 {
                     var vSrc1 = new Vector<float>(src);
-                    src = src.Slice(Vector<float>.Count);
+                    src = src[Vector<float>.Count..];
                     var vResult1 = Vector.Add(Vector.Multiply(vSrc1, vMax), vHalf);
                     vResult1 = Vector.Max(vMin, Vector.Min(vResult1, vMax));
                     var vIntResult1 = Vector.ConvertToInt32(vResult1);
 
                     var vSrc2 = new Vector<float>(src);
-                    src = src.Slice(Vector<float>.Count);
+                    src = src[Vector<float>.Count..];
                     var vResult2 = Vector.Add(Vector.Multiply(vSrc2, vMax), vHalf);
                     vResult2 = Vector.Max(vMin, Vector.Min(vResult2, vMax));
                     var vIntResult2 = Vector.ConvertToInt32(vResult2);
 
                     var vResult = Vector.Narrow(vIntResult1, vIntResult2);
                     vResult.CopyTo(dst);
-                    dst = dst.Slice(Vector<short>.Count);
+                    dst = dst[Vector<short>.Count..];
                 }
             }
 #endif
@@ -456,7 +456,7 @@ namespace MonoGame.Framework.Audio
                 offset++;
 
                 sampleDst[0] = (short)channel0.Predictor;
-                sampleDst = sampleDst.Slice(1);
+                sampleDst = sampleDst[1..];
 
                 if (channels == 2)
                 {
@@ -470,7 +470,7 @@ namespace MonoGame.Framework.Audio
                     offset++;
 
                     sampleDst[0] = (short)channel1.Predictor;
-                    sampleDst = sampleDst.Slice(1);
+                    sampleDst = sampleDst[1..];
 
                     for (int nibbles = 2 * (blockSize - 8); nibbles > 0; nibbles -= 16)
                     {
@@ -498,7 +498,7 @@ namespace MonoGame.Framework.Audio
                         }
                         offset += 4;
 
-                        sampleDst = sampleDst.Slice(16);
+                        sampleDst = sampleDst[16..];
                     }
                 }
                 else
@@ -511,7 +511,7 @@ namespace MonoGame.Framework.Audio
 
                         sampleDst[1] = sample2;
                         sampleDst[0] = sample1;
-                        sampleDst = sampleDst.Slice(2);
+                        sampleDst = sampleDst[2..];
 
                         offset++;
                     }
@@ -666,13 +666,13 @@ namespace MonoGame.Framework.Audio
                     sampleDst[2] = (short)channel0.Sample1;
                     sampleDst[1] = (short)channel1.Sample2;
                     sampleDst[0] = (short)channel0.Sample2;
-                    sampleDst = sampleDst.Slice(4);
+                    sampleDst = sampleDst[4..];
                 }
                 else
                 {
                     sampleDst[1] = (short)channel0.Sample1;
                     sampleDst[0] = (short)channel0.Sample2;
-                    sampleDst = sampleDst.Slice(2);
+                    sampleDst = sampleDst[2..];
                 }
 
                 blockSize -= offset - offsetStart;
@@ -690,7 +690,7 @@ namespace MonoGame.Framework.Audio
 
                         sampleDst[1] = sample2;
                         sampleDst[0] = sample1;
-                        sampleDst = sampleDst.Slice(2);
+                        sampleDst = sampleDst[2..];
                     }
                 }
                 else
@@ -703,7 +703,7 @@ namespace MonoGame.Framework.Audio
 
                         sampleDst[1] = sample2;
                         sampleDst[0] = sample1;
-                        sampleDst = sampleDst.Slice(2);
+                        sampleDst = sampleDst[2..];
                     }
                 }
             }

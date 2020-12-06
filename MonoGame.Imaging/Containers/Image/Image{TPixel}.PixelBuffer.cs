@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 
 namespace MonoGame.Imaging
 {
-    public partial class Image<TPixel> : IPixelBuffer<TPixel>, IDisposable
+    public partial class Image<TPixel> : IPixelBuffer<TPixel>
         where TPixel : unmanaged, IPixel<TPixel>
     {
         public override Span<byte> GetPixelByteSpan()
@@ -50,13 +50,13 @@ namespace MonoGame.Imaging
         public void GetPixelRow(int x, int y, Span<TPixel> destination)
         {
             var rowSpan = GetPixelRowSpan(y);
-            rowSpan.Slice(x).CopyTo(destination);
+            rowSpan[x..].CopyTo(destination);
         }
 
         public void SetPixelRow(int x, int y, ReadOnlySpan<TPixel> data)
         {
             var rowSpan = GetPixelRowSpan(y);
-            data.CopyTo(rowSpan.Slice(x));
+            data.CopyTo(rowSpan[x..]);
         }
 
         public void SetPixelColumn(int x, int y, ReadOnlySpan<TPixel> data)

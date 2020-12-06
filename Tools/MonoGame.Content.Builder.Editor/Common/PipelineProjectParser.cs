@@ -610,7 +610,7 @@ namespace MonoGame.Tools.Pipeline
             var src = commentFormat.Length / 2 - label.Length / 2;
             var dst = src + label.Length;
 
-            return commentFormat.Substring(0, src) + label + commentFormat.Substring(dst);
+            return commentFormat.Substring(0, src) + label + commentFormat[dst..];
         }
     }
 }

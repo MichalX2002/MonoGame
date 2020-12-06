@@ -1530,7 +1530,7 @@ namespace MonoGame.Framework.Graphics
                 for (int row = 0; row < rows; row++)
                 {
                     var srcSlice = byteSrc.Slice(byteOffset, rowBytes);
-                    var dstSlice = destination.Slice(row * rowBytes);
+                    var dstSlice = destination[(row * rowBytes)..];
                     srcSlice.CopyTo(dstSlice);
 
                     byteOffset += rowBytes;

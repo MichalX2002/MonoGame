@@ -104,7 +104,7 @@ namespace MonoGame.Effect
                 // Parse an optional argument.
                 char[] separators = { ':' };
 
-                var split = arg.Substring(1).Split(separators, 2, StringSplitOptions.None);
+                var split = arg[1..].Split(separators, 2, StringSplitOptions.None);
 
                 var name = split[0];
                 var value = (split.Length > 1) ? split[1] : "true";

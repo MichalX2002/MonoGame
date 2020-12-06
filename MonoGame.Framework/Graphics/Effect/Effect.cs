@@ -87,7 +87,7 @@ namespace MonoGame.Framework.Graphics
             if (!graphicsDevice.EffectCache.TryGetValue(effectKey, out var cloneSource))
             {
                 // Create one.
-                fixed (byte* effectCodePtr = effectCode.Slice(headerSize))
+                fixed (byte* effectCodePtr = effectCode[headerSize..])
                 {
                     using (var stream = new UnmanagedMemoryStream(effectCodePtr, effectCode.Length - headerSize))
                     using (var reader = new BinaryReaderEx(stream))
@@ -111,13 +111,13 @@ namespace MonoGame.Framework.Graphics
             int index = 0;
             MGFXHeader header;
 
-            header.Signature = BinaryPrimitives.ReadInt32LittleEndian(effectCode.Slice(index));
+            header.Signature = BinaryPrimitives.ReadInt32LittleEndian(effectCode[index..]);
             index += 4;
 
             header.Version = effectCode[index++];
             header.Profile = effectCode[index++];
 
-            header.EffectKey = BinaryPrimitives.ReadInt32LittleEndian(effectCode.Slice(index)); 
+            header.EffectKey = BinaryPrimitives.ReadInt32LittleEndian(effectCode[index..]); 
             index += 4;
 
             header.HeaderSize = index;

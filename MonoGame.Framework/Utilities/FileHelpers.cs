@@ -60,7 +60,7 @@ namespace MonoGame.Framework.Utilities
             var localPath = dst.LocalPath;
 
             if (!hasForwardSlash && localPath.StartsWith("/"))
-                localPath = localPath.Substring(1);
+                localPath = localPath[1..];
 
             // Convert the directory separator characters to the 
             // correct platform specific separator.

@@ -43,7 +43,7 @@ namespace MonoGame.Framework.Content.Pipeline
             rootDirectory = Path.GetFullPath(string.IsNullOrEmpty(rootDirectory) ? "." : rootDirectory);
             filename = Path.GetFullPath(filename);
             if (filename.StartsWith(rootDirectory))
-                return filename.Substring(rootDirectory.Length);
+                return filename[rootDirectory.Length..];
             return filename;
         }
 

@@ -100,7 +100,7 @@ namespace MonoGame.Framework.Graphics
                     for (int i = 0; i < destination.Length; i++)
                     {
                         var srcElement = byteSrc.Slice(i * VertexDeclaration.VertexStride, stride);
-                        var dstElement = byteDst.Slice(i * stride);
+                        var dstElement = byteDst[(i * stride)..];
                         srcElement.CopyTo(dstElement);
                     }
                 }
@@ -140,7 +140,7 @@ namespace MonoGame.Framework.Graphics
                         for (int i = 0; i < data.Length; i++)
                         {
                             var srcElement = byteSrc.Slice(i * stride, stride);
-                            var dstElement = byteDst.Slice(i * VertexDeclaration.VertexStride);
+                            var dstElement = byteDst[(i * VertexDeclaration.VertexStride)..];
                             srcElement.CopyTo(dstElement);
                         }
                     }
@@ -188,7 +188,7 @@ namespace MonoGame.Framework.Graphics
                         for (int i = 0; i < data.Length; i++)
                         {
                             var srcElement = byteSrc.Slice(i * stride, stride);
-                            var dstElement = byteDst.Slice(i * VertexDeclaration.VertexStride);
+                            var dstElement = byteDst[(i * VertexDeclaration.VertexStride)..];
                             srcElement.CopyTo(dstElement);
                         }
 

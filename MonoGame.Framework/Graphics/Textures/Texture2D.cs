@@ -360,7 +360,7 @@ namespace MonoGame.Framework.Graphics
 
                     SetData(dstSlice, textureRect, level, arraySlice);
 
-                    vectorRow = vectorRow.Slice(srcSlice.Length);
+                    vectorRow = vectorRow[srcSlice.Length..];
                     offsetX += count;
                 }
                 while (!vectorRow.IsEmpty);

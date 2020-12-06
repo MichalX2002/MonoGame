@@ -245,7 +245,7 @@ namespace MonoGame.Testing
 
             while ((token = tokens.ReadToken(codeSpan, out int consumed)).Type != PLCTokenType.EndOfData)
             {
-                codeSpan = codeSpan.Slice(consumed);
+                codeSpan = codeSpan[consumed..];
 
                 Color color = token.Type switch
                 {
@@ -258,7 +258,7 @@ namespace MonoGame.Testing
                 var span = token.Value;
                 while (Rune.DecodeFromUtf16(span, out Rune rune, out int consumedChars) == OperationStatus.Done)
                 {
-                    span = span.Slice(consumedChars);
+                    span = span[consumedChars..];
 
                     if (rune.Value == '\n')
                     {
@@ -381,7 +381,7 @@ namespace MonoGame.Testing
                     break;
 
                 count++;
-                text = text.Slice(index + 1);
+                text = text[(index + 1)..];
             }
             while (!text.IsEmpty);
             return count;
@@ -520,7 +520,7 @@ namespace MonoGame.Testing
 
                 while (Rune.DecodeFromUtf16(span, out Rune rune, out int consumed) == OperationStatus.Done)
                 {
-                    span = span.Slice(consumed);
+                    span = span[consumed..];
 
                     if (rune.Value == '\n')
                     {

@@ -464,7 +464,7 @@ namespace MonoGame.Framework.Memory
 
             if (bytesFromBuffer > 0)
             {
-                destination = destination.Slice(bytesFromBuffer);
+                destination = destination[bytesFromBuffer..];
             }
 
             // The read buffer must now be empty.
@@ -610,7 +610,7 @@ namespace MonoGame.Framework.Memory
 
             // Delegate to the async implementation.
             return ReadFromUnderlyingStreamAsync(
-                buffer.Slice(bytesFromBuffer), bytesFromBuffer, semaphoreLockTask, cancellationToken);
+                buffer[bytesFromBuffer..], bytesFromBuffer, semaphoreLockTask, cancellationToken);
         }
 
         /// <summary>
@@ -645,7 +645,7 @@ namespace MonoGame.Framework.Memory
 
                 if (bytesFromBuffer > 0)
                 {
-                    buffer = buffer.Slice(bytesFromBuffer);
+                    buffer = buffer[bytesFromBuffer..];
                     bytesAlreadySatisfied += bytesFromBuffer;
                 }
 
@@ -907,7 +907,7 @@ namespace MonoGame.Framework.Memory
                     Debug.Assert(bytesWritten == buffer.Length);
                     return;
                 }
-                buffer = buffer.Slice(bytesWritten);
+                buffer = buffer[bytesWritten..];
 
                 Debug.Assert(_writePos == BufferSize);
                 Debug.Assert(_bufferBlock != null);
@@ -1038,7 +1038,7 @@ namespace MonoGame.Framework.Memory
 
                 if (useBuffer)
                 {
-                    buffer = buffer.Slice(WriteToBuffer(buffer.Span));
+                    buffer = buffer[WriteToBuffer(buffer.Span)..];
 
                     if (_writePos < BufferSize)
                     {

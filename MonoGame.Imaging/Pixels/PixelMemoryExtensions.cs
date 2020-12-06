@@ -52,7 +52,7 @@ namespace MonoGame.Imaging.Pixels
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
 
-            return buffer.GetPixelSpan().Slice(start);
+            return buffer.GetPixelSpan()[start..];
         }
 
         public static ReadOnlySpan<TPixel> GetPixelSpan<TPixel>(
@@ -72,7 +72,7 @@ namespace MonoGame.Imaging.Pixels
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
 
-            return buffer.GetPixelSpan().Slice(start);
+            return buffer.GetPixelSpan()[start..];
         }
 
         public static Span<TPixel> GetPixelSpan<TPixel>(

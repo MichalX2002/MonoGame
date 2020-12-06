@@ -107,7 +107,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
                 return null;
 
             // If there isn't yet an alias for the last part of the namespace, use that.
-            var alias = childNamespace.Substring(childNamespace.LastIndexOf('.') + 1);
+            var alias = childNamespace[(childNamespace.LastIndexOf('.') + 1)..];
             if (aliases.All(x => x.Value.Alias != alias))
                 return new AliasedNamespace
                 {
@@ -142,7 +142,7 @@ namespace MonoGame.Framework.Content.Pipeline.Serialization.Intermediate
         private static string GetRelativeNamespace(string namespaceParent, string @namespace)
         {
             if (@namespace.StartsWith(namespaceParent))
-                return @namespace.Substring(namespaceParent.Length + 1);
+                return @namespace[(namespaceParent.Length + 1)..];
             throw new InvalidOperationException();
         }
 

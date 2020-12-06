@@ -51,7 +51,7 @@ namespace MonoGame.Framework.Graphics
 
                         int read;
                         while ((read = stream.Read(byteCode.Span)) != 0)
-                            byteCode = byteCode.Slice(read);
+                            byteCode = byteCode[read..];
 
                         if (!byteCode.IsEmpty)
                             throw new EndOfStreamException();

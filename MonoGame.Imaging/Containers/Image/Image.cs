@@ -119,7 +119,7 @@ namespace MonoGame.Imaging
         public void SetPixelByteRow(int x, int y, ReadOnlySpan<byte> data)
         {
             var rowSpan = GetPixelByteRowSpan(y);
-            var slice = rowSpan.Slice(x * PixelType.ElementSize);
+            var slice = rowSpan[(x * PixelType.ElementSize)..];
             data.CopyTo(slice);
         }
 
@@ -128,7 +128,7 @@ namespace MonoGame.Imaging
             int rows = data.Length / PixelType.ElementSize;
             for (int srcRow = 0; srcRow < rows; srcRow++)
             {
-                var dstSlice = GetPixelByteRowSpan(srcRow + y).Slice(x * PixelType.ElementSize);
+                var dstSlice = GetPixelByteRowSpan(srcRow + y)[(x * PixelType.ElementSize)..];
                 var srcSlice = data.Slice(srcRow * PixelType.ElementSize, PixelType.ElementSize);
                 srcSlice.CopyTo(dstSlice);
             }

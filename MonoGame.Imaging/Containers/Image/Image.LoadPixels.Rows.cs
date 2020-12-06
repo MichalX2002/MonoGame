@@ -41,7 +41,7 @@ namespace MonoGame.Imaging
                     pixels.GetPixelByteRow(rect.X + offsetX, rect.Y + y, MemoryMarshal.AsBytes(slice));
 
                     ConvertPixels(slice, dstRow);
-                    dstRow = dstRow.Slice(count);
+                    dstRow = dstRow[count..];
                     offsetX += count;
                 }
                 while (offsetX < rect.Width);

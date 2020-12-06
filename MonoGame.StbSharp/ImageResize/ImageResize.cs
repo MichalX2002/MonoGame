@@ -228,7 +228,7 @@ namespace StbSharp.ImageResize
             Span<float> coefficients, Filter filter, float scale, int y, int x)
         {
             int width = GetCoefficientWidth(filter, (float)scale);
-            return coefficients.Slice(width * y + x);
+            return coefficients[(width * y + x)..];
         }
 
         public static int EdgeWrapSlow(WrapMode wrap, int n, int max)
@@ -509,7 +509,7 @@ namespace StbSharp.ImageResize
         public static void DecodeScanline(in ResizeContext context, int y)
         {
             int in_buffer_row_offset = EdgeWrap(context.wrap_vertical, y, context.input_h) * context.input_stride_bytes;
-            var input_data = context.input_data.Slice(in_buffer_row_offset);
+            var input_data = context.input_data[in_buffer_row_offset..];
             int max_x = context.input_w + context.horizontal_filter_pixel_margin;
             int decode = (int)context.datatype * MAX_COLORSPACES + (int)context.colorspace;
             int x = -context.horizontal_filter_pixel_margin;
@@ -1283,7 +1283,7 @@ namespace StbSharp.ImageResize
             }
 
             EncodeScanline(
-                context, output_w, context.output_data.Slice(output_row_start),
+                context, output_w, context.output_data[output_row_start..],
                 context.encode_buffer, channels, alpha_channel, decode);
         }
 
@@ -1633,23 +1633,23 @@ namespace StbSharp.ImageResize
 
             context.horizontal_contributors =
                 MemoryMarshal.Cast<byte, Contributors>(tmpMemory.Slice(0, context.horizontal_contributors_size));
-            tmpMemory = tmpMemory.Slice(context.horizontal_contributors_size);
+            tmpMemory = tmpMemory[context.horizontal_contributors_size..];
 
             context.horizontal_coefficients =
                 MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.horizontal_coefficients_size));
-            tmpMemory = tmpMemory.Slice(context.horizontal_coefficients_size);
+            tmpMemory = tmpMemory[context.horizontal_coefficients_size..];
 
             context.vertical_contributors =
                 MemoryMarshal.Cast<byte, Contributors>(tmpMemory.Slice(0, context.vertical_contributors_size));
-            tmpMemory = tmpMemory.Slice(context.vertical_contributors_size);
+            tmpMemory = tmpMemory[context.vertical_contributors_size..];
 
             context.vertical_coefficients =
                 MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.vertical_coefficients_size));
-            tmpMemory = tmpMemory.Slice(context.vertical_coefficients_size);
+            tmpMemory = tmpMemory[context.vertical_coefficients_size..];
 
             context.decode_buffer =
                 MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.decode_buffer_size));
-            tmpMemory = tmpMemory.Slice(context.decode_buffer_size);
+            tmpMemory = tmpMemory[context.decode_buffer_size..];
 
             if (UseHeightUpsampling(context))
             {
@@ -1657,7 +1657,7 @@ namespace StbSharp.ImageResize
 
                 context.ring_buffer =
                     MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.ring_buffer_size));
-                tmpMemory = tmpMemory.Slice(context.ring_buffer_size);
+                tmpMemory = tmpMemory[context.ring_buffer_size..];
 
                 context.encode_buffer =
                     MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.encode_buffer_size));
@@ -1667,7 +1667,7 @@ namespace StbSharp.ImageResize
             {
                 context.horizontal_buffer =
                     MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.horizontal_buffer_size));
-                tmpMemory = tmpMemory.Slice(context.horizontal_buffer_size);
+                tmpMemory = tmpMemory[context.horizontal_buffer_size..];
 
                 context.ring_buffer =
                     MemoryMarshal.Cast<byte, float>(tmpMemory.Slice(0, context.ring_buffer_size));

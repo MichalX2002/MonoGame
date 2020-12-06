@@ -203,7 +203,7 @@ namespace MonoGame.Framework
                                     // This should never occur if SDL gives use valid data.
                                     throw new InvalidDataException("Failed to decode UTF-8 text input: " + status);
                                 }
-                                utf8 = utf8.Slice(bytesConsumed);
+                                utf8 = utf8[bytesConsumed..];
 
                                 var nkey = KeyboardUtil.ToXna(rune.Value, out var key) ? key : (Keys?)null;
                                 _window.OnTextInput(new TextInputEventArgs(rune, nkey));

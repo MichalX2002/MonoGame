@@ -95,8 +95,8 @@ namespace MonoGame.Framework.IO
             while (left > 0)
             {
                 int read = _position < _prefix.Length
-                    ? ReadBufferedPrefix(buffer.Slice(totalRead))
-                    : _stream.Read(buffer.Slice(totalRead));
+                    ? ReadBufferedPrefix(buffer[totalRead..])
+                    : _stream.Read(buffer[totalRead..]);
 
                 if (read == 0)
                     break;
@@ -123,8 +123,8 @@ namespace MonoGame.Framework.IO
             while (left > 0)
             {
                 int read = _position < _prefix.Length
-                    ? ReadBufferedPrefix(buffer.Slice(totalRead).Span)
-                    : await _stream.ReadAsync(buffer.Slice(totalRead), cancellationToken).ConfigureAwait(false);
+                    ? ReadBufferedPrefix(buffer[totalRead..].Span)
+                    : await _stream.ReadAsync(buffer[totalRead..], cancellationToken).ConfigureAwait(false);
 
                 if (read == 0)
                     break;

@@ -165,10 +165,10 @@ namespace MonoGame.Framework.Audio
         private void PlatformInitializeFormat(ReadOnlySpan<byte> header, ReadOnlySpan<byte> buffer, int loopStart, int loopLength)
         {
             short format = BinaryPrimitives.ReadInt16LittleEndian(header);
-            short channels = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(2));
-            int sampleRate = BinaryPrimitives.ReadInt32LittleEndian(header.Slice(4));
-            short blockAlignment = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(12));
-            short sampleBits = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(14));
+            short channels = BinaryPrimitives.ReadInt16LittleEndian(header[2..]);
+            int sampleRate = BinaryPrimitives.ReadInt32LittleEndian(header[4..]);
+            short blockAlignment = BinaryPrimitives.ReadInt16LittleEndian(header[12..]);
+            short sampleBits = BinaryPrimitives.ReadInt16LittleEndian(header[14..]);
 
             WaveFormat waveFormat;
             if (format == 1)

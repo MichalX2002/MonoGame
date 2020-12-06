@@ -198,7 +198,7 @@ namespace MonoGame.Content.Builder
             {
                 if (!inResponseFile)
                     throw new Exception("$set is invalid outside of a response file.");
-                var words = arg.Substring(5).Split('=');
+                var words = arg[5..].Split('=');
                 var name = words[0].Trim();
                 var value = words.Length > 1 ? words[1].Trim() : string.Empty;
 
@@ -211,7 +211,7 @@ namespace MonoGame.Content.Builder
                 if (!inResponseFile)
                     throw new Exception("$if is invalid outside of a response file.");
 
-                var words = arg.Substring(4).Split('=');
+                var words = arg[4..].Split('=');
                 var name = words[0].Trim();
                 var value = words.Length > 1 ? words[1].Trim() : string.Empty;
 
@@ -223,7 +223,7 @@ namespace MonoGame.Content.Builder
 
             if (arg.StartsWith("/define:") || arg.StartsWith("--define:"))
             {
-                arg = arg.Substring(arg[0] == '/' ? 8 : 9);
+                arg = arg[(arg[0] == '/' ? 8 : 9)..];
 
                 var words = arg.Split('=');
                 var name = words[0];
@@ -241,9 +241,9 @@ namespace MonoGame.Content.Builder
             {
                 var file = arg;
                 if (file.StartsWith("/@") || file.StartsWith("-@"))
-                    file = arg.Substring(3);
+                    file = arg[3..];
                 if (file.StartsWith("--@"))
-                    file = arg.Substring(4);
+                    file = arg[4..];
 
                 file = Path.GetFullPath(file);
 
@@ -298,7 +298,7 @@ namespace MonoGame.Content.Builder
                     return false;
                 }
 
-                ParseArgument("/" + name + arg.Substring(2));
+                ParseArgument("/" + name + arg[2..]);
                 return true;
             }
 
@@ -306,7 +306,7 @@ namespace MonoGame.Content.Builder
             if (arg.Length >= 2 &&
                ((arg[0] == '-' && arg[1] != '-') || arg[0] == '/') &&
                !arg.Contains(":") && !arg.Contains("=") &&
-               !_optionalOptions.ContainsKey(arg.Substring(1)))
+               !_optionalOptions.ContainsKey(arg[1..]))
             {
                 for (int i = 1; i < arg.Length; i++)
                 {
@@ -338,7 +338,7 @@ namespace MonoGame.Content.Builder
                 // Parse an optional argument.
                 char[] separators = { ':', '=' };
 
-                var split = arg.Substring(arg.StartsWith("/") ? 1 : 2)
+                var split = arg[(arg.StartsWith("/") ? 1 : 2)..]
                     .Split(separators, 2, StringSplitOptions.None);
 
                 var name = split[0];

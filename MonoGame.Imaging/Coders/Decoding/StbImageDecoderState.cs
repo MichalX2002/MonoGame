@@ -149,7 +149,7 @@ namespace MonoGame.Imaging.Coders.Decoding
             {
                 if (addressing == AddressingMajor.Row)
                 {
-                    var imageRow = CurrentImage.GetPixelByteRowSpan(line).Slice(start * dstElementSize);
+                    var imageRow = CurrentImage.GetPixelByteRowSpan(line)[(start * dstElementSize)..];
                     for (int x = 0; x < pixelData.Length; x += dstElementSize)
                     {
                         var src = pixelData.Slice(x, dstElementSize);
@@ -171,7 +171,7 @@ namespace MonoGame.Imaging.Coders.Decoding
 
                 if (addressing == AddressingMajor.Row)
                 {
-                    Span<byte> imageRow = CurrentImage.GetPixelByteRowSpan(line).Slice(start * dstElementSize);
+                    Span<byte> imageRow = CurrentImage.GetPixelByteRowSpan(line)[(start * dstElementSize)..];
                     Span<byte> buffer = stackalloc byte[4096];
                     int srcElementSize = SourcePixelType!.ElementSize;
                     int bufferCapacity = buffer.Length / dstElementSize;
@@ -196,7 +196,7 @@ namespace MonoGame.Imaging.Coders.Decoding
                             dstOffset += dstElementSize * spacing;
                         }
 
-                        pixelData = pixelData.Slice(slice.Length);
+                        pixelData = pixelData[slice.Length..];
                         pixelCount -= count;
 
                     } while (!pixelData.IsEmpty);

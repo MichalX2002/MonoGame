@@ -73,7 +73,7 @@ namespace MonoGame.Framework.Content.Pipeline
                     continue;
 
                 var key = line.Substring(0, line.IndexOf('='));
-                var value = line.Substring(line.IndexOf('=') + 1);
+                var value = line[(line.IndexOf('=') + 1)..];
                 switch (key)
                 {
                     case "duration":

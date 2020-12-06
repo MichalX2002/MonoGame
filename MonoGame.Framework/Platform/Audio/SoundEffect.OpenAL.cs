@@ -146,10 +146,10 @@ namespace MonoGame.Framework.Audio
             ReadOnlySpan<byte> header, ReadOnlySpan<byte> data, int loopStart, int loopLength)
         {
             short wavFormat = BinaryPrimitives.ReadInt16LittleEndian(header);
-            short channels = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(2));
-            int sampleRate = BinaryPrimitives.ReadInt32LittleEndian(header.Slice(4));
-            short blockAlignment = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(12));
-            short bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(14));
+            short channels = BinaryPrimitives.ReadInt16LittleEndian(header[2..]);
+            int sampleRate = BinaryPrimitives.ReadInt32LittleEndian(header[4..]);
+            short blockAlignment = BinaryPrimitives.ReadInt16LittleEndian(header[12..]);
+            short bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(header[14..]);
 
             var format = AudioLoader.GetSoundFormat(wavFormat, channels, bitsPerSample);
 

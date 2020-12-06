@@ -83,9 +83,9 @@ namespace MonoGame.Framework.Audio
             var format = BinaryPrimitives.ReadInt16LittleEndian(header);
             if (format == 1)
             {
-                var channels = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(2));
-                var sampleRate = BinaryPrimitives.ReadInt32LittleEndian(header.Slice(4));
-                var bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(header.Slice(14));
+                var channels = BinaryPrimitives.ReadInt16LittleEndian(header[2..]);
+                var sampleRate = BinaryPrimitives.ReadInt32LittleEndian(header[4..]);
+                var bitsPerSample = BinaryPrimitives.ReadInt16LittleEndian(header[14..]);
 
                 PlatformInitializePcm(
                     data, bitsPerSample, sampleRate, (AudioChannels)channels, loopStart, loopLength);

@@ -26,7 +26,7 @@ namespace MonoGame.Imaging.Pixels
         public static Span<TPixel> GetPixelRow<TPixel>(this IPixelBuffer<TPixel> buffer, int x, int y)
             where TPixel : unmanaged, IPixel
         {
-            return buffer.GetPixelRow(y).Slice(x);
+            return buffer.GetPixelRow(y)[x..];
         }
 
         public static void GetPixelRow<TPixel>(
@@ -40,7 +40,7 @@ namespace MonoGame.Imaging.Pixels
             this IPixelBuffer<TPixel> buffer, int x, int y, Span<TPixel> row)
             where TPixel : unmanaged, IPixel
         {
-            row.CopyTo(buffer.GetPixelRowSpan(y).Slice(x));
+            row.CopyTo(buffer.GetPixelRowSpan(y)[x..]);
         }
     }
 }

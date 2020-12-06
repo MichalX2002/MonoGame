@@ -551,7 +551,7 @@ namespace MonoGame.Framework.Memory
                     int amountToWriteInBlock = Math.Min(remainingInBlock, source.Length);
 
                     source.Slice(0, amountToWriteInBlock).CopyTo(currentBlock.AsSpan(blockOffset.Offset));
-                    source = source.Slice(amountToWriteInBlock);
+                    source = source[amountToWriteInBlock..];
 
                     blockOffset.Block++;
                     blockOffset.Offset = 0;
@@ -743,7 +743,7 @@ namespace MonoGame.Framework.Memory
             {
                 int amountToCopy = Math.Min(_blocks[blockOffset.Block].Length - blockOffset.Offset, bytesRemaining);
                 var blockSrc = _blocks[blockOffset.Block].AsSpan(blockOffset.Offset, amountToCopy);
-                blockSrc.CopyTo(buffer.Slice(bytesWritten));
+                blockSrc.CopyTo(buffer[bytesWritten..]);
 
                 bytesWritten += amountToCopy;
                 bytesRemaining -= amountToCopy;

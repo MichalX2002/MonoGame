@@ -154,7 +154,7 @@ namespace MonoGame.Effect
                 // Add the whitespace back to the source file.
                 var newfile = sourceFile.Substring(0, start);
                 newfile += content;
-                newfile += sourceFile.Substring(end);
+                newfile += sourceFile[end..];
                 sourceFile = newfile;
             }
         }

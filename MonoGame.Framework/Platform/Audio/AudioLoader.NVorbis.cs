@@ -59,7 +59,7 @@ namespace MonoGame.Framework.Audio
                     {
                         Span<byte> bytes = sampleBufferBytes.Slice(0, samplesRead * sizeof(float));
                         bytes.CopyTo(resultSpan);
-                        resultSpan = resultSpan.Slice(bytes.Length);
+                        resultSpan = resultSpan[bytes.Length..];
                         totalSamplesRead += samplesRead;
                     }
                 }
@@ -80,7 +80,7 @@ namespace MonoGame.Framework.Audio
 
                         Span<byte> bytes = pcmBufferBytes.Slice(0, samplesRead * sizeof(short));
                         bytes.CopyTo(resultSpan);
-                        resultSpan = resultSpan.Slice(bytes.Length);
+                        resultSpan = resultSpan[bytes.Length..];
                         totalSamplesRead += samplesRead;
                     }
                 }

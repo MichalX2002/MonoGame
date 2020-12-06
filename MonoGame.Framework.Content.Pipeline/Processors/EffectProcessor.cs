@@ -71,7 +71,7 @@ namespace MonoGame.Framework.Content.Pipeline.Processors
             foreach (var line in stdOutLines)
             {
                 if (line.StartsWith("Dependency:") && line.Length > 12)
-                    context.AddDependency(line.Substring(12));
+                    context.AddDependency(line[12..]);
             }
 
             ProcessErrorsAndWarnings(!success, stderr.ToString(), input, context);

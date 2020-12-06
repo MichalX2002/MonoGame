@@ -80,7 +80,7 @@ namespace MonoGame.Testing
                             var dirSep = Path.DirectorySeparatorChar;
                             string fileName = x.FileName.ToString();
                             return diff > 0
-                                ? x.Directory.Slice(x.RootDirectory.Length + 1).ToString() + dirSep + fileName
+                                ? x.Directory[(x.RootDirectory.Length + 1)..].ToString() + dirSep + fileName
                                 : fileName;
                         },
                         new EnumerationOptions

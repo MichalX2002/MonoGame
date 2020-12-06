@@ -84,7 +84,7 @@ namespace MonoGame.Framework.Content.Pipeline.Graphics
             // TryParse solves the problem when name is just 'BlendIndicies' for example, in 
             // which case we default to index 0, assuming only 1 index.
             int.TryParse(
-                encodedName.Slice(baseName.Length),
+                encodedName[baseName.Length..],
                 NumberStyles.Integer,
                 CultureInfo.InvariantCulture,
                 out int index);

@@ -816,7 +816,7 @@ namespace MonoGame.Framework.Collections
                 if (entry.Next >= -1)
                 {
                     destination[0] = entry.Value;
-                    destination = destination.Slice(1);
+                    destination = destination[1..];
                 }
             }
         }

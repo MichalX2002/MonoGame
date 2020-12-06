@@ -942,7 +942,7 @@ namespace MonoGame.Tools.Pipeline
 
             filePath = filePath.Replace("/", Path.DirectorySeparatorChar.ToString());
             if (filePath.StartsWith("\\"))
-                filePath = filePath.Substring(1);
+                filePath = filePath[1..];
 
             return _project.Location + Path.DirectorySeparatorChar + filePath;
         }

@@ -68,7 +68,7 @@ namespace MonoGame.Framework
         {
             var uri = new Uri("file:///" + FileHelpers.UrlEncode(name));
             var path = uri.LocalPath;
-            path = path.Substring(1);
+            path = path[1..];
             return path.Replace(FileHelpers.NotSeparator, FileHelpers.Separator);
         }
     }

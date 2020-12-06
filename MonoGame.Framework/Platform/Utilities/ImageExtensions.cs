@@ -37,8 +37,8 @@ namespace MonoGame.Framework
                     int dstY = y;
                     var dstPtr = (byte*)bmpData.Scan0 + dstY * bmpData.Stride;
 
-                    var srcRow = pixels.GetPixelByteRowSpan(srcY).Slice(srcX);
-                    var dstRow = new Span<Bgra32>(dstPtr, bmpData.Width).Slice(dstX);
+                    var srcRow = pixels.GetPixelByteRowSpan(srcY)[srcX..];
+                    var dstRow = new Span<Bgra32>(dstPtr, bmpData.Width)[dstX..];
 
                     convertPixels.Invoke(srcRow, MemoryMarshal.AsBytes(dstRow));
                 }
