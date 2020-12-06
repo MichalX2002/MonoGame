@@ -169,12 +169,18 @@ namespace MonoGame.Framework
         /// <summary>
         /// Indicates whether this <see cref="SizeF" /> is equal to another <see cref="SizeF" />.
         /// </summary>
-        public readonly bool Equals(SizeF other) => this == other;
+        public readonly bool Equals(SizeF other)
+        {
+            return this == other;
+        }
 
         /// <summary>
         /// Returns a value indicating whether this <see cref="SizeF" /> is equal to a specified object.
         /// </summary>
-        public override readonly bool Equals(object obj) => obj is SizeF other && Equals(other);
+        public override readonly bool Equals(object? obj)
+        {
+            return obj is SizeF other && Equals(other);
+        }
 
         /// <summary>
         /// Compares two <see cref="SizeF" /> structures. The result specifies

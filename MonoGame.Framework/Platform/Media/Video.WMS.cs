@@ -6,11 +6,11 @@ namespace MonoGame.Framework.Media
 {
     public sealed partial class Video : IDisposable
     {
-        private Topology _topology;
+        private Topology? _topology;
         private MediaType _mediaType;
 
-        internal Topology Topology => _topology;
-        internal VideoSampleGrabber SampleGrabber { get; private set; }
+        internal Topology? Topology => _topology;
+        internal VideoSampleGrabber? SampleGrabber { get; private set; }
 
         private void PlatformInitialize()
         {
@@ -23,7 +23,7 @@ namespace MonoGame.Framework.Media
             MediaSource mediaSource;
             {
                 using (var resolver = new SourceResolver())
-                using (ComObject source = resolver.CreateObjectFromURL(
+                using (var source = (ComObject)resolver.CreateObjectFromURL(
                     FileName, SourceResolverFlags.MediaSource, null, out _))
                 {
                     mediaSource = source.QueryInterface<MediaSource>();
@@ -32,7 +32,7 @@ namespace MonoGame.Framework.Media
 
             mediaSource.CreatePresentationDescriptor(out PresentationDescriptor presDesc);
 
-            for (var i = 0; i < presDesc.StreamDescriptorCount; i++)
+            for (int i = 0; i < presDesc.StreamDescriptorCount; i++)
             {
                 presDesc.GetStreamDescriptorByIndex(
                     i, out SharpDX.Mathematics.Interop.RawBool selected, out StreamDescriptor desc);
@@ -50,7 +50,6 @@ namespace MonoGame.Framework.Media
                     var majorType = desc.MediaTypeHandler.MajorType;
                     if (majorType == MediaTypeGuids.Video)
                     {
-
                         SampleGrabber = new VideoSampleGrabber();
 
                         _mediaType = new MediaType();
@@ -59,7 +58,7 @@ namespace MonoGame.Framework.Media
 
                         // Specify that we want the data to come in as RGB32.
                         _mediaType.Set(MediaTypeAttributeKeys.Subtype, new Guid("00000016-0000-0010-8000-00AA00389B71"));
-
+                        
                         MediaFactory.CreateSampleGrabberSinkActivate(_mediaType, SampleGrabber, out Activate activate);
                         outputNode.Object = activate;
                     }
@@ -67,7 +66,6 @@ namespace MonoGame.Framework.Media
                     if (majorType == MediaTypeGuids.Audio)
                     {
                         MediaFactory.CreateAudioRendererActivate(out Activate activate);
-
                         outputNode.Object = activate;
                     }
 

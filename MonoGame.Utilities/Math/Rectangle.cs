@@ -53,7 +53,7 @@ namespace MonoGame.Framework
         /// <summary>
         /// Returns a <see cref="Rectangle"/> with X=0, Y=0, Width=0, Height=0.
         /// </summary>
-        public static readonly Rectangle Empty = new Rectangle();
+        public static Rectangle Empty => default;
 
         /// <summary>
         /// Returns the x coordinate of the left edge of this <see cref="Rectangle"/>.
@@ -388,12 +388,18 @@ namespace MonoGame.Framework
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="Rectangle"/>.
         /// </summary>  
-        public readonly bool Equals(Rectangle other) => this == other;
+        public readonly bool Equals(Rectangle other)
+        {
+            return this == other;
+        }
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="object"/>.
         /// </summary>
-        public override readonly bool Equals(object obj) => obj is Rectangle other && Equals(other);
+        public override readonly bool Equals(object? obj)
+        {
+            return obj is Rectangle other && Equals(other);
+        }
 
         /// <summary>
         /// Compares whether two <see cref="Rectangle"/> instances are equal.

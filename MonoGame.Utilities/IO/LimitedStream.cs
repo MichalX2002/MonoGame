@@ -78,7 +78,7 @@ namespace MonoGame.Framework.IO
             {
                 if (!_leaveOpen)
                     _stream?.Dispose();
-                _stream = null;
+                _stream = null!;
             }
             base.Dispose(disposing);
         }

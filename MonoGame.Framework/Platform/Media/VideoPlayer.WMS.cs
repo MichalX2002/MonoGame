@@ -10,8 +10,8 @@ namespace MonoGame.Framework.Media
     public sealed partial class VideoPlayer : IDisposable
     {
         private MediaSession _session;
-        private AudioStreamVolume _volumeController;
-        private PresentationClock _clock;
+        private AudioStreamVolume? _volumeController;
+        private PresentationClock? _clock;
 
         // HACK: Need SharpDX to fix this.
         private static Guid AudioStreamVolumeGuid;
@@ -25,12 +25,12 @@ namespace MonoGame.Framework.Media
             // The GUID is specified in a GuidAttribute attached to the class
             AudioStreamVolumeGuid = Guid.Parse(
                 ((GuidAttribute)typeof(AudioStreamVolume).GetCustomAttributes(typeof(GuidAttribute), false)[0]).Value);
-
+            
             MediaManagerState.CheckStartup();
             MediaFactory.CreateMediaSession(null, out _session);
         }
 
-        private Texture2D PlatformGetTexture()
+        private Texture2D? PlatformGetTexture()
         {
             var sampleGrabber = Video.SampleGrabber;
             var texData = sampleGrabber.TextureData;
@@ -56,7 +56,7 @@ namespace MonoGame.Framework.Media
                 {
                     case ClockState.Running:
                         return MediaState.Playing;
-                        
+
                     case ClockState.Paused:
                         return MediaState.Paused;
                 }
@@ -77,12 +77,10 @@ namespace MonoGame.Framework.Media
                 _session.Stop();
                 _session.ClearTopologies();
                 _session.Close();
-                if (_volumeController != null)
-                {
-                    _volumeController.Dispose();
-                    _volumeController = null;
-                }
-                _clock.Dispose();
+
+                _volumeController?.Dispose();
+                _volumeController = null;
+                _clock?.Dispose();
             }
 
             // create the callback if it hasn't been created yet
@@ -167,6 +165,9 @@ namespace MonoGame.Framework.Media
 
         private TimeSpan PlatformGetPlayPosition()
         {
+            if (_clock == null)
+                return TimeSpan.Zero;
+
             return TimeSpan.FromTicks(_clock.Time);
         }
 
@@ -174,8 +175,7 @@ namespace MonoGame.Framework.Media
         {
             if (disposing)
             {
-                if (_videoCache != null)
-                    _videoCache.Dispose();
+                _videoCache?.Dispose();
             }
         }
 
@@ -187,38 +187,31 @@ namespace MonoGame.Framework.Media
             // Get the volume interface.
             MediaFactory.GetService(_session, MediaServiceKeys.StreamVolume, AudioStreamVolumeGuid, out IntPtr volumeObjectPtr);
             _volumeController = CppObject.FromPointer<AudioStreamVolume>(volumeObjectPtr);
-
+            
             SetChannelVolumes();
         }
 
-        private class Callback : IAsyncCallback
+        private class Callback : AsyncCallbackBase
         {
             private VideoPlayer _player;
-
-            public IDisposable Shadow { get; set; }
-            public AsyncCallbackFlags Flags { get; private set; }
-            public WorkQueueId WorkQueueId { get; private set; }
 
             public Callback(VideoPlayer player)
             {
                 _player = player;
             }
 
-            public void Invoke(AsyncResult asyncResultRef)
+            public override void Invoke(AsyncResult asyncResult)
             {
-                var ev = _player._session.EndGetEvent(asyncResultRef);
+                MediaEvent ev = _player._session.EndGetEvent(asyncResult);
 
                 // Trigger an "on Video Ended" event here if needed
 
-                if (ev.TypeInfo == MediaEventTypes.SessionTopologyStatus && 
+                if (ev.TypeInfo == MediaEventTypes.SessionTopologyStatus &&
                     ev.Get(EventAttributeKeys.TopologyStatus) == TopologyStatus.Ready)
+                {
                     _player.OnTopologyReady();
-
+                }
                 _player._session.BeginGetEvent(this, null);
-            }
-
-            public void Dispose()
-            {
             }
         }
     }

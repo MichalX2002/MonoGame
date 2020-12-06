@@ -19,10 +19,10 @@ namespace MonoGame.Framework.Audio
 
         #region Static Fields & Properties
 
-        internal static XAudio2 Device { get; private set; }
-        internal static MasteringVoice MasterVoice { get; private set; }
+        internal static XAudio2? Device { get; private set; }
+        internal static MasteringVoice? MasterVoice { get; private set; }
 
-        private static X3DAudio _device3D;
+        private static X3DAudio? _device3D;
         private static bool _device3DDirty = true;
         private static Speakers _speakers = Speakers.Stereo;
 
@@ -41,7 +41,7 @@ namespace MonoGame.Framework.Audio
             }
         }
 
-        internal static X3DAudio Device3D
+        internal static X3DAudio? Device3D
         {
             get
             {
@@ -50,12 +50,11 @@ namespace MonoGame.Framework.Audio
                     _device3DDirty = false;
                     _device3D = new X3DAudio(_speakers);
                 }
-
                 return _device3D;
             }
         }
 
-        private static SubmixVoice _reverbVoice;
+        private static SubmixVoice? _reverbVoice;
 
         internal static SubmixVoice ReverbVoice
         {
@@ -63,7 +62,7 @@ namespace MonoGame.Framework.Audio
             {
                 if (_reverbVoice == null)
                 {
-                    var details = MasterVoice.VoiceDetails;
+                    VoiceDetails details = MasterVoice.VoiceDetails;
                     _reverbVoice = new SubmixVoice(Device, details.InputChannelCount, details.InputSampleRate);
 
                     var reverb = new SharpDX.XAudio2.Fx.Reverb(Device);
@@ -81,7 +80,7 @@ namespace MonoGame.Framework.Audio
 
         #endregion
 
-        internal DataStream _dataStream;
+        internal DataStream? _dataStream;
         internal AudioBuffer _buffer;
         internal AudioBuffer _loopedBuffer;
         internal WaveFormat _format;

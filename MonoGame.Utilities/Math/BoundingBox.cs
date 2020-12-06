@@ -52,6 +52,9 @@ namespace MonoGame.Framework
 
         public readonly ContainmentType Contains(BoundingFrustum frustum)
         {
+            if (frustum == null)
+                throw new ArgumentNullException(nameof(frustum));
+
             //TODO: bad done here need a fix. 
             // Because question is not frustum contain box but reverse and this is not the same
             int i;
@@ -267,6 +270,9 @@ namespace MonoGame.Framework
 
         public readonly bool Intersects(BoundingFrustum frustum)
         {
+            if (frustum == null)
+                throw new ArgumentNullException(nameof(frustum));
+
             return frustum.Intersects(this);
         }
 
@@ -381,9 +387,15 @@ namespace MonoGame.Framework
 
         #region Equals
 
-        public readonly bool Equals(BoundingBox other) => this == other;
+        public readonly bool Equals(BoundingBox other)
+        {
+            return this == other;
+        }
 
-        public override readonly bool Equals(object obj) => obj is BoundingBox other && this == other;
+        public override readonly bool Equals(object? obj)
+        {
+            return obj is BoundingBox other && this == other;
+        }
 
         public static bool operator ==(in BoundingBox a, in BoundingBox b)
         {

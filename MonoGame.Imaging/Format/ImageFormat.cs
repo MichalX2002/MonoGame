@@ -140,6 +140,9 @@ namespace MonoGame.Imaging
 
         public static void AddFormat(ImageFormat format)
         {
+            if (format == null)
+                throw new ArgumentNullException(nameof(format));
+
             lock (RegistrationMutex)
             {
                 if (!_formats.Add(format))

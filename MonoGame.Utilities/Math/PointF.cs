@@ -191,12 +191,18 @@ namespace MonoGame.Framework
         /// <summary>
         /// Indicates whether this <see cref="PointF" /> is equal to another <see cref="PointF" />.
         /// </summary>
-        public readonly bool Equals(PointF other) => this == other;
+        public readonly bool Equals(PointF other)
+        {
+            return this == other;
+        }
 
         /// <summary>
         /// Returns a value indicating whether this <see cref="PointF" /> is equal to a specified object.
         /// </summary>
-        public override readonly bool Equals(object obj) => obj is PointF other && Equals(other);
+        public override readonly bool Equals(object? obj)
+        {
+            return obj is PointF other && Equals(other);
+        }
 
         /// <summary>
         /// Compares two <see cref="PointF" /> structures. The result specifies

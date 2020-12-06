@@ -9,6 +9,6 @@ namespace MonoGame.Framework.Memory
 
     public interface IReadOnlyMemory<T> : IReadOnlyMemory
     {
-        new ReadOnlySpan<T> Span { get; }
+        ReadOnlySpan<T> Span { get; }
     }
 }

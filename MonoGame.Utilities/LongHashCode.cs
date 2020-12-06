@@ -2,12 +2,15 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using MonoGame.Framework.Collections;
 
 namespace MonoGame.Framework
 {
+    [SuppressMessage("Design", "CA1066:Implement IEquatable when overriding Object.Equals", Justification = "<Pending>")]
+    [SuppressMessage("Usage", "CA2231:Overload operator equals on overriding value type Equals", Justification = "<Pending>")]
     public struct LongHashCode
     {
         private static ulong Seed { get; } = MarvinHash64.GenerateSeed();
@@ -367,7 +370,6 @@ namespace MonoGame.Framework
             return (long)hash;
         }
 
-#pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
 #pragma warning disable 0809
         // Obsolete member 'memberA' overrides non-obsolete member 'memberB'.
         // Disallowing GetHashCode and Equals is by design
@@ -398,6 +400,5 @@ namespace MonoGame.Framework
             throw new NotSupportedException();
         }
 #pragma warning restore 0809
-#pragma warning restore CA1065
     }
 }

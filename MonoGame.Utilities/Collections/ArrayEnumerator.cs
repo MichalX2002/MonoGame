@@ -15,6 +15,7 @@ namespace MonoGame.Framework.Collections
         public ArrayEnumerator(T[] array) : this()
         {
             _array = array ?? throw new ArgumentNullException(nameof(array));
+            Current = default!;
         }
 
         public bool MoveNext()

@@ -10,12 +10,12 @@ namespace MonoGame.Framework.Collections
     /// </summary>
     public readonly struct CachedReadOnlySet<T> : IEnumerable<T>
     {
-        public ISet<T> Source { get; }
+        public IReadOnlySet<T> Source { get; }
         public ReadOnlySet<T> ReadOnly { get; }
 
         public bool IsEmpty => Source == null;
 
-        public CachedReadOnlySet(ISet<T> items)
+        public CachedReadOnlySet(IReadOnlySet<T> items)
         {
             Source = items ?? throw new ArgumentNullException(nameof(items));
             ReadOnly = Source.AsReadOnly();

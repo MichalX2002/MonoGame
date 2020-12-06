@@ -47,7 +47,7 @@ namespace MonoGame.Framework.Collections
             get
             {
                 ref TValue value = ref FindValue(key);
-                if (!UnsafeR.IsNullRef(ref value))
+                if (!Unsafe.IsNullRef(ref value))
                     return value;
                 throw new KeyNotFoundException();
             }
@@ -163,7 +163,7 @@ namespace MonoGame.Framework.Collections
         {
             ref TValue value = ref FindValue(keyValuePair.Key);
 
-            if (!UnsafeR.IsNullRef(ref value) &&
+            if (!Unsafe.IsNullRef(ref value) &&
                 LongEqualityComparer<TValue>.Default.Equals(value, keyValuePair.Value))
                 return true;
 
@@ -174,7 +174,7 @@ namespace MonoGame.Framework.Collections
         {
             ref TValue value = ref FindValue(keyValuePair.Key);
 
-            if (!UnsafeR.IsNullRef(ref value) &&
+            if (!Unsafe.IsNullRef(ref value) &&
                 LongEqualityComparer<TValue>.Default.Equals(value, keyValuePair.Value))
             {
                 Remove(keyValuePair.Key);
@@ -202,7 +202,7 @@ namespace MonoGame.Framework.Collections
 
         public bool ContainsKey(TKey key)
         {
-            return !UnsafeR.IsNullRef(ref FindValue(key));
+            return !Unsafe.IsNullRef(ref FindValue(key));
         }
 
         public bool ContainsValue(TValue value)
@@ -282,7 +282,7 @@ namespace MonoGame.Framework.Collections
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            ref Entry entry = ref UnsafeR.NullRef<Entry>();
+            ref Entry entry = ref Unsafe.NullRef<Entry>();
             if (_buckets != null)
             {
                 Entry[]? entries = _entries;
@@ -387,7 +387,7 @@ namespace MonoGame.Framework.Collections
             Return:
             return ref value;
             ReturnNotFound:
-            value = ref UnsafeR.NullRef<TValue>();
+            value = ref Unsafe.NullRef<TValue>();
             goto Return;
         }
 
@@ -760,7 +760,7 @@ namespace MonoGame.Framework.Collections
         public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
         {
             ref TValue valRef = ref FindValue(key);
-            if (!UnsafeR.IsNullRef(ref valRef))
+            if (!Unsafe.IsNullRef(ref valRef))
             {
                 value = valRef;
                 return true;

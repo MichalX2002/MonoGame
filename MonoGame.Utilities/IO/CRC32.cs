@@ -14,7 +14,7 @@ namespace MonoGame.Framework.IO
         // private members
         private readonly uint _dwPolynomial;
         private readonly bool _reverseBits;
-        private uint[] crc32Table;
+        private uint[] _crc32Table;
         private uint _register = 0xFFFFFFFFU;
 
         /// <summary>
@@ -87,6 +87,8 @@ namespace MonoGame.Framework.IO
         {
             _reverseBits = reverseBits;
             _dwPolynomial = (uint)polynomial;
+            _crc32Table = new uint[256];
+
             GenerateLookupTable();
         }
 
@@ -109,7 +111,7 @@ namespace MonoGame.Framework.IO
         /// <param name="input">The stream over which to calculate the CRC32</param>
         /// <param name="output">The stream into which to deflate the input</param>
         /// <returns>the CRC32 calculation</returns>
-        public int GetCrc32AndCopy(Stream input, Stream output)
+        public int GetCrc32AndCopy(Stream input, Stream? output)
         {
             if (input == null)
                 throw new Exception("The input stream must not be null.");
@@ -148,7 +150,7 @@ namespace MonoGame.Framework.IO
 
         internal int InternalComputeCrc32(uint W, byte B)
         {
-            return (int)(crc32Table[(W ^ B) & 0xFF] ^ (W >> 8));
+            return (int)(_crc32Table[(W ^ B) & 0xFF] ^ (W >> 8));
         }
 
         /// <summary>
@@ -165,12 +167,12 @@ namespace MonoGame.Framework.IO
                 if (_reverseBits)
                 {
                     uint temp = (_register >> 24) ^ b;
-                    _register = (_register << 8) ^ crc32Table[temp];
+                    _register = (_register << 8) ^ _crc32Table[temp];
                 }
                 else
                 {
                     uint temp = (_register & 0x000000FF) ^ b;
-                    _register = (_register >> 8) ^ crc32Table[temp];
+                    _register = (_register >> 8) ^ _crc32Table[temp];
                 }
             }
             TotalBytesRead += block.Length;
@@ -186,12 +188,12 @@ namespace MonoGame.Framework.IO
             if (_reverseBits)
             {
                 uint temp = (_register >> 24) ^ b;
-                _register = (_register << 8) ^ crc32Table[temp];
+                _register = (_register << 8) ^ _crc32Table[temp];
             }
             else
             {
                 uint temp = (_register & 0x000000FF) ^ b;
-                _register = (_register >> 8) ^ crc32Table[temp];
+                _register = (_register >> 8) ^ _crc32Table[temp];
             }
         }
 
@@ -216,12 +218,12 @@ namespace MonoGame.Framework.IO
                 if (_reverseBits)
                 {
                     uint tmp = (_register >> 24) ^ b;
-                    _register = (_register << 8) ^ crc32Table[(tmp >= 0) ? tmp : (tmp + 256)];
+                    _register = (_register << 8) ^ _crc32Table[(tmp >= 0) ? tmp : (tmp + 256)];
                 }
                 else
                 {
                     uint tmp = (_register & 0x000000FF) ^ b;
-                    _register = (_register >> 8) ^ crc32Table[(tmp >= 0) ? tmp : (tmp + 256)];
+                    _register = (_register >> 8) ^ _crc32Table[(tmp >= 0) ? tmp : (tmp + 256)];
                 }
             }
         }
@@ -255,7 +257,7 @@ namespace MonoGame.Framework.IO
 
         private void GenerateLookupTable()
         {
-            crc32Table = new uint[256];
+            _crc32Table.AsSpan().Clear();
             unchecked
             {
                 uint dwCrc;
@@ -272,9 +274,9 @@ namespace MonoGame.Framework.IO
                     }
 
                     if (_reverseBits)
-                        crc32Table[ReverseBits(i)] = ReverseBits(dwCrc);
+                        _crc32Table[ReverseBits(i)] = ReverseBits(dwCrc);
                     else
-                        crc32Table[i] = dwCrc;
+                        _crc32Table[i] = dwCrc;
 
                     i++;
                 } while (i != 0);
@@ -297,7 +299,7 @@ namespace MonoGame.Framework.IO
 #endif
         }
 
-        private uint Gf2_matrix_times(ReadOnlySpan<uint> matrix, uint vec)
+        private static uint Gf2_matrix_times(ReadOnlySpan<uint> matrix, uint vec)
         {
             uint sum = 0;
             int i = 0;
@@ -311,7 +313,7 @@ namespace MonoGame.Framework.IO
             return sum;
         }
 
-        private void Gf2_matrix_square(Span<uint> square, ReadOnlySpan<uint> mat)
+        private static void Gf2_matrix_square(Span<uint> square, ReadOnlySpan<uint> mat)
         {
             for (int i = 0; i < 32; i++)
                 square[i] = Gf2_matrix_times(mat, mat[i]);

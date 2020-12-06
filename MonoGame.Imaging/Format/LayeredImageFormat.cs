@@ -1,4 +1,4 @@
-﻿using MonoGame.Framework.Collections;
+﻿using System.Collections.Generic;
 using MonoGame.Imaging.Attributes.Format;
 
 namespace MonoGame.Imaging

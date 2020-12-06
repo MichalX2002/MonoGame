@@ -179,13 +179,19 @@ namespace MonoGame.Framework
         /// Compares whether current instance is equal to specified <see cref="Point"/>.
         /// </summary>
         /// <param name="other">The <see cref="Point"/> to compare.</param>
-        public readonly bool Equals(Point other) => this == other;
+        public readonly bool Equals(Point other)
+        {
+            return this == other;
+        }
 
         /// <summary>
         /// Compares whether current instance is equal to specified <see cref="object"/>.
         /// </summary>
         /// <param name="obj">The <see cref="object"/> to compare.</param>
-        public override readonly bool Equals(object obj) => obj is Point other && Equals(other);
+        public override readonly bool Equals(object? obj)
+        {
+            return obj is Point other && Equals(other);
+        }
 
         /// <summary>
         /// Compares whether two <see cref="Point"/> instances are equal.

@@ -41,7 +41,7 @@ namespace MonoGame.Framework.IO
         public override int Read(byte[] buffer, int offset, int count) => _stream.Read(buffer, offset, count);
         public override int EndRead(IAsyncResult asyncResult) => _stream.EndRead(asyncResult);
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object? state) =>
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state) =>
             _stream.BeginRead(buffer, offset, count, callback, state);
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
@@ -55,7 +55,7 @@ namespace MonoGame.Framework.IO
         public override void Write(byte[] buffer, int offset, int count) => _stream.Write(buffer, offset, count);
         public override void EndWrite(IAsyncResult asyncResult) => _stream.EndWrite(asyncResult);
 
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object? state) =>
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state) =>
             _stream.BeginWrite(buffer, offset, count, callback, state);
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
@@ -73,7 +73,6 @@ namespace MonoGame.Framework.IO
             _stream.CopyToAsync(destination, bufferSize, cancellationToken);
 
         public override void Close() => _stream.Close();
-        public override object InitializeLifetimeService() => _stream.InitializeLifetimeService();
 
         protected override void Dispose(bool disposing)
         {

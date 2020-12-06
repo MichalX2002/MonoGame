@@ -11,6 +11,11 @@ namespace MonoGame.Framework
         /// </summary>
         public static void StackCopyTo(this Stream source, Stream destination)
         {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+            if (destination == null)
+                throw new ArgumentNullException(nameof(destination));
+
             Span<byte> buffer = stackalloc byte[4096];
             int read;
             while ((read = source.Read(buffer)) != 0)
@@ -22,13 +27,18 @@ namespace MonoGame.Framework
         /// using a stack-allocated buffer and reporting every read.
         /// </summary>
         public static void StackCopyTo(
-            this Stream source, Stream destination, Action<int> onRead)
+            this Stream source, Stream destination, Action<int>? onRead)
         {
             if (onRead == null)
             {
                 StackCopyTo(source, destination);
                 return;
             }
+
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+            if (destination == null)
+                throw new ArgumentNullException(nameof(destination));
 
             Span<byte> buffer = stackalloc byte[4096];
             int read;

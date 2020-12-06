@@ -77,24 +77,24 @@ namespace MonoGame.Testing
 
             base.Initialize();
 
-            using var image = Image<Color>.Create(8, 8);
-            var span = image.GetPixelSpan();
-            for (int i = 0; i < 8; i++)
-            {
-                span[i * 8 + 0] = Color.Red;
-                span[i * 8 + 1] = Color.Red;
-                span[i * 8 + 2] = Color.Green;
-                span[i * 8 + 3] = Color.Green;
-                span[i * 8 + 4] = Color.Yellow;
-                span[i * 8 + 5] = Color.Yellow;
-                span[i * 8 + 6] = Color.Blue;
-                span[i * 8 + 7] = Color.Blue;
-            }
-
-            image.Save(".bmp");
-            image.Save(".tga");
-            image.Save(".jpg");
-            image.Save(".png");
+            //using var image = Image<Color>.Create(8, 8);
+            //var span = image.GetPixelSpan();
+            //for (int i = 0; i < 8; i++)
+            //{
+            //    span[i * 8 + 0] = Color.Red;
+            //    span[i * 8 + 1] = Color.Red;
+            //    span[i * 8 + 2] = Color.Green;
+            //    span[i * 8 + 3] = Color.Green;
+            //    span[i * 8 + 4] = Color.Yellow;
+            //    span[i * 8 + 5] = Color.Yellow;
+            //    span[i * 8 + 6] = Color.Blue;
+            //    span[i * 8 + 7] = Color.Blue;
+            //}
+            //
+            //image.Save(".bmp");
+            //image.Save(".tga");
+            //image.Save(".jpg");
+            //image.Save(".png");
             //image.Save(".gif");
             //image.Save(".hdr");
 
