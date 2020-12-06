@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -32,34 +34,43 @@ namespace MonoGame.Imaging.Tests
 
         static void Main(string[] args)
         {
-            using (var imagee = CreateColorfulImage(256))
+            string dir = "savetest";
+            Directory.CreateDirectory(dir);
+
+            (ImageFormat, EncoderOptions?)[] tests = new[]
             {
-                Directory.CreateDirectory("savetest");
+                (ImageFormat.Jpeg, (EncoderOptions)new JpegEncoderOptions(1)),
+                (ImageFormat.Jpeg, new JpegEncoderOptions(5)),
+                (ImageFormat.Jpeg, new JpegEncoderOptions(10)),
+                (ImageFormat.Jpeg, new JpegEncoderOptions(20)),
+                (ImageFormat.Jpeg, new JpegEncoderOptions(30)),
+                (ImageFormat.Jpeg, new JpegEncoderOptions(40)),
+                (ImageFormat.Jpeg, new JpegEncoderOptions(50)),
+                (ImageFormat.Jpeg, new JpegEncoderOptions(60)),
+                (ImageFormat.Jpeg, new JpegEncoderOptions(70)),
+                (ImageFormat.Jpeg, new JpegEncoderOptions(80)),
+                (ImageFormat.Jpeg, new JpegEncoderOptions(90)),
+                (ImageFormat.Jpeg, new JpegEncoderOptions(95)),
+                (ImageFormat.Jpeg, new JpegEncoderOptions(100)),
 
-                void JpegAtQuality(int q)
+                (ImageFormat.Png, null),
+                (ImageFormat.Tga, TgaEncoderOptions.Default),
+                (ImageFormat.Tga, TgaEncoderOptions.NoRLE),
+                (ImageFormat.Bmp, null)
+            };
+
+            using (var image1 = CreateColorfulImage(256))
+            {
+                foreach (var (format, options) in tests)
                 {
-                    using (var fs = new FileStream(
-                        $"savetest/test_q{q}.jpeg", FileMode.Create, FileAccess.Write, FileShare.None, 4096))
-                    {
-                        imagee.Save(fs, ImageFormat.Jpeg, new JpegEncoderOptions(q));
-                    }
+                    string extra = 
+                        options is JpegEncoderOptions jpegOpts ? ("_" + jpegOpts.Quality) :
+                        options is TgaEncoderOptions tgaOpts ? (tgaOpts.UseRunLengthEncoding ? "_rle" : "_raw") :
+                        "";
+
+                    string path = Path.Combine(dir, "write" + extra + format.Extension);
+                    image1.Save(path, format, options);
                 }
-
-                JpegAtQuality(1);
-                JpegAtQuality(5);
-                JpegAtQuality(10);
-                JpegAtQuality(20);
-                JpegAtQuality(30);
-                JpegAtQuality(50);
-                JpegAtQuality(70);
-                JpegAtQuality(90);
-                JpegAtQuality(95);
-                JpegAtQuality(100);
-
-                imagee.Save("savetest/test.png");
-                imagee.Save("savetest/test_rle.tga", null, TgaEncoderOptions.Default);
-                imagee.Save("savetest/test_norle.tga", null, TgaEncoderOptions.NoRLE);
-                imagee.Save("savetest/test.bmp");
             }
             return;
 
@@ -306,8 +317,8 @@ namespace MonoGame.Imaging.Tests
                 for (int y = 0; y < size; y++)
                 {
                     pixels[y * size + x] = new Color(
-                        x * 255 / (size - 1),
-                        y * 255 / (size - 1),
+                        x * 127 / (size - 1),
+                        y * 127 / (size - 1),
                         127);
                 }
             }

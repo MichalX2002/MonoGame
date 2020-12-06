@@ -16,14 +16,14 @@ namespace MonoGame.Framework.Content
 
         protected internal override void Initialize(ContentTypeReaderManager manager)
         {			
-			Type readerType = Enum.GetUnderlyingType(typeof(T));
-			_elementReader = manager.GetTypeReader(readerType);
+            Type readerType = Enum.GetUnderlyingType(typeof(T));
+            _elementReader = manager.GetTypeReader(readerType);
         }
-		
+        
         protected internal override T Read(ContentReader input, T existingInstance)
         {
-			return input.ReadRawObject<T>(_elementReader);
-		}
+            return input.ReadRawObject<T>(_elementReader);
+        }
     }
 }
 

@@ -13,25 +13,24 @@ namespace MonoGame.Imaging
         {
         }
 
-        public ImagingException(string message) : base(message)
+        public ImagingException(string? message) : this(message, null, null)
         {
         }
 
-        public ImagingException(string message, Exception inner) : base(message, inner)
+        public ImagingException(string? message, Exception? inner) : this(message, inner, null)
         {
         }
         
-        public ImagingException(ImageFormat? format)
+        public ImagingException(ImageFormat? format) : this(null, null, format)
         {
-            Format = format;
         }
 
-        public ImagingException(string message, ImageFormat? format) : base(message)
+        public ImagingException(string? message, ImageFormat? format) : this(message, null, format)
         {
-            Format = format;
         }
 
-        public ImagingException(string message, Exception inner, ImageFormat? format) : base(message, inner)
+        public ImagingException(string? message, Exception? inner, ImageFormat? format) :
+            base(message ?? format?.ToString(), inner)
         {
             Format = format;
         }

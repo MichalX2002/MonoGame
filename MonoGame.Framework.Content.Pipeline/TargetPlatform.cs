@@ -116,7 +116,7 @@ namespace MonoGame.Framework.Content.Pipeline
     /// <summary>
     /// Deserialize legacy Platforms from .MGCB files.
     /// </summary>
-    internal class TargetPlatformTypeConverter : EnumConverter
+    internal class TargetPlatformTypeConverter : System.ComponentModel.EnumConverter
     {
         public TargetPlatformTypeConverter(Type type) : base(type)
         {
