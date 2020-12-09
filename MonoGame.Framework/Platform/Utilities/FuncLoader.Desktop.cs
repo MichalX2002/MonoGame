@@ -34,7 +34,7 @@ namespace MonoGame.Framework
             [DllImport("/usr/lib/libSystem.dylib")]
             public static extern IntPtr dlsym(IntPtr handle, string symbol);
         }
-        
+
         private const int RTLD_LAZY = 0x0001;
 
         public static IntPtr LoadLibraryExt(string libname)
@@ -90,27 +90,37 @@ namespace MonoGame.Framework
             return Linux.dlopen(libname, RTLD_LAZY);
         }
 
-        public static T? LoadFunction<T>(IntPtr library, string function, bool throwIfNotFound = false)
+        public static T LoadFunction<T>(IntPtr library, string functionName)
             where T : Delegate
         {
-            var ret = IntPtr.Zero;
+            if (!TryLoadFunction(library, functionName, out T? func))
+                throw new EntryPointNotFoundException(functionName);
 
+            return func;
+        }
+
+        public static bool TryLoadFunction<T>(
+            IntPtr library,
+            string functionName,
+            [NotNullWhen(true)] out T? func)
+            where T : Delegate
+        {
+            IntPtr ret;
             if (PlatformInfo.CurrentOS == PlatformInfo.OS.Windows)
-                ret = Windows.GetProcAddress(library, function);
+                ret = Windows.GetProcAddress(library, functionName);
             else if (PlatformInfo.CurrentOS == PlatformInfo.OS.MacOSX)
-                ret = OSX.dlsym(library, function);
+                ret = OSX.dlsym(library, functionName);
             else
-                ret = Linux.dlsym(library, function);
+                ret = Linux.dlsym(library, functionName);
 
             if (ret == IntPtr.Zero)
             {
-                if (throwIfNotFound)
-                    throw new EntryPointNotFoundException(function);
-
-                return default;
+                func = default;
+                return false;
             }
 
-            return Marshal.GetDelegateForFunctionPointer<T>(ret);
+            func = Marshal.GetDelegateForFunctionPointer<T>(ret);
+            return true;
         }
     }
 }

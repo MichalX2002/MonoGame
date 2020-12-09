@@ -4,7 +4,8 @@ using FL = MonoGame.Framework.FuncLoader;
 
 namespace MonoGame.OpenAL
 {
-    internal unsafe class ALC
+    [CLSCompliant(false)]
+    public static unsafe class ALC
     {
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate IntPtr d_alccreatecontext(IntPtr device, int* attributes);
@@ -94,12 +95,12 @@ namespace MonoGame.OpenAL
         public delegate IntPtr d_alcgetstring(IntPtr device, int p);
         public static d_alcgetstring alcGetString = FL.LoadFunction<d_alcgetstring>(AL.NativeLibrary, "alcGetString");
 
-        public static string GetString(IntPtr device, int p)
+        public static string? GetString(IntPtr device, int p)
         {
             return Marshal.PtrToStringAnsi(alcGetString(device, p));
         }
 
-        public static string GetString(IntPtr device, ALCGetString p)
+        public static string? GetString(IntPtr device, ALCGetString p)
         {
             return GetString(device, (int)p);
         }

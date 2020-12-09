@@ -1021,7 +1021,7 @@ namespace MonoGame.Framework.Graphics
             catch (SharpDXException)
             {
                 //// TODO: How should we deal with a device lost case here?
-                
+
                 //// If the device was removed either by a disconnect or a driver upgrade, we 
                 //// must completely reinitialize the renderer.
                 //if (    ex.ResultCode == SharpDX.DXGI.DXGIError.DeviceRemoved ||
@@ -1036,7 +1036,7 @@ namespace MonoGame.Framework.Graphics
         {
             if (_d3dContext == null)
                 return;
-            
+
             var viewport = new RawViewportF
             {
                 X = _viewport.X,
@@ -1096,7 +1096,7 @@ namespace MonoGame.Framework.Graphics
                 Textures.ClearTargets(this, _currentRenderTargetBindings);
             }
 
-            for (var i = 0; i < RenderTargetCount; i++)
+            for (int i = 0; i < RenderTargetCount; i++)
             {
                 var binding = _currentRenderTargetBindings[i];
                 var target = (IRenderTarget)binding.RenderTarget;
@@ -1161,8 +1161,7 @@ namespace MonoGame.Framework.Graphics
                 case PrimitiveType.TriangleStrip:
                     return PrimitiveTopology.TriangleStrip;
             }
-
-            throw new ArgumentException();
+            throw new ArgumentException(null, nameof(primitiveType));
         }
 
         internal void PlatformBeginApplyState()
@@ -1233,6 +1232,7 @@ namespace MonoGame.Framework.Graphics
                         var vertexDeclaration = vertexBuffer.VertexDeclaration;
                         int vertexStride = vertexDeclaration.VertexStride;
                         int vertexOffsetInBytes = vertexBufferBinding.VertexOffset * vertexStride;
+                        
                         _d3dContext.InputAssembler.SetVertexBuffers(
                             slot, new SharpDX.Direct3D11.VertexBufferBinding(
                                 vertexBuffer._buffer, vertexStride, vertexOffsetInBytes));
@@ -1242,9 +1242,10 @@ namespace MonoGame.Framework.Graphics
                 else
                 {
                     for (int slot = 0; slot < _vertexBufferSlotsUsed; slot++)
+                    {
                         _d3dContext.InputAssembler.SetVertexBuffers(
                             slot, new SharpDX.Direct3D11.VertexBufferBinding());
-
+                    }
                     _vertexBufferSlotsUsed = 0;
                 }
             }
@@ -1305,7 +1306,7 @@ namespace MonoGame.Framework.Graphics
                 _userVertexBuffers[declaration] = buffer;
             }
 
-            var startVertex = buffer.UserOffset;
+            int startVertex = buffer.UserOffset;
             if ((vertexCount + buffer.UserOffset) < buffer.Count)
             {
                 buffer.UserOffset += vertexCount;
@@ -1374,13 +1375,12 @@ namespace MonoGame.Framework.Graphics
         private void PlatformDrawIndexedPrimitives(
             PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount)
         {
+            int indexCount = GetElementCountForType(primitiveType, primitiveCount);
+
             lock (_d3dContext)
             {
                 ApplyState(true);
-
                 _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
-
-                var indexCount = GetElementCountForType(primitiveType, primitiveCount);
                 _d3dContext.DrawIndexed(indexCount, startIndex, baseVertex);
             }
         }
@@ -1390,12 +1390,11 @@ namespace MonoGame.Framework.Graphics
             ReadOnlySpan<byte> vertexData,
             VertexDeclaration vertexDeclaration)
         {
-            var startVertex = SetUserVertexBuffer(vertexData, vertexDeclaration, out int vertexCount);
+            int startVertex = SetUserVertexBuffer(vertexData, vertexDeclaration, out int vertexCount);
 
             lock (_d3dContext)
             {
                 ApplyState(true);
-
                 _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
                 _d3dContext.Draw(vertexCount, startVertex);
             }
@@ -1406,7 +1405,6 @@ namespace MonoGame.Framework.Graphics
             lock (_d3dContext)
             {
                 ApplyState(true);
-
                 _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
                 _d3dContext.Draw(vertexCount, vertexStart);
             }
@@ -1420,14 +1418,13 @@ namespace MonoGame.Framework.Graphics
             int primitiveCount,
             VertexDeclaration vertexDeclaration)
         {
-            var indexCount = GetElementCountForType(primitiveType, primitiveCount);
-            var startVertex = SetUserVertexBuffer(vertexData, vertexDeclaration, out _);
-            var startIndex = SetUserIndexBuffer(indexData, elementType);
+            int startVertex = SetUserVertexBuffer(vertexData, vertexDeclaration, out _);
+            int startIndex = SetUserIndexBuffer(indexData, elementType);
+            int indexCount = GetElementCountForType(primitiveType, primitiveCount);
 
             lock (_d3dContext)
             {
                 ApplyState(true);
-
                 _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
                 _d3dContext.DrawIndexed(indexCount, startIndex, startVertex);
             }
@@ -1437,12 +1434,12 @@ namespace MonoGame.Framework.Graphics
             PrimitiveType primitiveType, int baseVertex, int startIndex, int primitiveCount,
             int baseInstance, int instanceCount)
         {
+            int indexCount = GetElementCountForType(primitiveType, primitiveCount);
+
             lock (_d3dContext)
             {
                 ApplyState(true);
-
                 _d3dContext.InputAssembler.PrimitiveTopology = ToPrimitiveTopology(primitiveType);
-                int indexCount = GetElementCountForType(primitiveType, primitiveCount);
                 _d3dContext.DrawIndexedInstanced(indexCount, instanceCount, startIndex, baseVertex, baseInstance);
             }
         }

@@ -1,5 +1,6 @@
 ﻿using MonoGame.OpenGL;
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Graphics
@@ -11,9 +12,8 @@ namespace MonoGame.Framework.Graphics
             base.PlatformConstruct(BufferTarget.ElementArrayBuffer, VertexDeclaration.VertexStride);
         }
 
-        private unsafe void PlatformGetData<T>(
-            int offsetInBytes, Span<T> destination, int elementStride)
-            where T : unmanaged
+        private unsafe void PlatformGetData(
+            int offsetInBytes, Span<byte> destination, int stride)
         {
             if (GL.IsES)
             {
@@ -30,9 +30,9 @@ namespace MonoGame.Framework.Graphics
             GL.CheckError();
 
             int bufferBytes = Capacity * VertexDeclaration.VertexStride;
-            var src = new ReadOnlySpan<T>((void*)(mapPtr + offsetInBytes), bufferBytes);
+            var src = new ReadOnlySpan<byte>((void*)(mapPtr + offsetInBytes), bufferBytes);
 
-            if (sizeof(T) % elementStride == 0)
+            if (stride % VertexDeclaration.VertexStride == 0)
             {
                 // the source and destination use tightly packed data,
                 // we can skip the interleaved copy
@@ -46,9 +46,9 @@ namespace MonoGame.Framework.Graphics
                 // interleaved copy from buffer to destination
                 for (int i = 0; i < destination.Length; i++)
                 {
-                    var srcElement = byteSrc.Slice(i * VertexDeclaration.VertexStride, elementStride);
-                    var dstElement = byteDst.Slice(i * elementStride, elementStride);
-                    srcElement.CopyTo(dstElement);
+                    var srcElements = byteSrc.Slice(i * VertexDeclaration.VertexStride, stride);
+                    var dstElements = byteDst.Slice(i * stride, stride);
+                    srcElements.CopyTo(dstElements);
                 }
             }
 
@@ -56,9 +56,9 @@ namespace MonoGame.Framework.Graphics
             GL.CheckError();
         }
 
-        private unsafe void PlatformSetData<T>(
-            int offsetInBytes, ReadOnlySpan<T> data, int dataStride, SetDataOptions options)
-            where T : unmanaged
+        [SkipLocalsInit]
+        private unsafe void PlatformSetData(
+            int offsetInBytes, ReadOnlySpan<byte> data, int dataStride, SetDataOptions options)
         {
             GenerateIfRequired();
 
@@ -67,39 +67,29 @@ namespace MonoGame.Framework.Graphics
 
             DiscardBuffer(BufferTarget.ArrayBuffer, options, Capacity * VertexDeclaration.VertexStride);
 
-            if (sizeof(T) % dataStride == 0)
+            if (dataStride % VertexDeclaration.VertexStride == 0)
             {
-                fixed (T* dataPtr = data)
+                fixed (byte* dataPtr = data)
                 {
                     // there are no gaps so we can copy in one go
-                    var size = (IntPtr)(sizeof(T) * data.Length);
-                    GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)offsetInBytes, size, (IntPtr)dataPtr);
+                    GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)offsetInBytes, (IntPtr)data.Length, (IntPtr)dataPtr);
                     GL.CheckError();
                 }
             }
             else
             {
-                // else we must copy each element separately
-                int bufferSize = Math.Max(1, 2048 / sizeof(T));
-                int bufferLength = bufferSize * sizeof(T);
-                byte* buffer = stackalloc byte[bufferLength];
-                var bufferSpan = new Span<byte>(buffer, bufferLength);
-
-                var dataBytes = MemoryMarshal.AsBytes(data);
-                int elementOffset = 0;
-                int left = data.Length;
-                while (left > 0)
+                fixed (byte* dataPtr = data)
                 {
-                    int elementsToCopy = Math.Min(bufferSize, left);
-                    int copyByteSize = elementsToCopy * sizeof(T);
-                    dataBytes.Slice(elementOffset * sizeof(T), copyByteSize).CopyTo(bufferSpan);
-
-                    var offset = new IntPtr(offsetInBytes + elementOffset * dataStride);
-                    GL.BufferSubData(BufferTarget.ArrayBuffer, offset, (IntPtr)copyByteSize, (IntPtr)buffer);
-                    GL.CheckError();
-
-                    elementOffset += elementsToCopy;
-                    left -= elementsToCopy;
+                    nint dstOffset = offsetInBytes;
+                    byte* ptr = dataPtr;
+                    for (int i = 0; i < data.Length; i += dataStride)
+                    {
+                        GL.BufferSubData(BufferTarget.ArrayBuffer, dstOffset, (IntPtr)dataStride, (IntPtr)ptr);
+                        GL.CheckError();
+                
+                        dstOffset += dataStride;
+                        ptr += dataStride;
+                    }
                 }
             }
         }
