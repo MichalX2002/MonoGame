@@ -47,11 +47,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="3.3.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -59,8 +55,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Win32.Registry" Version="4.7.0" />
-    <PackageReference Include="AssimpNet" Version="4.1.0" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+    <PackageReference Include="AssimpNet" Version="5.0.0-beta1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(CopyContentFiles)' == 'True'">
@@ -230,8 +226,7 @@
     </Content>
   </ItemGroup>
   
-  <Import Project="..\Stadia\MonoGame.Framework.Content.Pipeline.targets" 
-          Condition="exists('..\Stadia\MonoGame.Framework.Content.Pipeline.targets')" />
+  <Import Project="..\Stadia\MonoGame.Framework.Content.Pipeline.targets" Condition="exists('..\Stadia\MonoGame.Framework.Content.Pipeline.targets')" />
 
   <ItemGroup>
     <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj" />

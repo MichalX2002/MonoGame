@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Framework.Memory;
@@ -119,6 +120,7 @@ namespace MonoGame.Imaging.Coders.Decoding
             }
         }
 
+        [SkipLocalsInit]
         private void OnOutputPixelLine(
             ReadState state, AddressingMajor addressing,
             int line, int start, int spacing, ReadOnlySpan<byte> pixelData)

@@ -8,10 +8,7 @@
     <BaseOutputPath>..\Artifacts\MonoGame.Framework\$(MonoGamePlatform)</BaseOutputPath>
     <AssemblyName>MonoGame.Framework</AssemblyName>
     <RootNamespace>MonoGame.Framework</RootNamespace>
-
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
-    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
 </Project>

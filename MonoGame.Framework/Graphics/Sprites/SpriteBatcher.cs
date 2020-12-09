@@ -33,15 +33,9 @@ namespace MonoGame.Framework.Graphics
         private int _itemCount;
         private SpriteBatchItem[] _batchItems;
 
-        // Using unmanaged memory removes GC pinning costs.
-
-        // TODO: allocate on Pinned Object Heap instead
-        private UnmanagedMemory<SpriteQuad> _quadBuffer;
-
-        /// <summary>
-        /// The index buffer values are constant and more indices are added as needed.
-        /// </summary>
-        private UnmanagedMemory<ushort> _indexBuffer;
+        private SpriteQuad[]? _quadBuffer;
+        private IndexBuffer? _indexBuffer;
+        private DynamicVertexBuffer? _vertexBuffer;
 
         public bool IsDisposed { get; private set; }
 
@@ -49,34 +43,38 @@ namespace MonoGame.Framework.Graphics
         {
             _device = device ?? throw new ArgumentNullException(nameof(device));
 
-            _quadBuffer = new UnmanagedMemory<SpriteQuad>();
-            _indexBuffer = new UnmanagedMemory<ushort>();
-
             _batchItems = new SpriteBatchItem[InitialBatchSize];
             for (int i = 0; i < _batchItems.Length; i++)
                 _batchItems[i] = new SpriteBatchItem();
 
-            SetupBuffers(InitialBatchSize, 0);
+            SetupBuffers(InitialBatchSize);
         }
 
         /// <summary>
         /// Calculates indices and resizes buffer capacity (up to <see cref="MaxBatchSize"/>).
         /// </summary>
-        private void SetupBuffers(int itemCount, int oldItemCount)
+        private void SetupBuffers(int itemCount)
         {
             int minVertices = itemCount * 4; // 4 vertices per item
-            if (minVertices > _quadBuffer.Length)
-                _quadBuffer.Length = minVertices;
+            if (_vertexBuffer == null || minVertices > _vertexBuffer.Capacity)
+            {
+                _quadBuffer = GC.AllocateUninitializedArray<SpriteQuad>(minVertices, pinned: true);
+
+                _vertexBuffer?.Dispose();
+                _vertexBuffer = new DynamicVertexBuffer(
+                    _device, VertexPositionColorTexture.VertexDeclaration, minVertices, BufferUsage.WriteOnly);
+            }
 
             int minIndices = itemCount * 6; // 6 indices per item
-            if (minIndices > _indexBuffer.Length)
+            if (_indexBuffer == null || minIndices > _indexBuffer.Capacity)
             {
-                _indexBuffer.Length = minIndices;
+                _indexBuffer?.Dispose();
+                _indexBuffer = new IndexBuffer(_device, IndexElementType.Int16, minIndices, BufferUsage.WriteOnly);
+                
+                // Use the quad buffer as a temporary buffer as it is always larger than the index buffer.
+                Span<ushort> indexSpan = MemoryMarshal.Cast<SpriteQuad, ushort>(_quadBuffer).Slice(0, minIndices);
 
-                int oldVertices = oldItemCount * 4;
-                int oldIndices = oldItemCount * 6;
-                var indexSpan = _indexBuffer.Span;
-                for (int i = oldIndices, v = oldVertices; i < minIndices; i += 6, v += 4)
+                for (int i = 0, v = 0; i < indexSpan.Length; i += 6, v += 4)
                 {
                     /*
                      *  TL    TR    0,1,2,3 = index offsets for vertex indices
@@ -99,6 +97,8 @@ namespace MonoGame.Framework.Graphics
                     indexSpan[i + 4] = (ushort)(v + 3);
                     indexSpan[i + 5] = (ushort)(v + 2);
                 }
+
+                _indexBuffer.SetData(indexSpan);
             }
         }
 
@@ -114,7 +114,7 @@ namespace MonoGame.Framework.Graphics
                 for (int i = oldSize; i < newSize; i++)
                     _batchItems[i] = new SpriteBatchItem();
 
-                SetupBuffers(Math.Min(newSize, MaxBatchSize), oldSize);
+                SetupBuffers(Math.Min(newSize, MaxBatchSize));
             }
             return _batchItems[_itemCount++];
         }
@@ -128,8 +128,10 @@ namespace MonoGame.Framework.Graphics
         public unsafe void DrawBatch(SpriteSortMode sortMode, Effect? effect)
         {
             if (effect != null && effect.IsDisposed)
+            {
                 throw new ArgumentException(
-                    nameof(effect), new ObjectDisposedException(effect.GetType().FullName));
+                    "The effect is disposed.", nameof(effect), new ObjectDisposedException(effect.GetType().FullName));
+            }
 
             // nothing to do
             if (_itemCount == 0)
@@ -146,8 +148,7 @@ namespace MonoGame.Framework.Graphics
             }
 
             // iterate through the batches, doing clamped sets of vertices at the time
-            var dstQuadSpan = _quadBuffer.Span;
-            var indexSpan = _indexBuffer.Span;
+            Span<SpriteQuad> quadBuffer = _quadBuffer.AsSpan();
             int itemIndex = 0;
             int itemsLeft = _itemCount;
 
@@ -173,7 +174,7 @@ namespace MonoGame.Framework.Graphics
                     {
                         Debug.Assert(item.Texture != null);
 
-                        FlushQuads(dstQuadSpan.Slice(0, count), indexSpan, effect, tex);
+                        FlushQuads(quadBuffer.Slice(0, count), effect, tex);
                         count = 0;
 
                         tex = item.Texture;
@@ -181,11 +182,11 @@ namespace MonoGame.Framework.Graphics
                     }
                     item.Texture = null; // release texture from item
 
-                    dstQuadSpan[count] = item.Quad;
+                    quadBuffer[count] = item.Quad;
                 }
 
                 // flush the remaining data
-                FlushQuads(dstQuadSpan.Slice(0, count), indexSpan, effect, tex);
+                FlushQuads(quadBuffer.Slice(0, count), effect, tex);
 
                 itemsLeft -= itemsToProcess;
             }
@@ -201,29 +202,33 @@ namespace MonoGame.Framework.Graphics
         /// Sends the triangle list to the graphics device. Here is where the actual drawing starts.
         /// </summary>
         /// <param name="quads">The vertices to draw.</param>
-        /// <param name="indices">The indices used to draw.</param>
         /// <param name="effect">The custom effect to apply to the geometry.</param>
         /// <param name="texture">The texture to draw.</param>
         private void FlushQuads(
-            ReadOnlySpan<SpriteQuad> quads, ReadOnlySpan<ushort> indices,
-            Effect? effect, Texture texture)
+            ReadOnlySpan<SpriteQuad> quads, Effect? effect, Texture texture)
         {
             if (quads.IsEmpty)
                 return;
 
+            Debug.Assert(_indexBuffer != null);
+            Debug.Assert(_vertexBuffer != null);
             const PrimitiveType primitiveType = PrimitiveType.TriangleList;
 
             var vertices = MemoryMarshal.Cast<SpriteQuad, VertexPositionColorTexture>(quads);
+            _vertexBuffer.SetData(vertices);
 
-            // If the effect is not null, then apply each pass and render the geometry
+            _device.SetVertexBuffer(_vertexBuffer);
+            _device.Indices = _indexBuffer;
+
             if (effect == null)
             {
                 // If no custom effect is defined, then simply render.
-                _device.DrawUserIndexedPrimitives(primitiveType, vertices, indices, vertices.Length / 2);
+                _device.DrawIndexedPrimitives(primitiveType, 0, 0, vertices.Length / 2);
             }
             else
             {
-                foreach (var pass in effect.CurrentTechnique.Passes)
+                // If the effect is not null, then apply each pass and render the geometry
+                foreach (EffectPass pass in effect.CurrentTechnique.Passes)
                 {
                     pass.Apply();
 
@@ -231,7 +236,7 @@ namespace MonoGame.Framework.Graphics
                     // ends up in Textures[0].
                     _device.Textures[0] = texture;
 
-                    _device.DrawUserIndexedPrimitives(primitiveType, vertices, indices, vertices.Length / 2);
+                    _device.DrawIndexedPrimitives(primitiveType, 0, 0, vertices.Length / 2);
                 }
             }
         }
@@ -240,7 +245,8 @@ namespace MonoGame.Framework.Graphics
         {
             if (!IsDisposed)
             {
-                _quadBuffer.Dispose();
+                _indexBuffer?.Dispose();
+                _vertexBuffer?.Dispose();
                 IsDisposed = true;
             }
         }

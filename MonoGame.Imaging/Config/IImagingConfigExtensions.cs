@@ -15,6 +15,9 @@ namespace MonoGame.Imaging
         public static bool TryGetEncoder(
             this IImagingConfig config, ImageFormat format, out IImageEncoder? encoder)
         {
+            if (config == null)
+                throw new ArgumentNullException(nameof(config));
+
             var provider = config.GetModule<ImageCoderProvider<IImageEncoder>>();
             if (provider == null)
                 throw new ImagingException($"Missing {nameof(ImageCoderProvider<IImageEncoder>)}.");
@@ -60,6 +63,9 @@ namespace MonoGame.Imaging
         public static bool TryGetInfoDetector(
             this IImagingConfig config, ImageFormat format, out IImageInfoDetector? infoDetector)
         {
+            if (config == null)
+                throw new ArgumentNullException(nameof(config));
+
             var provider = config.GetModule<ImageCoderProvider<IImageInfoDetector>>();
             if (provider == null)
                 throw new ImagingException($"Missing {nameof(ImageCoderProvider<IImageInfoDetector>)}.");

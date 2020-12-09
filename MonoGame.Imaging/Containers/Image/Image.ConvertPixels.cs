@@ -24,6 +24,8 @@ namespace MonoGame.Imaging
 
             // This massive check should be JITted down to the respective type.
 
+            // Added more conversions and add vectorized conversions for common types.
+
             if (typeof(TPixelFrom) == typeof(TPixelTo))
             {
                 var src = MemoryMarshal.Cast<TPixelFrom, TPixelTo>(source);
@@ -267,7 +269,6 @@ namespace MonoGame.Imaging
             #endregion
 
             #region Extra
-            // TODO: move to IPixel?
             else if (typeof(TPixelTo) == typeof(Red8))
             {
                 var typedDestination = MemoryMarshal.Cast<TPixelTo, Red8>(destination);

@@ -290,6 +290,7 @@ namespace MonoGame.Framework.Graphics
         /// <exception cref="ArgumentException">
         ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
+        [SkipLocalsInit]
         public void SetData(
             Image image,
             Rectangle? rectangle = null,
@@ -299,15 +300,16 @@ namespace MonoGame.Framework.Graphics
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
 
-            var srcVectorType = image.PixelType;
+            VectorType srcVectorType = image.PixelType;
 
             ValidateParams(
                 Format.GetSize(), srcVectorType.Type.Name, level, arraySlice, rectangle,
                 image.Width * image.Height, out Rectangle checkedRect);
 
-            var dstVectorFormat = GetVectorFormat(Format);
-            var dstVectorTypes = dstVectorFormat.VectorTypes.Span;
-            foreach (var vectorType in dstVectorTypes)
+            VectorFormat dstVectorFormat = GetVectorFormat(Format);
+            ReadOnlySpan<VectorType> dstVectorTypes = dstVectorFormat.VectorTypes.Span;
+
+            foreach (VectorType vectorType in dstVectorTypes)
             {
                 if (srcVectorType == vectorType)
                 {
@@ -320,11 +322,13 @@ namespace MonoGame.Framework.Graphics
                     {
                         for (int y = 0; y < checkedRect.Height; y++)
                         {
-                            var row = image.GetPixelByteRowSpan(y).Slice(0, rowStride);
+                            Span<byte> row = image.GetPixelByteRowSpan(y).Slice(0, rowStride);
 
-                            var textureRect = checkedRect;
-                            textureRect.Y += y;
-                            textureRect.Height = 1;
+                            var textureRect = new Rectangle(
+                                checkedRect.X,
+                                checkedRect.Y + y,
+                                checkedRect.Width,
+                                height: 1);
 
                             SetData(row, textureRect, level, arraySlice);
                         }
@@ -334,7 +338,7 @@ namespace MonoGame.Framework.Graphics
             }
 
             Span<byte> buffer = stackalloc byte[4096];
-            var dstVectorType = dstVectorTypes[0];
+            VectorType dstVectorType = dstVectorTypes[0];
             int bufferCapacity = buffer.Length / dstVectorType.ElementSize;
             int srcRowStride = checkedRect.Width * srcVectorType.ElementSize;
             var convertPixels = Image.GetConvertPixelsDelegate(srcVectorType, dstVectorType);
@@ -427,7 +431,7 @@ namespace MonoGame.Framework.Graphics
         /// <param name="rectangle">Area of the texture; defaults to texture bounds.</param>
         /// <param name="level">Layer of the texture.</param>
         /// <param name="arraySlice">Index inside the texture array.</param>
-        /// /// <exception cref="ArgumentException">
+        /// <exception cref="ArgumentException">
         ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
         public UnmanagedMemory<T> GetData<T>(Rectangle? rectangle = null, int level = 0, int arraySlice = 0)
@@ -441,6 +445,29 @@ namespace MonoGame.Framework.Graphics
             var ptr = new UnmanagedMemory<T>(elementCount);
             PlatformGetData(level, arraySlice, checkedRect, ptr.ByteSpan);
             return ptr;
+        }
+
+        /// <summary>
+        /// Retrieves the contents of the texture and stores them in an array.
+        /// </summary>
+        /// <param name="rectangle">Area of the texture; defaults to texture bounds.</param>
+        /// <param name="level">Layer of the texture.</param>
+        /// <param name="arraySlice">Index inside the texture array.</param>
+        /// <param name="pinned">W</param>
+        /// <exception cref="ArgumentException">
+        ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
+        /// </exception>
+        public T[] GetDataArray<T>(Rectangle? rectangle = null, int level = 0, int arraySlice = 0, bool pinned = false)
+            where T : unmanaged
+        {
+            ValidateParams<T>(level, arraySlice, rectangle, out int byteSize, out Rectangle checkedRect);
+
+            int elementCount = checkedRect.Width * checkedRect.Height;
+            ValidateSizes(elementCount, Unsafe.SizeOf<T>(), byteSize);
+
+            T[] array = GC.AllocateUninitializedArray<T>(elementCount, pinned);
+            PlatformGetData(level, arraySlice, checkedRect, MemoryMarshal.AsBytes(array.AsSpan()));
+            return array;
         }
 
         #endregion
@@ -586,8 +613,8 @@ namespace MonoGame.Framework.Graphics
         {
             CheckRect(level, rectangle, out Rectangle checkedRect);
 
-            var saveFormat = GetVectorFormat(Format);
-            var data = saveFormat.GetData(this, checkedRect, level, arraySlice);
+            VectorFormat saveFormat = GetVectorFormat(Format);
+            IMemory data = saveFormat.GetData(this, checkedRect, level, arraySlice);
             try
             {
                 return Image.WrapMemory(saveFormat.VectorTypes.Span[0], data, checkedRect.Size, leaveOpen: false);
@@ -611,14 +638,16 @@ namespace MonoGame.Framework.Graphics
         {
             CheckRect(level, rectangle, out Rectangle checkedRect);
 
-            var saveFormat = GetVectorFormat(Format);
-            var data = saveFormat.GetData(this, checkedRect, level, arraySlice);
+            VectorFormat saveFormat = GetVectorFormat(Format);
+            IMemory data = saveFormat.GetData(this, checkedRect, level, arraySlice);
             try
             {
-                var types = saveFormat.VectorTypes.Span;
-                foreach (var vectorType in types)
+                ReadOnlySpan<VectorType> types = saveFormat.VectorTypes.Span;
+                foreach (VectorType vectorType in types)
+                {
                     if (vectorType.Type == typeof(TPixel))
                         return Image.WrapMemory<TPixel>(data, checkedRect.Size, leaveOpen: false);
+                }
 
                 using (data)
                 {

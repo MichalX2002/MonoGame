@@ -14,7 +14,7 @@ namespace MonoGame.Imaging
 {
     // TODO: put Reflection* methods into seperate class
 
-    // TODO: create container class so delegates can be accessed by field instead of dict-lookup
+    // TODO: create container class so delegates can be accessed by generic field instead of dict-lookup
 
     using SrcDstTypePair = ValueTuple<VectorType, VectorType>;
 

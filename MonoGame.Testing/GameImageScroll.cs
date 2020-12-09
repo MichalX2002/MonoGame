@@ -430,8 +430,8 @@ namespace MonoGame.Testing
             public bool IsPreviewLoadFinished { get; set; }
             public bool IsPreviewFaulted { get; set; }
 
-            public Image<Color> PreviewImage { get; private set; }
-            public Texture2D PreviewTexture { get; private set; }
+            public Image<Color>? PreviewImage { get; private set; }
+            public Texture2D? PreviewTexture { get; private set; }
             public Rectangle? PreviewRect { get; set; }
 
             public float AnimationTime { get; set; }
@@ -455,9 +455,8 @@ namespace MonoGame.Testing
 
                     using (var fs = File.OpenRead(_directory + "/" + FileName))
                     {
-                        var pixelType = VectorType.Get<Color>();
-                        var image = Image.Load(fs, pixelType, DecoderOptions, null, cancellationToken);
-                        PreviewImage = (Image<Color>)image;
+                        var image = Image.Load<Color>(fs, DecoderOptions, null, cancellationToken);
+                        PreviewImage = image;
                     }
                 }
                 catch
@@ -488,11 +487,19 @@ namespace MonoGame.Testing
 
                 try
                 {
-                    if (PreviewTexture == null)
-                        PreviewTexture = new Texture2D(
-                            graphicsDevice, image.Width, image.Height);
-
-                    PreviewTexture.SetData(image.GetPixelSpan());
+                    try
+                    {
+                        if (PreviewTexture == null)
+                        {
+                            PreviewTexture = new Texture2D(
+                                graphicsDevice, image.Width, image.Height);
+                        }
+                        PreviewTexture.SetData(image.GetPixelSpan());
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
                 }
                 finally
                 {

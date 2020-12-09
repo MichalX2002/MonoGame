@@ -4,7 +4,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
     <PublishReadyToRun>false</PublishReadyToRun>
@@ -23,12 +22,14 @@
     <When Condition="'$(SolutionName)' == 'MonoGame.Framework.DesktopGL'">
       <PropertyGroup>
         <MonoGamePlatform>DesktopGL</MonoGamePlatform>
+        <TargetFramework>net5.0</TargetFramework>
       </PropertyGroup>
     </When>
 
     <When Condition="'$(SolutionName)' == 'MonoGame.Framework.Windows'">
       <PropertyGroup>
         <MonoGamePlatform>Windows</MonoGamePlatform>
+        <TargetFramework>net5.0-windows</TargetFramework>
       </PropertyGroup>
     </When>
   </Choose>
@@ -39,14 +40,14 @@
 
   <ItemGroup>
     <MonoGameContentReference Include="Content/Content.$(MonoGamePlatform).mgcb" />
-    
+
     <None Update="Content/Cards/*.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.Windows.csproj" />
+    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.$(MonoGamePlatform).csproj" />
     <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj" />
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
   </ItemGroup>
@@ -105,7 +106,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeQuality.Analyzers" Version="3.3.2">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

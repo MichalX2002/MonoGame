@@ -18,18 +18,16 @@ namespace MonoGame.Imaging
             DecodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
         {
-            var frames = CreateDecoderEnumerator(
+            using var frames = CreateDecoderEnumerator(
                 config, stream, leaveOpen: true, cancellationToken);
 
-            using (frames)
-            {
-                frames.State.DecoderOptions = decoderOptions;
-                frames.State.PreferredPixelType = preferredPixelType;
-                frames.State.Progress += onProgress;
+            frames.State.PreferredPixelType = preferredPixelType;
+            frames.State.DecoderOptions = decoderOptions;
+            frames.State.Progress += onProgress;
 
-                if (frames.MoveNext())
-                    return frames.Current;
-            }
+            if (frames.MoveNext())
+                return frames.Current;
+
             return null;
         }
 
