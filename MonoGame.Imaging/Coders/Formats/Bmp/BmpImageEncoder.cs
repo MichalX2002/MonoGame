@@ -12,12 +12,12 @@ namespace MonoGame.Imaging.Coders.Formats.Bmp
 
         protected override void Write(
             StbImageEncoderState encoderState,
-            IReadOnlyPixelRows image,
-            WriteState writeState)
+            WriteState writeState,
+            PixelRowProvider image)
         {
             // TODO: allow different bit depths
 
-            StbSharp.ImageWrite.Bmp.Write(writeState);
+            StbSharp.ImageWrite.Bmp.Write(writeState, image);
         }
     }
 }

@@ -16,10 +16,10 @@ namespace MonoGame.Imaging.Coders.Encoding
 
         protected abstract void Write(
             StbImageEncoderState encoderState,
-            IReadOnlyPixelRows image,
-            WriteState writeState);
+            WriteState writeState,
+            PixelRowProvider image);
 
-        public ImageEncoderState CreateState(
+        public virtual ImageEncoderState CreateState(
             IImagingConfig imagingConfig,
             Stream stream,
             bool leaveOpen,
@@ -33,9 +33,9 @@ namespace MonoGame.Imaging.Coders.Encoding
             ImageEncoderState encoderState,
             IReadOnlyPixelRows image)
         {
-            if (encoderState == null) 
+            if (encoderState == null)
                 throw new ArgumentNullException(nameof(encoderState));
-            if (image == null) 
+            if (image == null)
                 throw new ArgumentNullException(nameof(image));
 
             var state = (StbImageEncoderState)encoderState;
@@ -55,11 +55,9 @@ namespace MonoGame.Imaging.Coders.Encoding
             int depth = Math.Min(encoderMaxDepth, variableDepth);
 
             var provider = new PixelRowProvider(image, components, depth);
+            Write(state, state.WriteState, provider);
 
-            using (var writeState = state.CreateWriteState(provider))
-            {
-                Write(state, image, writeState);
-            }
+            state.FrameIndex++;
         }
     }
 }

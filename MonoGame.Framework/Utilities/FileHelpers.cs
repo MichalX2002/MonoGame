@@ -69,9 +69,9 @@ namespace MonoGame.Framework.Utilities
 
         internal static string UrlEncode(string url)
         {
-            var encoder = Encoding.UTF8;
-            var builder = new StringBuilder(encoder.GetByteCount(url) * 3);
-            Span<byte> tmp = stackalloc byte[encoder.GetMaxByteCount(1)];
+            var encoding = Encoding.UTF8;
+            var builder = new StringBuilder(encoding.GetByteCount(url) * 3);
+            Span<byte> tmp = stackalloc byte[encoding.GetMaxByteCount(1)];
 
             for (int i = 0; i < url.Length; i++)
             {
@@ -85,7 +85,7 @@ namespace MonoGame.Framework.Utilities
                 }
                 else
                 {
-                    int byteCount = encoder.GetBytes(url.AsSpan(i, 1), tmp);
+                    int byteCount = encoding.GetBytes(url.AsSpan(i, 1), tmp);
                     for (int j = 0; j < byteCount; j++)
                     {
                         builder.Append('%');

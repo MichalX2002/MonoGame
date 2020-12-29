@@ -15,6 +15,9 @@ namespace MonoGame.Imaging
 
             foreach (var formatDetector in config.GetFormatDetectors())
             {
+                if (header.Length < formatDetector.HeaderSize)
+                    continue;
+
                 var format = formatDetector.DetectFormat(config, header);
                 if (format != null)
                     return format;

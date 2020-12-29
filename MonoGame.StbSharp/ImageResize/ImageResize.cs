@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace StbSharp.ImageResize
 {
+    [SkipLocalsInit]
     public static unsafe partial class ImageResize
     {
         private const int MAX_COLORSPACES = 2;
@@ -996,12 +997,13 @@ namespace StbSharp.ImageResize
                 }
 
                 int num_nonalpha;
-                ushort* nonalpha = stackalloc ushort[64];
+                Span<ushort> nonalpha = stackalloc ushort[64];
                 for (x = 0, num_nonalpha = 0; x < channels; ++x)
                 {
                     if ((x != alphaChannel) || ((context.flags & (1 << 1)) != 0))
                         nonalpha[num_nonalpha++] = (ushort)x;
                 }
+                nonalpha = nonalpha.Slice(0, num_nonalpha);
 
                 fixed (byte* dst8 = outputBuffer)
                 {
@@ -1028,7 +1030,7 @@ namespace StbSharp.ImageResize
                             for (x = 0; x < numPixels; ++x)
                             {
                                 int pixel_index = x * channels;
-                                for (n = 0; n < num_nonalpha; n++)
+                                for (n = 0; n < nonalpha.Length; n++)
                                 {
                                     int index = pixel_index + nonalpha[n];
                                     dst8[index] = LinearToSrgbByte(src[index]);
@@ -1060,7 +1062,7 @@ namespace StbSharp.ImageResize
                             for (x = 0; x < numPixels; ++x)
                             {
                                 int pixel_index = x * channels;
-                                for (n = 0; n < num_nonalpha; n++)
+                                for (n = 0; n < nonalpha.Length; n++)
                                 {
                                     int index = pixel_index + nonalpha[n];
                                     dst16[index] = (ushort)(int)(
@@ -1093,7 +1095,7 @@ namespace StbSharp.ImageResize
                             for (x = 0; x < numPixels; ++x)
                             {
                                 int pixel_index = x * channels;
-                                for (n = 0; n < num_nonalpha; n++)
+                                for (n = 0; n < nonalpha.Length; n++)
                                 {
                                     int index = pixel_index + nonalpha[n];
                                     dst32[index] = (uint)((((double)LinearToSrgb(
@@ -1126,7 +1128,7 @@ namespace StbSharp.ImageResize
                             for (x = 0; x < numPixels; ++x)
                             {
                                 int pixel_index = x * channels;
-                                for (n = 0; n < num_nonalpha; n++)
+                                for (n = 0; n < nonalpha.Length; n++)
                                 {
                                     int index = pixel_index + nonalpha[n];
                                     dstF[index] = (float)LinearToSrgb(src[index]);

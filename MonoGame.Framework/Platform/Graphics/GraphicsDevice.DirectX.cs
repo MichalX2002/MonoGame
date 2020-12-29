@@ -544,14 +544,12 @@ namespace MonoGame.Framework.Graphics
             {
                 featureLevels = new[]
                 {
-                    // For the Reach profile, first try use the highest supported 9_X feature level
-                    FeatureLevel.Level_9_3,
-                    FeatureLevel.Level_9_2,
-                    FeatureLevel.Level_9_1,
-                    // If level 9 is not supported, then just use the highest supported level
                     FeatureLevel.Level_11_0,
                     FeatureLevel.Level_10_1,
                     FeatureLevel.Level_10_0,
+                    FeatureLevel.Level_9_3,
+                    FeatureLevel.Level_9_2,
+                    FeatureLevel.Level_9_1,
                 };
             }
 

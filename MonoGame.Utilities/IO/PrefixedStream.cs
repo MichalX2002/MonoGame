@@ -149,6 +149,8 @@ namespace MonoGame.Framework.IO
         {
             if (_readAheadPosition < ReadAheadLength && _prefix.IsEmpty)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 int read;
                 while ((read = _stream.Read(
                     _readAheadBuffer, _readAheadPosition, ReadAheadLength - _readAheadPosition)) > 0)

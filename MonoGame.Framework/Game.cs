@@ -58,7 +58,6 @@ namespace MonoGame.Framework
         private long _elapsedTimeTicks;
         private bool _isRunningSlowly;
 
-        private long _targetElapsedTicks;
         private long _accumulatedElapsedTicks;
         private long _previousTicks;
         private int _updateFrameLag;
@@ -194,7 +193,6 @@ namespace MonoGame.Framework
                 if (value != _targetElapsedTime)
                 {
                     _targetElapsedTime = value;
-                    _targetElapsedTicks = _targetElapsedTime.Ticks;
                     Platform?.TargetElapsedTimeChanged();
                 }
             }
@@ -279,7 +277,6 @@ namespace MonoGame.Framework
             ResetGameTimer();
             _elapsedTimeTicks = 0;
             _accumulatedElapsedTicks = 0;
-            _previousTicks = 0;
         }
 
         /// <summary>
@@ -384,7 +381,6 @@ namespace MonoGame.Framework
 
         /// <summary>
         /// Run one iteration of the game loop.
-        ///
         /// Makes at least one call to <see cref="Update"/>
         /// and exactly one call to <see cref="Draw"/> if drawing is not supressed.
         /// When <see cref="IsFixedTimeStep"/> is set to <code>false</code> this will
@@ -407,10 +403,10 @@ namespace MonoGame.Framework
             _accumulatedElapsedTicks += currentTicks - _previousTicks;
             _previousTicks = currentTicks;
 
-            if (IsFixedTimeStep && _accumulatedElapsedTicks < _targetElapsedTicks)
+            if (IsFixedTimeStep && _accumulatedElapsedTicks < _targetElapsedTime.Ticks)
             {
                 // Sleep for as long as possible without overshooting the update time.
-                long sleepTicks = _targetElapsedTicks - _accumulatedElapsedTicks;
+                long sleepTicks = _targetElapsedTime.Ticks - _accumulatedElapsedTicks;
 
                 // Check if the sleep time is more than 1 millisecond.
                 if (sleepTicks >= Stopwatch.Frequency / 1000)
@@ -433,10 +429,10 @@ namespace MonoGame.Framework
                 int stepCount = 0;
 
                 // Perform as many full fixed length time steps as we can.
-                while (_accumulatedElapsedTicks >= _targetElapsedTicks && !_shouldExit)
+                while (_accumulatedElapsedTicks >= _targetElapsedTime.Ticks && !_shouldExit)
                 {
                     _totalTimeTicks += TargetElapsedTime.Ticks;
-                    _accumulatedElapsedTicks -= _targetElapsedTicks;
+                    _accumulatedElapsedTicks -= _targetElapsedTime.Ticks;
                     stepCount++;
 
                     DoUpdate(Time);

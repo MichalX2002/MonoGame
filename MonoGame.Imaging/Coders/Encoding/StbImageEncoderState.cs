@@ -3,15 +3,16 @@ using System.Threading;
 using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Pixels;
 using MonoGame.Imaging.Utilities;
-using StbSharp;
 using StbSharp.ImageWrite;
 
 namespace MonoGame.Imaging.Coders.Encoding
 {
     public class StbImageEncoderState : ImageEncoderState
     {
+        private byte[]? _buffer;
+
         public WriteProgressCallback ProgressCallback { get; }
-        private byte[]? Buffer { get; set; }
+        public WriteState WriteState { get; private set; }
 
         public new IReadOnlyPixelRows? CurrentImage { get => base.CurrentImage; set => base.CurrentImage = value; }
         public new int FrameIndex { get => base.FrameIndex; set => base.FrameIndex = value; }
@@ -25,26 +26,23 @@ namespace MonoGame.Imaging.Coders.Encoding
             base(encoder, config, stream, leaveOpen, cancellationToken)
         {
             ProgressCallback = (progress, rect) => InvokeProgress(progress, rect?.ToMGRect());
-            Buffer = RecyclableMemoryManager.Default.GetBlock();
-        }
+            
+            _buffer = RecyclableMemoryManager.Default.GetBlock();
 
-        public WriteState<TPixelRowProvider> CreateWriteState<TPixelRowProvider>(TPixelRowProvider provider)
-            where TPixelRowProvider : IPixelRowProvider
-        {
-            AssertNotDisposed();
-
-            return new WriteState<TPixelRowProvider>(
+            WriteState = new WriteState(
                 Stream,
-                Buffer!,
-                provider,
+                _buffer,
                 ProgressCallback,
                 CancellationToken);
         }
 
         protected override void Dispose(bool disposing)
         {
-            RecyclableMemoryManager.Default.ReturnBlock(Buffer);
-            Buffer = null;
+            WriteState?.Dispose();
+            WriteState = null!;
+
+            RecyclableMemoryManager.Default.ReturnBlock(_buffer);
+            _buffer = null;
 
             base.Dispose(disposing);
         }

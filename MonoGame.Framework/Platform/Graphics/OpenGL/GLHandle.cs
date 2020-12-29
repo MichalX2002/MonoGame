@@ -129,8 +129,8 @@ namespace MonoGame.OpenGL
 
         public static bool operator ==(GLHandle a, GLHandle b)
         {
-            return a.Value.Equals(b.Value)
-                && a.Type.Equals(b.Type);
+            return a.Value == b.Value
+                && a.Type == b.Type;
         }
 
         public static bool operator !=(GLHandle a, GLHandle b)

@@ -2,19 +2,23 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using SharpDX.DXGI;
-
 namespace MonoGame.Framework.Graphics
 {
     public partial class GraphicsCapabilities
     {
         private void PlatformInitialize(GraphicsDevice device)
         {
-            if (device.GraphicsProfile == GraphicsProfile.HiDef)
+            if (device._d3dDevice.FeatureLevel >= SharpDX.Direct3D.FeatureLevel.Level_11_0)
             {
                 MaxTexture2DSize = SharpDX.Direct3D11.Resource.MaximumTexture2DSize;
                 MaxTexture3DSize = SharpDX.Direct3D11.Resource.MaximumTexture3DSize;
                 MaxTextureCubeSize = SharpDX.Direct3D11.Resource.MaximumTextureCubeSize;
+            }
+            else if (device._d3dDevice.FeatureLevel >= SharpDX.Direct3D.FeatureLevel.Level_10_0)
+            {
+                MaxTexture2DSize = 8192;
+                MaxTexture3DSize = 2048;
+                MaxTextureCubeSize = 8192;
             }
             else
             {

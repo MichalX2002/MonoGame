@@ -14,6 +14,7 @@ namespace MonoGame.Imaging.Pixels
 
         public int Components { get; }
         public int Depth { get; }
+
         public int Width => _pixelRows.Width;
         public int Height => _pixelRows.Height;
 
@@ -40,7 +41,7 @@ namespace MonoGame.Imaging.Pixels
             _convertPixels = Image.GetConvertPixelsDelegate(pixelRows.PixelType, resultType);
         }
 
-        public unsafe void GetRow(int row, Span<byte> destination)
+        public void GetByteRow(int row, Span<byte> destination)
         {
             if (_pixelBuffer != null)
             {
@@ -54,7 +55,7 @@ namespace MonoGame.Imaging.Pixels
             }
         }
 
-        public unsafe void GetRow(int row, Span<float> destination)
+        public void GetFloatRow(int row, Span<float> destination)
         {
             throw new NotImplementedException();
         }

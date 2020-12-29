@@ -38,7 +38,7 @@ namespace MonoGame.Framework
                 throw new ArgumentException($"A relative path is required.", nameof(name));
 
             // Normalize the file path.
-            var safeName = NormalizeRelativePath(name);
+            string safeName = NormalizeRelativePath(name);
 
             // Call the platform code to open the stream.  
             // Any errors at this point should result in a file not found.
@@ -59,7 +59,7 @@ namespace MonoGame.Framework
             }
         }
 
-        private static Exception CreateFileNotFoundException(string fileName, Exception inner)
+        private static Exception CreateFileNotFoundException(string fileName, Exception? inner)
         {
             return new FileNotFoundException(null, fileName, inner);
         }

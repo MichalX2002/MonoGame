@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
@@ -10,7 +11,8 @@ namespace MonoGame.Imaging
     {
         // TODO: move these out of Image class 
         // AND ALSO make them into extenions for Image class
-        
+
+        [SkipLocalsInit]
         public static void LoadPixels<TPixelFrom, TPixelTo>(
             IReadOnlyPixelRows pixels, IPixelBuffer<TPixelTo> destination, Rectangle? sourceRectangle = null)
             where TPixelFrom : unmanaged, IPixel

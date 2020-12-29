@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace MonoGame.Framework
 {
+    [SkipLocalsInit]
     public static class StreamExtensions
     {
         /// <summary>

@@ -20,13 +20,25 @@ namespace MonoGame.Imaging
 
             using (var prefixStream = config.CreateStreamWithHeaderPrefix(stream, leaveOpen))
             {
-                var prefix = prefixStream.GetPrefix(cancellationToken);
+                Memory<byte> prefix = prefixStream.GetPrefix(cancellationToken);
+                ImageFormat? format = DetectFormat(config, prefix.Span);
 
-                var format = DetectFormat(config, prefix.Span);
                 if (format == null)
-                    throw new UnknownImageFormatException();
+                {
+                    if (prefix.Length == 0)
+                    {
+                        throw new UnknownImageFormatException(
+                            "No bytes were read from the stream.");
+                    }
+                    else
+                    {
+                        throw new UnknownImageFormatException(
+                            $"Failed to recognize any format from the first {prefix.Length} bytes.");
+                    }
+                }
 
-                var decoder = config.GetDecoder(format);
+                IImageDecoder decoder = config.GetDecoder(format);
+
                 return new ImageDecoderEnumerator(
                     config, decoder, prefixStream, false, cancellationToken);
             }

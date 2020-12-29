@@ -582,9 +582,7 @@ namespace MonoGame.Framework.Memory
         public override void WriteByte(byte value)
         {
             CheckDisposed();
-            Span<byte> tmp = stackalloc byte[1];
-            tmp[0] = value;
-            Write(tmp);
+            Write(stackalloc byte[] { value });
         }
 
         /// <summary>

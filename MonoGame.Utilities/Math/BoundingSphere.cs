@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace MonoGame.Framework
@@ -15,6 +16,7 @@ namespace MonoGame.Framework
     /// </summary>
     [DataContract]
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
+    [SkipLocalsInit]
     public struct BoundingSphere : IEquatable<BoundingSphere>
     {
         /// <summary>

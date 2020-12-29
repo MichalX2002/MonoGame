@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Enumeration;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using MonoGame.Framework;
@@ -21,6 +22,7 @@ namespace MonoGame.Testing
         private SpriteBatch _spriteBatch;
 
         private Viewport _lastViewport;
+        private RenderTarget2D _target;
 
         private static string _directory = @"C:\Users\Michal Piatkowski\Pictures";
         private List<string> _entries = new List<string>();
@@ -30,7 +32,6 @@ namespace MonoGame.Testing
         private bool _loadPreviews;
         private Thread _previewLoadThread;
         private CancellationTokenSource _previewLoadCancellation = new CancellationTokenSource();
-
 
         public GameImageScroll()
         {
@@ -143,6 +144,7 @@ namespace MonoGame.Testing
                     try
                     {
                         frame.LoadPreviewImage(_previewLoadCancellation.Token);
+                        Console.WriteLine("Loaded \"" + frame.FileName + "\"");
                     }
                     catch (OperationCanceledException)
                     {
@@ -178,10 +180,17 @@ namespace MonoGame.Testing
         private void ViewportChanged(in Viewport viewport)
         {
             _moved = true;
+
+            _target = new RenderTarget2D(
+                GraphicsDevice, viewport.Width, viewport.Height, false, SurfaceFormat.Rgb24, DepthFormat.Depth24Stencil8);
         }
 
         protected override void Update(in FrameTime time)
         {
+            for (int i = 0; i < 10000; i++)
+            {
+                _ = Keyboard.GetState();
+            }
             var keyboard = Keyboard.GetState();
             if (keyboard.IsKeyDown(Keys.Escape))
             {
@@ -220,11 +229,13 @@ namespace MonoGame.Testing
             base.Update(time);
         }
 
+        int count = 0;
+
         protected override void Draw(in FrameTime time)
         {
             GraphicsDevice.Clear(Color.Black);
 
-            viewY -= 2f;
+            viewY -= 20f;
 
             if (_moved)
             {
@@ -246,8 +257,8 @@ namespace MonoGame.Testing
 
         // make these into dynamic variables
         private const int frameTextHeight = 40;
-        private const int frameWidth = 150;
-        private const int frameHeight = 125 + frameTextHeight;
+        private const int frameWidth = 300;
+        private const int frameHeight = 200 + frameTextHeight;
         private const int frameSpacingX = 5;
         private const int frameSpacingY = 5;
 
@@ -255,7 +266,7 @@ namespace MonoGame.Testing
         private List<FrameLayout> _frames = new List<FrameLayout>();
         private ConcurrentQueue<FrameLayout> _previewLoadQueue = new ConcurrentQueue<FrameLayout>();
         private const int uploadsPerFrame = 10;
-        private float renderscale = 0.66f;
+        private float renderscale = 1f;
 
         private Matrix4x4 RenderTransformation =>
             Matrix4x4.CreateScale(renderscale) * Matrix4x4.CreateTranslation(0, viewY, 0);

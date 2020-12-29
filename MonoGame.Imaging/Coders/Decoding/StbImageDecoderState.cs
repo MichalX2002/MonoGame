@@ -103,15 +103,17 @@ namespace MonoGame.Imaging.Coders.Decoding
             }
             else
             {
+                int dstElementSize = CurrentImage!.PixelType.ElementSize;
+
                 if (addressing == AddressingMajor.Row)
                 {
-                    var dstSpan = CurrentImage.GetPixelByteRowSpan(line);
+                    var dstSpan = CurrentImage.GetPixelByteRowSpan(line)[(start * dstElementSize)..];
                     _convertPixels!.Invoke(pixels, dstSpan);
                 }
                 else if (addressing == AddressingMajor.Column)
                 {
                     throw new NotImplementedException();
-                    CurrentImage.SetPixelByteColumn(start, line, pixels);
+                    //CurrentImage.SetPixelByteColumn(start, line, pixels);
                 }
                 else
                 {

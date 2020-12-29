@@ -29,7 +29,7 @@ namespace MonoGame.Imaging
         /// <summary>
         /// Gets the "Graphics Interchange Format".
         /// </summary>
-        public static ImageFormat Gif { get; } = new AnimatedImageFormat(
+        public static AnimatedImageFormat Gif { get; } = new AnimatedImageFormat(
             "Graphics Interchange Format", "GIF",
             new HashSet<string> { "image/gif" }.AsReadOnly(),
             new HashSet<string> { ".gif" }.AsReadOnly(),
@@ -71,7 +71,10 @@ namespace MonoGame.Imaging
 
         static ImageFormat()
         {
+            AddFormat(Gif);
             _integratedFormats.Add(Gif);
+
+            AddFormat(Psd);
             _integratedFormats.Add(Psd);
         }
 

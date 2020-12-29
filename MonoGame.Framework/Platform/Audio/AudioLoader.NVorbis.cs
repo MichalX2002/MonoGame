@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using MonoGame.Framework.Memory;
 using MonoGame.OpenAL;
@@ -9,6 +10,7 @@ namespace MonoGame.Framework.Audio
 {
     internal static partial class AudioLoader
     {
+        [SkipLocalsInit]
         private static RecyclableBuffer LoadVorbis(
             Stream stream, out ALFormat format, out int frequency, out int channels,
             out int blockAlignment, out int bitsPerSample, out int samplesPerBlock, out int sampleCount)
@@ -28,11 +30,7 @@ namespace MonoGame.Framework.Audio
                 else
                     throw new NotSupportedException("Only mono and stereo is supported.");
 
-                var readerTotalSamples = reader.TotalSamples;
-                if (readerTotalSamples == null)
-                    throw new IOException("Unknown sample count.");
-
-                sampleCount = (int)readerTotalSamples;
+                sampleCount = (int)reader.TotalSamples;
                 frequency = reader.SampleRate;
                 blockAlignment = 0;
                 samplesPerBlock = 0;

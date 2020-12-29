@@ -18,7 +18,7 @@ namespace MonoGame.Imaging
             DecodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
         {
-            using var frames = CreateDecoderEnumerator(
+            using ImageDecoderEnumerator frames = CreateDecoderEnumerator(
                 config, stream, leaveOpen: true, cancellationToken);
 
             frames.State.PreferredPixelType = preferredPixelType;
@@ -76,13 +76,60 @@ namespace MonoGame.Imaging
 
         #endregion
 
-        private static Stream OpenReadStream(string filePath)
-        {
-            // All Stb decoders read file sequentially, so there's nothing to lose.
-            var options = FileOptions.SequentialScan;
+        #region Load(FilePath)
 
-            throw new NotImplementedException();
+        public static Image? Load(
+            IImagingConfig config,
+            string filePath,
+            VectorType? preferredPixelType = null,
+            DecoderOptions? decoderOptions = null,
+            DecodeProgressCallback? onProgress = null,
+            CancellationToken cancellationToken = default)
+        {
+            using var fs = File.OpenRead(filePath);
+            return Load(config, fs, preferredPixelType, decoderOptions, onProgress, cancellationToken);
         }
+
+        public static Image? Load(
+            string filePath,
+            VectorType? preferredPixelType = null,
+            DecoderOptions? decoderOptions = null,
+            DecodeProgressCallback? onProgress = null,
+            CancellationToken cancellationToken = default)
+        {
+            return Load(
+                ImagingConfig.Default,
+                filePath, preferredPixelType, decoderOptions, onProgress, cancellationToken);
+        }
+
+        #endregion
+
+        #region Load<TPixel>(FilePath)
+
+        public static Image<TPixel>? Load<TPixel>(
+            IImagingConfig config,
+            string filePath,
+            DecoderOptions? decoderOptions = null,
+            DecodeProgressCallback? onProgress = null,
+            CancellationToken cancellationToken = default)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            using var fs = File.OpenRead(filePath);
+            return Load<TPixel>(config, fs, decoderOptions, onProgress, cancellationToken);
+        }
+
+        public static Image<TPixel>? Load<TPixel>(
+            string filePath,
+            DecoderOptions? decoderOptions = null,
+            DecodeProgressCallback? onProgress = null,
+            CancellationToken cancellationToken = default)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            return Load<TPixel>(
+                ImagingConfig.Default, filePath, decoderOptions, onProgress, cancellationToken);
+        }
+
+        #endregion
 
         /* TODO: fix this :)
 

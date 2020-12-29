@@ -13,6 +13,7 @@ using MonoGame.Imaging;
 
 namespace MonoGame.Framework.Graphics
 {
+    [SkipLocalsInit]
     public partial class Texture2D : Texture
     {
         /// <summary>
@@ -135,7 +136,7 @@ namespace MonoGame.Framework.Graphics
 
         #endregion
 
-        #region SetData(Span)
+        #region SetData(Span and Memory)
 
         /// <summary>
         /// Changes the pixels of the texture.
@@ -290,7 +291,6 @@ namespace MonoGame.Framework.Graphics
         /// <exception cref="ArgumentException">
         ///  <paramref name="arraySlice"/> is greater than 0 and the graphics device does not support texture arrays.
         /// </exception>
-        [SkipLocalsInit]
         public void SetData(
             Image image,
             Rectangle? rectangle = null,
@@ -367,7 +367,7 @@ namespace MonoGame.Framework.Graphics
                     vectorRow = vectorRow[srcSlice.Length..];
                     offsetX += count;
                 }
-                while (!vectorRow.IsEmpty);
+                while (vectorRow.Length > 0);
             }
         }
 

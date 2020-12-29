@@ -21,34 +21,37 @@ namespace MonoGame.Imaging
             EncodeProgressCallback? onProgress = null,
             CancellationToken cancellationToken = default)
         {
-            if (images == null) 
+            if (images == null)
                 throw new ArgumentNullException(nameof(images));
             if (imagingConfig == null)
                 throw new ArgumentNullException(nameof(imagingConfig));
 
             AssertValidOutput(output);
 
-            var encoder = AssertValidArguments(imagingConfig, format);
+            IImageEncoder encoder = AssertValidArguments(imagingConfig, format);
 
-            var state = encoder.CreateState(
+            using ImageEncoderState state = encoder.CreateState(
                 imagingConfig, output, leaveOpen: true, cancellationToken);
 
-            using (state)
+            state.EncoderOptions = encoderOptions;
+            state.Progress += onProgress;
+
+            bool hasAnimationSupport =
+                format.HasAttribute<IAnimatedFormatAttribute>() &&
+                encoder.HasAttribute<IAnimatedFormatAttribute>();
+
+            bool hasLayerSupport =
+                format.HasAttribute<ILayeredFormatAttribute>() &&
+                encoder.HasAttribute<ILayeredFormatAttribute>();
+
+            bool acceptsMultipleImages = hasAnimationSupport || hasLayerSupport;
+
+            foreach (IReadOnlyPixelRows image in images)
             {
-                state.EncoderOptions = encoderOptions;
-                state.Progress += onProgress;
+                encoder.Encode(state, image);
 
-                bool hasAnimationSupport =
-                    format.HasAttribute<IAnimatedFormatAttribute>() &&
-                    encoder.HasAttribute<IAnimatedFormatAttribute>();
-
-                foreach (var image in images)
-                {
-                    encoder.Encode(state, image);
-
-                    if (!hasAnimationSupport)
-                        break;
-                }
+                if (!acceptsMultipleImages)
+                    break;
             }
         }
 
@@ -188,7 +191,7 @@ namespace MonoGame.Imaging
         {
             if (imagingConfig == null)
                 throw new ArgumentNullException(nameof(imagingConfig));
-            if (format == null) 
+            if (format == null)
                 throw new ArgumentNullException(nameof(format));
 
             return imagingConfig.GetEncoder(format);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Numerics;
@@ -21,7 +22,7 @@ using MonoGame.Imaging.Processing;
 
 namespace MonoGame.Testing
 {
-    public class GameImageInterlace : Game
+    public class GameImageAnimate : Game
     {
         private GraphicsDeviceManager _graphicsManager;
         private SpriteBatch _spriteBatch;
@@ -39,7 +40,7 @@ namespace MonoGame.Testing
 
         float scale = 1f / 2f; // 1f / 10.5f;
 
-        public GameImageInterlace()
+        public GameImageAnimate()
         {
             _graphicsManager = new GraphicsDeviceManager(this);
             _graphicsManager.GraphicsProfile = GraphicsProfile.HiDef;
@@ -78,107 +79,48 @@ namespace MonoGame.Testing
                 _lastRow = rect?.Y ?? 0;
             }
 
-            //_tex = Texture2D.FromStream(
-            //    //File.OpenRead(@"C:\Users\Michal Piatkowski\Pictures\my-mind-is-like-an-internet-browser.jpg"),
-            //    //File.OpenRead("../../../very big interlace.bmp"),
-            //    File.OpenRead("../../../very big interlace.png"),
-            //    GraphicsDevice);
-
             void LoadBody()
             {
-                try
-                {
-                    var ww = new Stopwatch();
+                var ww = new Stopwatch();
 
-                    var web = new WebClient();
+                string[] imageFiles = Directory.GetFiles("../../../../frames");
 
-                    string[] saveFormats = new string[]
-                    {
-                        ".png",
-                        ".jpeg", 
-                        ".tga", 
-                        // ".bmp"
-                    };
+                IEnumerable<Image<Color>> images =
+                    imageFiles
+                    .OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+                    .Select(path => Image.Load<Color>(path) ?? throw new InvalidDataException());
 
-                    using (var fs = new FileStream(
-                        @"C:\Users\Michal Piatkowski\Pictures\Banners\LOL Sion Mecha.jpg",
-                        //"../../../very big base.jpg",
-                        //"../../../very big prog.jpg",
-                        //"../../../very big interlace.png",
-                        //"../../../very_big_interlace pog.jpg",    
-                        FileMode.Open, FileAccess.Read, FileShare.Read, 1024 * 8))
-                    //using(var fs = web.OpenRead(
-                    //    "https://upload.wikimedia.org/wikipedia/commons/3/3d/LARGE_elevation.jpg"))
-                    {
-                        for (int i = 0; i < saveFormats.Length; i++)
-                        {
-                            Thread.Sleep(500);
-                            fs.Seek(0, SeekOrigin.Begin);
+                images.Save("output.gif");
 
-                            ww.Restart();
-                            var img = Image.Load<Color>(fs, onProgress: OnLoadProgress);
-
-                            _finished = true;
-                            ww.Stop();
-                            Console.WriteLine("Time: " + ww.Elapsed.TotalMilliseconds + "ms");
-
-                            Console.WriteLine(img.Width + "x" + img.Height);
-
-                            var lastRow = img.GetPixelRowSpan(img.Height - 1);
-                            Console.WriteLine(lastRow[0]);
-
-                            Thread.Sleep(500);
-
-                            //_tex = Texture2D.FromImage(img, GraphicsDevice);
-
-                            //return;
-                            //
-                            //var newSize = new Size(img.Width, img.Height / 3);
-                            //var procsed = img.ProcessRows(c => c.Resize(newSize, newSize, OnResizeProgress));
-                            //
-                            //if (false)
-                            {
-                                string saveFormat = saveFormats[i];
-                                string savepath = $"recoded{saveFormat}";
-                                Console.WriteLine($"saving {saveFormat}...");
-                                ww.Restart();
-                                img.Save(savepath);
-                                ww.Stop();
-                                Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
-
-                                Thread.Sleep(500);
-
-                                Console.WriteLine($"Reloading saved {saveFormat}...");
-                                var xd = Image.Load<Color>(File.OpenRead(savepath));
-                                Console.WriteLine("Reloaded");
-                                //
-                                //var reLastRow = xd.GetPixelRowSpan(xd.Height - 1);
-                                //Console.WriteLine(reLastRow[0]);
-
-                                //Console.WriteLine("saving reloaded png...");
-                                //ww.Restart();
-                                //x.Save("very big reloaded.png", ImageFormat.Png);
-                                //ww.Stop();
-                                //Console.WriteLine("saved: " + ww.Elapsed.TotalMilliseconds + "ms");
-                            }
-
-                            Console.WriteLine();
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
+                //for (int i = 0; i < images.Length; i++)
+                //{
+                //    ww.Restart();
+                //    Image<Color> image = images[i];
+                //
+                //
+                //
+                //    ww.Stop();
+                //    Console.WriteLine("Frame Encode Time: " + ww.Elapsed.TotalMilliseconds + "ms");
+                //}
             }
 
-            if (false)
+            if (true)
             {
                 LoadBody();
             }
             else
             {
-                Task.Run(LoadBody);
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        LoadBody();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
+                });
             }
         }
 

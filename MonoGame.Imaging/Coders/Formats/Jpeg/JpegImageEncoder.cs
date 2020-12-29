@@ -48,21 +48,17 @@ namespace MonoGame.Imaging.Coders.Formats
 
             protected override void Write(
                 StbImageEncoderState encoderState,
-                IReadOnlyPixelRows image,
-                WriteState writeState)
+                WriteState writeState,
+                PixelRowProvider image)
             {
-                if (encoderState == null) throw new ArgumentNullException(nameof(encoderState));
-                if (image == null) throw new ArgumentNullException(nameof(image));
-                if (writeState == null) throw new ArgumentNullException(nameof(writeState));
-
                 var options = encoderState.GetCoderOptionsOrDefault<JpegEncoderOptions>();
 
-                bool useFloatPixels = writeState.Depth > 8;
+                bool useFloatPixels = image.Depth > 8;
                 bool allowSubsample = options.Subsampling == JpegSubsampling.Allow;
                 bool forceSubsample = options.Subsampling == JpegSubsampling.Force;
 
                 StbSharp.ImageWrite.Jpeg.WriteCore(
-                    writeState, useFloatPixels, options.Quality, allowSubsample, forceSubsample);
+                    writeState, image, useFloatPixels, options.Quality, allowSubsample, forceSubsample);
             }
         }
     }

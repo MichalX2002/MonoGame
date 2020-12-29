@@ -75,6 +75,7 @@ namespace MonoGame.Framework.Input
         [DllImport("user32.dll")]
         private static extern bool GetKeyboardState(ref byte lpKeyState);
 
+        [SkipLocalsInit]
         private static void UpdateState(bool onlyModifiers)
         {
             _modifiers = KeyModifiers.None;

@@ -32,16 +32,12 @@ namespace MonoGame.Imaging.Coders.Formats
 
             protected override void Write(
                 StbImageEncoderState encoderState,
-                IReadOnlyPixelRows image,
-                WriteState writeState)
+                WriteState writeState,
+                PixelRowProvider image)
             {
-                if (encoderState == null) throw new ArgumentNullException(nameof(encoderState));
-                if (image == null) throw new ArgumentNullException(nameof(image));
-                if (writeState == null) throw new ArgumentNullException(nameof(writeState));
-
                 var options = encoderState.GetCoderOptionsOrDefault<TgaEncoderOptions>();
                 
-                StbSharp.ImageWrite.Tga.Write(writeState, options.UseRunLengthEncoding);
+                StbSharp.ImageWrite.Tga.Write(writeState, image, options.UseRunLengthEncoding);
             }
         }
     }

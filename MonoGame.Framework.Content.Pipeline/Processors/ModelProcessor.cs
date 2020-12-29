@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using MonoGame.Framework.Content.Pipeline.Graphics;
 using MonoGame.Framework.Graphics;
 using MonoGame.Framework.Vectors;
@@ -14,6 +15,7 @@ using MonoGame.Framework.Vectors;
 namespace MonoGame.Framework.Content.Pipeline.Processors
 {
     [ContentProcessor(DisplayName = "Model - MonoGame")]
+    [SkipLocalsInit]
     public class ModelProcessor : ContentProcessor<NodeContent, ModelContent>
     {
         private const bool DefaultColorKeyEnabled = true;

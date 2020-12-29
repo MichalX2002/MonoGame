@@ -8,11 +8,11 @@ namespace MonoGame.Imaging
         {
         }
 
-        public UnknownImageFormatException(string message) : base(message)
+        public UnknownImageFormatException(string? message) : base(message)
         {
         }
 
-        public UnknownImageFormatException(string message, Exception inner) : base(message, inner)
+        public UnknownImageFormatException(string? message, Exception? inner) : base(message, inner)
         {
         }
     }

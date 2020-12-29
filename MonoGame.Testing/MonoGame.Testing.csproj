@@ -18,14 +18,14 @@
     <Compile Remove="GameHead - vector drawing.cs" />
   </ItemGroup>
 
-  <Choose>
+  <Choose>    
     <When Condition="'$(SolutionName)' == 'MonoGame.Framework.DesktopGL'">
       <PropertyGroup>
         <MonoGamePlatform>DesktopGL</MonoGamePlatform>
         <TargetFramework>net5.0</TargetFramework>
       </PropertyGroup>
     </When>
-
+    
     <When Condition="'$(SolutionName)' == 'MonoGame.Framework.Windows'">
       <PropertyGroup>
         <MonoGamePlatform>Windows</MonoGamePlatform>
@@ -49,6 +49,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.$(MonoGamePlatform).csproj" />
     <ProjectReference Include="..\MonoGame.Imaging\MonoGame.Imaging.csproj" />
+    <ProjectReference Include="..\MonoGame.StbSharp\MonoGame.StbSharp.csproj" />
     <ProjectReference Include="..\MonoGame.Utilities\MonoGame.Utilities.csproj" />
   </ItemGroup>
 

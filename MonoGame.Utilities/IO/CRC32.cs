@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using MonoGame.Framework.Memory;
+using System.Runtime.CompilerServices;
 
 namespace MonoGame.Framework.IO
 {
@@ -9,6 +9,7 @@ namespace MonoGame.Framework.IO
     ///   can set the polynomial and enable or disable bit
     ///   reversal. This can be used for GZIP, BZip2, or ZIP.
     /// </summary>
+    [SkipLocalsInit]
     public class Crc32
     {
         // private members

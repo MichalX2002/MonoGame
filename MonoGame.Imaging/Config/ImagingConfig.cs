@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using MonoGame.Imaging.Coders.Decoding;
 using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Coders.Formats.Bmp;
+using MonoGame.Imaging.Coders.Formats.Gif;
 using MonoGame.Imaging.Coders.Formats.Jpeg;
 using MonoGame.Imaging.Coders.Formats.Png;
 using MonoGame.Imaging.Coders.Formats.Tga;
@@ -24,6 +25,8 @@ namespace MonoGame.Imaging
         {
             _modules = new Dictionary<Type, object>();
 
+            // TODO: improve this
+
             var decoders = new ImageCoderProvider<IImageDecoder>();
             decoders.TryAdd(ImageFormat.Bmp, new BmpImageDecoder());
             decoders.TryAdd(ImageFormat.Tga, new TgaImageDecoder());
@@ -35,6 +38,7 @@ namespace MonoGame.Imaging
             encoders.TryAdd(ImageFormat.Tga, new TgaImageEncoder());
             encoders.TryAdd(ImageFormat.Png, new PngImageEncoder());
             encoders.TryAdd(ImageFormat.Jpeg, new JpegImageEncoder());
+            encoders.TryAdd(ImageFormat.Gif, new GifImageEncoder());
 
             var formatDetectors = new ImageFormatDetectorProvider();
             formatDetectors.TryAdd(ImageFormat.Bmp, new BmpImageFormatDetector());
