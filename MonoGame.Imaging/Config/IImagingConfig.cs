@@ -1,8 +1,11 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
+
 namespace MonoGame.Imaging
 {
     public interface IImagingConfig
     {
-        T? GetModule<T>() where T : class;
+        bool TryGetModule<T>([MaybeNullWhen(false)] out T module)
+            where T : class;
     }
 }

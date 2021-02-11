@@ -1,11 +1,10 @@
-﻿using MonoGame.Imaging.Attributes;
-
+﻿
 namespace MonoGame.Imaging.Coders
 {
     /// <summary>
     /// Base interface for image coders.
     /// </summary>
-    public interface IImageCoder : IImageCoderAttribute
+    public interface IImageCoder
     {
         /// <summary>
         /// Gets the format associated with this coder.
@@ -13,8 +12,8 @@ namespace MonoGame.Imaging.Coders
         ImageFormat Format { get; }
 
         /// <summary>
-        /// Gets the default options for this coder.
+        /// Gets the options for this coder.
         /// </summary>
-        CoderOptions DefaultOptions { get; }
+        CoderOptions CoderOptions { get; }
     }
 }

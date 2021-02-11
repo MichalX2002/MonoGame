@@ -21,13 +21,13 @@ namespace MonoGame.Imaging.Coders.Detection
             }
         }
 
-        public CoderOptions DefaultOptions => CoderOptions.Default;
+        public CoderOptions CoderOptions => CoderOptions.Default;
 
         public abstract ImageFormat Format { get; }
 
-        protected abstract InfoResult GetInfo(IImagingConfig config, BinReader reader);
+        protected abstract InfoResult GetInfo(IImagingConfig config, ImageBinReader reader);
 
-        private ImageInfo Identify(IImagingConfig config, BinReader reader)
+        private ImageInfo Identify(IImagingConfig config, ImageBinReader reader)
         {
             var info = GetInfo(config, reader);
             var readState = info.ReadState;
@@ -48,7 +48,8 @@ namespace MonoGame.Imaging.Coders.Detection
             var buffer = RecyclableMemoryManager.Default.GetBlock();
             try
             {
-                using var reader = new BinReader(stream, buffer, leaveOpen: true, cancellationToken);
+                using var reader = new ImageBinReader(stream, buffer);
+                reader.CancellationToken = cancellationToken;
                 return Identify(config, reader);
             }
             finally
@@ -73,8 +74,9 @@ namespace MonoGame.Imaging.Coders.Detection
             return tuple.Type!;
         }
 
-        public static (bool Depth, bool Components, VectorType? Type)
-            TryGetVectorType(int components, int depth)
+        public static (bool Depth, bool Components, VectorType? Type) TryGetVectorType(
+            int components,
+            int depth)
         {
             // Note: 32bit depth means floating-point
 

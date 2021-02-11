@@ -1,59 +1,86 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using MonoGame.Framework.IO;
 using MonoGame.Imaging.Coders.Decoding;
 using MonoGame.Imaging.Coders.Encoding;
-using MonoGame.Imaging.Config;
+using MonoGame.Imaging.Config.Providers;
 
 namespace MonoGame.Imaging
 {
     public static class IImagingConfigExtensions
     {
+        public static T GetModule<T>(this IImagingConfig config)
+            where T : class
+        {
+            if (!config.TryGetModule<T>(out T? module) || module == null)
+                throw new MissingImagingModuleException(typeof(T));
+            return module;
+        }
+
         #region [Try]GetEncoder
 
-        public static bool TryGetEncoder(
-            this IImagingConfig config, ImageFormat format, out IImageEncoder? encoder)
+        public static bool TryCreateEncoder(
+            this IImagingConfig config,
+            Stream stream,
+            ImageFormat format,
+            EncoderOptions? encoderOptions,
+            [MaybeNullWhen(false)] out IImageEncoder encoder)
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
 
             var provider = config.GetModule<ImageCoderProvider<IImageEncoder>>();
-            if (provider == null)
-                throw new ImagingException($"Missing {nameof(ImageCoderProvider<IImageEncoder>)}.");
-
-            return provider.TryGetCoder(format, out encoder);
+            var factory = provider.GetFactory(format);
+            encoder = factory.Invoke(stream, encoderOptions) ?? throw new ImagingException("Coder factory returned null.");
+            return true;
         }
 
-        public static IImageEncoder GetEncoder(this IImagingConfig config, ImageFormat format)
+        public static IImageEncoder CreateEncoder(
+            this IImagingConfig config,
+            Stream stream,
+            ImageFormat format,
+            EncoderOptions? encoderOptions)
         {
-            if (!TryGetEncoder(config, format, out var encoder))
+            if (!TryCreateEncoder(config, stream, format, encoderOptions, out var encoder))
                 throw new MissingEncoderException(format);
-            return encoder!;
+            return encoder;
         }
 
         #endregion
 
         #region [Try]GetDecoder
 
-        public static bool TryGetDecoder(
-            this IImagingConfig config, ImageFormat format, out IImageDecoder? decoder)
+        public static bool TryCreateDecoder(
+            this IImagingConfig config,
+            Stream stream,
+            ImageFormat format,
+            DecoderOptions? decoderOptions,
+            [MaybeNullWhen(false)] out IImageDecoder decoder)
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
 
             var provider = config.GetModule<ImageCoderProvider<IImageDecoder>>();
-            if (provider == null)
-                throw new ImagingException($"Missing {nameof(ImageCoderProvider<IImageDecoder>)}.");
-
-            return provider.TryGetCoder(format, out decoder);
+            var factory = provider.GetFactory(format);
+            decoder = factory.Invoke(stream, decoderOptions) ?? throw new ImagingException("Coder factory returned null.");
+            return true;
         }
 
-        public static IImageDecoder GetDecoder(this IImagingConfig config, ImageFormat format)
+        public static IImageDecoder CreateDecoder(
+            this IImagingConfig config,
+            Stream stream,
+            ImageFormat format,
+            DecoderOptions? decoderOptions)
         {
-            if (!TryGetDecoder(config, format, out var decoder))
+            if (!TryCreateDecoder(config, stream, format, decoderOptions, out var decoder))
                 throw new MissingDecoderException(format);
-            return decoder!;
+            return decoder;
         }
 
         #endregion
@@ -61,23 +88,22 @@ namespace MonoGame.Imaging
         #region [Try]GetInfoDetector
 
         public static bool TryGetInfoDetector(
-            this IImagingConfig config, ImageFormat format, out IImageInfoDetector? infoDetector)
+            this IImagingConfig config,
+            ImageFormat format,
+            [MaybeNullWhen(false)] out IImageInfoDetector infoDetector)
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
 
-            var provider = config.GetModule<ImageCoderProvider<IImageInfoDetector>>();
-            if (provider == null)
-                throw new ImagingException($"Missing {nameof(ImageCoderProvider<IImageInfoDetector>)}.");
-
-            return provider.TryGetCoder(format, out infoDetector);
+            var provider = config.GetModule<ImagingInstanceProvider<IImageInfoDetector>>();
+            return provider.TryGetValue(format, out infoDetector);
         }
 
         public static IImageInfoDetector GetInfoDetector(this IImagingConfig config, ImageFormat format)
         {
             if (!TryGetInfoDetector(config, format, out var decoder))
                 throw new MissingDecoderException(format);
-            return decoder!;
+            return decoder;
         }
 
         #endregion
@@ -87,10 +113,7 @@ namespace MonoGame.Imaging
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
 
-            var provider = config.GetModule<ImageFormatDetectorProvider>();
-            if (provider == null)
-                throw new ImagingException($"Missing {nameof(ImageFormatDetectorProvider)}.");
-
+            var provider = config.GetModule<ImagingInstanceProvider<IImageFormatDetector>>();
             return provider.GetMaxHeaderSize();
         }
 
@@ -99,18 +122,15 @@ namespace MonoGame.Imaging
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
 
-            var provider = config.GetModule<ImageFormatDetectorProvider>();
-            if (provider == null)
-                throw new ImagingException($"Missing {nameof(ImageFormatDetectorProvider)}.");
-
+            var provider = config.GetModule<ImagingInstanceProvider<IImageFormatDetector>>();
             return provider.Values;
         }
 
         public static PrefixedStream CreateStreamWithHeaderPrefix(
-            this IImagingConfig config, Stream stream, bool leaveOpen)
+            this IImagingConfig config, Stream stream)
         {
             int readAhead = GetMaxHeaderSize(config);
-            return new PrefixedStream(stream, readAhead, leaveOpen);
+            return new PrefixedStream(stream, readAhead, leaveOpen: true);
         }
     }
 }

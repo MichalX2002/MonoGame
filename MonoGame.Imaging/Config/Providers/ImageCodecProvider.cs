@@ -3,33 +3,60 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using MonoGame.Imaging.Coders;
 
-namespace MonoGame.Imaging.Config
+namespace MonoGame.Imaging.Config.Providers
 {
-    public class ImageCoderProvider<TCoder> : IEnumerable<KeyValuePair<ImageFormat, TCoder>>
+    public delegate T CoderFactory<T>(Stream stream, CoderOptions coderOptions)
+        where T : class, IImageCoder;
+
+    public class ImageCoderProvider<TCoder> : IReadOnlyDictionary<ImageFormat, CoderFactory<TCoder>>
         where TCoder : class, IImageCoder
     {
-        private ConcurrentDictionary<ImageFormat, TCoder> _coders =
-            new ConcurrentDictionary<ImageFormat, TCoder>();
+        private ConcurrentDictionary<ImageFormat, CoderFactory<TCoder>> _coders =
+            new ConcurrentDictionary<ImageFormat, CoderFactory<TCoder>>();
+
+        public int Count => _coders.Count;
 
         public IEnumerable<ImageFormat> Keys => _coders.Keys;
-        public IEnumerable<TCoder> Values => _coders.Values;
+        public IEnumerable<CoderFactory<TCoder>> Values => _coders.Values;
 
-        public bool TryAdd(ImageFormat format, TCoder coder)
+        public CoderFactory<TCoder> this[ImageFormat key] => _coders[key];
+
+        public bool TryAddFactory(ImageFormat format, CoderFactory<TCoder> factory)
         {
-            if (format == null) throw new ArgumentNullException(nameof(format));
-            if (coder == null) throw new ArgumentNullException(nameof(coder));
+            if (format == null)
+                throw new ArgumentNullException(nameof(format));
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
 
-            return _coders.TryAdd(format, coder);
+            return _coders.TryAdd(format, factory);
         }
 
-        public bool TryGetCoder(ImageFormat format, [MaybeNullWhen(false)] out TCoder? coder)
+        public bool TryGetFactory(ImageFormat format, [MaybeNullWhen(false)] out CoderFactory<TCoder> factory)
         {
-            return _coders.TryGetValue(format, out coder);
+            return _coders.TryGetValue(format, out factory);
         }
 
-        public IEnumerator<KeyValuePair<ImageFormat, TCoder>> GetEnumerator()
+        public CoderFactory<TCoder> GetFactory(ImageFormat format)
+        {
+            if (!TryGetFactory(format, out var factory))
+                throw new ImagingException("Missing coder factory for requested format.", format);
+            return factory;
+        }
+
+        public bool ContainsKey(ImageFormat key)
+        {
+            return _coders.ContainsKey(key);
+        }
+
+        public bool TryGetValue(ImageFormat key, [MaybeNullWhen(false)] out CoderFactory<TCoder> value)
+        {
+            return _coders.TryGetValue(key, out value);
+        }
+
+        public IEnumerator<KeyValuePair<ImageFormat, CoderFactory<TCoder>>> GetEnumerator()
         {
             return _coders.GetEnumerator();
         }

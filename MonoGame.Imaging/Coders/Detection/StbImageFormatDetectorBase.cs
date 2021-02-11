@@ -8,7 +8,7 @@ namespace MonoGame.Imaging.Coders.Detection
         public abstract ImageFormat Format { get; }
         public abstract int HeaderSize { get; }
 
-        public CoderOptions DefaultOptions => CoderOptions.Default;
+        public CoderOptions CoderOptions => CoderOptions.Default;
 
         protected abstract bool TestFormat(IImagingConfig config, ReadOnlySpan<byte> header);
 

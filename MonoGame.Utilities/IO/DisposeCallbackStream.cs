@@ -76,24 +76,18 @@ namespace MonoGame.Framework.IO
 
         protected override void Dispose(bool disposing)
         {
-            void DisposeStream()
+            if (disposing)
             {
-                if (disposing && !_leaveOpen)
+                try
+                {
+                    OnDisposing?.Invoke(this, disposing);
+                }
+                finally
+                {
                     _stream?.Dispose();
-            }
-
-            try
-            {
-                OnDisposing?.Invoke(this, disposing);
-                DisposeStream();
+                }
                 OnDispose?.Invoke(this, disposing);
             }
-            catch // the event invocation may throw
-            {
-                DisposeStream();
-                throw;
-            }
-
             base.Dispose(disposing);
         }
     }

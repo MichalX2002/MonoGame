@@ -36,7 +36,7 @@ namespace MonoGame.Testing
                     using var fs = File.OpenRead(cacheImageFile);
                     state.Image = Image.Load<Color>(fs, onProgress: (d, p, r) =>
                     {
-                        progress?.Invoke(p * (i + 1f) / cachedPackStates.Count, cachedPackStates.Count);
+                        progress?.Invoke((float)(p * (i + 1.0) / cachedPackStates.Count), cachedPackStates.Count);
                     });
                 }
                 return cachedPackStates;

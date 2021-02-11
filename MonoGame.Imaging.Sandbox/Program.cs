@@ -25,6 +25,8 @@ using System.Xml;
 using MonoGame.Imaging.Processing;
 using MonoGame.Imaging.Coders.Formats;
 using StbSharp.ImageResize;
+using MonoGame.Imaging.Coders.Formats.Jpeg;
+using MonoGame.Imaging.Coders.Formats.Tga;
 
 namespace MonoGame.Imaging.Tests
 {
@@ -54,8 +56,8 @@ namespace MonoGame.Imaging.Tests
                 (ImageFormat.Jpeg, new JpegEncoderOptions(100)),
 
                 (ImageFormat.Png, null),
-                (ImageFormat.Tga, TgaEncoderOptions.Default),
-                (ImageFormat.Tga, TgaEncoderOptions.NoRLE),
+                (ImageFormat.Tga, new TgaEncoderOptions(useRunLengthEncoding: true)),
+                (ImageFormat.Tga, new TgaEncoderOptions(useRunLengthEncoding: false)),
                 (ImageFormat.Bmp, null)
             };
 
@@ -99,8 +101,8 @@ namespace MonoGame.Imaging.Tests
             int writeRepeats = 1;
 
             static void OnReadProgress(
-                ImageDecoderState decoderState,
-                float percentage,
+                IImageDecoder decoder,
+                double percentage,
                 Rectangle? rectangle)
             {
                 Console.WriteLine("Read: " + Math.Round(percentage * 100, 2) + "%");
@@ -132,8 +134,8 @@ namespace MonoGame.Imaging.Tests
             watch.Reset();
 
             static void OnWriteProgress(
-                ImageEncoderState encoderState,
-                float percentage,
+                IImageEncoder encoder,
+                double percentage,
                 Rectangle? rectangle)
             {
                 //Console.WriteLine("Write: " + Math.Round(percentage * 100, 2) + "%");

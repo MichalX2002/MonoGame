@@ -6,7 +6,7 @@ namespace MonoGame.Imaging.Processing
 {
     public class ReadOnlyPixelRowsContext : IReadOnlyPixelRowsContext
     {
-        public IImagingConfig Config { get; }
+        public IImagingConfig ImagingConfig { get; }
         public IReadOnlyPixelRows Pixels { get; }
         public bool IsDisposed { get; private set; }
 
@@ -19,7 +19,7 @@ namespace MonoGame.Imaging.Processing
 
         public ReadOnlyPixelRowsContext(IImagingConfig imagingConfig, IReadOnlyPixelRows pixels)
         {
-            Config = imagingConfig ?? throw new ArgumentNullException(nameof(imagingConfig));
+            ImagingConfig = imagingConfig ?? throw new ArgumentNullException(nameof(imagingConfig));
             Pixels = pixels ?? throw new ArgumentNullException(nameof(pixels));
         }
 

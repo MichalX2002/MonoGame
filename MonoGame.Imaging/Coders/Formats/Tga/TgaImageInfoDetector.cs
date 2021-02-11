@@ -7,7 +7,7 @@ namespace MonoGame.Imaging.Coders.Formats.Tga
     {
         public override ImageFormat Format => ImageFormat.Bmp;
 
-        protected override InfoResult GetInfo(IImagingConfig config, BinReader reader)
+        protected override InfoResult GetInfo(IImagingConfig config, ImageBinReader reader)
         {
             var tgaInfo = StbSharp.ImageRead.Tga.Info(reader, out var readState);
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
 using StbSharp;
@@ -12,15 +13,17 @@ namespace MonoGame.Imaging.Pixels
         private readonly byte[]? _rowBuffer;
         private readonly Image.ConvertPixelDataDelegate _convertPixels;
 
+        public CancellationToken CancellationToken { get; }
         public int Components { get; }
         public int Depth { get; }
 
         public int Width => _pixelRows.Width;
         public int Height => _pixelRows.Height;
 
-        public PixelRowProvider(IReadOnlyPixelRows pixelRows, int components, int depth)
+        public PixelRowProvider(IReadOnlyPixelRows pixelRows, int components, int depth, CancellationToken cancellationToken)
         {
             _pixelRows = pixelRows ?? throw new ArgumentNullException(nameof(pixelRows));
+            CancellationToken = cancellationToken;
             Components = components;
             Depth = depth;
 
@@ -43,6 +46,8 @@ namespace MonoGame.Imaging.Pixels
 
         public void GetByteRow(int row, Span<byte> destination)
         {
+            CancellationToken.ThrowIfCancellationRequested();
+
             if (_pixelBuffer != null)
             {
                 var rowSpan = _pixelBuffer.GetPixelByteRowSpan(row);
@@ -57,6 +62,8 @@ namespace MonoGame.Imaging.Pixels
 
         public void GetFloatRow(int row, Span<float> destination)
         {
+            CancellationToken.ThrowIfCancellationRequested();
+
             throw new NotImplementedException();
         }
 

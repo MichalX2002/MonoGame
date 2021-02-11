@@ -1,44 +1,22 @@
-﻿using System;
+﻿using System.IO;
 using MonoGame.Imaging.Attributes.Coder;
 using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Pixels;
-using StbSharp.ImageWrite;
 
-namespace MonoGame.Imaging.Coders.Formats
+namespace MonoGame.Imaging.Coders.Formats.Tga
 {
-    [Serializable]
-    public class TgaEncoderOptions : EncoderOptions
+    public class TgaImageEncoder : StbImageEncoderBase<TgaEncoderOptions>, ICancellableCoder
     {
-        public static new TgaEncoderOptions Default { get; } = 
-            new TgaEncoderOptions(useRunLengthEncoding: true);
+        public override ImageFormat Format => ImageFormat.Tga;
 
-        public static TgaEncoderOptions NoRLE { get; } =
-            new TgaEncoderOptions(useRunLengthEncoding: false);
-
-        public bool UseRunLengthEncoding { get; }
-
-        public TgaEncoderOptions(bool useRunLengthEncoding)
+        public TgaImageEncoder(IImagingConfig config, Stream stream, TgaEncoderOptions? encoderOptions) :
+            base(config, stream, encoderOptions)
         {
-            UseRunLengthEncoding = useRunLengthEncoding;
         }
-    }
 
-    namespace Tga
-    {
-        public class TgaImageEncoder : StbImageEncoderBase, ICancellableCoderAttribute
+        protected override void Write(PixelRowProvider image)
         {
-            public override ImageFormat Format => ImageFormat.Tga;
-            public override EncoderOptions DefaultOptions => TgaEncoderOptions.Default;
-
-            protected override void Write(
-                StbImageEncoderState encoderState,
-                WriteState writeState,
-                PixelRowProvider image)
-            {
-                var options = encoderState.GetCoderOptionsOrDefault<TgaEncoderOptions>();
-                
-                StbSharp.ImageWrite.Tga.Write(writeState, image, options.UseRunLengthEncoding);
-            }
+            StbSharp.ImageWrite.Tga.Write(Writer, image, EncoderOptions.UseRunLengthEncoding);
         }
     }
 }

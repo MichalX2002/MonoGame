@@ -1,44 +1,101 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using MonoGame.Framework.Memory;
 using MonoGame.Framework.Vectors;
+using MonoGame.Imaging.Attributes.Coder;
 using MonoGame.Imaging.Pixels;
+using MonoGame.Imaging.Utilities;
 using StbSharp.ImageWrite;
 
 namespace MonoGame.Imaging.Coders.Encoding
 {
-    public abstract partial class StbImageEncoderBase : IImageEncoder
+    public abstract class StbImageEncoderBase<TOptions> : IImageEncoder, IProgressReportingCoder<IImageEncoder>
+        where TOptions : EncoderOptions, new()
     {
-        public abstract ImageFormat Format { get; }
-        public virtual EncoderOptions DefaultOptions => EncoderOptions.Default;
+        private readonly object _progressMutex = new object();
+        private ImagingProgressCallback<IImageEncoder>? _progress;
+        private WriteProgressCallback? _writeProgress;
 
-        CoderOptions IImageCoder.DefaultOptions => DefaultOptions;
-
-        protected abstract void Write(
-            StbImageEncoderState encoderState,
-            WriteState writeState,
-            PixelRowProvider image);
-
-        public virtual ImageEncoderState CreateState(
-            IImagingConfig imagingConfig,
-            Stream stream,
-            bool leaveOpen,
-            CancellationToken cancellationToken = default)
+        public event ImagingProgressCallback<IImageEncoder>? Progress
         {
-            return new StbImageEncoderState(
-                this, imagingConfig, stream, leaveOpen, cancellationToken);
+            add
+            {
+                if (value == null)
+                    return;
+
+                lock (_progressMutex)
+                {
+                    _progress += value;
+                    if (_writeProgress == null)
+                    {
+                        _writeProgress = (p, r) => _progress?.Invoke(this, p, r?.ToMGRect());
+                        Writer.Progress += _writeProgress;
+                    }
+                }
+            }
+            remove
+            {
+                if (value == null)
+                    return;
+
+                lock (_progressMutex)
+                {
+                    _progress -= value;
+                    if (_progress == null && _writeProgress != null)
+                    {
+                        Writer.Progress -= _writeProgress;
+                        _writeProgress = null;
+                    }
+                }
+            }
         }
 
-        public void Encode(
-            ImageEncoderState encoderState,
-            IReadOnlyPixelRows image)
+        public IImagingConfig ImagingConfig { get; }
+        public TOptions EncoderOptions { get; }
+        public ImageBinWriter Writer { get; }
+
+        public bool IsDisposed { get; private set; }
+        public int FrameIndex { get; private set; }
+
+        EncoderOptions IImageEncoder.EncoderOptions => EncoderOptions;
+        CoderOptions IImageCoder.CoderOptions => EncoderOptions;
+
+        public virtual bool CanReportProgressRectangle => false;
+
+        public abstract ImageFormat Format { get; }
+
+        public StbImageEncoderBase(
+            IImagingConfig config, Stream stream, TOptions? encoderOptions)
         {
-            if (encoderState == null)
-                throw new ArgumentNullException(nameof(encoderState));
+            ImagingConfig = config ?? throw new ArgumentNullException(nameof(config));
+            EncoderOptions = encoderOptions ?? new();
+
+            byte[] buffer = RecyclableMemoryManager.Default.GetBlock();
+            Writer = new ImageBinWriter(stream, buffer);
+        }
+
+        protected abstract void Write(PixelRowProvider image);
+
+        public virtual bool CanEncodeImage(IReadOnlyPixelRows image)
+        {
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
 
-            var state = (StbImageEncoderState)encoderState;
+            AssertNotDisposed();
+
+            return FrameIndex == 0;
+        }
+
+        public void Encode(
+            IReadOnlyPixelRows image,
+            CancellationToken cancellationToken = default)
+        {
+            if (image == null)
+                throw new ArgumentNullException(nameof(image));
+
+            AssertCanEncodeImage(image);
+
             var pixelInfo = image.PixelType.ComponentInfo;
 
             // TODO: change components to dynamic/controlled (maybe in encoder options)
@@ -54,10 +111,50 @@ namespace MonoGame.Imaging.Coders.Encoding
             int variableDepth = Math.Max(encoderMinDepth, imageMaxDepth);
             int depth = Math.Min(encoderMaxDepth, variableDepth);
 
-            var provider = new PixelRowProvider(image, components, depth);
-            Write(state, state.WriteState, provider);
+            var provider = new PixelRowProvider(image, components, depth, cancellationToken);
+            Write(provider);
 
-            state.FrameIndex++;
+            FrameIndex++;
+        }
+
+        protected void AssertCanEncodeImage(IReadOnlyPixelRows image)
+        {
+            if (!CanEncodeImage(image))
+                throw new ImagingException("Image may not be written in the current state of the encoder.");
+        }
+
+        protected void AssertNotDisposed()
+        {
+            if (IsDisposed)
+                throw new ObjectDisposedException(GetType().FullName);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!IsDisposed)
+            {
+                if (disposing)
+                {
+                    byte[]? buffer = Writer.Buffer;
+                    Writer.Dispose();
+                    RecyclableMemoryManager.Default.ReturnBlock(buffer);
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                IsDisposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~StbImageEncoderBase()
+        {
+            Dispose(disposing: false);
         }
     }
 }

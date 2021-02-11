@@ -10,47 +10,41 @@ namespace MonoGame.Imaging
         #region CreateDecoderEnumeratorAsync(Stream)
 
         public static ImageDecoderEnumerator CreateDecoderEnumerator(
-            IImagingConfig config,
+            IImagingConfig imagingConfig,
             Stream stream,
-            bool leaveOpen,
+            DecoderOptions? decoderOptions = null,
             CancellationToken cancellationToken = default)
         {
-            if (config == null)
-                throw new ArgumentNullException(nameof(config));
+            if (imagingConfig == null)
+                throw new ArgumentNullException(nameof(imagingConfig));
 
-            using (var prefixStream = config.CreateStreamWithHeaderPrefix(stream, leaveOpen))
+            var prefixStream = imagingConfig.CreateStreamWithHeaderPrefix(stream);
+            Memory<byte> prefix = prefixStream.GetPrefix(cancellationToken);
+            ImageFormat? format = DetectFormat(imagingConfig, prefix.Span);
+            if (format == null)
             {
-                Memory<byte> prefix = prefixStream.GetPrefix(cancellationToken);
-                ImageFormat? format = DetectFormat(config, prefix.Span);
-
-                if (format == null)
+                if (prefix.Length == 0)
                 {
-                    if (prefix.Length == 0)
-                    {
-                        throw new UnknownImageFormatException(
-                            "No bytes were read from the stream.");
-                    }
-                    else
-                    {
-                        throw new UnknownImageFormatException(
-                            $"Failed to recognize any format from the first {prefix.Length} bytes.");
-                    }
+                    throw new UnknownImageFormatException(
+                        "No bytes were read from the stream.");
                 }
-
-                IImageDecoder decoder = config.GetDecoder(format);
-
-                return new ImageDecoderEnumerator(
-                    config, decoder, prefixStream, false, cancellationToken);
+                else
+                {
+                    throw new UnknownImageFormatException(
+                        $"Failed to recognize any format from the first {prefix.Length} bytes.");
+                }
             }
+
+            IImageDecoder decoder = imagingConfig.CreateDecoder(prefixStream, format, decoderOptions);
+            return new ImageDecoderEnumerator(decoder, cancellationToken);
         }
 
         public static ImageDecoderEnumerator CreateDecoderEnumerator(
             Stream stream,
-            bool leaveOpen,
+            DecoderOptions? decoderOptions = null,
             CancellationToken cancellationToken = default)
         {
-            return CreateDecoderEnumerator(
-                ImagingConfig.Default, stream, leaveOpen, cancellationToken);
+            return CreateDecoderEnumerator(ImagingConfig.Default, stream, decoderOptions, cancellationToken);
         }
 
         #endregion

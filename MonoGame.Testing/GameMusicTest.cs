@@ -173,8 +173,8 @@ namespace MonoGame.Testing
                     Task.Run(() =>
                     {
                         static void OnProgress(
-                            ImageEncoderState encoderState,
-                            float percentage,
+                            IImageEncoder encoder,
+                            double percentage,
                             Rectangle? rectangle)
                         {
                             Console.WriteLine("PNG write progress: " + Math.Round(percentage * 100f, 1) + "%");

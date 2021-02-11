@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Threading;
 using MonoGame.Imaging.Attributes.Coder;
 using MonoGame.Imaging.Attributes.Format;
 using MonoGame.Imaging.Coders.Encoding;
@@ -9,30 +8,29 @@ using StbSharp.ImageWrite;
 
 namespace MonoGame.Imaging.Coders.Formats.Gif
 {
-    public class GifImageEncoder : StbImageEncoderBase, ICancellableCoderAttribute, IAnimatedFormatAttribute
+    public class GifImageEncoder : StbImageEncoderBase<EncoderOptions>, ICancellableCoder, IAnimatedFormatAttribute
     {
         public override ImageFormat Format => ImageFormat.Gif;
-        public override EncoderOptions DefaultOptions => EncoderOptions.Default;
 
         public TimeSpan MinimumAnimationDelay => ((AnimatedImageFormat)Format).MinimumAnimationDelay;
 
-        public override ImageEncoderState CreateState(
-            IImagingConfig imagingConfig,
-            Stream stream,
-            bool leaveOpen,
-            CancellationToken cancellationToken = default)
+        public GifImageEncoder(IImagingConfig config, Stream stream, EncoderOptions? encoderOptions) :
+            base(config, stream, encoderOptions)
         {
-            return new StbGifImageEncoderState(this, imagingConfig, stream, leaveOpen, cancellationToken);
         }
 
-        protected override void Write(
-            StbImageEncoderState encoderState,
-            WriteState writeState,
-            PixelRowProvider image)
+        public override bool CanEncodeImage(IReadOnlyPixelRows image)
+        {
+            AssertNotDisposed();
+
+            return true;
+        }
+
+        protected override void Write(PixelRowProvider image)
         {
             // TODO: allow different bit depths
 
-            var state = (StbGifImageEncoderState)encoderState;
+            throw new NotImplementedException();
 
 
             byte[] pixeldata = new byte[image.Width * image.Height * 4];
@@ -42,26 +40,6 @@ namespace MonoGame.Imaging.Coders.Formats.Gif
             }
 
 
-        }
-    }
-
-    public class StbGifImageEncoderState : StbImageEncoderState
-    {
-        public StbGifImageEncoderState(
-            IImageEncoder encoder,
-            IImagingConfig config,
-            Stream stream,
-            bool leaveOpen,
-            CancellationToken cancellationToken) :
-            base(encoder, config, stream, leaveOpen, cancellationToken)
-        {
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-
-
-            base.Dispose(disposing);
         }
     }
 }

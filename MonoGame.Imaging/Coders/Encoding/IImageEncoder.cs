@@ -1,4 +1,4 @@
-﻿using System.IO;
+﻿using System;
 using System.Threading;
 using MonoGame.Imaging.Pixels;
 
@@ -7,33 +7,20 @@ namespace MonoGame.Imaging.Coders.Encoding
     /// <summary>
     /// Encapsulates encoding of images to a stream.
     /// </summary>
-    public interface IImageEncoder : IImageCoder
+    public interface IImageEncoder : IImageCoder, IImagingConfigurable, IDisposable
     {
         /// <summary>
-        /// Gets the default options for this encoder.
+        /// Gets the options for this encoder.
         /// </summary>
-        new EncoderOptions DefaultOptions { get; }
+        EncoderOptions EncoderOptions { get; }
+
+        bool CanEncodeImage(IReadOnlyPixelRows image);
 
         /// <summary>
-        /// Creates a state that can be used to encode images.
+        /// Encodes an image to the underlying stream.
         /// </summary>
-        /// <param name="stream">The stream to write to.</param>
-        /// <param name="config">The imaging configuration.</param>
-        /// <param name="leaveOpen">Whether to leave <paramref name="stream"/> open after disposal.</param>
-        /// <param name="cancellationToken">The token used for cancellation.</param>
-        /// <returns>The state used to encoding images.</returns>
-        ImageEncoderState CreateState(
-            IImagingConfig config,
-            Stream stream,
-            bool leaveOpen,
-            CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Encodes an image to the encoder state stream.
-        /// </summary>
-        /// <typeparam name="TPixel">The pixel type of the frame collection.</typeparam>
-        /// <param name="encoderState">The shared state used to encode images.</param>
         /// <param name="image">The image to encode.</param>
-        void Encode(ImageEncoderState encoderState, IReadOnlyPixelRows image);
+        /// <param name="cancellationToken">The token used for cancellation.</param>
+        void Encode(IReadOnlyPixelRows image, CancellationToken cancellationToken = default);
     }
 }

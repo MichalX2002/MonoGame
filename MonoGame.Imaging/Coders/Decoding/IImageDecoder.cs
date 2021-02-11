@@ -1,36 +1,36 @@
-﻿using System.IO;
+﻿using System;
 using System.Threading;
+using MonoGame.Framework.Vectors;
 
 namespace MonoGame.Imaging.Coders.Decoding
 {
     /// <summary>
     /// Encapsulates decoding of images.
     /// </summary>
-    public interface IImageDecoder : IImageCoder
+    public interface IImageDecoder : IImageCoder, IImagingConfigurable, IDisposable
     {
         /// <summary>
-        /// Gets the default options for this decoder.
+        /// Gets the options for this decoder.
         /// </summary>
-        new DecoderOptions DefaultOptions { get; }
+        DecoderOptions DecoderOptions { get; }
+        
+        /// <summary>
+        /// Gets the zero-based index of the most recently processed image.
+        /// </summary>
+        int FrameIndex { get; }
 
         /// <summary>
-        /// Creates a state that can be used to decode images.
+        /// Gets the current image buffer.
         /// </summary>
-        /// <param name="config">The imaging configuration.</param>
-        /// <param name="stream">The stream to read from.</param>
-        /// <param name="leaveOpen">Whether to leave <paramref name="stream"/> open after disposal.</param>
-        /// <param name="cancellationToken">The token used for cancellation.</param>
-        /// <returns>The state used to decode images.</returns>
-        ImageDecoderState CreateState(
-            IImagingConfig config,
-            Stream stream,
-            bool leaveOpen,
-            CancellationToken cancellationToken = default);
+        Image? CurrentImage { get; }
+
+        VectorType? SourcePixelType { get; } // TODO: move into CurrentImage metadata
+
+        VectorType? TargetPixelType { get; set; }
 
         /// <summary>
-        /// Decodes an image from the decoder state stream. 
+        /// Decodes an image from the underlying stream. 
         /// </summary>
-        /// <param name="decoderState">The shared state used to decode images.</param>
-        void Decode(ImageDecoderState decoderState);
+        void Decode(CancellationToken cancellationToken = default);
     }
 }

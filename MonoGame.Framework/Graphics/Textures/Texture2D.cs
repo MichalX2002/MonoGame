@@ -158,7 +158,7 @@ namespace MonoGame.Framework.Graphics
         {
             if (rectangle.HasValue)
             {
-                var rect = rectangle.GetValueOrDefault();
+                Rectangle rect = rectangle.GetValueOrDefault();
                 if (rect.Width == 0 || rect.Height == 0)
                     return;
             }
@@ -213,8 +213,10 @@ namespace MonoGame.Framework.Graphics
             where T : unmanaged
         {
             if (rectangle.HasValue)
+            {
                 if (rectangle.Value.Width == 0 || rectangle.Value.Height == 0)
                     return;
+            }
 
             ValidateParams<T>(level, arraySlice, rectangle, data.Length, out Rectangle checkedRect);
 
@@ -351,12 +353,12 @@ namespace MonoGame.Framework.Graphics
                 {
                     int sliceWidth = checkedRect.Width - offsetX;
                     int count = sliceWidth > bufferCapacity ? bufferCapacity : sliceWidth;
-                    var srcSlice = vectorRow.Slice(0, count * srcVectorType.ElementSize);
-                    var dstSlice = buffer.Slice(0, count * dstVectorType.ElementSize);
+                    Span<byte> srcSlice = vectorRow.Slice(0, count * srcVectorType.ElementSize);
+                    Span<byte> dstSlice = buffer.Slice(0, count * dstVectorType.ElementSize);
 
                     convertPixels.Invoke(srcSlice, dstSlice);
 
-                    var textureRect = new Rectangle(
+                    Rectangle textureRect = new(
                         checkedRect.X + offsetX,
                         checkedRect.Y + y,
                         width: count,
@@ -692,7 +694,7 @@ namespace MonoGame.Framework.Graphics
             if (format == null)
                 throw new ArgumentNullException(nameof(format));
 
-            using (var image = ToImage(rectangle, level, arraySlice))
+            using (Image image = ToImage(rectangle, level, arraySlice))
                 image.Save(imagingConfig, stream, format, encoderOptions);
         }
 
@@ -740,8 +742,6 @@ namespace MonoGame.Framework.Graphics
             int level = 0,
             int arraySlice = 0)
         {
-            SaveExtensions.AssertValidPath(filePath);
-
             if (format == null)
                 format = ImageFormat.GetByPath(filePath).FirstOrDefault();
 

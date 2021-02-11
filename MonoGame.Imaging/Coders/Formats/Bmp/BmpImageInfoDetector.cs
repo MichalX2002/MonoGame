@@ -7,7 +7,7 @@ namespace MonoGame.Imaging.Coders.Formats.Bmp
     {
         public override ImageFormat Format => ImageFormat.Bmp;
 
-        protected override InfoResult GetInfo(IImagingConfig config, BinReader reader)
+        protected override InfoResult GetInfo(IImagingConfig config, ImageBinReader reader)
         {
             var bmpInfo = StbSharp.ImageRead.Bmp.Info(reader, out var readState);
 

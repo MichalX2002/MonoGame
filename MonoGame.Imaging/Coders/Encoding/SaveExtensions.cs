@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using MonoGame.Framework;
+using MonoGame.Imaging.Attributes.Coder;
 using MonoGame.Imaging.Attributes.Format;
-using MonoGame.Imaging.Coders;
 using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Pixels;
 
@@ -18,40 +17,32 @@ namespace MonoGame.Imaging
             Stream output,
             ImageFormat format,
             EncoderOptions? encoderOptions = null,
-            EncodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageEncoder>? onProgress = null,
             CancellationToken cancellationToken = default)
         {
             if (images == null)
                 throw new ArgumentNullException(nameof(images));
             if (imagingConfig == null)
                 throw new ArgumentNullException(nameof(imagingConfig));
+            if (format == null)
+                throw new ArgumentNullException(nameof(format));
+            if (output == null)
+                throw new ArgumentNullException(nameof(output));
 
-            AssertValidOutput(output);
+            if (!output.CanWrite)
+                throw new ArgumentException("The stream is not writable.", nameof(output));
 
-            IImageEncoder encoder = AssertValidArguments(imagingConfig, format);
+            using IImageEncoder encoder = imagingConfig.CreateEncoder(output, format, encoderOptions);
 
-            using ImageEncoderState state = encoder.CreateState(
-                imagingConfig, output, leaveOpen: true, cancellationToken);
-
-            state.EncoderOptions = encoderOptions;
-            state.Progress += onProgress;
-
-            bool hasAnimationSupport =
-                format.HasAttribute<IAnimatedFormatAttribute>() &&
-                encoder.HasAttribute<IAnimatedFormatAttribute>();
-
-            bool hasLayerSupport =
-                format.HasAttribute<ILayeredFormatAttribute>() &&
-                encoder.HasAttribute<ILayeredFormatAttribute>();
-
-            bool acceptsMultipleImages = hasAnimationSupport || hasLayerSupport;
+            if (onProgress != null && encoder is IProgressReportingCoder<IImageEncoder> progressReporter)
+                progressReporter.Progress += onProgress;
 
             foreach (IReadOnlyPixelRows image in images)
             {
-                encoder.Encode(state, image);
-
-                if (!acceptsMultipleImages)
+                if (!encoder.CanEncodeImage(image))
                     break;
+
+                encoder.Encode(image, cancellationToken);
             }
         }
 
@@ -60,7 +51,7 @@ namespace MonoGame.Imaging
             Stream output,
             ImageFormat format,
             EncoderOptions? encoderOptions = null,
-            EncodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageEncoder>? onProgress = null,
             CancellationToken cancellationToken = default)
         {
             Save(
@@ -74,16 +65,16 @@ namespace MonoGame.Imaging
             string filePath,
             ImageFormat? format = null,
             EncoderOptions? encoderOptions = null,
-            EncodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageEncoder>? onProgress = null,
             CancellationToken cancellationToken = default)
         {
             if (format == null)
                 format = ImageFormat.GetByPath(filePath)[0];
 
-            using (var outputStream = OpenWriteStream(filePath))
-                Save(
-                    images, imagingConfig, outputStream, format,
-                    encoderOptions, onProgress, cancellationToken);
+            using var output = OpenWriteStream(filePath);
+            Save(
+                images, imagingConfig, output, format,
+                encoderOptions, onProgress, cancellationToken);
         }
 
         public static void Save(
@@ -91,7 +82,7 @@ namespace MonoGame.Imaging
             string filePath,
             ImageFormat? format = null,
             EncoderOptions? encoderOptions = null,
-            EncodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageEncoder>? onProgress = null,
             CancellationToken cancellationToken = default)
         {
             Save(
@@ -107,14 +98,11 @@ namespace MonoGame.Imaging
             Stream output,
             ImageFormat format,
             EncoderOptions? encoderOptions = null,
-            EncodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageEncoder>? onProgress = null,
             CancellationToken cancellationToken = default)
         {
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
-
-            AssertValidArguments(imagingConfig, format);
-            AssertValidOutput(output);
 
             Save(
                 new[] { image }, imagingConfig, output, format,
@@ -126,7 +114,7 @@ namespace MonoGame.Imaging
             Stream output,
             ImageFormat format,
             EncoderOptions? encoderOptions = null,
-            EncodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageEncoder>? onProgress = null,
             CancellationToken cancellationToken = default)
         {
             Save(
@@ -144,14 +132,11 @@ namespace MonoGame.Imaging
             string filePath,
             ImageFormat? format = null,
             EncoderOptions? encoderOptions = null,
-            EncodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageEncoder>? onProgress = null,
             CancellationToken cancellationToken = default)
         {
             if (format == null)
                 format = ImageFormat.GetByPath(filePath)[0];
-
-            AssertValidArguments(imagingConfig, format);
-            AssertValidPath(filePath);
 
             Save(
                 new[] { image }, imagingConfig, filePath, format,
@@ -163,7 +148,7 @@ namespace MonoGame.Imaging
             string filePath,
             ImageFormat? format = null,
             EncoderOptions? encoderOptions = null,
-            EncodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageEncoder>? onProgress = null,
             CancellationToken cancellationToken = default)
         {
             Save(
@@ -178,45 +163,8 @@ namespace MonoGame.Imaging
             const FileOptions options = FileOptions.None;
             const int bufferSize = 1024 * 4;
 
-            AssertValidPath(filePath);
-
             return new FileStream(
                 filePath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize, options);
         }
-
-        #region Argument Validation
-
-        private static IImageEncoder AssertValidArguments(
-            IImagingConfig imagingConfig, ImageFormat format)
-        {
-            if (imagingConfig == null)
-                throw new ArgumentNullException(nameof(imagingConfig));
-            if (format == null)
-                throw new ArgumentNullException(nameof(format));
-
-            return imagingConfig.GetEncoder(format);
-        }
-
-        private static void AssertValidOutput(Stream output)
-        {
-            if (output == null)
-                throw new ArgumentNullException(nameof(output));
-
-            if (!output.CanWrite)
-                throw new ArgumentException("The stream is not writable.", nameof(output));
-        }
-
-        public static void AssertValidPath(string filePath)
-        {
-            if (filePath == null)
-                throw new ArgumentNullException(nameof(filePath));
-
-            if (string.IsNullOrWhiteSpace(filePath))
-                throw new ArgumentEmptyException(nameof(filePath));
-
-            Path.GetFullPath(filePath);
-        }
-
-        #endregion
     }
 }

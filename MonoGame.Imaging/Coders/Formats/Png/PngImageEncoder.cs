@@ -1,46 +1,26 @@
-﻿using System;
-using System.IO.Compression;
+﻿using System.IO;
 using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Attributes.Coder;
 using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Pixels;
-using StbSharp.ImageWrite;
 
-namespace MonoGame.Imaging.Coders.Formats
+namespace MonoGame.Imaging.Coders.Formats.Png
 {
-    [Serializable]
-    public class PngEncoderOptions : EncoderOptions
+    public class PngImageEncoder : StbImageEncoderBase<PngEncoderOptions>, ICancellableCoder
     {
-        public static new PngEncoderOptions Default { get; } =
-            new PngEncoderOptions(CompressionLevel.Fastest);
+        public override ImageFormat Format => ImageFormat.Png;
 
-        public CompressionLevel CompressionLevel { get; }
-
-        public PngEncoderOptions(CompressionLevel compression)
+        public PngImageEncoder(IImagingConfig config, Stream stream, PngEncoderOptions? encoderOptions) :
+            base(config, stream, encoderOptions)
         {
-            CompressionLevel = compression;
         }
-    }
-
-    namespace Png
-    {
-        public class PngImageEncoder : StbImageEncoderBase, ICancellableCoderAttribute
+        
+        protected override void Write(PixelRowProvider image)
         {
-            public override ImageFormat Format => ImageFormat.Png;
-            public override EncoderOptions DefaultOptions => PngEncoderOptions.Default;
+            // TODO: add forcedFilter option
 
-            protected override void Write(
-                StbImageEncoderState encoderState,
-                WriteState writeState,
-                PixelRowProvider image)
-            {
-                var options = encoderState.GetCoderOptionsOrDefault<PngEncoderOptions>();
-                
-                // TODO: add forcedFilter option
-
-                StbSharp.ImageWrite.Png.Write(
-                    writeState, image, options.CompressionLevel, null, RecyclableArrayPool.Shared);
-            }
+            StbSharp.ImageWrite.Png.Write(
+                Writer, image, EncoderOptions.CompressionLevel, null, null, RecyclableArrayPool.Shared);
         }
     }
 }

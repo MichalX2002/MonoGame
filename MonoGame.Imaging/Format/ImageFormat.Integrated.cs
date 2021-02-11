@@ -11,7 +11,7 @@ namespace MonoGame.Imaging
         #region Getters (and Initializers)
 
         /// <summary>
-        /// Gets the "Portable Network Graphics" format.
+        /// Gets the "Portable Network Graphics" (PNG) format.
         /// </summary>
         public static ImageFormat Png { get; } = AddIntegrated(
             "Portable Network Graphics", "PNG",
@@ -19,7 +19,7 @@ namespace MonoGame.Imaging
             new[] { ".png" });
 
         /// <summary> 
-        /// Gets the "Joint Photographic Experts Group" (i.e JPEG) format. 
+        /// Gets the "Joint Photographic Experts Group" (JPEG) format. 
         /// </summary>
         public static ImageFormat Jpeg { get; } = AddIntegrated(
             "Joint Photographic Experts Group", "JPEG",
@@ -27,7 +27,7 @@ namespace MonoGame.Imaging
             new[] { ".jpeg", ".jpg", ".jfif", ".jpe", ".jif" });
 
         /// <summary>
-        /// Gets the "Graphics Interchange Format".
+        /// Gets the "Graphics Interchange Format" (GIF).
         /// </summary>
         public static AnimatedImageFormat Gif { get; } = new AnimatedImageFormat(
             "Graphics Interchange Format", "GIF",
@@ -36,7 +36,7 @@ namespace MonoGame.Imaging
             TimeSpan.FromSeconds(0.01));
 
         /// <summary>
-        /// Gets the "Bitmap" format.
+        /// Gets the "Bitmap" (BMP) format.
         /// </summary>
         public static ImageFormat Bmp { get; } = AddIntegrated(
             "Bitmap", "BMP",
@@ -44,7 +44,7 @@ namespace MonoGame.Imaging
             new[] { ".bmp", ".bm", ".dip" });
 
         /// <summary>
-        /// Gets the "Truevision Graphics Adapter" format.
+        /// Gets the "Truevision Graphics Adapter" (TGA) format.
         /// </summary>
         public static ImageFormat Tga { get; } = AddIntegrated(
             "Truevision Graphics Adapter", "TGA",
@@ -60,7 +60,7 @@ namespace MonoGame.Imaging
             new[] { ".hdr", ".rgbe" });
 
         /// <summary>
-        /// Gets the "PhotoShop Document" format.
+        /// Gets the "PhotoShop Document" (PSD) format.
         /// </summary>
         public static ImageFormat Psd { get; } = new LayeredImageFormat(
             "PhotoShop Document", "PSD",

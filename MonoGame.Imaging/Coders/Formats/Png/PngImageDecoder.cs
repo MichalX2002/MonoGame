@@ -1,23 +1,22 @@
-﻿using System;
+﻿using System.IO;
 using MonoGame.Framework.Memory;
 using MonoGame.Imaging.Coders.Decoding;
 using StbSharp.ImageRead;
 
 namespace MonoGame.Imaging.Coders.Formats.Png
 {
-    public class PngImageDecoder : StbImageDecoderBase
+    public class PngImageDecoder : StbImageDecoderBase<DecoderOptions>
     {
         public override ImageFormat Format => ImageFormat.Png;
-        public override DecoderOptions DefaultOptions => DecoderOptions.Default;
-
-        protected override void Read(StbImageDecoderState decoderState, ReadState readState)
+        
+        public PngImageDecoder(IImagingConfig config, Stream stream, DecoderOptions? decoderOptions) :
+            base(config, stream, decoderOptions)
         {
-            if (decoderState == null)
-                throw new ArgumentNullException(nameof(decoderState));
+        }
 
-            StbSharp.ImageRead.Png.Load(
-                decoderState.Reader, readState, 
-                ScanMode.Load, RecyclableArrayPool.Shared);
+        protected override void Read()
+        {
+            StbSharp.ImageRead.Png.Load(Reader, ReadState, ScanMode.Load, RecyclableArrayPool.Shared);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using MonoGame.Imaging.Coders.Decoding;
 
 namespace MonoGame.Imaging
 {
@@ -13,12 +14,12 @@ namespace MonoGame.Imaging
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
 
-            foreach (var formatDetector in config.GetFormatDetectors())
+            foreach (IImageFormatDetector formatDetector in config.GetFormatDetectors())
             {
                 if (header.Length < formatDetector.HeaderSize)
                     continue;
 
-                var format = formatDetector.DetectFormat(config, header);
+                ImageFormat? format = formatDetector.DetectFormat(config, header);
                 if (format != null)
                     return format;
             }
@@ -37,17 +38,15 @@ namespace MonoGame.Imaging
         public static ImageInfo Identify(
             IImagingConfig config, Stream stream, CancellationToken cancellationToken = default)
         {
-            using (var prefixedStream = config.CreateStreamWithHeaderPrefix(stream, true))
-            {
-                var prefix = prefixedStream.GetPrefix(cancellationToken);
+            using var prefixedStream = config.CreateStreamWithHeaderPrefix(stream);
+            Memory<byte> prefix = prefixedStream.GetPrefix(cancellationToken);
 
-                var format = DetectFormat(config, prefix.Span);
-                if (format == null)
-                    throw new UnknownImageFormatException();
+            ImageFormat? format = DetectFormat(config, prefix.Span);
+            if (format == null)
+                throw new UnknownImageFormatException();
 
-                var infoDetector = config.GetInfoDetector(format);
-                return infoDetector.Identify(config, prefixedStream, cancellationToken);
-            }
+            var infoDetector = config.GetInfoDetector(format);
+            return infoDetector.Identify(config, prefixedStream, cancellationToken);
         }
 
         public static ImageInfo Identify(Stream stream, CancellationToken cancellationToken = default)

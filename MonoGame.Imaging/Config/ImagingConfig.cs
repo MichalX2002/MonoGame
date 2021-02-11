@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using MonoGame.Imaging.Coders;
 using MonoGame.Imaging.Coders.Decoding;
 using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Coders.Formats.Bmp;
@@ -7,7 +9,7 @@ using MonoGame.Imaging.Coders.Formats.Gif;
 using MonoGame.Imaging.Coders.Formats.Jpeg;
 using MonoGame.Imaging.Coders.Formats.Png;
 using MonoGame.Imaging.Coders.Formats.Tga;
-using MonoGame.Imaging.Config;
+using MonoGame.Imaging.Config.Providers;
 
 namespace MonoGame.Imaging
 {
@@ -28,34 +30,70 @@ namespace MonoGame.Imaging
             // TODO: improve this
 
             var decoders = new ImageCoderProvider<IImageDecoder>();
-            decoders.TryAdd(ImageFormat.Bmp, new BmpImageDecoder());
-            decoders.TryAdd(ImageFormat.Tga, new TgaImageDecoder());
-            decoders.TryAdd(ImageFormat.Png, new PngImageDecoder());
-            decoders.TryAdd(ImageFormat.Jpeg, new JpegImageDecoder());
+            decoders.TryAddFactory(ImageFormat.Bmp, (stream, options) => 
+                new BmpImageDecoder(this, stream, CheckCoderOptions<DecoderOptions>(options)));
+            
+            decoders.TryAddFactory(ImageFormat.Tga, (stream, options) => 
+                new TgaImageDecoder(this, stream, CheckCoderOptions<DecoderOptions>(options)));
+            
+            decoders.TryAddFactory(ImageFormat.Png, (stream, options) => 
+                new PngImageDecoder(this, stream, CheckCoderOptions<DecoderOptions>(options)));
+            
+            decoders.TryAddFactory(ImageFormat.Jpeg, (stream, options) => 
+                new JpegImageDecoder(this, stream, CheckCoderOptions<DecoderOptions>(options)));
+
 
             var encoders = new ImageCoderProvider<IImageEncoder>();
-            encoders.TryAdd(ImageFormat.Bmp, new BmpImageEncoder());
-            encoders.TryAdd(ImageFormat.Tga, new TgaImageEncoder());
-            encoders.TryAdd(ImageFormat.Png, new PngImageEncoder());
-            encoders.TryAdd(ImageFormat.Jpeg, new JpegImageEncoder());
-            encoders.TryAdd(ImageFormat.Gif, new GifImageEncoder());
+            encoders.TryAddFactory(ImageFormat.Bmp, (stream, options) =>
+                new BmpImageEncoder(this, stream, CheckCoderOptions<EncoderOptions>(options)));
 
-            var formatDetectors = new ImageFormatDetectorProvider();
+            encoders.TryAddFactory(ImageFormat.Tga, (stream, options) =>
+                new TgaImageEncoder(this, stream, CheckCoderOptions<TgaEncoderOptions>(options)));
+
+            encoders.TryAddFactory(ImageFormat.Png, (stream, options) =>
+                new PngImageEncoder(this, stream, CheckCoderOptions<PngEncoderOptions>(options)));
+
+            encoders.TryAddFactory(ImageFormat.Jpeg, (stream, options) =>
+                new JpegImageEncoder(this, stream, CheckCoderOptions<JpegEncoderOptions>(options)));
+
+            encoders.TryAddFactory(ImageFormat.Gif, (stream, options) =>
+                new GifImageEncoder(this, stream, CheckCoderOptions<EncoderOptions>(options)));
+
+
+            var formatDetectors = new ImagingInstanceProvider<IImageFormatDetector>();
             formatDetectors.TryAdd(ImageFormat.Bmp, new BmpImageFormatDetector());
             formatDetectors.TryAdd(ImageFormat.Tga, new TgaImageFormatDetector());
             formatDetectors.TryAdd(ImageFormat.Png, new PngImageFormatDetector());
             formatDetectors.TryAdd(ImageFormat.Jpeg, new JpegImageFormatDetector());
+
 
             _modules.Add(decoders.GetType(), decoders);
             _modules.Add(encoders.GetType(), encoders);
             _modules.Add(formatDetectors.GetType(), formatDetectors);
         }
 
-        public T? GetModule<T>() where T : class
+        [return: NotNullIfNotNull("options")]
+        public static TOptions? CheckCoderOptions<TOptions>(CoderOptions? options)
+           where TOptions : CoderOptions
         {
-            if (_modules.TryGetValue(typeof(T), out var value))
-                return (T)value;
-            return default;
+            if (options == null)
+                return null;
+
+            if (typeof(TOptions).IsAssignableFrom(options.GetType()))
+                return (TOptions)options;
+
+            throw new ArgumentException("", nameof(options));
+        }
+
+        public bool TryGetModule<T>([MaybeNullWhen(false)] out T value) where T : class
+        {
+            if (_modules.TryGetValue(typeof(T), out object? obj))
+            {
+                value = (T)obj;
+                return true;
+            }
+            value = default;
+            return false;
         }
     }
 }

@@ -1,65 +1,27 @@
-﻿using System;
+﻿using System.IO;
 using MonoGame.Imaging.Attributes.Coder;
 using MonoGame.Imaging.Coders.Encoding;
 using MonoGame.Imaging.Pixels;
-using StbSharp.ImageWrite;
 
-namespace MonoGame.Imaging.Coders.Formats
+namespace MonoGame.Imaging.Coders.Formats.Jpeg
 {
-    public enum JpegSubsampling
+    public class JpegImageEncoder : StbImageEncoderBase<JpegEncoderOptions>, ICancellableCoder
     {
-        Allow,
-        Disallow,
-        Force,
-    }
+        public override ImageFormat Format => ImageFormat.Jpeg;
 
-    [Serializable]
-    public class JpegEncoderOptions : EncoderOptions
-    {
-        public static new JpegEncoderOptions Default { get; } = new JpegEncoderOptions(90);
-
-        public int Quality { get; }
-        public JpegSubsampling Subsampling { get; }
-        
-        public JpegEncoderOptions(int quality, JpegSubsampling subsampling = JpegSubsampling.Allow)
+        public JpegImageEncoder(IImagingConfig config, Stream stream, JpegEncoderOptions? encoderOptions) :
+            base(config, stream, encoderOptions)
         {
-            switch (subsampling)
-            {
-                case JpegSubsampling.Allow:
-                case JpegSubsampling.Disallow:
-                case JpegSubsampling.Force:
-                    Subsampling = subsampling;
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(subsampling));
-            }
-
-            Quality = quality;
         }
-    }
 
-    namespace Jpeg
-    {
-        public class JpegImageEncoder : StbImageEncoderBase, ICancellableCoderAttribute
+        protected override void Write(PixelRowProvider image)
         {
-            public override ImageFormat Format => ImageFormat.Jpeg;
-            public override EncoderOptions DefaultOptions => JpegEncoderOptions.Default;
+            bool useFloatPixels = image.Depth > 8;
+            bool allowSubsample = EncoderOptions.Subsampling == JpegSubsampling.Allow;
+            bool forceSubsample = EncoderOptions.Subsampling == JpegSubsampling.Force;
 
-            protected override void Write(
-                StbImageEncoderState encoderState,
-                WriteState writeState,
-                PixelRowProvider image)
-            {
-                var options = encoderState.GetCoderOptionsOrDefault<JpegEncoderOptions>();
-
-                bool useFloatPixels = image.Depth > 8;
-                bool allowSubsample = options.Subsampling == JpegSubsampling.Allow;
-                bool forceSubsample = options.Subsampling == JpegSubsampling.Force;
-
-                StbSharp.ImageWrite.Jpeg.WriteCore(
-                    writeState, image, useFloatPixels, options.Quality, allowSubsample, forceSubsample);
-            }
+            StbSharp.ImageWrite.Jpeg.WriteCore(
+                Writer, image, useFloatPixels, EncoderOptions.Quality, allowSubsample, forceSubsample);
         }
     }
 }

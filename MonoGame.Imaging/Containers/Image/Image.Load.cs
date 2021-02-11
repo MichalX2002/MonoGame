@@ -1,7 +1,7 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading;
 using MonoGame.Framework.Vectors;
+using MonoGame.Imaging.Attributes.Coder;
 using MonoGame.Imaging.Coders.Decoding;
 
 namespace MonoGame.Imaging
@@ -15,15 +15,16 @@ namespace MonoGame.Imaging
             Stream stream,
             VectorType? preferredPixelType = null,
             DecoderOptions? decoderOptions = null,
-            DecodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageDecoder>? onProgress = null,
             CancellationToken cancellationToken = default)
         {
             using ImageDecoderEnumerator frames = CreateDecoderEnumerator(
-                config, stream, leaveOpen: true, cancellationToken);
+                config, stream, decoderOptions, cancellationToken);
 
-            frames.State.PreferredPixelType = preferredPixelType;
-            frames.State.DecoderOptions = decoderOptions;
-            frames.State.Progress += onProgress;
+            frames.Decoder.TargetPixelType = preferredPixelType;
+
+            if (onProgress != null && frames.Decoder is IProgressReportingCoder<IImageDecoder> progressReporter)
+                progressReporter.Progress += onProgress;
 
             if (frames.MoveNext())
                 return frames.Current;
@@ -35,7 +36,7 @@ namespace MonoGame.Imaging
             Stream stream,
             VectorType? preferredPixelType = null,
             DecoderOptions? decoderOptions = null,
-            DecodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageDecoder>? onProgress = null,
             CancellationToken cancellationToken = default)
         {
             return Load(
@@ -51,7 +52,7 @@ namespace MonoGame.Imaging
             IImagingConfig config,
             Stream stream,
             DecoderOptions? decoderOptions = null,
-            DecodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageDecoder>? onProgress = null,
             CancellationToken cancellationToken = default)
             where TPixel : unmanaged, IPixel<TPixel>
         {
@@ -66,7 +67,7 @@ namespace MonoGame.Imaging
         public static Image<TPixel>? Load<TPixel>(
             Stream stream,
             DecoderOptions? decoderOptions = null,
-            DecodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageDecoder>? onProgress = null,
             CancellationToken cancellationToken = default)
             where TPixel : unmanaged, IPixel<TPixel>
         {
@@ -83,7 +84,7 @@ namespace MonoGame.Imaging
             string filePath,
             VectorType? preferredPixelType = null,
             DecoderOptions? decoderOptions = null,
-            DecodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageDecoder>? onProgress = null,
             CancellationToken cancellationToken = default)
         {
             using var fs = File.OpenRead(filePath);
@@ -94,7 +95,7 @@ namespace MonoGame.Imaging
             string filePath,
             VectorType? preferredPixelType = null,
             DecoderOptions? decoderOptions = null,
-            DecodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageDecoder>? onProgress = null,
             CancellationToken cancellationToken = default)
         {
             return Load(
@@ -110,7 +111,7 @@ namespace MonoGame.Imaging
             IImagingConfig config,
             string filePath,
             DecoderOptions? decoderOptions = null,
-            DecodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageDecoder>? onProgress = null,
             CancellationToken cancellationToken = default)
             where TPixel : unmanaged, IPixel<TPixel>
         {
@@ -121,7 +122,7 @@ namespace MonoGame.Imaging
         public static Image<TPixel>? Load<TPixel>(
             string filePath,
             DecoderOptions? decoderOptions = null,
-            DecodeProgressCallback? onProgress = null,
+            ImagingProgressCallback<IImageDecoder>? onProgress = null,
             CancellationToken cancellationToken = default)
             where TPixel : unmanaged, IPixel<TPixel>
         {
@@ -137,7 +138,7 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> Load<TPixel>(
             ReadOnlySpan<byte> data, ImagingConfig config, out ImageFormat format,
-            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
+            CancellationToken cancellation, CoderProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return LoadFrames(data, config, 1, out format, cancellation, onProgress)?.First.Pixels;
@@ -145,7 +146,7 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> Load<TPixel>(
             ReadOnlySpan<byte> data, ImagingConfig config,
-            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
+            CancellationToken cancellation, CoderProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return Load(data, config, out _, cancellation, onProgress);
@@ -154,7 +155,7 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> Load<TPixel>(
             ReadOnlySpan<byte> data, out ImageFormat format,
-            CancellationToken cancellation, DecodeProgressCallback<TPixel> onProgress = null)
+            CancellationToken cancellation, CoderProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return LoadFrames(
@@ -163,7 +164,7 @@ namespace MonoGame.Imaging
 
         public static Image<TPixel> Load<TPixel>(
             ReadOnlySpan<byte> data, CancellationToken cancellation, 
-            DecodeProgressCallback<TPixel> onProgress = null)
+            CoderProgressCallback<TPixel> onProgress = null)
             where TPixel : unmanaged, IPixel
         {
             return Load(data, out _, cancellation, onProgress);

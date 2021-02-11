@@ -7,7 +7,7 @@ namespace MonoGame.Imaging.Coders.Formats.Png
     {
         public override ImageFormat Format => ImageFormat.Png;
 
-        protected override InfoResult GetInfo(IImagingConfig config, BinReader reader)
+        protected override InfoResult GetInfo(IImagingConfig config, ImageBinReader reader)
         {
             StbSharp.ImageRead.Png.Info(reader, out var readState);
             

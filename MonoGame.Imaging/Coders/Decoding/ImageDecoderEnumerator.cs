@@ -1,43 +1,37 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 
 namespace MonoGame.Imaging.Coders.Decoding
 {
     public class ImageDecoderEnumerator : IEnumerator<Image>, IImagingConfigurable
     {
-        public ImageDecoderState State { get; }
         public bool IsDisposed { get; private set; }
         
-        public IImagingConfig Config => State.Config;
+        public IImageDecoder Decoder { get; }
+        public IImagingConfig ImagingConfig => Decoder.ImagingConfig;
 
-        public Image Current => State.CurrentImage!;
+        public Image Current => Decoder.CurrentImage ?? throw new InvalidOperationException();
         object? IEnumerator.Current => Current;
+
+        public CancellationToken CancellationToken { get; }
 
         #region Constructors
 
-        public ImageDecoderEnumerator(
-            IImagingConfig config,
-            IImageDecoder decoder,
-            Stream stream,
-            bool leaveOpen,
-            CancellationToken cancellationToken = default)
+        public ImageDecoderEnumerator(IImageDecoder decoder, CancellationToken cancellationToken = default)
         {
-            if (decoder == null)
-                throw new ArgumentNullException(nameof(decoder));
-
-            State = decoder.CreateState(config, stream, leaveOpen, cancellationToken);
+            Decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
+            CancellationToken = cancellationToken;
         }
 
         #endregion
 
         public bool MoveNext()
         {
-            State.Decoder.Decode(State);
+            Decoder.Decode(CancellationToken);
 
-            return State.CurrentImage != null;
+            return Decoder.CurrentImage != null;
         }
 
         public void Reset()
@@ -52,7 +46,7 @@ namespace MonoGame.Imaging.Coders.Decoding
             {
                 if (disposing)
                 {
-                    State.Dispose();
+                    Decoder.Dispose();
                 }
                 IsDisposed = true;
             }

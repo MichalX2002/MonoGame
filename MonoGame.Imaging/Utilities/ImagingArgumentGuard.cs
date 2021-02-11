@@ -61,12 +61,15 @@ namespace MonoGame.Imaging
                 throw new ArgumentOutOfRangeException(rectParamName + ".Y");
         }
 
+
+        // TODO: do something with this?
+
         public static void AssertAnimationSupport(ImageFormat format, ImagingConfig config)
         {
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
 
-            if (!format.HasAttribute<IAnimatedFormatAttribute>())
+            if (format is not IAnimatedFormatAttribute)
                 throw new AnimationNotSupportedException(format);
         }
 
@@ -77,7 +80,7 @@ namespace MonoGame.Imaging
 
             AssertAnimationSupport(coder.Format, config);
 
-            if (!coder.HasAttribute<IAnimatedFormatAttribute>())
+            if (coder is not IAnimatedFormatAttribute)
                 throw new AnimationNotImplementedException(coder);
         }
     }

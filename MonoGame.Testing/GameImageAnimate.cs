@@ -55,11 +55,11 @@ namespace MonoGame.Testing
 
             base.Initialize();
 
-            void OnLoadProgress(ImageDecoderState decoderState, float percentage, Rectangle? rect)
+            void OnLoadProgress(IImageDecoder decoder, double percentage, Rectangle? rect)
             {
-                if (_image == null && decoderState.CurrentImage != null)
+                if (_image == null && decoder.CurrentImage != null)
                 {
-                    _image = decoderState.CurrentImage;
+                    _image = decoder.CurrentImage;
                     (_image as Image<Color>)?.GetPixelSpan().Fill(Color.Transparent);
                     Console.WriteLine("load setup");
                 }
@@ -67,7 +67,7 @@ namespace MonoGame.Testing
                 _lastRow = rect?.Y ?? 0;
             }
 
-            void OnResizeProgress(Size state, float percentage, Rectangle? rect)
+            void OnResizeProgress(Size state, double percentage, Rectangle? rect)
             {
                 if (_image == null)
                 {
