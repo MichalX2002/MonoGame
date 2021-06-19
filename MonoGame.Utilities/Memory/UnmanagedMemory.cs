@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace MonoGame.Framework.Memory
@@ -39,7 +38,6 @@ namespace MonoGame.Framework.Memory
         /// Gets or sets the length of the allocated memory in elements.
         /// </summary>
         public int Length
-
         {
             get
             {
@@ -56,7 +54,7 @@ namespace MonoGame.Framework.Memory
                 if (index < 0 || index >= _length)
                     throw new ArgumentOutOfRangeException(nameof(index));
 
-                var ptr = (T*)Pointer;
+                T* ptr = (T*)Pointer;
                 return ref ptr[index];
             }
         }
@@ -64,6 +62,12 @@ namespace MonoGame.Framework.Memory
         #endregion
 
         #region Constructors
+
+        public UnmanagedMemory(IntPtr pointer, int length)
+        {
+            Pointer = pointer;
+            Length = length;
+        }
 
         /// <summary>
         /// Constructs the unmanaged pointer with a specified length,

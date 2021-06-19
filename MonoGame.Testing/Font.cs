@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using MonoGame.Framework;
 using MonoGame.Framework.Vectors;
@@ -12,10 +13,10 @@ namespace MonoGame.Testing
     {
         public TT.FontInfo FontInfo { get; }
 
-        public Font(ReadOnlyMemory<byte> fontData, int fontIndex = 0)
+        public Font(ReadOnlyMemory<byte> fontData)
         {
             FontInfo = new TT.FontInfo();
-            TT.InitFont(FontInfo, fontData, fontIndex);
+            TT.InitFont(FontInfo, fontData);
         }
 
         public static RectangleF GetGlyphBoxSubpixel(
@@ -88,27 +89,67 @@ namespace MonoGame.Testing
             return false;
         }
 
-        public Image<Alpha8>? GetGlyphBitmap(
-            int glyphIndex, Vector2 scale, Vector2 shift = default)
+        public bool TryGetGlyphRect(int glyphIndex, Vector2 scale, Point oversample, Vector2 shift, out Rectangle rectangle)
         {
             if (TT.GetGlyphBitmapBoxSubpixel(
-                FontInfo, glyphIndex, scale, shift, out var glyphBox))
+                FontInfo, glyphIndex, scale * oversample, shift, out TT.IntRect rect))
             {
-                var image = Image<Alpha8>.CreateUninitialized(glyphBox.W, glyphBox.H);
+                rectangle = new Rectangle(rect.X, rect.Y, rect.W, rect.H);
+                return true;
+            }
+            rectangle = default;
+            return false;
+        }
 
-                float pixelFlatness = 0.35f;
-                var gbm = GetTTBitmap(image, glyphBox.W, glyphBox.H);
+        public static RectangleF GetDrawRectangle(Rectangle rectangle, Point oversample, Vector2 shift)
+        {
+            int w = rectangle.Width + oversample.X - 1;
+            int h = rectangle.Height + oversample.Y - 1;
+            float sub_x = TT.OversampleShift(oversample.X);
+            float sub_y = TT.OversampleShift(oversample.Y);
+            float drawX = (rectangle.X - shift.X) / oversample.X + sub_x;
+            float drawY = (rectangle.Y - shift.Y) / oversample.Y + sub_y;
+            float drawW = w / (float)oversample.X + sub_x;
+            float drawH = h / (float)oversample.Y + sub_y;
+            RectangleF drawRectangle = new (drawX, drawY, drawW, drawH);
+            return drawRectangle;
+        }
 
-                int num_verts = TT.GetGlyphShape(FontInfo, glyphIndex, out TT.Vertex[]? vertices);
-
-                TT.Rasterize(
-                    gbm, pixelFlatness, vertices.AsSpan(0, num_verts), scale, shift,
-                    glyphBox.Position, TT.IntPoint.Zero, true);
-
-                return image;
+        public bool TryGetGlyphBitmap(
+            int glyphIndex, Vector2 scale, Point oversample, Vector2 shift,
+            [MaybeNullWhen(false)] out Image<Alpha8> image,
+            out RectangleF drawRectangle)
+        {
+            if (!TryGetGlyphRect(glyphIndex, scale, oversample, shift, out Rectangle rect))
+            {
+                image = default;
+                drawRectangle = default;
+                return false;
             }
 
-            return null;
+            int w = rect.Width + oversample.X - 1;
+            int h = rect.Height + oversample.Y - 1;
+            image = Image<Alpha8>.CreateUninitialized(w, h);
+
+            TT.Bitmap glyphBmp = GetTTBitmap(image, rect.Width, rect.Height);
+            TT.MakeGlyphBitmap(
+                FontInfo,
+                glyphBmp,
+                0.35f,
+                scale * oversample,
+                shift,
+                TT.IntPoint.Zero,
+                glyphIndex);
+
+            TT.Bitmap filterBmp = GetTTBitmap(image, w, h);
+            if (oversample.X > 1)
+                TT.HorizontalPrefilter(filterBmp, oversample.X);
+            if (oversample.Y > 1)
+                TT.VerticalPrefilter(filterBmp, oversample.Y);
+
+            drawRectangle = GetDrawRectangle(rect, oversample, shift);
+
+            return true;
         }
 
         public static TT.Bitmap GetTTBitmap(IPixelMemory image, int width, int height)
@@ -116,13 +157,7 @@ namespace MonoGame.Testing
             if (image == null)
                 throw new ArgumentNullException(nameof(image));
 
-            return new TT.Bitmap()
-            {
-                w = width,
-                h = height,
-                stride = image.ByteStride,
-                pixels = image.GetPixelByteSpan()
-            };
+            return new TT.Bitmap(image.GetPixelByteSpan(), width, height, image.ByteStride);
         }
 
         public static TT.Bitmap GetTTBitmap(IPixelMemory image)

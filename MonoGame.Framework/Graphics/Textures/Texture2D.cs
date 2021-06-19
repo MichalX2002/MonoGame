@@ -113,8 +113,10 @@ namespace MonoGame.Framework.Graphics
 
             ArgumentGuard.AssertGreaterThanZero(height, nameof(height));
             if (height > maxTexSize)
+            {
                 throw new ArgumentOutOfRangeException(
                     nameof(height), "The height exceeds device capability.");
+            }
 
             GraphicsDevice = graphicsDevice;
             Bounds = new Rectangle(0, 0, width, height);
