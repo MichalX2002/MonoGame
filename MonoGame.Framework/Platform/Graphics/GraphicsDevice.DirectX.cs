@@ -48,6 +48,9 @@ namespace MonoGame.Framework.Graphics
         // The swap chain resources.
         private SharpDX.Direct2D1.Bitmap1 _bitmapTarget;
         private SharpDX.DXGI.SwapChain1 _swapChain;
+        
+        // Tearing (disabling V-Sync) support
+        private bool _isTearingSupported;
 
         private SwapChainPanel _swapChainPanel;
         private float _dpi; 
@@ -308,6 +311,15 @@ namespace MonoGame.Framework.Graphics
                 format, 
                 PresentationParameters.MultiSampleCount);
 
+            var swapChainFlags = SwapChainFlags.None;
+#if WINDOWS_UAP
+            _isTearingSupported = IsTearingSupported();
+            if (_isTearingSupported)
+            {
+                swapChainFlags = SwapChainFlags.AllowTearing;
+            }
+#endif
+
             // If the swap chain already exists... update it.
             if (_swapChain != null)
             {
@@ -337,6 +349,7 @@ namespace MonoGame.Framework.Graphics
                     // By default we scale the backbuffer to the window 
                     // rectangle to function more like a WP7 game.
                     Scaling = SharpDX.DXGI.Scaling.Stretch,
+                    Flags = swapChainFlags
                 };
 
                 // Once the desired swap chain description is configured,
@@ -485,6 +498,30 @@ namespace MonoGame.Framework.Graphics
         }
 
 #if  WINDOWS_UAP
+        private bool IsTearingSupported()
+        {
+            RawBool allowTearing;
+            using (var dxgiFactory2 = new Factory2())
+            {
+                unsafe
+                {
+                    var factory5 = dxgiFactory2.QueryInterface<Factory5>();
+                    try
+                    {
+                        factory5.CheckFeatureSupport(SharpDX.DXGI.Feature.PresentAllowTearing, new IntPtr(&allowTearing), sizeof(RawBool));
+
+                        return allowTearing;
+                    }
+                    catch (SharpDXException ex)
+                    {
+                        // can't request feature
+                    }
+                }
+            }
+
+            return false;
+        }
+
         private void SetMultiSamplingToMaximum(
             PresentationParameters presentationParameters, out int quality)
         {
@@ -1004,30 +1041,54 @@ namespace MonoGame.Framework.Graphics
         {
             Debug.Assert(_swapChain != null);
 
+#if WINDOWS_UAP
             try
             {
-                var syncInterval = PresentationParameters.PresentationInterval.GetSyncInterval();
-
                 // The first argument instructs DXGI to block until VSync, putting the application
                 // to sleep until the next VSync. This ensures we don't waste any cycles rendering
                 // frames that will never be displayed to the screen.
                 lock (_d3dContext)
                 {
-                    _swapChain.Present(syncInterval, syncInterval == 0 ? PresentFlags.AllowTearing : PresentFlags.None);
+                    if (PresentationParameters.PresentationInterval == PresentInterval.Immediate && _isTearingSupported)
+                    {
+                        _swapChain.Present(0, PresentFlags.AllowTearing);
+                    }
+                    else
+                    {
+                        _swapChain.Present(1, PresentFlags.None);
+                    }
                 }
             }
-            catch (SharpDXException)
+            catch (SharpDX.SharpDXException ex)
             {
-                //// TODO: How should we deal with a device lost case here?
-
-                //// If the device was removed either by a disconnect or a driver upgrade, we 
-                //// must completely reinitialize the renderer.
-                //if (    ex.ResultCode == SharpDX.DXGI.DXGIError.DeviceRemoved ||
-                //        ex.ResultCode == SharpDX.DXGI.DXGIError.DeviceReset)
-                //    this.Initialize();
-                //else
-                //    throw;
+                // TODO: How should we deal with a device lost case here?
+                /*               
+                // If the device was removed either by a disconnect or a driver upgrade, we 
+                // must completely reinitialize the renderer.
+                if (    ex.ResultCode == SharpDX.DXGI.DXGIError.DeviceRemoved ||
+                        ex.ResultCode == SharpDX.DXGI.DXGIError.DeviceReset)
+                    this.Initialize();
+                else
+                    throw;
+                */
             }
+
+#endif
+#if WINDOWS
+
+            try
+            {
+                var syncInterval = PresentationParameters.PresentationInterval.GetSyncInterval();
+
+                // The first argument instructs DXGI to block n VSyncs before presenting.
+                lock (_d3dContext)
+                    _swapChain.Present(syncInterval, PresentFlags.None);
+            }
+            catch (SharpDX.SharpDXException)
+            {
+                // TODO: How should we deal with a device lost case here?
+            }
+#endif
         }
 
         private void PlatformSetViewport(in Viewport value)
